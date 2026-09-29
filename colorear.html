@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>🎨 Colorear · Zona Infantil · ZonaHack</title>
+<link rel="icon" href="/icon_96.png" type="image/png">
+<meta name="description" content="App de colorear online para chicos, 100% original y legal. Dibuja y pintá con muchas herramientas.">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:linear-gradient(180deg,#fff4fb,#eefaff 40%,#fffbe8);color:#3a2f4a;font-family:'Comic Sans MS','Segoe UI',system-ui,sans-serif;min-height:100vh;touch-action:manipulation;overflow:hidden}
+.header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:linear-gradient(135deg,#ff9ecb,#a78bfa 55%,#7dd3fc);box-shadow:0 4px 16px rgba(167,139,250,.25);position:relative;z-index:20}
+.header h1{color:#fff;font-size:1em;text-shadow:0 2px 4px rgba(0,0,0,.15);display:flex;align-items:center;gap:8px}
+.back{color:#fff;text-decoration:none;font-size:.8em;padding:6px 12px;border:2px solid rgba(255,255,255,.6);border-radius:20px;font-weight:700;background:rgba(255,255,255,.12)}
+.bar{display:flex;gap:6px;flex-wrap:wrap;padding:8px 10px;background:#fff;border-bottom:2px solid #f3ecff;align-items:center;position:relative;z-index:20}
+.bar .grp{display:flex;gap:5px;align-items:center;flex-wrap:wrap}
+.col{width:26px;height:26px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1.5px #d8c7f5;cursor:pointer;transition:transform .12s;flex-shrink:0}
+.col:hover{transform:scale(1.18)}
+.col.sel{box-shadow:0 0 0 3px #a78bfa;transform:scale(1.18)}
+.tool{padding:7px 10px;border:none;border-radius:14px;background:#f3ecff;color:#7c3aed;font-weight:700;font-size:.7em;cursor:pointer;font-family:inherit}
+.tool:hover{background:#e9ddfb}
+.tool.on{background:linear-gradient(135deg,#ff9ecb,#a78bfa);color:#fff}
+.tool.danger{background:#ffe0e6;color:#d6336c}
+.psize{width:26px;height:26px;border-radius:50%;background:#fff;border:2px solid #d8c7f5;cursor:pointer;position:relative;flex-shrink:0}
+.psize::after{content:"";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#7c3aed;border-radius:50%}
+.psize.s1::after{width:5px;height:5px}.psize.s2::after{width:11px;height:11px}.psize.s3::after{width:19px;height:19px}
+.psize.sel{border-color:#a78bfa;box-shadow:0 0 0 3px #ffd6ef}
+#caja{flex:1;position:relative;overflow:hidden;background:#fff}
+#lienzo{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:crosshair;touch-action:none;background:#fff}
+.hint{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);background:rgba(61,48,90,.85);color:#fff;font-size:.66em;padding:8px 16px;border-radius:20px;pointer-events:none;z-index:30;transition:opacity .4s;white-space:nowrap}
+body{display:flex;flex-direction:column}
+</style>
+</head>
+<body>
+<div class="header">
+  <a href="/dibujitos.html" class="back">← Infantil</a>
+  <h1>🎨 COLOREAR</h1>
+  <div style="width:70px"></div>
+</div>
+<div class="bar">
+  <div class="grp" id="colores"></div>
+  <span style="width:1px;height:26px;background:#eee"></span>
+  <div class="grp">
+    <div class="psize s1" onclick="setSize(4)"></div>
+    <div class="psize s2 sel" onclick="setSize(12)"></div>
+    <div class="psize s3" onclick="setSize(26)"></div>
+  </div>
+  <span style="width:1px;height:26px;background:#eee"></span>
+  <div class="grp">
+    <button class="tool" onclick="setModo('pintar')">🖌️ Pintar</button>
+    <button class="tool" onclick="setModo('borrar')">🧽 Borrar</button>
+    <button class="tool" onclick="deshacer()">↩️ Deshacer</button>
+    <button class="tool danger" onclick="limpiar()">🧹 Vaciar</button>
+    <button class="tool" onclick="guardar()">📥 Guardar</button>
+  </div>
+</div>
+<div id="caja">
+  <canvas id="lienzo"></canvas>
+  <div class="hint" id="hint">Dibujá con el dedo o el mouse ✨</div>
+</div>
+
+<script>
+/* ═══ APP COLOREAR — 100% original · ZonaHack ═══ */
+var PALETA=["#ff5c5c","#ff9f43","#ffd93d","#6bcB77","#3ddc97","#4ca3ff","#7c5cff","#c77dff","#ff66b2","#b8860b","#ffffff","#000000","#a0522d","#ffd9b3","#8d6e63","#e0f7fa"];
+var lienzo,ctx,modo="pintar",color="#ff5c5c",grosor=12,dibujando=false,pilas=[];
+function iniciar(){
+  lienzo=document.getElementById("lienzo");
+  ctx=lienzo.getContext("2d");
+  redimensionar();
+  var c=document.getElementById("colores");
+  c.innerHTML=PALETA.map(function(cr,i){return '<div class="col'+(i===0?' sel':'')+'" style="background:'+cr+'" onclick="setColor(\''+cr+'\',this)"></div>';}).join("");
+  window.addEventListener("resize",redimensionar);
+  lienzo.addEventListener("mousedown",down);
+  lienzo.addEventListener("mousemove",move);
+  window.addEventListener("mouseup",up);
+  lienzo.addEventListener("touchstart",tDown,{passive:false});
+  lienzo.addEventListener("touchmove",tMove,{passive:false});
+  lienzo.addEventListener("touchend",up);
+  setTimeout(function(){document.getElementById("hint").style.opacity="0";},2600);
+}
+function redimensionar(){
+  var caja=document.getElementById("caja");
+  var dpr=window.devicePixelRatio||1;
+  var w=caja.clientWidth,h=caja.clientHeight;
+  lienzo.width=w*dpr;lienzo.height=h*dpr;
+  lienzo.style.width=w+"px";lienzo.style.height=h+"px";
+  ctx.scale(dpr,dpr);
+  ctx.lineCap="round";ctx.lineJoin="round";
+  ctx.fillStyle="#fff";ctx.fillRect(0,0,w,h);
+}
+function pos(e){
+  var r=lienzo.getBoundingClientRect();
+  return {x:e.clientX-r.left,y:e.clientY-r.top};
+}
+function down(e){
+  var p=pos(e);dibujando=true;
+  pilas.push({c:modo==="borrar"?"#fff":color,g:modo==="borrar"?grosor*2.2:grosor,puntos:[p]});
+  pintarTrazo(pilas[pilas.length-1]);
+}
+function move(e){
+  if(!dibujando)return;
+  var p=pos(e);
+  var tr=pilas[pilas.length-1];
+  tr.puntos.push(p);
+  ctx.strokeStyle=tr.c;ctx.lineWidth=tr.g;
+  ctx.lineTo(p.x,p.y);ctx.stroke();
+}
+function pintarTrazo(tr){
+  ctx.strokeStyle=tr.c;ctx.lineWidth=tr.g;ctx.lineCap="round";ctx.lineJoin="round";
+  ctx.beginPath();
+  tr.puntos.forEach(function(p,i){ if(i===0)ctx.moveTo(p.x,p.y); else ctx.lineTo(p.x,p.y); });
+  ctx.stroke();
+}
+function tDown(e){e.preventDefault();down(e.touches[0]);}
+function tMove(e){e.preventDefault();move(e.touches[0]);}
+function up(){dibujando=false;}
+function setColor(cr,el){
+  color=cr;
+  document.querySelectorAll(".col").forEach(function(x){x.classList.remove("sel");});
+  el.classList.add("sel");
+}
+function setSize(n){grosor=n;document.querySelectorAll(".psize").forEach(function(x){x.classList.remove("sel");});}
+function setModo(m){modo=m;document.querySelectorAll(".tool").forEach(function(x){x.classList.remove("on");});event.target.classList.add("on");}
+function redibujarTodo(){
+  var caja=document.getElementById("caja");
+  ctx.save();ctx.setTransform(1,0,0,1,0,0);
+  ctx.clearRect(0,0,lienzo.width,lienzo.height);
+  ctx.fillStyle="#fff";ctx.fillRect(0,0,lienzo.width,lienzo.height);
+  ctx.restore();
+  var dpr=window.devicePixelRatio||1;
+  ctx.save();ctx.scale(dpr,dpr);
+  pilas.forEach(pintarTrazo);
+  ctx.restore();
+}
+function deshacer(){
+  if(pilas.length){ pilas.pop(); redibujarTodo(); }
+}
+function limpiar(){
+  if(!confirm("¿Vaciar el dibujo?"))return;
+  pilas=[];
+  var caja=document.getElementById("caja");
+  ctx.save();ctx.setTransform(1,0,0,1,0,0);
+  ctx.clearRect(0,0,lienzo.width,lienzo.height);
+  ctx.fillStyle="#fff";ctx.fillRect(0,0,lienzo.width,lienzo.height);
+  ctx.restore();
+}
+function guardar(){
+  var a=document.createElement("a");
+  a.download="mi-dibujo-"+Date.now()+".png";
+  a.href=lienzo.toDataURL("image/png");
+  a.click();
+}
+iniciar();
+</script>
+</body>
+</html>

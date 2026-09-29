@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<title>🕸️ Deep Web · Tienda del Dueño</title>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#f5d76e">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#07090e;--card:rgba(13,17,23,.92);--border:#1c2531;--text:#d7e2ef;--muted:#6d7f93;--accent:#00ff41;--gold:#f1c40f;--danger:#ff5a5a}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh}
+.bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.orb{position:absolute;border-radius:50%;filter:blur(90px);opacity:.25;animation:flotar 18s ease-in-out infinite}
+.orb1{width:460px;height:460px;background:radial-gradient(circle,rgba(0,255,65,.15),transparent 70%);top:-170px;right:-120px}
+.orb2{width:500px;height:500px;background:radial-gradient(circle,rgba(245,215,110,.15),transparent 70%);bottom:-200px;left:-160px;animation-delay:-7s}
+.orb3{width:300px;height:300px;background:radial-gradient(circle,rgba(255,90,90,.12),transparent 70%);top:40%;left:30%}
+@keyframes flotar{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(20px,-14px) scale(1.08)}}
+.wrap{position:relative;z-index:1;max-width:980px;margin:0 auto;padding:14px}
+.header{display:flex;align-items:center;gap:10px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+.logo{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;background:linear-gradient(135deg,rgba(0,255,65,.2),rgba(245,215,110,.2));border:1px solid rgba(0,255,65,.3)}
+.ttl{flex:1}
+.ttl h1{font-size:1em;letter-spacing:2px;font-family:'Courier New',monospace;color:#fff}
+.ttl span{font-size:.6em;color:var(--muted)}
+.back{color:var(--accent);text-decoration:none;font-size:.7em;padding:6px 10px;border:1px solid var(--border);border-radius:8px}
+.hero{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px;margin:12px 0;text-align:center}
+.hero .big{font-size:2.4em}
+.hero h2{color:var(--gold);letter-spacing:1px;font-size:1em;margin:6px 0}
+.hero p{font-size:.7em;color:var(--muted)}
+.badge{display:inline-block;margin-top:8px;background:rgba(0,255,65,.08);border:1px solid rgba(0,255,65,.25);color:var(--accent);font-size:.6em;padding:4px 10px;border-radius:10px;letter-spacing:1px}
+.pulse{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--accent);animation:rt 1.6s infinite;margin-right:4px}
+@keyframes rt{0%,100%{opacity:.2}50%{opacity:1}}
+.warn{background:rgba(245,215,110,.06);border:1px solid rgba(245,215,110,.2);color:#f5d76e;font-size:.66em;line-height:1.6;padding:10px 12px;border-radius:10px;margin-bottom:12px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.tab{background:var(--card);border:1px solid var(--border);border-radius:10px;color:var(--muted);padding:9px 14px;font-size:.68em;cursor:pointer;font-family:inherit}
+.tab.on{background:var(--accent);color:#03140a;border-color:var(--accent);font-weight:800}
+.tab.tienda.on{background:var(--gold);color:#03140a;border-color:var(--gold)}
+#contenido{display:flex;flex-direction:column;gap:12px}
+.sec-titulo{font-size:.7em;color:var(--accent);letter-spacing:1px;margin:4px 0}
+.news{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px}
+.n-src{font-size:.58em;color:var(--gold);letter-spacing:1px;text-transform:uppercase}
+.n-t{font-size:.82em;font-weight:700;margin:4px 0}
+.n-t a{color:var(--text);text-decoration:none}
+.n-t a:hover{color:var(--accent)}
+.n-s{font-size:.66em;color:var(--muted);line-height:1.5}
+.n-f{font-size:.58em;color:var(--muted);margin-top:6px}
+.hn{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px}
+.ht{font-size:.8em;font-weight:700}
+.ht a{color:var(--text);text-decoration:none}
+.hm{display:flex;gap:10px;flex-wrap:wrap;font-size:.6em;color:var(--muted);margin-top:6px}
+.hm .tag{color:var(--gold);border:1px solid rgba(245,215,110,.2);padding:1px 6px;border-radius:4px}
+.dir-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.dir{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px}
+.d-ico{font-size:1.5em}
+.d-nom{font-size:.78em;font-weight:800;margin:4px 0}
+.d-desc{font-size:.62em;color:var(--muted);line-height:1.5;margin-bottom:8px}
+.d-link{color:var(--accent);font-size:.66em;text-decoration:none;border:1px solid rgba(0,255,65,.25);padding:5px 10px;border-radius:6px}
+.d-link:hover{background:rgba(0,255,65,.08)}
+.empty{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:30px;text-align:center;color:var(--muted);font-size:.72em}
+.footer{margin-top:20px;text-align:center;font-size:.6em;color:var(--muted);letter-spacing:1px;padding-bottom:20px}
+/* TIENDA */
+.shop-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.prod{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:6px;position:relative}
+.prod .p-ico{font-size:1.8em}
+.prod .p-nom{font-size:.8em;font-weight:800;color:#fff}
+.prod .p-desc{font-size:.62em;color:var(--muted);line-height:1.5}
+.prod button{background:linear-gradient(135deg,#f1c40f,#ff8c42);color:#03140a;border:none;border-radius:10px;padding:10px;font-weight:800;font-size:.7em;cursor:pointer;font-family:inherit;margin-top:4px}
+.prod button.gratis{background:linear-gradient(135deg,#00ff41,#2ee6a8)}
+.prod button:hover{opacity:.9}
+.regalo-box{background:rgba(0,255,65,.05);border:1px solid rgba(0,255,65,.2);border-radius:12px;padding:12px;margin-bottom:12px}
+.regalo-box .t{font-size:.7em;color:var(--accent);letter-spacing:1px;margin-bottom:8px}
+.regalo-box label{font-size:.62em;color:var(--muted)}
+.regalo-box input{width:100%;background:#0a0d12;border:1px solid var(--border);border-radius:8px;color:var(--text);padding:9px 11px;font-size:.78em;margin:4px 0 8px;outline:none}
+.regalo-box input:focus{border-color:var(--accent)}
+.btn-dueño{background:var(--card);border:1px solid var(--gold);color:var(--gold);border-radius:10px;padding:9px 14px;font-size:.68em;cursor:pointer;font-family:inherit}
+.avisos{margin-top:10px}
+.aviso-item{background:rgba(0,255,65,.05);border:1px solid rgba(0,255,65,.15);border-radius:10px;padding:9px 11px;font-size:.66em;margin-bottom:6px}
+/* VISOR INTEGRADO */
+.n-ver,.d-ver{color:var(--gold);font-size:.62em;text-decoration:none;border:1px solid rgba(245,215,110,.35);padding:5px 10px;border-radius:6px;cursor:pointer;font-family:inherit;background:none;margin-left:6px;transition:.15s}
+.n-ver:hover,.d-ver:hover{background:rgba(245,215,110,.12)}
+.visor{display:none;position:fixed;inset:0;z-index:100;background:#05070a;flex-direction:column}
+.visor .vh{display:flex;align-items:center;gap:8px;padding:8px 10px;background:#0a0d12;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.visor .vh b{flex:1;font-size:.72em;color:var(--accent);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.visor .vh button{background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:7px 12px;font-size:.68em;cursor:pointer;font-family:inherit}
+.visor .vh button.x{color:var(--danger);border-color:rgba(255,90,90,.4)}
+.visor iframe{flex:1;border:none;background:#fff}
+.visor .vg{font-size:.62em;color:var(--muted);text-align:center;padding:6px;letter-spacing:1px}
+@media(max-width:480px){.shop-grid{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="bg"><div class="orb orb1"></div><div class="orb orb2"></div><div class="orb orb3"></div></div>
+
+<div class="wrap">
+  <div class="header">
+    <div class="logo">🕸️</div>
+    <div class="ttl"><h1>DEEP WEB</h1><span>NOTICIAS · FOROS · TIENDA DEL DUEÑO</span></div>
+    <a href="/" class="back">←</a>
+  </div>
+
+  <div class="hero">
+    <div class="big">🕸️</div>
+    <h2>DEEP WEB & CYBERCRIMEN</h2>
+    <p>Noticias, foros, fuentes del lado oscuro y la tienda del dueño</p>
+    <span class="badge"><span class="pulse"></span> SCRAPPEADO EN VIVO</span>
+  </div>
+
+  <div class="warn">⚠️ Esta sección es <b>informativa</b>: noticias públicas y discusiones legales de ciberseguridad. No accedemos a redes anónimas (.onion) ni promovemos actividades ilegales.</div>
+
+  <div class="tabs">
+    <button class="tab on" data-v="noticias" onclick="setVista('noticias')">🌐 Noticias Deep Web</button>
+    <button class="tab" data-v="foro" onclick="setVista('foro')">💬 Foro Scrappeado</button>
+    <button class="tab" data-v="directorio" onclick="setVista('directorio')">📚 Fuentes</button>
+    <button class="tab tienda" data-v="tienda" onclick="setVista('tienda')">🛒 Tienda</button>
+  </div>
+
+  <div id="estado"><div class="spinner"></div></div>
+  <div id="contenido"></div>
+  <div class="footer">ZONAHACK · DEEP WEB · TIENDA DEL DUEÑO</div>
+</div>
+
+<div class="visor" id="visor">
+  <div class="vh"><b id="visorTitulo">Visor</b>
+    <button onclick="visorExterno()">🔗 Externo</button>
+    <button class="x" onclick="cerrarVisor()">✕ Cerrar</button>
+  </div>
+  <iframe id="visorFrame" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-downloads"></iframe>
+  <div class="vg">🕸️ CONTENIDO VISTO DENTRO DE ZONAHACK</div>
+</div>
+
+<script>
+var vista="noticias", noticias=[], hilos=[], productos=[], regalos=[];
+function $(id){return document.getElementById(id);}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+var usuario=localStorage.getItem("vh_usuario")||localStorage.getItem("zh_usuario")||"";
+var claveDuenio=localStorage.getItem("zh_owner_clave")||"";
+function nombreUsuario(){ return usuario || prompt("¿Tu nombre de usuario?") || ""; }
+function mostrarEstado(html){ $('estado').innerHTML=html; }
+// escapado seguro para onclick (comillas simples)
+function qjs(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/'/g,"\\'"); }
+
+/* ─── VISOR INTEGRADO (ver el link dentro del sitio) ─── */
+var visorUrl="";
+function verAqui(url,titulo){
+  visorUrl=url;
+  $("visorTitulo").textContent=(titulo||"Visor").slice(0,60);
+  $("visorFrame").src="/api/proxy?url="+encodeURIComponent(url);
+  $("visor").style.display="flex";
+  document.body.style.overflow="hidden";
+}
+function cerrarVisor(){ $("visor").style.display="none"; $("visorFrame").src="about:blank"; document.body.style.overflow=""; }
+function visorExterno(){ if(visorUrl)window.open(visorUrl,"_blank"); }
+
+function setVista(v){
+  vista=v;
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.toggle('on',t.getAttribute('data-v')===v);});
+  render();
+}
+
+function cargar(){
+  mostrarEstado('<div style="color:#6d7f93;font-size:.7em">Cargando...</div>');
+  fetch('/api/deepweb?limit=40').then(function(r){return r.json();}).then(function(d){ noticias=(d&&d.noticias)||[]; })
+    .catch(function(){ noticias=[]; });
+  var temas=["dark web","tor network","ransomware","data breach","hacker forum","cybercrime"];
+  Promise.all(temas.map(function(t){
+    return fetch("https://hn.algolia.com/api/v1/search?query="+encodeURIComponent(t)+"&tags=story&hitsPerPage=6")
+      .then(function(r){return r.ok?r.json():{hits:[]};}).catch(function(){return {hits:[]};});
+  })).then(function(resultados){
+    hilos=[];
+    resultados.forEach(function(res,idx){
+      (res.hits||[]).forEach(function(h){
+        hilos.push({titulo:h.title,url:h.url||("https://news.ycombinator.com/item?id="+h.objectID),
+          puntos:h.points||0,comentarios:h.num_comments||0,fecha:(h.created_at||'').slice(0,10),tema:temas[idx]});
+      });
+    });
+    hilos.sort(function(a,b){return b.puntos-a.puntos;});
+    hilos=hilos.slice(0,24);
+    mostrarEstado('');
+    render();
+  });
+  fetch('/api/tienda?accion=productos').then(function(r){return r.json();}).then(function(d){ productos=(d&&d.productos)||[]; if(vista==='tienda') renderTienda(); }).catch(function(){});
+  fetch('/api/tienda?accion=regalos').then(function(r){return r.json();}).then(function(d){ regalos=(d&&d.regalos)||[]; if(vista==='tienda') renderTienda(); }).catch(function(){});
+}
+
+function render(){
+  if(vista==='noticias') renderNoticias();
+  else if(vista==='foro') renderForo();
+  else if(vista==='directorio') renderDirectorio();
+  else renderTienda();
+}
+
+function renderNoticias(){
+  var out='<div class="sec-titulo">🌐 Noticias deep web / cibercrimen</div>';
+  if(!noticias.length){ $('contenido').innerHTML='<div class="empty"><div class="big">🕸️</div>No se pudieron cargar las noticias. Probá en un rato.</div>'; return; }
+  out+=noticias.map(function(n,i){
+    return '<div class="news"><div class="n-src">'+esc(n.fuente||'')+'</div>'+
+      '<div class="n-t"><a href="'+esc(n.link)+'" target="_blank" rel="noopener">'+esc(n.title)+'</a>'+
+      '<button class="n-ver" onclick="verAqui(\''+qjs(n.link)+'\',\''+qjs(n.title)+'\')">👁 Ver aquí</button></div>'+
+      (n.snippet?'<div class="n-s">'+esc(n.snippet)+'</div>':'')+
+      '<div class="n-f">'+(n.date||'').slice(0,16)+'</div></div>';
+  }).join('');
+  $('contenido').innerHTML=out;
+}
+
+function renderForo(){
+  var out='<div class="sec-titulo">💬 Foro scrappeado · discusiones (Hacker News)</div>';
+  if(!hilos.length){ $('contenido').innerHTML='<div class="empty"><div class="big">💬</div>No se pudieron cargar los hilos.</div>'; return; }
+  out+=hilos.map(function(h){
+    return '<div class="hn"><div class="ht"><a href="'+esc(h.url)+'" target="_blank" rel="noopener">'+esc(h.titulo)+'</a>'+
+      '<button class="n-ver" onclick="verAqui(\''+qjs(h.url)+'\',\''+qjs(h.titulo)+'\')">👁 Ver aquí</button></div>'+
+      '<div class="hm"><span class="tag">#'+esc(h.tema.replace(/ /g,'_'))+'</span><span>▲ <b>'+(h.puntos||0)+'</b></span>'+
+      '<span>💬 '+(h.comentarios||0)+'</span><span>⏱ '+esc(h.fecha)+'</span></div></div>';
+  }).join('');
+  $('contenido').innerHTML=out;
+}
+
+var DIR=[
+  {ico:'🧅',nom:'Tor Project',desc:'El proyecto Tor: navegador y red anónima.',url:'https://blog.torproject.org/'},
+  {ico:'🐸',nom:'Bleeping Computer · Dark Web',desc:'Brechas, mercados y ransomware.',url:'https://www.bleepingcomputer.com/tag/dark-web/'},
+  {ico:'🔺',nom:'The Hacker News · Dark Web',desc:'Noticias de dark web y cybercrimen.',url:'https://thehackernews.com/'},
+  {ico:'🦈',nom:'Krebs on Security',desc:'Investigación sobre cibercrimen.',url:'https://krebsonsecurity.com/'},
+  {ico:'🛡️',nom:'Have I Been Pwned',desc:'Comprobá si tu email fue filtrado.',url:'https://haveibeenpwned.com/'},
+  {ico:'📉',nom:'Ransomwatch',desc:'Sitio que rastrea fugas de ransomware.',url:'https://www.ransomwatch.org/'},
+  {ico:'📚',nom:'Exploit-DB',desc:'Base de exploits y vulnerabilidades.',url:'https://www.exploit-db.com/'},
+  {ico:'🐙',nom:'GitHub · darkweb',desc:'Herramientas open source sobre tor.',url:'https://github.com/search?q=darkweb'}
+];
+
+function renderDirectorio(){
+  var out='<div class="sec-titulo">📚 Fuentes y directorio</div>'+
+    '<div class="warn">🔒 El acceso real a la dark web requiere herramientas especiales (Tor) y no se muestra en esta app. Estos son recursos públicos de referencia.</div>'+
+    '<div class="dir-grid">'+DIR.map(function(d){
+      return '<div class="dir"><div class="d-ico">'+d.ico+'</div><div class="d-nom">'+esc(d.nom)+'</div>'+
+        '<div class="d-desc">'+esc(d.desc)+'</div>'+
+        '<div style="display:flex;gap:6px;flex-wrap:wrap"><a class="d-link" href="'+esc(d.url)+'" target="_blank" rel="noopener">Abrir →</a>'+
+        '<button class="d-ver" onclick="verAqui(\''+qjs(d.url)+'\',\''+qjs(d.nom)+'\')">👁 Ver aquí</button></div></div>';
+    }).join('')+'</div>';
+  $('contenido').innerHTML=out;
+}
+
+// ═══ TIENDA ═══
+function renderTienda(){
+  var out='<div class="sec-titulo">🛒 TIENDA DEL DUEÑO</div>';
+  // Caja del DUEÑO para regalar gratis
+  out+='<div class="regalo-box"><div class="t">👑 ZONA DEL DUEÑO · REGALAR SIN PLATA</div>'+
+    '<label>Producto a regalar</label><input id="regaloProd" placeholder="ej: VIP Premium · 30 días">'+
+    '<label>Para el usuario</label><input id="regaloUser" placeholder="ej: gonza">'+
+    '<button class="btn-dueño" onclick="regalar()">🎁 Regalar gratis</button></div>';
+  // Productos
+  if(!productos.length){ out+='<div class="empty">No hay productos en la tienda todavía.</div>'; }
+  else{
+    out+='<div class="shop-grid">'+productos.map(function(p){
+      return '<div class="prod"><div class="p-ico">'+esc(p.ico||"🛍️")+'</div>'+
+        '<div class="p-nom">'+esc(p.nombre)+'</div>'+
+        '<div class="p-desc">'+esc(p.desc||"")+'</div>'+
+        '<button onclick="comprar(\''+esc(String(p.nombre).replace(/'/g,"\\'"))+'\')">🛒 Comprar</button></div>';
+    }).join('')+'</div>';
+  }
+  // Avisos de regalos
+  if(regalos.length){
+    out+='<div class="sec-titulo" style="margin-top:14px">🎁 Últimos regalos del dueño</div><div class="avisos">'+
+      regalos.slice().reverse().slice(0,6).map(function(r){
+        return '<div class="aviso-item">🎁 El dueño regaló <b>'+esc(r.producto)+'</b> a <b>'+esc(r.usuario)+'</b> · '+esc(r.fecha)+'</div>';
+      }).join('')+'</div>';
+  }
+  $('contenido').innerHTML=out;
+}
+
+function comprar(nombre){
+  var u=nombreUsuario();
+  if(!u) return;
+  if(!confirm('¿Comprar "'+nombre+'" como '+u+'? (sin plata real)')) return;
+  fetch('/api/tienda?accion=comprar&producto='+encodeURIComponent(nombre)+'&usuario='+encodeURIComponent(u))
+  .then(function(r){return r.json();}).then(function(d){
+    alert(d&&d.mensaje||"Pedido registrado");
+  }).catch(function(){ alert("Error de conexión"); });
+}
+
+function regalar(){
+  var clave=prompt('👑 Clave del dueño (para regalar gratis):');
+  if(!clave) return;
+  var prod=$("regaloProd").value.trim();
+  var usr=$("regaloUser").value.trim();
+  if(!prod||!usr){ alert("Faltan producto y/o usuario"); return; }
+  fetch('/api/tienda?accion=regalar&clave_owner='+encodeURIComponent(clave)+'&producto='+encodeURIComponent(prod)+'&usuario='+encodeURIComponent(usr))
+  .then(function(r){return r.json();}).then(function(d){
+    if(d&&d.ok){ alert(d.mensaje); fetch('/api/tienda?accion=regalos').then(function(r){return r.json();}).then(function(x){ regalos=x.regalos||[]; renderTienda(); }); }
+    else alert(d&&d.error||"No se pudo regalar (solo el dueño)");
+  }).catch(function(){ alert("Error de conexión"); });
+}
+
+cargar();
+</script>
+</body>

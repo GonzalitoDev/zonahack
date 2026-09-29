@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>🎰 Casino ZonaHack · sin dinero real</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#07090e;--card:rgba(13,17,23,.92);--border:#1c2531;--text:#d7e2ef;--muted:#6d7f93;--gold:#f1c40f;--green:#2ee6a8;--red:#ff5a5a;--cyan:#00e5ff;--violet:#7a5cff}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh}
+.bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.orb{position:absolute;border-radius:50%;filter:blur(90px);opacity:.3;animation:flotar 18s ease-in-out infinite}
+.orb1{width:460px;height:460px;background:radial-gradient(circle,rgba(241,196,15,.16),transparent 70%);top:-170px;right:-120px}
+.orb2{width:500px;height:500px;background:radial-gradient(circle,rgba(122,92,255,.16),transparent 70%);bottom:-200px;left:-160px;animation-delay:-7s}
+@keyframes flotar{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(20px,-14px) scale(1.08)}}
+.header{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border);background:rgba(7,9,14,.92);backdrop-filter:blur(10px);position:sticky;top:0;z-index:100}
+.logo{width:40px;height:40px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px;background:linear-gradient(135deg,rgba(241,196,15,.3),rgba(122,92,255,.3));border:1px solid rgba(241,196,15,.45)}
+.ttl{flex:1;min-width:0}
+.ttl h1{font-size:.95em;letter-spacing:2px;font-weight:900;font-family:'Courier New',monospace;color:#fff}
+.ttl span{font-size:.6em;color:var(--muted)}
+.back{color:var(--gold);text-decoration:none;font-size:.7em;padding:6px 10px;border:1px solid var(--border);border-radius:8px}
+.container{max-width:820px;margin:0 auto;padding:14px 14px 40px;position:relative;z-index:1}
+.aviso{text-align:center;background:rgba(241,196,15,.07);border:1px solid rgba(241,196,15,.2);color:#f5d76e;font-size:.62em;border-radius:10px;padding:7px;margin-bottom:12px}
+.saldo{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px 16px;margin-bottom:14px}
+.saldo .fichas{font-size:1.5em;font-weight:900;color:var(--gold);flex:1}
+.saldo .lbl{font-size:.6em;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+.saldo button{background:rgba(46,230,168,.1);border:1px solid rgba(46,230,168,.3);color:var(--green);border-radius:10px;padding:9px 14px;font-size:.7em;font-weight:800;cursor:pointer;font-family:inherit}
+.tabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.tab{flex:1;min-width:130px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:11px 8px;text-align:center;cursor:pointer;font-size:.72em;font-weight:800;color:var(--muted);font-family:inherit;transition:.12s}
+.tab.on{color:var(--gold);border-color:rgba(241,196,15,.4);background:rgba(241,196,15,.06)}
+.tab:active{transform:scale(.97)}
+.game{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;display:none}
+.game.on{display:block;animation:fadeIn .25s}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.game h2{font-size:.85em;letter-spacing:1px;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.betbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:10px 0}
+.betbar input{flex:1;min-width:120px;background:rgba(0,0,0,.4);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:10px 12px;font-size:.85em;outline:none;font-family:inherit}
+.betbar input:focus{border-color:var(--gold)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{background:linear-gradient(135deg,#f1c40f,#ff8c00);color:#2a1400;border:none;border-radius:20px;padding:6px 12px;font-weight:900;font-size:.7em;cursor:pointer;font-family:inherit}
+.chip:active{transform:scale(.94)}
+.btn{background:linear-gradient(135deg,#f1c40f,#ff8c00);color:#2a1400;border:none;border-radius:12px;padding:12px 22px;font-weight:900;font-size:.82em;cursor:pointer;font-family:inherit}
+.btn.ghost{background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--text)}
+.btn:active{transform:scale(.97)}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.res{min-height:20px;font-size:.78em;margin-top:8px;font-weight:700}
+.win{color:var(--green)} .lose{color:var(--red)} .push{color:var(--cyan)} .info{color:var(--muted)}
+/* slots */
+.reels{display:flex;gap:8px;justify-content:center;background:#0b0f16;border:1px solid var(--border);border-radius:14px;padding:16px;margin:10px 0}
+.reel{width:78px;height:96px;border-radius:10px;background:#12161f;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:2.4em}
+.reel.spin{animation:giro .5s linear infinite}
+@keyframes giro{0%{transform:translateY(0)}50%{transform:translateY(-6px)}100%{transform:translateY(0)}}
+.pay{font-size:.62em;color:var(--muted);line-height:1.8;margin-top:6px}
+/* blackjack */
+.hand{display:flex;gap:6px;flex-wrap:wrap;min-height:64px;margin:6px 0}
+.carta{width:44px;height:60px;border-radius:8px;background:#fff;color:#111;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1.1em;border:1px solid #000}
+.carta.red{color:#e74c3c}
+/* ruleta */
+.ruleta{display:flex;flex-wrap:wrap;gap:4px;max-width:380px;margin:10px auto}
+.num{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.72em;font-weight:800;cursor:pointer;border:1px solid rgba(255,255,255,.15)}
+.num:hover{transform:scale(1.08)}
+.num.rojo{background:#e74c3c}.num.negro{background:#111}.num.cero{background:#2ee6a8;color:#04150f}
+.num.sel{outline:2px solid #fff}
+.ruleta-btns{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:8px 0}
+.multi{background:rgba(122,92,255,.15);border:1px solid rgba(122,92,255,.4);color:#c3a8ff;border-radius:8px;padding:7px 10px;font-size:.62em;font-weight:800;cursor:pointer;font-family:inherit}
+.multi.on{background:rgba(122,92,255,.35)}
+/* ── MÓVIL ── */
+@media(max-width:560px){
+  .container{padding:10px 10px 30px}
+  .reel{width:62px;height:82px;font-size:2em}
+  .num{width:29px;height:29px;font-size:.64em}
+  .carta{width:38px;height:52px;font-size:.95em}
+  .saldo .fichas{font-size:1.2em}
+  .tab{min-width:calc(50% - 5px);padding:11px 6px}
+  .btn{padding:13px 16px}
+  .chip{padding:8px 14px}
+  .multi{padding:8px 10px}
+  .ruleta{max-width:100%}
+  input,select{font-size:16px}
+  .pay{font-size:.58em}
+  .hand{min-height:56px}
+}
+</style>
+</head>
+<body>
+<div class="bg"><div class="orb orb1"></div><div class="orb orb2"></div></div>
+
+<div class="header">
+  <div class="logo">🎰</div>
+  <div class="ttl"><h1>CASINO ZONAHACK</h1><span>solo diversión · fichas virtuales · sin dinero real</span></div>
+  <a href="/" class="back">←</a>
+</div>
+
+<div class="container">
+  <div class="aviso">⚠️ CASINO DE ENTRETENIMIENTO — Las fichas son VIRTUALES, no valen dinero real. Jugá por diversión. 🎮</div>
+
+  <div class="saldo">
+    <div><div class="lbl">Tus fichas</div><div class="fichas" id="saldoTxt">…</div></div>
+    <button onclick="recargar()">🔄 Recargar 1000</button>
+  </div>
+
+  <div class="tabs">
+    <div class="tab on" onclick="abrirJuego('slots',this)">🎰 Tragamonedas</div>
+    <div class="tab" onclick="abrirJuego('blackjack',this)">🃏 Blackjack 21</div>
+    <div class="tab" onclick="abrirJuego('ruleta',this)">🎡 Ruleta</div>
+    <div class="tab" onclick="abrirJuego('dados',this)">🎲 Dados</div>
+  </div>
+
+  <!-- 🎰 TRAGAMONEDAS -->
+  <div class="game on" id="game-slots">
+    <h2>🎰 TRAGAMONEDAS</h2>
+    <div class="betbar">
+      <input id="slotsBet" type="number" value="50" min="1">
+      <div class="chips"><button class="chip" onclick="setBet('slots',10)">+10</button><button class="chip" onclick="setBet('slots',50)">+50</button><button class="chip" onclick="setBet('slots',100)">+100</button><button class="chip" onclick="setBet('slots',500)">+500</button></div>
+    </div>
+    <div class="reels"><div class="reel" id="r1">🍒</div><div class="reel" id="r2">🍒</div><div class="reel" id="r3">🍒</div></div>
+    <button class="btn" style="width:100%" onclick="jugarSlots()">🎲 TIRAR</button>
+    <div class="pay">💰 Pagos (por ficha): 🍒🍒🍒 = x3 · 🍋🍋🍋 = x4 · 🔔🔔🔔 = x6 · ⭐⭐⭐ = x10 · 💎💎💎 = x20 · <b>7️⃣7️⃣7️⃣ = JACKPOT x50</b><br>Dos iguales = recuperás la apuesta · cero = perdés.</div>
+    <div class="res info" id="slotsRes"></div>
+  </div>
+
+  <!-- 🃏 BLACKJACK -->
+  <div class="game" id="game-blackjack">
+    <h2>🃏 BLACKJACK 21</h2>
+    <div class="betbar">
+      <input id="bjBet" type="number" value="100" min="1">
+      <div class="chips"><button class="chip" onclick="setBet('bj',10)">+10</button><button class="chip" onclick="setBet('bj',50)">+50</button><button class="chip" onclick="setBet('bj',100)">+100</button><button class="chip" onclick="setBet('bj',500)">+500</button></div>
+    </div>
+    <div style="font-size:.62em;color:var(--muted)">Tus cartas: <span id="bjSuma">-</span> · Dealer: <span id="bjDealer">?</span></div>
+    <div class="hand" id="bjHand"></div>
+    <div style="font-size:.62em;color:var(--muted)">Cartas del dealer:</div>
+    <div class="hand" id="bjDealerHand"></div>
+    <div class="btns">
+      <button class="btn" id="bjIniciar" onclick="bjIniciar()">🃏 Repartir</button>
+      <button class="btn ghost" id="bjPedir" style="display:none" onclick="bjPedir()">➕ Pedir</button>
+      <button class="btn ghost" id="bjPlantar" style="display:none" onclick="bjPlantar()">✋ Plantarme</button>
+    </div>
+    <div class="res info" id="bjRes"></div>
+  </div>
+
+  <!-- 🎡 RULETA -->
+  <div class="game" id="game-ruleta">
+    <h2>🎡 RULETA</h2>
+    <div class="betbar">
+      <input id="ruletaBet" type="number" value="50" min="1">
+      <div class="chips"><button class="chip" onclick="setBet('ruleta',10)">+10</button><button class="chip" onclick="setBet('ruleta',50)">+50</button><button class="chip" onclick="setBet('ruleta',100)">+100</button></div>
+    </div>
+    <div class="ruleta" id="ruletaNumeros"></div>
+    <div class="ruleta-btns">
+      <button class="multi" data-m="rojo" onclick="setRuletaApuesta('rojo',this)">🔴 Rojo (x2)</button>
+      <button class="multi" data-m="negro" onclick="setRuletaApuesta('negro',this)">⚫ Negro (x2)</button>
+      <button class="multi" data-m="par" onclick="setRuletaApuesta('par',this)">2️⃣ Par (x2)</button>
+      <button class="multi" data-m="impar" onclick="setRuletaApuesta('impar',this)">3️⃣ Impar (x2)</button>
+    </div>
+    <button class="btn" style="width:100%" onclick="girarRuleta()">🎡 GIRAR</button>
+    <div class="res info" id="ruletaRes"></div>
+  </div>
+
+  <!-- 🎲 DADOS -->
+  <div class="game" id="game-dados">
+    <h2>🎲 DADOS</h2>
+    <div class="betbar">
+      <input id="dadosBet" type="number" value="50" min="1">
+      <div class="chips"><button class="chip" onclick="setBet('dados',10)">+10</button><button class="chip" onclick="setBet('dados',50)">+50</button><button class="chip" onclick="setBet('dados',100)">+100</button></div>
+    </div>
+    <div class="ruleta-btns">
+      <button class="multi" data-m="par" onclick="setDadosApuesta('par',this)">2️⃣ Par (x2)</button>
+      <button class="multi" data-m="impar" onclick="setDadosApuesta('impar',this)">3️⃣ Impar (x2)</button>
+      <button class="multi" data-m="mayor" onclick="setDadosApuesta('mayor',this)">⬆ Mayor 7+ (x2)</button>
+      <button class="multi" data-m="menor" onclick="setDadosApuesta('menor',this)">⬇ Menor 6- (x2)</button>
+      <button class="multi" data-m="seis" onclick="setDadosApuesta('seis',this)">🎲 Doble 6 (x10)</button>
+    </div>
+    <div style="text-align:center;font-size:2.6em;margin:8px 0" id="dadosShow">🎲🎲</div>
+    <button class="btn" style="width:100%" onclick="tirarDados()">🎲 TIRAR</button>
+    <div class="res info" id="dadosRes"></div>
+  </div>
+</div>
+
+<script src="/firebase_zh.js"></script>
+<script>
+var USER=localStorage.getItem('vh_usuario')||'anon';
+var fichas=1000;
+var bjBaraja=[], bjJugador=[], bjDealer=[], bjApuesta=0, bjFin=false;
+var ruletaSel=null;
+var dadosAp=null;
+var $=function(id){return document.getElementById(id);};
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+
+// ─── SALDO EN FIREBASE (sin dinero real) ───
+function pintarSaldo(){ $('saldoTxt').textContent=fichas.toLocaleString('es')+' 🪙'; }
+function recargar(){ fichas=Math.max(fichas,1000)+1000; guardarSaldo(); pintarSaldo(); }
+function guardarSaldo(){
+  try{ if(window.ZHFirebase) ZHFirebase.set('casino_saldos/'+USER,{fichas:fichas,ts:Date.now()}).catch(function(){}); }catch(e){}
+}
+function debitar(n){ fichas-=n; guardarSaldo(); pintarSaldo(); }
+function acreditar(n){ fichas+=n; guardarSaldo(); pintarSaldo(); }
+
+function setBet(juego,delta){
+  var inp={'slots':'slotsBet','bj':'bjBet','ruleta':'ruletaBet','dados':'dadosBet'}[juego];
+  var v=parseInt($(inp).value||'0',10);
+  $(inp).value=Math.max(1,(v||0)+delta);
+}
+function setRuletaApuesta(t,el){
+  ruletaSel={tipo:t,multi:2};
+  document.querySelectorAll('#game-ruleta .multi').forEach(function(x){x.classList.remove('on');});
+  el.classList.add('on');
+  document.querySelectorAll('.num').forEach(function(x){x.classList.remove('sel');});
+}
+function setDadosApuesta(t,el){
+  dadosAp={tipo:t,multi: t==='seis'?10:2};
+  document.querySelectorAll('#game-dados .multi').forEach(function(x){x.classList.remove('on');});
+  el.classList.add('on');
+}
+
+// ─── TRAGAMONEDAS ───
+var SIMB=['🍒','🍋','🔔','⭐','💎','7️⃣'];
+function jugarSlots(){
+  var ap=parseInt($('slotsBet').value||'0',10);
+  if(ap<=0||ap>fichas){ $('slotsRes').className='res lose'; $('slotsRes').textContent=ap>fichas?'Sin suficientes fichas':'Apuesta inválida'; return; }
+  debitar(ap);
+  var r=[SIMB[Math.floor(Math.random()*6)],SIMB[Math.floor(Math.random()*6)],SIMB[Math.floor(Math.random()*6)]];
+  var ids=['r1','r2','r3'];
+  ids.forEach(function(i){$(i).classList.add('spin');});
+  setTimeout(function(){
+    ids.forEach(function(i){$(i).classList.remove('spin');});
+    for(var i=0;i<3;i++)$(ids[i]).textContent=r[i];
+    var mult=0;
+    if(r[0]===r[1]&&r[1]===r[2]) mult={1:3,2:4,3:6,4:10,5:20,6:50}[SIMB.indexOf(r[0])]||3;
+    else if(r[0]===r[1]||r[1]===r[2]||r[0]===r[2]) mult=1;
+    var gan=Math.round(ap*mult);
+    if(mult>1){ acreditar(gan); $('slotsRes').className='res win'; $('slotsRes').textContent='🎉 GANASTE '+gan+' fichas (x'+mult+')! '+r.join(' '); }
+    else if(mult===1){ $('slotsRes').className='res push'; $('slotsRes').textContent='Casi… recuperás tu apuesta. '+r.join(' '); }
+    else{ $('slotsRes').className='res lose'; $('slotsRes').textContent='Perdiste '+ap+' fichas. '+r.join(' '); }
+  },500);
+}
+
+// ─── BLACKJACK ───
+function crearBaraja(){
+  bjBaraja=[];
+  ['♠','♥','♦','♣'].forEach(function(p){
+    for(var v=1;v<=13;v++) bjBaraja.push({v:v,p:p});
+  });
+}
+function barajar(){ for(var i=bjBaraja.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=bjBaraja[i];bjBaraja[i]=bjBaraja[j];bjBaraja[j]=t;} }
+function valorCarta(c){ return c.v>10?10:c.v; }
+function sumaMano(m){ var s=0,a=0; m.forEach(function(c){ s+=valorCarta(c); if(c.v===1)a++; }); while(s>21&&a){ s-=10; a--; } return s; }
+function dibCarta(c){ return '<div class="carta'+(c.p==='♥'||c.p==='♦'?' red':'')+'">'+['','A','2','3','4','5','6','7','8','9','10','J','Q','K'][c.v]+c.p+'</div>'; }
+function bjDibujar(){
+  $('bjHand').innerHTML=bjJugador.map(dibCarta).join('');
+  $('bjDealerHand').innerHTML=bjDealer.map(dibCarta).join('');
+  $('bjSuma').textContent=sumaMano(bjJugador);
+  $('bjDealer').textContent=bjFin?sumaMano(bjDealer):(valorCarta(bjDealer[0])+(bjDealer.length>1?'+?':''));
+}
+function bjIniciar(){
+  var ap=parseInt($('bjBet').value||'0',10);
+  if(ap<=0||ap>fichas){ $('bjRes').className='res lose'; $('bjRes').textContent=ap>fichas?'Sin suficientes fichas':'Apuesta inválida'; return; }
+  bjApuesta=ap; bjFin=false;
+  debitar(ap);
+  crearBaraja(); barajar();
+  bjJugador=[bjBaraja.pop(),bjBaraja.pop()];
+  bjDealer=[bjBaraja.pop()];
+  bjDibujar();
+  $('bjIniciar').style.display='none'; $('bjPedir').style.display='inline'; $('bjPlantar').style.display='inline';
+  $('bjRes').className='res info'; $('bjRes').textContent='¿Pedís o te plantás?';
+  if(sumaMano(bjJugador)===21){ bjPlantar(); }
+}
+function bjPedir(){
+  bjJugador.push(bjBaraja.pop()); bjDibujar();
+  if(sumaMano(bjJugador)>21){ bjFin(); $('bjRes').className='res lose'; $('bjRes').textContent='💥 Te pasaste de 21. Perdiste '+bjApuesta+' fichas.'; }
+}
+function bjPlantar(){
+  if(bjFin) return; bjFin=true;
+  while(sumaMano(bjDealer)<17) bjDealer.push(bjBaraja.pop());
+  bjDibujar();
+  var pj=sumaMano(bjJugador), dl=sumaMano(bjDealer);
+  if(dl>21||pj>dl){ acreditar(bjApuesta*2); $('bjRes').className='res win'; $('bjRes').textContent='🎉 Ganaste '+bjApuesta+' fichas ('+pj+' vs '+dl+')!'; }
+  else if(pj===dl){ acreditar(bjApuesta); $('bjRes').className='res push'; $('bjRes').textContent='Empate ('+pj+'). Recuperás tu apuesta.'; }
+  else{ $('bjRes').className='res lose'; $('bjRes').textContent='Perdiste ('+pj+' vs '+dl+').'; }
+  $('bjIniciar').style.display='inline'; $('bjPedir').style.display='none'; $('bjPlantar').style.display='none';
+}
+
+// ─── RULETA ───
+function construirRuleta(){
+  var el=$('ruletaNumeros'); el.innerHTML='';
+  var nums=[0]; for(var i=1;i<=36;i++)nums.push(i);
+  var rojos=[1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36];
+  var esRojo=function(n){return rojos.indexOf(n)>=0;};
+  nums.forEach(function(n){
+    var d=document.createElement('div');
+    d.className='num'+(n===0?' cero':(esRojo(n)?' rojo':' negro'));
+    d.textContent=n;
+    d.onclick=function(){ ruletaSel={tipo:'num',num:n,multi:36}; document.querySelectorAll('.num').forEach(function(x){x.classList.remove('sel');}); d.classList.add('sel'); document.querySelectorAll('#game-ruleta .multi').forEach(function(x){x.classList.remove('on');}); };
+    el.appendChild(d);
+  });
+}
+function girarRuleta(){
+  if(!ruletaSel){ $('ruletaRes').className='res info'; $('ruletaRes').textContent='Elegí un número o un color'; return; }
+  var ap=parseInt($('ruletaBet').value||'0',10);
+  if(ap<=0||ap>fichas){ $('ruletaRes').className='res lose'; $('ruletaRes').textContent=ap>fichas?'Sin fichas':'Apuesta inválida'; return; }
+  debitar(ap);
+  var n=Math.floor(Math.random()*37);
+  var rojos=[1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36];
+  var color=n===0?'verde':(rojos.indexOf(n)>=0?'rojo':'negro');
+  setTimeout(function(){
+    var gan=false;
+    if(ruletaSel.tipo==='num'&&ruletaSel.num===n) gan=true;
+    else if(ruletaSel.tipo==='rojo'&&color==='rojo') gan=true;
+    else if(ruletaSel.tipo==='negro'&&color==='negro') gan=true;
+    else if(ruletaSel.tipo==='par'&&n!==0&&n%2===0) gan=true;
+    else if(ruletaSel.tipo==='impar'&&n!==0&&n%2===1) gan=true;
+    if(gan){ var gan2=ap*ruletaSel.multi; acreditar(gan2); $('ruletaRes').className='res win'; $('ruletaRes').textContent='🎡 Cayó el '+n+' ('+color+')! GANASTE '+gan2+' fichas (x'+ruletaSel.multi+')!'; }
+    else { $('ruletaRes').className='res lose'; $('ruletaRes').textContent='Cayó el '+n+' ('+color+'). Perdiste '+ap+' fichas.'; }
+  },600);
+}
+
+// ─── DADOS ───
+function tirarDados(){
+  if(!dadosAp){ $('dadosRes').className='res info'; $('dadosRes').textContent='Elegí una apuesta (par/impar/mayor/menor/doble6)'; return; }
+  var ap=parseInt($('dadosBet').value||'0',10);
+  if(ap<=0||ap>fichas){ $('dadosRes').className='res lose'; $('dadosRes').textContent=ap>fichas?'Sin fichas':'Apuesta inválida'; return; }
+  debitar(ap);
+  var d1=1+Math.floor(Math.random()*6), d2=1+Math.floor(Math.random()*6);
+  var total=d1+d2;
+  $('dadosShow').textContent='🎲 '+d1+' + 🎲 '+d2+' = '+total;
+  setTimeout(function(){
+    var gan=false;
+    if(dadosAp.tipo==='par'&&total%2===0)gan=true;
+    else if(dadosAp.tipo==='impar'&&total%2===1)gan=true;
+    else if(dadosAp.tipo==='mayor'&&total>=7)gan=true;
+    else if(dadosAp.tipo==='menor'&&total<=6)gan=true;
+    else if(dadosAp.tipo==='seis'&&d1===6&&d2===6)gan=true;
+    if(gan){ var g=ap*dadosAp.multi; acreditar(g); $('dadosRes').className='res win'; $('dadosRes').textContent='🎉 GANASTE '+g+' fichas (x'+dadosAp.multi+')! Total '+total; }
+    else { $('dadosRes').className='res lose'; $('dadosRes').textContent='Perdiste. Total '+total; }
+  },400);
+}
+
+// ─── NAVEGACIÓN ───
+function abrirJuego(nombre,el){
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('on');});
+  el.classList.add('on');
+  document.querySelectorAll('.game').forEach(function(g){g.classList.remove('on');});
+  $('game-'+nombre).classList.add('on');
+}
+
+// ─── CARGA DE SALDO ───
+ZHFirebase.init(function(){
+  ZHFirebase.get('casino_saldos/'+USER).then(function(s){
+    if(s&&typeof s.fichas==='number'){ fichas=Math.max(0,s.fichas); if(fichas===0)fichas=1000; }
+    else { fichas=1000; guardarSaldo(); }
+    pintarSaldo();
+  }).catch(function(){ pintarSaldo(); });
+});
+construirRuleta();
+pintarSaldo();
+</script>
+<script src="/logger_zh.js?v=2026"></script>
+</body>
+</html>

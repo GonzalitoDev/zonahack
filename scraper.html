@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>🕷 Web Scraper - ZonaHack</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0a;color:#c8d6e5;font-family:'Courier New',monospace;min-height:100vh;padding:15px}
+body::before{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:radial-gradient(circle at 50% 0%,rgba(0,255,65,.05) 0,transparent 60%),repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,255,65,.012) 2px,rgba(0,255,65,.012) 4px);pointer-events:none;z-index:9998}
+.header{display:flex;align-items:center;justify-content:space-between;padding:10px 0 14px;max-width:940px;margin:0 auto}
+.header h1{color:#00ff41;font-size:1em;letter-spacing:2px;text-shadow:0 0 12px rgba(0,255,65,.25)}
+.back{color:#00ff41;text-decoration:none;font-size:.65em;padding:4px 8px;border:1px solid rgba(0,255,65,.15);border-radius:3px}
+.wrap{max-width:940px;margin:0 auto}
+textarea{width:100%;background:#050505;border:1px solid rgba(0,255,65,.15);color:#00ff41;padding:12px 14px;border-radius:4px;font-family:'Courier New',monospace;font-size:.78em;outline:none;min-height:64px;resize:vertical;line-height:1.6}
+textarea:focus{border-color:rgba(0,255,65,.5);box-shadow:0 0 12px rgba(0,255,65,.08)}
+.inputbar{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.inputbar .hint{font-size:.55em;color:rgba(200,214,229,.4);margin-top:4px}
+.btn{padding:11px 18px;background:linear-gradient(135deg,#00b33c,#007a2a);border:none;color:#fff;border-radius:4px;font-family:'Courier New',monospace;font-weight:bold;font-size:.78em;cursor:pointer;letter-spacing:1px}
+.btn:hover{box-shadow:0 0 18px rgba(0,255,65,.3)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.ghost{background:transparent;border:1px solid rgba(0,255,65,.2);color:#00ff41}
+.status{font-size:.7em;color:#00ff41;letter-spacing:1px;margin:8px 0;min-height:18px}
+.status.err{color:#e74c3c}
+.autor{display:flex;align-items:center;gap:6px;font-size:.62em;color:rgba(200,214,229,.6);margin:6px 0 10px;cursor:pointer}
+.bar{height:3px;background:#0a0a0a;border-radius:2px;overflow:hidden;margin:6px 0;position:relative;display:none}
+.bar .fill{position:absolute;top:0;left:-30%;height:100%;width:30%;background:#00ff41;box-shadow:0 0 8px rgba(0,255,65,.5);animation:mv 1s ease-in-out infinite}
+@keyframes mv{0%{left:-30%}100%{left:100%}}
+.result{border:1px solid rgba(0,255,65,.12);border-radius:6px;overflow:hidden;margin-bottom:14px;display:none}
+.urtabs{display:flex;gap:4px;flex-wrap:wrap;padding:8px 10px;background:rgba(0,0,0,.35);border-bottom:1px solid rgba(255,255,255,.05)}
+.urtab{padding:5px 10px;border-radius:12px;font-size:.58em;letter-spacing:.5px;border:1px solid rgba(255,255,255,.08);color:rgba(200,214,229,.55);cursor:pointer;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.urtab.active{color:#00ff41;border-color:rgba(0,255,65,.4);background:rgba(0,255,65,.06)}
+.urtab .st{color:#2ecc71}
+.urtab .er{color:#e74c3c}
+.result-head{padding:14px;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;border-bottom:1px solid rgba(255,255,255,.05);background:rgba(0,0,0,.3)}
+.result-head .url{font-size:.66em;color:rgba(200,214,229,.6);word-break:break-all;max-width:70%}
+.result-head .title{color:#00ff41;font-size:.85em;font-weight:bold;margin-top:4px}
+.badge{font-size:.58em;padding:3px 8px;border-radius:12px;border:1px solid rgba(46,204,113,.4);color:#2ecc71;background:rgba(46,204,113,.06);margin-right:4px}
+.tabs{display:flex;gap:2px;border-bottom:1px solid rgba(255,255,255,.05);padding:0 10px;overflow-x:auto}
+.tabs button{background:none;border:none;color:rgba(200,214,229,.4);padding:10px 12px;font-family:'Courier New',monospace;font-size:.66em;cursor:pointer;border-bottom:2px solid transparent;letter-spacing:1px;white-space:nowrap}
+.tabs button.active{color:#00ff41;border-bottom-color:#00ff41}
+.tabpane{display:none;padding:12px;background:rgba(0,0,0,.2)}
+.tabpane.active{display:block}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(105px,1fr));gap:8px;margin-bottom:12px}
+.metrics div{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.05);border-radius:4px;padding:10px;text-align:center}
+.metrics b{display:block;color:#00ff41;font-size:1.1em;margin-bottom:3px;letter-spacing:1px}
+.metrics span{font-size:.52em;color:rgba(200,214,229,.45);letter-spacing:1px}
+pre{background:#060606;border:1px solid rgba(0,255,65,.08);border-radius:4px;padding:12px;font-size:.64em;color:#9db5aa;white-space:pre-wrap;word-break:break-word;line-height:1.6;max-height:420px;overflow:auto}
+pre mark{background:#f1c40f;color:#03140a;border-radius:2px;padding:0 1px}
+.list{font-size:.64em;color:rgba(200,214,229,.75);line-height:1.8}
+.list a{color:#7ec8f0;word-break:break-all;text-decoration:none}
+.list a:hover{text-decoration:underline}
+.chips{display:flex;flex-wrap:wrap;gap:5px}
+.chips span{padding:4px 9px;border-radius:12px;font-size:.6em;letter-spacing:.5px;border:1px solid rgba(0,255,65,.2);color:#00ff41;background:rgba(0,255,65,.04);cursor:pointer}
+.chips span:hover{border-color:rgba(0,255,65,.6)}
+.chips span.mail{border-color:rgba(52,152,219,.3);color:#7ec8f0;cursor:default}
+.chips span.tel{border-color:rgba(241,196,15,.3);color:#f1c40f;cursor:default}
+.chips span.kw{font-size:.58em}
+.img-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
+.img-grid img{width:100%;aspect-ratio:16/9;object-fit:cover;background:#0d0d0d;border:1px solid rgba(255,255,255,.06);border-radius:4px}
+.img-grid a{font-size:.5em;color:rgba(200,214,229,.4);word-break:break-all;margin-top:4px}
+.h-item{font-size:.64em;padding:4px 0;border-bottom:1px dashed rgba(255,255,255,.04)}
+.h-item b{color:#00ff41}
+.kv{font-size:.62em;color:rgba(200,214,229,.65);padding:4px 0;border-bottom:1px dashed rgba(255,255,255,.04);display:flex;justify-content:space-between;gap:10px;line-height:1.5}
+.kv:last-child{border-bottom:none}
+.kv b{color:#00ff41;font-weight:normal;text-align:right;word-break:break-all}
+.toolbar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;align-items:center}
+.toolbar button{padding:6px 10px;border:1px solid rgba(0,255,65,.15);border-radius:3px;background:rgba(0,0,0,.3);color:#00ff41;font-size:.6em;cursor:pointer;font-family:'Courier New',monospace}
+.toolbar button:hover{border-color:rgba(0,255,65,.4)}
+.search{flex:1;min-width:150px;background:#050505;border:1px solid rgba(0,255,65,.15);color:#00ff41;padding:7px 10px;border-radius:3px;font-family:'Courier New',monospace;font-size:.66em;outline:none}
+.hist{border:1px solid rgba(255,255,255,.06);border-radius:6px;padding:10px 12px;margin-bottom:14px;display:none}
+.hist h3{font-size:.62em;color:rgba(200,214,229,.4);letter-spacing:1px;margin-bottom:6px}
+.hist .it{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 8px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.04);border-radius:4px;margin:3px 0;font-size:.6em;cursor:pointer}
+.hist .it:hover{border-color:rgba(0,255,65,.2)}
+.hist .it b{max-width:55%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#00ff41;font-weight:normal}
+.hist .it .x{margin-left:auto;color:#e74c3c;background:none;border:none;cursor:pointer;font-size:.9em}
+.disclaimer{margin-top:16px;border:1px solid rgba(241,196,15,.15);border-radius:5px;padding:10px;font-size:.6em;color:rgba(200,214,229,.4);line-height:1.7}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:200;display:none;align-items:center;justify-content:center;padding:16px}
+.modal{background:#0d0d0d;border:1px solid rgba(0,255,65,.25);border-radius:6px;padding:18px;width:100%;max-width:520px;max-height:80vh;display:flex;flex-direction:column}
+.modal .mh{color:#00ff41;font-size:.78em;letter-spacing:1px;margin-bottom:10px}
+.modal .mbody{font-size:.7em;color:#c8d6e5;line-height:1.7;overflow:auto;white-space:pre-wrap;word-break:break-word}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(0,255,65,.2);border-top-color:#00ff41;border-radius:50%;animation:sp .8s linear infinite;vertical-align:middle;margin-right:8px}
+@keyframes sp{to{transform:rotate(360deg)}}
+.empty{text-align:center;color:rgba(0,255,65,.4);font-size:.7em;padding:30px}
+</style>
+</head>
+<body>
+<div class="header">
+  <a href="/" class="back">← Volver</a>
+  <h1>🕷 WEB SCRAPER</h1>
+  <div style="width:60px"></div>
+</div>
+
+<div class="wrap">
+  <textarea id="urls" placeholder="Pegá una URL por línea:&#10;https://ejemplo.com&#10;https://otro-sitio.com/pagina">https://es.wikipedia.org/wiki/Perro</textarea>
+  <div class="hint">Una URL por línea · se scrapean todas juntas</div>
+
+  <div class="inputbar">
+    <button class="btn" id="btn" onclick="scrapear()">🕷 SCRAPEAR</button>
+    <button class="btn ghost" onclick="toggleHist()">📜 Historial</button>
+    <button class="btn ghost" onclick="verGuardados()">🗂 Guardados</button>
+    <button class="btn ghost" onclick="abrirComparar()">⇄ Comparar</button>
+    <button class="btn ghost" onclick="guardarTodos()">💾 Guardar todos</button>
+    <button class="btn ghost" onclick="exportarTodoJSON()">⬇ Exportar JSON</button>
+    <button class="btn ghost" onclick="exportarZIP()">📦 Exportar ZIP</button>
+    <input class="search" id="busquedaGlobal" placeholder="🔍 Filtrar resultados por título..." oninput="filtrarGlobal(this.value)" style="flex:1;min-width:160px;background:#050505;border:1px solid rgba(0,255,65,.15);color:#00ff41;padding:9px 10px;border-radius:4px;font-family:'Courier New',monospace;font-size:.7em;outline:none">
+    <label class="autor" style="margin:0"><input type="checkbox" id="crawlCb" style="width:auto"> Crawl (links internos)</label>
+    <select id="crawlProf" style="width:auto;background:#050505;border:1px solid rgba(0,255,65,.15);color:#00ff41;border-radius:4px;padding:8px;font-family:'Courier New',monospace;font-size:.68em;outline:none">
+      <option value="3">3 págs</option><option value="5" selected>5 págs</option><option value="8">8 págs</option>
+    </select>
+  </div>
+  <label class="autor"><input type="checkbox" id="chk"> Confirmo que tengo derecho a acceder a este contenido.</label>
+
+  <div class="status" id="status">Listo. Ingresá URLs y scrapeá.</div>
+  <div class="bar" id="bar"><div class="fill"></div></div>
+
+  <div class="hist" id="hist">
+    <h3>📜 ÚLTIMOS SCRAPEO</h3>
+    <div id="hList"></div>
+  </div>
+
+  <div class="result" id="result"></div>
+
+  <div class="disclaimer">
+    🕷 <b style="color:#f1c40f">USO RESPONSABLE</b><br>
+    Extrae <b>contenido público</b> (texto, metadatos, links, imágenes) de páginas web.<br>
+    🔒 Usalo en <b>páginas que tenés derecho a leer</b>: las tuyas, con permiso, o contenido público según los términos del sitio. Respetá los términos de uso y robots.txt de cada página.
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal"></div>
+
+<script src="/jszip.min.js"></script>
+<script>
+function $(id){return document.getElementById(id);}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+var resultados=[];   // [{url, ok, data|error}]
+var current=0;
+
+/* ─── HISTORIAL ─── */
+var LS_H="zh_scrape_hist";
+function getHist(){try{return JSON.parse(localStorage.getItem(LS_H)||"[]");}catch(e){return [];}}
+function toggleHist(){
+  var h=$("hist");h.style.display=h.style.display==="block"?"none":"block";
+  if(h.style.display==="block")renderHist();
+}
+function renderHist(){
+  var h=getHist();
+  $("hList").innerHTML=h.length?h.map(function(x){
+    return '<div class="it" onclick="reHist(\''+esc(x.url.replace(/'/g,"\\'"))+'\')">'+
+      '<b>'+esc(x.titulo||x.url)+'</b><span style="color:rgba(200,214,229,.4)">'+esc((x.fecha||"").slice(5,16))+'</span>'+
+      '<button class="x" onclick="event.stopPropagation();delHist(\''+esc(x.url.replace(/'/g,"\\'"))+'\')">✕</button></div>';
+  }).join(""):'<div class="empty">Sin historial.</div>';
+}
+function addHist(url,titulo){
+  var h=getHist().filter(function(x){return x.url!==url;});
+  h.unshift({url:url,titulo:(titulo||url).slice(0,80),fecha:new Date().toISOString()});
+  h=h.slice(0,10);
+  try{localStorage.setItem(LS_H,JSON.stringify(h));}catch(e){}
+}
+function reHist(u){$("urls").value=u;scrapear();}
+function delHist(u){
+  var h=getHist().filter(function(x){return x.url!==u;});
+  localStorage.setItem(LS_H,JSON.stringify(h));renderHist();
+}
+
+/* ─── KEYWORDS ─── */
+var STOP={"de":1,"la":1,"el":1,"que":1,"en":1,"y":1,"a":1,"los":1,"del":1,"se":1,"las":1,"por":1,"un":1,"para":1,"con":1,"no":1,"una":1,"su":1,"al":1,"lo":1,"como":1,"mas":1,"pero":1,"sus":1,"le":1,"ya":1,"o":1,"este":1,"esta":1,"entre":1,"cuando":1,"muy":1,"sin":1,"sobre":1,"tambien":1,"me":1,"hasta":1,"hay":1,"donde":1,"quien":1,"desde":1,"todo":1,"nos":1,"durante":1,"todos":1,"uno":1,"les":1,"ni":1,"contra":1,"otros":1,"ese":1,"eso":1,"ante":1,"ellos":1,"e":1,"esto":1,"antes":1,"unos":1,"yo":1,"otro":1,"otras":1,"otra":1,"tanto":1,"esa":1,"estos":1,"mucho":1,"quienes":1,"nada":1,"muchos":1,"cual":1,"poco":1,"ella":1,"estar":1,"estas":1,"algunas":1,"algo":1,"nosotros":1,"mi":1,"mis":1,"tus":1,"ellas":1,"te":1,"tu":1,"os":1,"asi":1,"asi":1,"cual":1,"los":1,"the":1,"and":1,"for":1,"are":1,"was":1,"with":1,"that":1,"this":1,"from":1,"they":1,"have":1,"had":1,"has":1,"its":1,"not":1,"but":1,"you":1,"all":1,"will":1,"can":1,"their":1,"what":1,"when":1,"were":1,"also":1,"solo":1,"puede":1,"pueden":1,"hace":1,"hacer":1,"ser":1,"son":1,"http":1,"https":1,"www":1,"com":1};
+function keywords(texto){
+  var c={};
+  (texto||"").toLowerCase().split(/[^a-záéíóúñü0-9]+/).forEach(function(w){
+    if(w.length<4||STOP[w])return;
+    c[w]=(c[w]||0)+1;
+  });
+  return Object.keys(c).sort(function(a,b){return c[b]-c[a];}).slice(0,20).map(function(w){return {w:w,n:c[w]};});
+}
+
+/* ─── SCRAPE ─── */
+function scrapear(){
+  var urls=$("urls").value.split("\n").map(function(s){return s.trim();}).filter(Boolean);
+  if(!urls.length){$("status").textContent="⛔ Ingresá al menos una URL.";$("status").className="status err";return;}
+  if(!$("chk").checked){$("status").textContent="⛔ Confirmá que tenés derecho a acceder a esas páginas.";$("status").className="status err";return;}
+  var urlsN=urls.map(function(u){return /^https?:\/\//i.test(u)?u:"https://"+u;});
+  var crawl=$("crawlCb").checked;
+  var prof=$("crawlProf").value;
+  var btn=$("btn");btn.disabled=true;
+  $("status").textContent=(crawl?"🕸 Rastreando (crawl) ":"🕷 Scrapeando ")+urlsN.length+" página(s)...";
+  $("status").className="status";
+  $("result").style.display="none";
+  $("bar").style.display="block";
+  resultados=[];
+  var hechos=0;
+  function proc(list){
+    if(!list.length){finalizar();return;}
+    var batch=list.splice(0,3);
+    Promise.all(batch.map(function(u){
+      var q=crawl?("&crawl=1&profundidad="+prof):"&html=1";
+      return fetch("/api/scrape?url="+encodeURIComponent(u)+q)
+        .then(function(r){return r.json();})
+        .then(function(d){resultados.push({url:u,ok:!!d.ok,data:d});})
+        .catch(function(){resultados.push({url:u,ok:false,data:{error:"Error de red"}});});
+    })).then(function(){
+      hechos+=batch.length;
+      $("status").textContent=(crawl?"🕸 Rastreando... ":"🕷 Scrapeando... ")+hechos+"/"+urlsN.length+" ("+Math.round(hechos/urlsN.length*100)+"%)";
+      proc(list);
+    });
+  }
+  proc(urlsN.slice());
+  function finalizar(){
+    $("bar").style.display="none";
+    var ok=resultados.filter(function(r){return r.ok;}).length;
+    $("status").textContent="✅ Listo: "+ok+"/"+urlsN.length+" página(s)"+(crawl?" rastreadas":" scrapeadas");
+    $("status").className="status";
+    current=0;
+    render();
+    resultados.forEach(function(r){
+      if(r.ok)addHist(r.url,(crawl?(r.data.paginas&&r.data.paginas[0]?r.data.paginas[0].titulo:"") : r.data.titulo)||r.url);
+    });
+  }
+}
+
+function render(){
+  var h="";
+  var bg=($("busquedaGlobal")?$("busquedaGlobal").value:"").trim().toLowerCase();
+  var visibles=resultados.map(function(r,i){return {r:r,i:i};}).filter(function(x){
+    if(!bg)return true;
+    return ((x.r.data&&(x.r.data.titulo||"").toLowerCase().indexOf(bg)>=0)||x.r.url.toLowerCase().indexOf(bg)>=0);
+  });
+  // tabs de URLs
+  h+='<div class="urtabs">';
+  visibles.forEach(function(x){
+    var r=x.r,i=x.i;
+    var cls=r.ok?"st":"er", ic=r.ok?"✓":"✕";
+    h+='<span class="urtab'+(i===current?' active':'')+'" onclick="sel('+i+')">'+ic+' <span class="'+cls+'">'+esc(r.url.slice(0,40))+'…</span></span>';
+  });
+  if(!visibles.length)h+='<span style="font-size:.6em;color:rgba(200,214,229,.4);padding:4px">Sin resultados que coincidan con la búsqueda</span>';
+  h+='</div>';
+  h+='<div id="resultBody"></div>';
+  $("result").innerHTML=h;
+  $("result").style.display="block";
+  if(resultados[current])drawResult(current);
+}
+function filtrarGlobal(){render();}
+function sel(i){current=i;drawResult(i);}
+
+function drawResult(i){
+  var r=resultados[i];if(!r)return;
+  var body=$("resultBody");
+  if(!r.ok){
+    body.innerHTML='<div class="empty">⛔ No se pudo scrapear '+esc(r.url)+'<br>'+(r.data&&r.data.error?esc(r.data.error):"error")+'</div>';
+    return;
+  }
+  var d=r.data;
+  if(d.modo==="crawl"){drawCrawl(d);return;}
+  var h="";
+  h+='<div class="result-head"><div style="flex:1;min-width:0"><div class="url">'+esc(d.final_url||d.url)+'</div>'+
+     '<div class="title">'+esc(d.titulo||"Sin título")+'</div>'+
+     '<div style="margin-top:6px"><span class="badge">HTTP '+esc(d.status)+'</span>'+
+     (d.lang?' <span class="badge">'+esc(d.lang)+'</span>':'')+
+     (d.server?' <span class="badge">'+esc(d.server.slice(0,25))+'</span>':'')+
+     '</div></div></div>';
+
+  h+='<div class="metrics">';
+  h+='<div><b>'+d.palabras+'</b><span>PALABRAS</span></div>';
+  h+='<div><b>'+d.chars+'</b><span>CARACTERES</span></div>';
+  h+='<div><b>'+d.links_total+'</b><span>LINKS ('+d.links_internos+'i/'+d.links_externos+'e)</span></div>';
+  h+='<div><b>'+d.imagenes_total+'</b><span>IMÁGENES</span></div>';
+  h+='<div><b>'+(d.emails||[]).length+'</b><span>EMAILS</span></div>';
+  h+='</div>';
+
+  // toolbar con buscar + descargas
+  h+='<div class="toolbar" style="padding:0 12px">'+
+     '<input class="search" id="buscar" placeholder="🔍 Buscar en el texto..." oninput="filtrarTexto(this.value)">'+
+     '<button onclick="resumirIA('+i+')">🤖 Resumir</button>'+
+     '<button onclick="guardarBase('+i+')">💾 Guardar</button>'+
+     '<button onclick="descargarHTML('+i+')">⬇ HTML</button>'+
+     '<button onclick="descargarTexto('+i+')">⬇ Texto</button>'+
+     '<button onclick="exportarMD('+i+')">⬇ MD</button>'+
+     '<button onclick="copiarTexto('+i+')">📋 Copiar</button>'+
+     '</div>';
+
+  // keywords
+  var kws=keywords(d.texto);
+  if(kws.length){
+    var maxKw=kws[0].n||1;
+    h+='<div style="padding:0 12px 10px"><div style="font-size:.58em;color:rgba(0,255,65,.6);margin-bottom:6px">PALABRAS CLAVE (tocá una para filtrar el texto)</div><div class="chips">'+
+       kws.map(function(k){return '<span class="kw" onclick="buscarKw(\''+esc(k.w.replace(/'/g,"\\'"))+'\')" style="border-color:rgba(0,255,65,'+(0.15+0.55*k.n/maxKw).toFixed(2)+');background:rgba(0,255,65,'+(0.03+0.10*k.n/maxKw).toFixed(2)+')">'+esc(k.w)+' <small>('+k.n+')</small></span>';}).join("")+
+       '</div></div>';
+  }
+
+  h+='<div class="tabs">';
+  h+='<button class="active" onclick="tab(\'texto\',this)">📄 Texto</button>';
+  h+='<button onclick="tab(\'lectura\',this)">📖 Lectura</button>';
+  h+='<button onclick="tab(\'links\',this)">🔗 Links ('+d.links_total+')</button>';
+  h+='<button onclick="tab(\'imgs\',this)">🖼 Imágenes ('+d.imagenes_total+')</button>';
+  h+='<button onclick="tab(\'contacto\',this)">✉ Contacto</button>';
+  h+='<button onclick="tab(\'heads\',this)">📑 Encabezados</button>';
+  h+=(d.html_raw?'<button onclick="tab(\'html\',this)">🖥 HTML</button>':'');
+  h+='<button onclick="tab(\'regex\',this)">🎯 Regex</button>';
+  h+='<button onclick="tab(\'detalles\',this)">⚙ Detalles</button>';
+  h+='<button onclick="tab(\'datos\',this)">📊 Datos</button>';
+  h+='</div>';
+
+  h+='<div class="tabpane active" id="p-texto"><pre id="textoPre">'+esc(d.texto||"(sin texto)")+'</pre></div>';
+
+  // lectura (párrafos)
+  h+='<div class="tabpane" id="p-lectura"><div class="list">'+
+    ((d.parrafos||[]).length?d.parrafos.map(function(p,i){return '<div style="margin-bottom:8px"><b style="color:rgba(0,255,65,.5)">¶'+(i+1)+'</b> '+esc(p)+'</div>';}).join(""):'<div class="empty">No se detectaron párrafos.</div>')+
+    '</div></div>';
+
+  // html crudo
+  h+='<div class="tabpane" id="p-html"><pre style="max-height:440px;color:#8fb8a8">'+esc(d.html_raw||"")+'</pre></div>';
+
+  // regex
+  h+='<div class="tabpane" id="p-regex">'+
+     '<div class="toolbar" style="padding:0 0 8px">'+
+     '<input class="search" id="regexIn" placeholder="Ej: [A-Z][a-z]+@[a-z]+\\.com" onkeydown="if(event.key===\'Enter\')runRegex()">'+
+     '<select id="regexSrc" style="background:#050505;border:1px solid rgba(0,255,65,.15);color:#00ff41;border-radius:3px;padding:7px;font-family:\'Courier New\',monospace;font-size:.66em;outline:none">'+
+     '<option value="texto">en el texto</option><option value="html">en el HTML</option></select>'+
+     '<button onclick="runRegex()">▶ Extraer</button></div>'+
+     '<div id="regexOut"><div class="empty">Ingresá una expresión regular y tocá Extraer.</div></div></div>';
+
+  h+='<div class="tabpane" id="p-links"><div class="list">'+
+    (d.links||[]).map(function(l){return '<div>· <a href="'+esc(l)+'" target="_blank">'+esc(l)+'</a></div>';}).join("")+
+    (d.links_total>30?'<div style="color:rgba(200,214,229,.4);margin-top:8px">… y '+(d.links_total-30)+' links más</div>':'')+
+    '</div>'+
+    (function(){
+      var doms={};
+      (d.links||[]).forEach(function(l){var host=((l.split('/')[2]||'').replace(/^www\./,'')).toLowerCase(); if(host)doms[host]=(doms[host]||0)+1;});
+      var top=Object.keys(doms).sort(function(a,b){return doms[b]-doms[a];}).slice(0,10);
+      if(!top.length)return '';
+      var h2='<div style="font-size:.62em;color:rgba(0,255,65,.6);margin:10px 0 4px">DOMINIOS MÁS ENLazADOS</div><div class="chips">'+
+        top.map(function(dom){return '<span>'+esc(dom)+' <small>('+doms[dom]+')</small></span>';}).join("")+'</div>';
+      return h2;
+    })()+
+    '</div>';
+
+  h+='<div class="tabpane" id="p-imgs">'+
+    ((d.imagenes||[]).length
+      ?'<div class="img-grid">'+d.imagenes.map(function(im){return '<div><img src="'+esc(im)+'" loading="lazy" onerror="this.style.visibility=\'hidden\'"><a href="'+esc(im)+'" target="_blank">'+esc(im.length>50?im.slice(0,50)+'…':im)+'</a></div>';}).join("")+'</div>'
+      :'<div class="empty">No se detectaron imágenes.</div>')+'</div>';
+
+  h+='<div class="tabpane" id="p-contacto">';
+  h+='<div style="font-size:.6em;color:rgba(0,255,65,.6);margin-bottom:6px">EMAILS ('+(d.emails||[]).length+')</div><div class="chips">'+
+    ((d.emails||[]).length?d.emails.map(function(e){return '<span class="mail">'+esc(e)+'</span>';}).join(""):'<span style="color:rgba(200,214,229,.4)">ninguno</span>')+'</div>';
+  h+='<div style="font-size:.6em;color:rgba(0,255,65,.6);margin:12px 0 6px">TELÉFONOS ('+(d.telefonos||[]).length+')</div><div class="chips">'+
+    ((d.telefonos||[]).length?d.telefonos.map(function(t){return '<span class="tel">'+esc(t)+'</span>';}).join(""):'<span style="color:rgba(200,214,229,.4)">ninguno</span>')+'</div>';
+  h+='</div>';
+
+  h+='<div class="tabpane" id="p-heads">';
+  ["h1","h2","h3"].forEach(function(t){
+    h+='<div style="font-size:.6em;color:rgba(0,255,65,.6);margin:8px 0 4px">'+t.toUpperCase()+' ('+(d[t]||[]).length+')</div>';
+    (d[t]||[]).slice(0,15).forEach(function(x){h+='<div class="h-item"><b>'+esc(t)+':</b> '+esc(x)+'</div>';});
+  });
+  h+='</div>';
+
+  h+='<div class="tabpane" id="p-detalles">';
+  h+=kv("URL final",d.final_url||"—");
+  h+=kv("Status",String(d.status));
+  h+=kv("Server",d.server||"—");
+  h+=kv("Content-Type",d.content_type||"—");
+  h+=kv("Idioma",d.lang||"—");
+  h+=kv("HTML",d.html_chars+" caracteres");
+  h+=kv("Meta description",d.meta_description||"—");
+  h+='<div style="font-size:.6em;color:rgba(0,255,65,.6);margin:10px 0 4px">SCRIPTS EXTERNOS ('+(d.scripts||[]).length+')</div><div class="list">'+
+    (d.scripts||[]).map(function(s){return '<div>· '+esc(s)+'</div>';}).join("")+'</div>';
+  h+='</div>';
+
+  h+='<div class="tabpane" id="p-datos">';
+  h+=kv("Canonical",d.canonical?'<a href="'+esc(d.canonical)+'" target="_blank" style="color:#7ec8f0">'+esc(d.canonical)+'</a>':"—");
+  if(d.favicon)h+=kv("Favicon",'<a href="'+esc(d.favicon)+'" target="_blank" style="color:#7ec8f0">'+esc(d.favicon)+'</a>');
+  if(d.meta_author)h+=kv("Autor",esc(d.meta_author));
+  if(d.meta_keywords)h+=kv("Keywords",esc(d.meta_keywords));
+  var mt=d.meta_tags||{};
+  if(Object.keys(mt).length){
+    h+='<div style="font-size:.6em;color:rgba(0,255,65,.6);margin:8px 0 4px">METATAGS (og: / twitter:)</div>';
+    Object.keys(mt).forEach(function(k){h+=kv(k,esc(mt[k]));});
+  }
+  if((d.feeds||[]).length){
+    h+='<div style="font-size:.6em;color:rgba(0,255,65,.6);margin:8px 0 4px">FEEDS RSS/ATOM</div><div class="list">'+d.feeds.map(function(f){return '<div>· '+esc(f)+'</div>';}).join("")+'</div>';
+  }
+  if((d.jsonld||[]).length){
+    h+='<div style="font-size:.6em;color:rgba(0,255,65,.6);margin:8px 0 4px">JSON-LD ('+d.jsonld.length+')</div>';
+    d.jsonld.slice(0,2).forEach(function(j){h+='<pre style="max-height:200px">'+esc(JSON.stringify(j,null,1).slice(0,1500))+'</pre>';});
+  }
+  if((d.tablas||[]).length){
+    h+='<div style="font-size:.6em;color:rgba(0,255,65,.6);margin:8px 0 4px">TABLAS ('+d.tablas_total+' totales · primera)</div><div class="list">'+d.tablas.map(function(fila){return '<div>'+fila.map(esc).join(' · ')+'</div>';}).join("")+'</div>';
+  }
+  if(!Object.keys(mt).length&&!d.canonical&&!d.favicon&&!(d.feeds||[]).length&&!(d.jsonld||[]).length&&!(d.tablas||[]).length){
+    h+='<div class="empty">No se detectaron datos estructurados.</div>';
+  }
+  h+='</div>';
+
+  h+='</div>';
+  body.innerHTML=h;
+}
+
+function drawCrawl(d){
+  var body=$("resultBody");
+  var h="";
+  h+='<div class="result-head"><div style="flex:1;min-width:0"><div class="url">🕸 Crawl de '+esc(d.url)+'</div>'+
+     '<div class="title">'+d.total+' página(s) rastreadas</div>'+
+     '<div style="margin-top:6px"><span class="badge">links internos seguidos</span></div></div></div>';
+  h+='<div class="toolbar" style="padding:0 12px">'+
+     '<button onclick="exportarCrawlJSON()">⬇ Exportar crawl JSON</button>'+
+     '</div>';
+  (d.paginas||[]).forEach(function(p,j){
+    h+='<div style="padding:0 12px 10px"><div class="metrics" style="grid-template-columns:repeat(auto-fit,minmax(90px,1fr))">'+
+       '<div><b>'+(j+1)+'</b><span>PÁGINA</span></div>'+
+       '<div><b>'+p.palabras+'</b><span>PALABRAS</span></div>'+
+       '<div><b>'+p.links_internos+'</b><span>LINKS INT</span></div>'+
+       '<div><b>'+p.status+'</b><span>STATUS</span></div>'+
+       '</div></div>';
+    h+='<div style="padding:0 12px"><div class="title" style="color:#00ff41;font-size:.75em">'+esc(p.titulo||p.url)+'</div>'+
+       '<div class="url" style="color:rgba(200,214,229,.5);font-size:.6em;margin:2px 0 6px">'+esc(p.url)+'</div>'+
+       '<pre style="max-height:140px">'+esc((p.texto||"").slice(0,900))+'…</pre></div>';
+  });
+  body.innerHTML=h;
+}
+
+/* ─── RESUMEN IA / GUARDAR ─── */
+function resumirIA(i){
+  var r=resultados[i];if(!r||!r.ok)return;
+  var btn=event.target||{textContent:"🤖 Resumir"};var txt0=btn.textContent;
+  btn.textContent="🤖 Resumiendo...";btn.disabled=true;
+  $("status").textContent="🤖 Generando resumen con IA (tarda unos segundos)...";
+  $("status").className="status";
+  fetch("/api/scrape?url="+encodeURIComponent(r.url)+"&resumen=1")
+  .then(function(res){return res.json();})
+  .then(function(d){
+    if(d.resumen){showModal("🤖 Resumen con IA",esc(d.resumen));}
+    else{$("status").textContent="⛔ "+(d.resumen_error||"No se pudo resumir");$("status").className="status err";}
+  })
+  .catch(function(e){$("status").textContent="⛔ Error: "+e.message;$("status").className="status err";})
+  .finally(function(){btn.textContent=txt0;btn.disabled=false;});
+}
+function guardarBase(i){
+  var r=resultados[i];if(!r||!r.ok)return;
+  var btn=event.target||{};var txt0=btn.textContent;
+  btn.textContent="💾 Guardando...";btn.disabled=true;
+  var intentos=0;
+  function doSave(){
+    fetch(apiConKey("/api/scrape?url="+encodeURIComponent(r.url)+"&guardar=1"))
+    .then(function(res){return res.json();})
+    .then(function(d){
+      if(d.error==="falta_key"&&intentos<1){intentos++;pedirKey();doSave();return;}
+      if(d.guardado){$("status").textContent="✅ Guardado en la base.";$("status").className="status";}
+      else{
+        var m=d.guardar_detalle||(d.msg||"");
+        $("status").textContent="⛔ No se pudo guardar. "+(m.indexOf("PGRST205")>=0?"Creá la tabla: corre sql_scrapes.sql en Supabase.":m);
+        $("status").className="status err";
+      }
+    })
+    .catch(function(e){$("status").textContent="⛔ Error: "+e.message;$("status").className="status err";})
+    .finally(function(){btn.textContent=txt0;btn.disabled=false;});
+  }
+  doSave();
+}
+function exportarCrawlJSON(){
+  var r=resultados[current];if(!r||!r.data)return;
+  descargar("crawl.json",JSON.stringify(r.data.paginas,null,2));
+}
+function showModal(titulo,html){
+  var m=$("modal");
+  m.innerHTML='<div class="modal"><div class="mh">'+esc(titulo)+'</div><div class="mbody">'+html+'</div>'+
+    '<div style="display:flex;gap:8px;margin-top:12px"><button class="btn ghost" onclick="hideModal()">Cerrar</button>'+
+    '<button class="btn ghost" onclick="copiarModal()">📋 Copiar</button></div></div>';
+  m.style.display="flex";
+}
+function hideModal(){$("modal").style.display="none";}
+function copiarModal(){
+  var b=document.querySelector("#modal .mbody");
+  (navigator.clipboard?navigator.clipboard.writeText(b.textContent):Promise.reject()).then(function(){$("status").textContent="✅ Copiado";});
+}
+
+/* ─── REGEX ─── */
+function runRegex(){
+  var r=resultados[current];if(!r||!r.data)return;
+  var pat=$("regexIn").value;var out=$("regexOut");if(!pat){out.innerHTML="<div class='empty'>Ingresá un regex</div>";return;}
+  var fuente=$("regexSrc").value==="html"?(r.data.html_raw||""):(r.data.texto||"");
+  try{
+    var re=new RegExp(pat,"gi");var matches=[];var m;
+    while((m=re.exec(fuente))!==null){matches.push(m[0]);if(matches.length>=100)break;}
+    out.innerHTML=matches.length
+      ?'<div class="list">'+matches.map(function(x){return '<div>· '+esc(x.slice(0,200))+'</div>';}).join("")+'</div><div style="color:#00ff41;font-size:.6em;margin-top:8px">'+matches.length+' coincidencia(s)</div>'
+      :'<div class="empty">Sin coincidencias.</div>';
+  }catch(e){out.innerHTML='<div class="empty">Regex inválido: '+esc(e.message)+'</div>';}
+}
+
+/* ─── GUARDADOS ─── */
+function verGuardados(){
+  showModal("🗂 Scrapeos guardados","Cargando...");
+  var intentos=0;
+  function cargar(){
+    fetch(apiConKey("/api/scrape?accion=listar&limite=30"))
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if(d.error==="falta_key"&&intentos<1){intentos++;pedirKey();cargar();return;}
+      if(!d.ok){document.querySelector("#modal .mbody").innerHTML='<div style="color:#e74c3c">'+esc(d.error||"Error")+'</div>';return;}
+      var list=d.scrapes||[];
+      var h=list.length?list.map(function(s){
+        var f=(s.created_at||"").replace("T"," ").slice(0,16);
+        return '<div style="border:1px solid rgba(255,255,255,.06);border-radius:4px;padding:8px;margin:4px 0">'+
+          '<div style="color:#00ff41;font-size:.72em">'+esc(s.titulo||s.url)+'</div>'+
+          '<div style="color:rgba(200,214,229,.5);font-size:.58em;margin:3px 0">'+esc(s.url)+' · '+f+' · '+s.palabras+' palabras</div>'+
+          '<div style="display:flex;gap:6px"><button class="btn ghost" onclick="abrirScrape(\''+esc(s.url.replace(/'/g,"\\'"))+'\')">Abrir</button>'+
+          '<button class="btn ghost" style="color:#e74c3c;border-color:rgba(231,76,60,.4)" onclick="eliminarScrape('+s.id+')">Eliminar</button></div></div>';
+      }).join(""):'<div class="empty">Todavía no guardaste nada. Scrapeá una página y tocá "💾 Guardar".</div>';
+      document.querySelector("#modal .mbody").innerHTML=h;
+    })
+    .catch(function(e){document.querySelector("#modal .mbody").innerHTML='<div style="color:#e74c3c">'+esc(e.message)+'</div>';});
+  }
+  cargar();
+}
+function eliminarScrape(id){
+  if(!confirm("¿Eliminar este scrapeo?"))return;
+  fetch(apiConKey("/api/scrape?accion=eliminar&id="+id))
+  .then(function(r){return r.json();})
+  .then(function(d){
+    if(d.error==="falta_key"){pedirKey();eliminarScrape(id);return;}
+    if(d.ok){$("status").textContent="✅ Scrapeo eliminado";$("status").className="status";verGuardados();}
+    else{$("status").textContent="⛔ "+(d.error||"Error");$("status").className="status err";}
+  });
+}
+function abrirScrape(url){hideModal();$("urls").value=url;scrapear();}
+
+/* ─── COMPARAR ─── */
+function abrirComparar(){
+  if(resultados.length<2){$("status").textContent="⛔ Necesitás al menos 2 resultados scrapeados para comparar.";$("status").className="status err";return;}
+  var opts=resultados.map(function(r,i){
+    return '<label style="display:flex;align-items:center;gap:8px;padding:6px;border:1px solid rgba(255,255,255,.05);border-radius:4px;margin:3px 0;font-size:.66em;cursor:pointer">'+
+      '<input type="radio" name="cmpA" value="'+i+'"'+(i===0?' checked':'')+'> <b style="color:#00ff41">A:</b> '+esc((r.data&&r.data.titulo)||r.url.slice(0,50))+'</label>';
+  });
+  var opts2=resultados.map(function(r,i){
+    return '<label style="display:flex;align-items:center;gap:8px;padding:6px;border:1px solid rgba(255,255,255,.05);border-radius:4px;margin:3px 0;font-size:.66em;cursor:pointer">'+
+      '<input type="radio" name="cmpB" value="'+i+'"'+(i===1?' checked':'')+'> <b style="color:#7ec8f0">B:</b> '+esc((r.data&&r.data.titulo)||r.url.slice(0,50))+'</label>';
+  });
+  showModal("⇄ Comparar 2 páginas",
+    '<div style="font-size:.62em;color:rgba(0,255,65,.6);margin-bottom:4px">PÁGINA A</div>'+opts.join("")+
+    '<div style="font-size:.62em;color:rgba(0,255,65,.6);margin:10px 0 4px">PÁGINA B</div>'+opts2.join("")+
+    '<button class="btn" style="margin-top:10px" onclick="runComparar()">⇄ Comparar</button>');
+}
+function runComparar(){
+  var a=parseInt(document.querySelector("input[name=cmpA]:checked").value,10);
+  var b=parseInt(document.querySelector("input[name=cmpB]:checked").value,10);
+  if(a===b){document.querySelector("#modal .mbody").innerHTML='<div class="empty">Elegí dos páginas distintas.</div>';return;}
+  var da=resultados[a].data, db=resultados[b].data;
+  function setPalabras(d){var s={};((d.texto)||"").toLowerCase().split(/[^a-záéíóúñü0-9]+/).forEach(function(w){if(w.length>4&&!STOP[w])s[w]=1;});return s;}
+  var sa=setPalabras(da), sb=setPalabras(db);
+  var inter=0;Object.keys(sa).forEach(function(w){if(sb[w])inter++;});
+  var total=Object.keys(sa).length+Object.keys(sb).length;
+  var sim=total?Math.round(inter*2/total*100):0;
+  var soloA=Object.keys(sa).filter(function(w){return !sb[w];}).sort();
+  var soloB=Object.keys(sb).filter(function(w){return !sa[w];}).sort();
+  var h='<div style="text-align:center;font-size:2em;color:'+(sim>=60?"#2ecc71":(sim>=30?"#f1c40f":"#e74c3c"))+'">'+sim+'%<div style="font-size:.3em;letter-spacing:2px;color:rgba(200,214,229,.5)">SIMILARIDAD</div></div>';
+  h+='<div style="display:flex;gap:8px;margin:12px 0">'+
+     '<div style="flex:1;border:1px solid rgba(0,255,65,.2);border-radius:4px;padding:8px;font-size:.62em">'+esc((da.titulo||"")||"Página A")+'<br><span style="color:rgba(200,214,229,.5)">'+esc(resultados[a].url)+'</span></div>'+
+     '<div style="flex:1;border:1px solid rgba(122,92,255,.25);border-radius:4px;padding:8px;font-size:.62em">'+esc((db.titulo||"")||"Página B")+'<br><span style="color:rgba(200,214,229,.5)">'+esc(resultados[b].url)+'</span></div></div>';
+  h+='<div style="font-size:.6em;color:rgba(0,255,65,.6);margin:8px 0 4px">SOLO EN A ('+soloA.length+')</div><div class="chips">'+soloA.slice(0,20).map(function(w){return '<span>'+esc(w)+'</span>';}).join("")+'</div>';
+  h+='<div style="font-size:.6em;color:#7ec8f0;margin:10px 0 4px">SOLO EN B ('+soloB.length+')</div><div class="chips">'+soloB.slice(0,20).map(function(w){return '<span style="border-color:rgba(122,92,255,.3);color:#9a7fff">'+esc(w)+'</span>';}).join("")+'</div>';
+  document.querySelector("#modal .mbody").innerHTML=h;
+}
+function kv(k,v){return '<div class="kv"><span>'+esc(k)+'</span><b>'+v+'</b></div>';}
+function tab(name,btn){
+  document.querySelectorAll(".tabpane").forEach(function(p){p.classList.remove("active");});
+  document.querySelectorAll(".tabs button").forEach(function(b){b.classList.remove("active");});
+  $("p-"+name).classList.add("active");
+  btn.classList.add("active");
+}
+
+/* ─── BUSCAR / KEYWORDS ─── */
+function filtrarTexto(q){
+  var r=resultados[current];if(!r||!r.data)return;
+  var pre=$("textoPre");if(!pre)return;
+  var texto=r.data.texto||"";
+  q=(q||"").trim().toLowerCase();
+  if(!q){pre.innerHTML=esc(texto);return;}
+  var partes=texto.split(new RegExp("("+q.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+")","i"));
+  pre.innerHTML=partes.map(function(p,i){return i%2?'<mark>'+esc(p)+'</mark>':esc(p);}).join("");
+  pre.scrollTop=0;
+}
+function buscarKw(w){var s=$("buscar");s.value=w;filtrarTexto(w);}
+
+/* ─── DESCARGAS ─── */
+function descargarHTML(i){
+  var r=resultados[i];if(!r||!r.data||!r.data.html_raw)return;
+  descargar((r.data.titulo||"pagina").replace(/[^\w]+/g,"_").slice(0,40)+".html",r.data.html_raw);
+}
+function descargarTexto(i){
+  var r=resultados[i];if(!r||!r.data)return;
+  var d=r.data;
+  var t="URL: "+d.url+"\nTítulo: "+d.titulo+"\nFinal: "+(d.final_url||d.url)+"\nStatus: "+d.status+"\n\n"+d.texto;
+  descargar((d.titulo||"pagina").replace(/[^\w]+/g,"_").slice(0,40)+".txt",t);
+}
+function copiarTexto(i){
+  var r=resultados[i];if(!r||!r.data)return;
+  (navigator.clipboard?navigator.clipboard.writeText(r.data.texto||""):Promise.reject()).then(function(){
+    $("status").textContent="✅ Texto copiado";
+  }).catch(function(){prompt("Copiá el texto (Ctrl+C):",(r.data.texto||"").slice(0,4000));});
+}
+function exportarTodoJSON(){
+  if(!resultados.length){$("status").textContent="⛔ Primero scrapeá algo";return;}
+  descargar("scrapes.json",JSON.stringify(resultados.map(function(r){return r.data;}),null,2));
+}
+function exportarZIP(){
+  if(!resultados.length){$("status").textContent="⛔ Primero scrapeá algo";return;}
+  if(typeof JSZip==="undefined"){$("status").textContent="⛔ JSZip no disponible";return;}
+  var zip=new JSZip();
+  resultados.forEach(function(r,j){
+    if(!r.ok||!r.data)return;
+    var d=r.data;
+    var nom=((d.titulo||("pagina"+j)).replace(/[^\w]+/g,"_")||"pagina"+j).slice(0,40);
+    zip.file(nom+".txt",d.texto||"");
+    if(d.html_raw)zip.file(nom+".html",d.html_raw);
+  });
+  zip.generateAsync({type:"blob"}).then(function(blob){
+    var a=document.createElement("a");
+    a.href=URL.createObjectURL(blob);
+    a.download="scrapes.zip";
+    document.body.appendChild(a);a.click();
+    setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(a.href);},300);
+    $("status").textContent="✅ ZIP exportado ("+resultados.length+" página/s)";
+  }).catch(function(){ $("status").textContent="⛔ Error generando ZIP"; });
+}
+function scrapeKey(){return localStorage.getItem("zh_scrape_key")||"";}
+function apiConKey(base){return base+(base.indexOf("?")>=0?"&":"?")+"key="+encodeURIComponent(scrapeKey());}
+function pedirKey(){
+  var k=prompt("Ingresá la clave del scraper (SCRAPER_KEY):");
+  if(k)localStorage.setItem("zh_scrape_key",k);
+  return k;
+}
+function exportarMD(i){
+  var r=resultados[i];if(!r||!r.data)return;
+  var d=r.data;
+  var md="# "+d.titulo+"\n\n";
+  md+="- **URL:** "+d.url+"\n";
+  md+="- **Final:** "+(d.final_url||d.url)+"\n";
+  md+="- **Status:** "+d.status+(d.lang?" · **Idioma:** "+d.lang:"")+"\n";
+  if(d.meta_description)md+="- **Descripción:** "+d.meta_description+"\n\n";
+  (d.h1||[]).forEach(function(h){md+="## "+h+"\n\n";});
+  (d.h2||[]).forEach(function(h){md+="### "+h+"\n\n";});
+  md+=(d.texto||"")+"\n\n";
+  if((d.links||[]).length){
+    md+="## Links ("+d.links_total+")\n\n";
+    d.links.forEach(function(l){md+="- "+l+"\n";});
+  }
+  descargar(((d.titulo||"pagina").replace(/[^\w]+/g,"_")||"pagina").slice(0,40)+".md",md);
+}
+function guardarTodos(){
+  var okList=resultados.filter(function(r){return r.ok&&!r.data.modo;});
+  if(!okList.length){$("status").textContent="⛔ No hay resultados para guardar";return;}
+  $("status").textContent="💾 Guardando "+okList.length+" ...";
+  $("status").className="status";
+  var hechos=0,bien=0,pidio=false;
+  function siguiente(i){
+    if(i>=okList.length){fin();return;}
+    fetch(apiConKey("/api/scrape?url="+encodeURIComponent(okList[i].url)+"&guardar=1"))
+    .then(function(res){return res.json();})
+    .then(function(d){
+      if(d.error==="falta_key"&&!pidio){pidio=true;pedirKey();siguiente(i);return;}
+      if(d.guardado)bien++;
+      hechos++;
+      $("status").textContent="💾 "+hechos+"/"+okList.length+" guardados";
+      siguiente(i+1);
+    })
+    .catch(function(){ hechos++; siguiente(i+1); });
+  }
+  function fin(){ $("status").textContent="✅ "+bien+"/"+okList.length+" guardados en la base"; $("status").className="status"; }
+  siguiente(0);
+}
+function descargar(nombre,contenido){
+  var blob=new Blob([contenido],{type:"text/plain;charset=utf-8"});
+  var a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download=nombre;
+  document.body.appendChild(a);a.click();
+  setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(a.href);},300);
+}
+$("urls").addEventListener("keydown",function(e){if(e.key==="Enter"&&(e.ctrlKey||e.metaKey))scrapear();});
+</script>
+<script src="/errores.js" defer></script>
+<script src="/update_check.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<title>🍥 Anime Legal · Dominio Público y Oficiales · ZonaHack</title>
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/icon_96.png" type="image/png">
+<meta name="theme-color" content="#00c896">
+<meta name="description" content="Zona Anime Legal de ZonaHack: solo dominio público (Archive.org) y canales oficiales (YouTube). Retransmisión 100% legal.">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--ver:#00c896;--ver2:#7fffe0;--cian:#00e5ff;--fondo:#07090c;--panel:#0e1217;--borde:rgba(255,255,255,.08);--txt:#d7e2ef;--sub:#6d7f93}
+body{background:var(--fondo);color:var(--txt);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;z-index:-1;background:
+ radial-gradient(600px 300px at 15% 0%,rgba(0,200,150,.10),transparent 60%),
+ radial-gradient(600px 300px at 85% 10%,rgba(0,229,255,.07),transparent 60%)}
+.wrap{max-width:1040px;margin:0 auto;padding:14px 14px 0}
+.hdr{display:flex;align-items:center;gap:12px;padding:14px 18px;border:1px solid var(--borde);border-radius:18px;background:rgba(14,18,23,.7);backdrop-filter:blur(12px);box-shadow:0 8px 30px rgba(0,0,0,.35)}
+.hdr .logo{font-size:2em;filter:drop-shadow(0 0 14px rgba(0,200,150,.6));animation:flot 3s ease-in-out infinite}
+@keyframes flot{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+.hdr h1{font-size:1.05em;letter-spacing:3px;font-family:'Courier New',monospace;background:linear-gradient(90deg,var(--ver),var(--cian));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hdr span{font-size:.6em;color:var(--sub);letter-spacing:1px;display:block;margin-top:2px}
+.hdr a{margin-left:auto;color:var(--ver);text-decoration:none;font-size:.72em;border:1px solid rgba(0,200,150,.35);padding:7px 14px;border-radius:10px;transition:.2s}
+.hdr a:hover{background:rgba(0,200,150,.12);box-shadow:0 0 18px rgba(0,200,150,.25)}
+.hero{text-align:center;padding:26px 18px;margin:14px 0;border-radius:20px;border:1px solid var(--borde);background:linear-gradient(160deg,rgba(0,200,150,.08),rgba(0,229,255,.05) 60%),rgba(10,12,16,.6);position:relative;overflow:hidden}
+.hero::after{content:"🍥⚖️";position:absolute;font-size:60px;opacity:.05;top:-8px;right:8px;transform:rotate(12deg)}
+.hero .big{font-size:2.4em;animation:flot 3s ease-in-out infinite}
+.hero h2{font-size:1.15em;letter-spacing:4px;margin:8px 0 6px;background:linear-gradient(90deg,#fff,var(--ver2));-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:800}
+.hero p{font-size:.68em;color:var(--sub);max-width:620px;margin:0 auto;line-height:1.6}
+.badge{display:inline-flex;align-items:center;gap:6px;margin-top:12px;background:rgba(0,200,150,.08);border:1px solid rgba(0,200,150,.35);color:var(--ver2);font-size:.6em;padding:6px 14px;border-radius:20px;letter-spacing:1px}
+.badge .punto{width:8px;height:8px;border-radius:50%;background:#00ff41;box-shadow:0 0 10px #00ff41;animation:late 1.4s infinite}
+@keyframes late{0%,100%{opacity:1}50%{opacity:.35}}
+.aviso{display:flex;align-items:center;gap:8px;background:rgba(0,255,65,.06);border:1px solid rgba(0,255,65,.25);color:#8fffb0;border-radius:14px;padding:12px 16px;font-size:.64em;line-height:1.6;margin:0 0 14px}
+.aviso b{color:#00ff41}
+/* curadas */
+.curadas{margin-bottom:14px}
+.curadas h3{font-size:.72em;color:var(--ver2);letter-spacing:2px;margin-bottom:8px;font-family:'Courier New',monospace}
+.cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.citem{background:var(--panel);border:1px solid var(--borde);border-radius:14px;overflow:hidden;cursor:pointer;transition:.2s}
+.citem:hover{transform:translateY(-4px);border-color:rgba(0,200,150,.5);box-shadow:0 12px 30px rgba(0,0,0,.5),0 0 18px rgba(0,200,150,.18)}
+.citem .th{aspect-ratio:3/4;background:linear-gradient(160deg,#0e1a16,#0d1130);display:flex;align-items:center;justify-content:center;font-size:2.6em;position:relative;overflow:hidden}
+.citem .th img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
+.citem .bd{padding:9px 11px}
+.citem .t{font-size:.68em;color:#fff;font-weight:600;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.citem .an{font-size:.54em;color:var(--sub);margin-top:4px}
+/* busqueda */
+.searchrow{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.searchrow input{flex:1;min-width:200px;background:rgba(10,12,16,.8);border:1px solid rgba(0,200,150,.22);border-radius:14px;color:#fff;padding:15px 18px;font-size:.84em;outline:none;font-family:inherit;transition:.2s;box-shadow:inset 0 2px 8px rgba(0,0,0,.4)}
+.searchrow input:focus{border-color:var(--ver);box-shadow:0 0 0 3px rgba(0,200,150,.15)}
+.searchrow button{background:linear-gradient(135deg,var(--ver),var(--cian));color:#03140a;border:none;border-radius:14px;padding:15px 26px;font-weight:800;font-size:.76em;cursor:pointer;font-family:inherit;letter-spacing:.5px;transition:.2s;box-shadow:0 6px 22px rgba(0,200,150,.35)}
+.searchrow button:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(0,229,255,.35)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:12px}
+.peli{background:var(--panel);border:1px solid var(--borde);border-radius:16px;overflow:hidden;cursor:pointer;transition:.2s;animation:fadeIn .35s both}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.peli:hover{transform:translateY(-5px);border-color:rgba(0,200,150,.45);box-shadow:0 14px 34px rgba(0,0,0,.55),0 0 22px rgba(0,200,150,.15)}
+.peli .th{position:relative;aspect-ratio:16/9;background:linear-gradient(160deg,#0e1a16,#0d1130);overflow:hidden}
+.peli .th img{width:100%;height:100%;object-fit:cover;display:block}
+.peli .th .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:2.4em;background:linear-gradient(160deg,#0e1a16,#0d1130)}
+.peli .th .playov{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0);opacity:0;transition:.2s}
+.peli:hover .th .playov{opacity:1;background:rgba(0,0,0,.5)}
+.peli .th .playov span{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--ver),var(--cian));color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 0 24px rgba(0,200,150,.6)}
+.peli .bd{padding:10px 12px}
+.peli .t{font-size:.7em;color:#fff;font-weight:600;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.8em}
+.peli .ch{font-size:.55em;color:var(--sub);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fch{display:inline-flex;align-items:center;gap:4px;font-size:.52em;margin-top:5px;padding:2px 8px;border-radius:10px;color:#fff}
+.spin{width:38px;height:38px;border:3px solid rgba(0,200,150,.15);border-top-color:var(--ver);border-radius:50%;animation:sp .8s linear infinite;margin:36px auto}
+@keyframes sp{100%{transform:rotate(360deg)}}
+.empty{background:var(--panel);border:1px solid var(--borde);border-radius:16px;padding:40px 20px;text-align:center;color:var(--sub);font-size:.72em;line-height:1.7}
+.empty b{color:#fff}
+.foot{margin-top:20px;border:1px solid var(--borde);border-radius:16px;background:rgba(14,18,23,.6);padding:20px;font-size:.64em;color:var(--sub);line-height:1.7}
+.foot h4{color:var(--ver2);letter-spacing:2px;font-size:.9em;margin-bottom:8px;font-family:'Courier New',monospace}
+.foot .leg{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.foot p{margin:0 0 6px}
+.foot .bot{margin-top:14px;border-top:1px dashed var(--borde);padding-top:12px;text-align:center}
+.foot a{color:var(--ver);text-decoration:none}
+#player{display:none;position:fixed;inset:0;z-index:100;background:#05070a;flex-direction:column}
+#player .ph{display:flex;align-items:center;gap:8px;padding:10px 14px;background:rgba(10,12,16,.95);border-bottom:1px solid rgba(0,200,150,.35);flex-wrap:wrap;backdrop-filter:blur(10px)}
+#player .ph b{flex:1;font-size:.74em;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
+#player .ph button{background:#0a0a0a;border:1px solid rgba(0,200,150,.4);color:var(--ver2);border-radius:10px;padding:9px 14px;font-size:.66em;cursor:pointer;font-family:inherit;transition:.15s}
+#player .ph button:hover{background:rgba(0,200,150,.12)}
+#player .ph button.verde{color:#00ff41;border-color:rgba(0,255,65,.4)}
+#player .ph button.verde:hover{background:rgba(0,255,65,.1)}
+#player iframe{flex:1;border:none;background:#fff}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:rgba(10,12,16,.95);border:1px solid var(--ver);color:var(--ver2);padding:11px 20px;border-radius:14px;font-size:.68em;z-index:99;display:none;max-width:90vw;text-align:center;box-shadow:0 8px 30px rgba(0,0,0,.5)}
+@media(max-width:640px){.foot .leg{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hdr">
+    <div class="logo">🍥</div>
+    <div><h1>ANIME LEGAL</h1><span>DOMINIO PÚBLICO Y CANALES OFICIALES · RETRANSMISIÓN 100% LEGAL</span></div>
+    <a href="/">← Volver</a>
+  </div>
+
+  <div class="hero">
+    <div class="big">🍥</div>
+    <h2>ANIME LEGAL · TRANSMITIDO ACÁ</h2>
+    <p>Buscá animes y miralos sin salir de ZonaHack. Solo contenido <b>100% legal</b>: anime de dominio público y Creative Commons de Archive.org, y videos de <b>canales oficiales</b> de YouTube.</p>
+    <span class="badge"><span class="punto"></span> SIN PIRATERÍA · SOLO FUENTES LEGALES</span>
+  </div>
+
+  <div class="aviso">⚖️ <span><b>Zona 100% legal</b>: eliminamos las fuentes pirateadas (AnimeAV1/SoloLatino). Acá solo hay <b>dominio público, Creative Commons y canales oficiales</b>. ZonaHack no sube ni almacena archivos; solo busca y retransmite desde Archive.org y YouTube.</span></div>
+
+  <div class="curadas">
+    <h3>🏮 ANIME CLÁSICO · DOMINIO PÚBLICO</h3>
+    <div class="cgrid" id="curadas"></div>
+  </div>
+
+  <div class="searchrow">
+    <input id="q" placeholder="🍥 Buscar anime legal (ej: princesa iron fan, astro boy, anime clásico)..." onkeydown="if(event.key==='Enter')buscar()">
+    <button onclick="buscar()">🔍 Buscar</button>
+  </div>
+
+  <div id="grid" class="grid"><div class="empty">🍥 Escribí una búsqueda y se buscan <b>Archive.org + YouTube</b> (fuentes legales) a la vez.</div></div>
+
+  <div class="foot">
+    <h4>⚖️ AVISO LEGAL</h4>
+    <div class="leg">
+      <p><b>Zona Anime Legal</b> solo incluye <b>contenido legal</b>: anime y animación de <b>dominio público / Creative Commons</b> (Archive.org) y videos publicados por <b>canales oficiales</b> en YouTube.</p>
+      <p><b>No se retransmiten sitios piratas</b>. ZonaHack no sube ni almacena archivos: el contenido se reproduce desde los servidores oficiales de Archive.org y YouTube.</p>
+      <p>Si sos titular de derechos y encontrás algo que no debería estar, <a href="#" onclick="return false">contactanos</a> y lo retiramos.</p>
+      <p>Para animes actuales en emisión, miralos en plataformas oficiales (Crunchyroll, Netflix, Prime). 🍥⚖️</p>
+    </div>
+    <div class="bot">🍥 ZONAHACK · ANIME LEGAL · DOMINIO PÚBLICO + OFICIALES · 2026</div>
+  </div>
+</div>
+
+<div id="player">
+  <div class="ph"><b id="pTitle">Cargando...</b>
+    <button class="verde" onclick="exterior()">🌐 Fuente</button>
+    <button onclick="cerrarP()">✕ Cerrar</button>
+  </div>
+  <iframe id="pFrame" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-downloads allow-presentation"></iframe>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ═══ ANIME LEGAL — dominio público (Archive) + oficiales (YouTube) ═══ */
+var API = location.hostname.indexOf("20dd2740") >= 0 ? "https://offlinevideoplayer.vercel.app/api/search" : "/api/search";
+var CURADAS = [
+  ["Princess Iron Fan (1941)", "Princess_Iron_Fan_1941_divx5_denoised", "El primer largometraje animado chino · dominio público"],
+  ["Mr. Wonderbird (1952)", "The_Curious_Adventures_of_Mr._Wonderbird", "Animación clásica · dominio público"],
+  ["Space Thunder Kids", "SpaceThunderKids", "Animación retro · dominio público"],
+  ["Defenders of Space", "DefendersOfSpace", "Animación retro · dominio público"],
+  ["Anna (2003)", "anna_fountainhead", "Animación · Creative Commons"]
+];
+var resultados = [];
+function $(i){return document.getElementById(i);}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function toast(m){var t=$("toast");t.textContent=m;t.style.display="block";clearTimeout(t._x);t._x=setTimeout(function(){t.style.display="none";},2600);}
+function iniciarCuradas(){
+  $("curadas").innerHTML = CURADAS.map(function(c,i){
+    return '<div class="citem" onclick="verCurada('+i+')">'+
+      '<div class="th"><img src="https://archive.org/services/img/'+esc(c[1])+'" onerror="this.remove()">🍥</div>'+
+      '<div class="bd"><div class="t">'+esc(c[0])+'</div><div class="an">'+esc(c[2])+'</div></div></div>';
+  }).join("");
+}
+function verCurada(i){
+  var c = CURADAS[i];
+  $("pTitle").textContent = c[0]+" · 🏛️ Archive.org";
+  $("pFrame").src = "https://archive.org/embed/"+c[1];
+  $("player").style.display="flex";
+  document.body.style.overflow="hidden";
+}
+function buscar(q){
+  if(!q){ q=$("q").value.trim(); }
+  if(!q){ toast("Escribí un anime"); return; }
+  var grid=$("grid");
+  grid.innerHTML='<div class="spin"></div>';
+  fetch(API+"?q="+encodeURIComponent(q)+"&limit=40&fuentes=archive,youtube")
+  .then(function(r){return r.json();}).then(function(d){
+    var res=(d&&d.results)||[];
+    resultados=res;
+    if(!res.length){ grid.innerHTML='<div class="empty">🍥 Sin resultados legales para "<b>'+esc(q)+'</b>".<br>Probá con otro título de dominio público o canal oficial.</div>'; return; }
+    grid.innerHTML=res.map(function(v,i){ return card(v,i); }).join("");
+    toast("🍥 "+res.length+" resultados legales (Archive + YouTube)");
+  }).catch(function(){ grid.innerHTML='<div class="empty">⚠️ Error al buscar. Reintentá en unos segundos.</div>'; });
+}
+function card(v,i){
+  var esArch = v.source==="archive";
+  var e = esArch ? ["🏛️","Archive.org","#8a2be2"] : ["🟥","YouTube oficial","#c4302b"];
+  var img = v.thumb ? '<img src="'+esc(v.thumb)+'" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'"><div class="ph" style="display:none">'+e[0]+'</div>'
+                    : '<div class="ph">'+e[0]+'</div>';
+  return '<div class="peli" onclick="ver('+i+')">'+
+    '<div class="th">'+img+'<div class="playov"><span>▶</span></div></div>'+
+    '<div class="bd"><div class="t">'+esc(v.title)+'</div>'+
+    '<div class="ch">'+esc(v.channel||"")+'</div>'+
+    '<span class="fch" style="background:'+e[2]+'">'+e[0]+' '+e[1]+'</span></div></div>';
+}
+function ver(i){
+  var v = resultados[i];
+  $("pTitle").textContent = v.title+" · "+(v.source==="archive"?"🏛️ Archive.org":"🟥 YouTube");
+  $("pFrame").src = v.url;
+  $("player").style.display="flex";
+  document.body.style.overflow="hidden";
+}
+function exterior(){ var f=$("pFrame"); if(f&&f.src&&f.src.indexOf("about:blank")<0) window.open(f.src,"_blank"); }
+function cerrarP(){ $("player").style.display="none"; $("pFrame").src="about:blank"; document.body.style.overflow=""; }
+iniciarCuradas();
+</script>
+</body>
+</html>

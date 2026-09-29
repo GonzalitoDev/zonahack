@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>📋 Playlists - ZonaHack</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0a;color:#c8d6e5;min-height:100vh;font-family:'Courier New',monospace}
+.header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid rgba(0,255,65,.1);position:sticky;top:0;z-index:100;background:#0a0a0a}
+.header h1{color:#00ff41;font-size:.95em}
+.back{color:#00ff41;text-decoration:none;font-size:.65em;padding:4px 8px;border:1px solid rgba(0,255,65,.1);border-radius:3px}
+.container{max-width:900px;margin:0 auto;padding:10px}
+.top-bar{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+.top-bar button{padding:6px 14px;border:1px solid rgba(0,255,65,.1);border-radius:4px;background:rgba(0,255,65,.03);color:#00ff41;cursor:pointer;font-size:.65em;font-family:'Courier New',monospace;transition:.2s}
+.top-bar button:hover{background:rgba(0,255,65,.06)}
+.card{border:1px solid rgba(0,255,65,.04);border-radius:6px;padding:12px;margin-bottom:8px;background:#0d0d0d;transition:.15s}
+.card:hover{border-color:rgba(0,255,65,.08)}
+.card .hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;flex-wrap:wrap;gap:4px}
+.card .hdr h3{font-size:.78em;color:#00ff41}
+.card .hdr .acoes{display:flex;gap:3px}
+.card .hdr .acoes button{padding:3px 8px;border:1px solid rgba(0,255,65,.06);border-radius:3px;background:transparent;color:rgba(200,214,229,.4);cursor:pointer;font-size:.55em;font-family:'Courier New',monospace;transition:.15s}
+.card .hdr .acoes button:hover{color:#00ff41;border-color:rgba(0,255,65,.12)}
+.card .desc{font-size:.6em;color:rgba(200,214,229,.3);margin-bottom:4px}
+.card .meta{font-size:.55em;color:rgba(200,214,229,.15)}
+.playlist-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px}
+.tab{display:inline-block;padding:5px 12px;border:1px solid rgba(0,255,65,.06);border-radius:3px;background:transparent;color:rgba(0,255,65,.4);cursor:pointer;font-size:.6em;font-family:'Courier New',monospace;transition:.15s;margin:1px}
+.tab:hover,.tab.active{color:#00ff41;border-color:rgba(0,255,65,.12)}
+.tabc{display:none}
+.tabc.active{display:block}
+.grid-videos{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:4px}
+.vid-card{border:1px solid rgba(0,255,65,.03);border-radius:4px;overflow:hidden;cursor:pointer;background:#0a0a0a;transition:.15s}
+.vid-card:hover{border-color:rgba(0,255,65,.08)}
+.vid-card img{width:100%;aspect-ratio:16/9;object-fit:cover}
+.vid-card .inf{padding:5px}
+.vid-card .t{font-size:.6em;color:rgba(200,214,229,.5);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+input,textarea{padding:6px 10px;border:1px solid rgba(0,255,65,.08);border-radius:4px;background:#0a0a0a;color:#c8d6e5;font-size:.65em;outline:none;font-family:'Courier New',monospace;width:100%;margin:2px 0}
+input:focus,textarea:focus{border-color:rgba(0,255,65,.15)}
+textarea{resize:vertical;min-height:50px}
+.empty{text-align:center;padding:30px;color:rgba(200,214,229,.1);font-size:.7em}
+@media(max-width:480px){.playlist-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="header">
+  <a href="/" class="back">←</a>
+  <h1>📋 Playlists</h1>
+  <div style="width:40px"></div>
+</div>
+<div class="container">
+  <div class="top-bar">
+    <button onclick="mostrar('mis')">📂 Mis playlists</button>
+    <button onclick="mostrar('explorar')">🌍 Explorar</button>
+    <button onclick="mostrar('crear')">➕ Nueva playlist</button>
+  </div>
+  <div id="tab-mis" class="tabc active"></div>
+  <div id="tab-explorar" class="tabc"></div>
+  <div id="tab-crear" class="tabc">
+    <div class="card">
+      <h3 style="font-size:.78em;color:#00ff41;margin-bottom:6px">➕ Nueva playlist</h3>
+      <input id="plName" placeholder="Nombre de la playlist...">
+      <textarea id="plDesc" placeholder="Descripcion (opcional)"></textarea>
+      <div style="display:flex;gap:4px;margin-top:4px;align-items:center">
+        <span style="font-size:.55em;color:rgba(200,214,229,.2)">Color:</span>
+        <input type="color" id="plColor" value="#00ff41" style="width:30px;height:25px;padding:0;border:none">
+        <label style="font-size:.55em;color:rgba(200,214,229,.2);display:flex;align-items:center;gap:3px"><input type="checkbox" id="plPublico" checked> Publica</label>
+        <label style="font-size:.55em;color:rgba(200,214,229,.2);display:flex;align-items:center;gap:3px"><input type="checkbox" id="plColab"> Colaborativa</label>
+      </div>
+      <button onclick="crearPlaylist()" style="margin-top:6px;padding:6px 16px;border:1px solid rgba(0,255,65,.12);border-radius:4px;background:rgba(0,255,65,.04);color:#00ff41;cursor:pointer;font-size:.65em;font-family:'Courier New',monospace">Crear playlist</button>
+      <div id="plMsg" style="font-size:.55em;color:rgba(200,214,229,.2);margin-top:4px"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+var USER = localStorage.getItem('vh_usuario')||'anon';
+var SUPABASE = "https://xfwolaurpeofysnymqle.supabase.co/rest/v1";
+var KEY = "sb_publishable_3VvBUD5Bdu3Uaq59fJ99MQ_XDCtujUU";
+var H = {"apikey":KEY,"Authorization":"Bearer "+KEY,"Content-Type":"application/json"};
+
+function esc(s){return (s||"").replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"})[m])}
+
+function mostrar(tab){
+  document.querySelectorAll(".tabc").forEach(function(e){e.classList.remove("active");});
+  document.getElementById("tab-"+tab).classList.add("active");
+  if(tab==="mis") cargarMisPlaylists();
+  if(tab==="explorar") cargarExplorar();
+}
+
+function mostrarTab(tab){mostrar(tab);}
+
+function api(m,e,d){
+  return fetch(SUPABASE+"/"+e,{method:m||"GET",headers:H,body:d?JSON.stringify(d):undefined}).then(function(r){return r.json().catch(function(){return[]})});
+}
+
+// ─── CREAR ──────────────────────────────
+function crearPlaylist(){
+  var nom = document.getElementById("plName").value.trim();
+  if(!nom){document.getElementById("plMsg").textContent="Ingresa un nombre";return;}
+  var desc = document.getElementById("plDesc").value.trim();
+  var color = document.getElementById("plColor").value;
+  var pub = document.getElementById("plPublico").checked;
+  var colab = document.getElementById("plColab").checked;
+  api("POST","playlists",{nombre:nom,descripcion:desc,creador:USER,publico:pub,colaborativo:colab,color:color}).then(function(){
+    document.getElementById("plMsg").innerHTML='<span style="color:#00ff41">Playlist creada!</span>';
+    document.getElementById("plName").value="";document.getElementById("plDesc").value="";
+    mostrar("mis");
+  });
+}
+
+// ─── MIS PLAYLISTS ──────────────────────
+function cargarMisPlaylists(){
+  var el = document.getElementById("tab-mis");
+  el.innerHTML = '<div class="empty">Cargando...</div>';
+  api("GET","playlists?creador=eq."+encodeURIComponent(USER)+"&order=created_at.desc&limit=50").then(function(d){
+    if(!d||!d.length){el.innerHTML='<div class="card"><div class="empty">No tenes playlists aun. Crea una!</div></div>';return;}
+    var html = '<div class="playlist-grid">';
+    d.forEach(function(p){
+      html += '<div class="card" onclick="verPlaylist('+p.id+')" style="cursor:pointer;border-left:3px solid '+(p.color||'#00ff41')+'">';
+      html += '<div class="hdr"><h3>'+esc(p.nombre||'')+'</h3><span class="meta">'+(p.publico?'🌍':'🔒')+(p.colaborativo?' 👥':'')+'</span></div>';
+      if(p.descripcion) html += '<div class="desc">'+esc(p.descripcion.slice(0,80))+'</div>';
+      html += '<div class="meta">'+new Date(p.created_at).toLocaleDateString()+'</div></div>';
+    });
+    html += '</div>';
+    el.innerHTML = html;
+  });
+}
+
+// ─── EXPLORAR ───────────────────────────
+function cargarExplorar(){
+  var el = document.getElementById("tab-explorar");
+  el.innerHTML = '<div class="empty">Cargando...</div>';
+  api("GET","playlists?publico=eq.true&order=created_at.desc&limit=50").then(function(d){
+    if(!d||!d.length){el.innerHTML='<div class="card"><div class="empty">Sin playlists publicas aun</div></div>';return;}
+    var html = '<div class="playlist-grid">';
+    d.forEach(function(p){
+      html += '<div class="card" onclick="verPlaylist('+p.id+')" style="cursor:pointer;border-left:3px solid '+(p.color||'#00ff41')+'">';
+      html += '<div class="hdr"><h3>'+esc(p.nombre||'')+'</h3><span class="meta">👤 '+esc(p.creador||'')+'</span></div>';
+      if(p.descripcion) html += '<div class="desc">'+esc(p.descripcion.slice(0,80))+'</div>';
+      html += '<div class="meta">'+new Date(p.created_at).toLocaleDateString()+'</div></div>';
+    });
+    html += '</div>';
+    el.innerHTML = html;
+  });
+}
+
+// ─── VER PLAYLIST ───────────────────────
+function verPlaylist(id){
+  var overlay = document.createElement("div");
+  overlay.style.cssText="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.9);z-index:200;overflow-y:auto;padding:20px";
+  overlay.innerHTML='<div style="max-width:600px;margin:0 auto;background:#0d0d0d;border:1px solid rgba(0,255,65,.08);border-radius:6px;padding:16px"><div id="plDetail"><div class="empty">Cargando...</div></div></div>';
+  overlay.onclick = function(e){if(e.target===overlay)document.body.removeChild(overlay);};
+  document.body.appendChild(overlay);
+
+  var det = document.getElementById("plDetail");
+  api("GET","playlists?id=eq."+id+"&limit=1").then(function(d){
+    if(!d||!d.length){det.innerHTML='<div class="empty">No encontrada</div>';return;}
+    var p = d[0];
+    api("GET","playlist_videos?playlist_id=eq."+id+"&order=created_at.desc&limit=100").then(function(vids){
+      var esMia = p.creador===USER;
+      var html = '<div style="display:flex;justify-content:space-between;align-items:start;flex-wrap:wrap;gap:6px">';
+      html += '<div><h3 style="color:'+(p.color||'#00ff41')+';font-size:.9em">'+esc(p.nombre||'')+'</h3>';
+      if(p.descripcion) html += '<div style="font-size:.6em;color:rgba(200,214,229,.2);margin-top:2px">'+esc(p.descripcion)+'</div>';
+      html += '<div style="font-size:.55em;color:rgba(200,214,229,.15);margin-top:2px">👤 '+esc(p.creador)+' | '+(vids||[]).length+' videos</div></div>';
+      html += '<div style="display:flex;gap:3px">';
+      if(esMia) html += '<button onclick="eliminarPlaylist('+id+')" style="padding:4px 10px;border:1px solid rgba(231,76,60,.12);border-radius:3px;background:transparent;color:#e74c3c;cursor:pointer;font-size:.55em;font-family:\'Courier New\',monospace">Eliminar</button>';
+      html += '<button onclick="compartirPlaylist('+id+')" style="padding:4px 10px;border:1px solid rgba(0,255,65,.1);border-radius:3px;background:transparent;color:#00ff41;cursor:pointer;font-size:.55em;font-family:\'Courier New\',monospace">Compartir</button>';
+      html += '<button onclick="document.body.removeChild(document.getElementById(\''+overlay.id+'\'))" style="padding:4px 10px;border:1px solid rgba(200,214,229,.1);border-radius:3px;background:transparent;color:rgba(200,214,229,.4);cursor:pointer;font-size:.55em;font-family:\'Courier New\',monospace">Cerrar</button>';
+      html += '</div></div>';
+
+      if(vids&&vids.length){
+        html += '<div class="grid-videos" style="margin-top:8px">';
+        vids.forEach(function(v){
+          html += '<div class="vid-card" onclick="reproducir(\''+v.video_id+'\',\''+esc(v.titulo||'')+'\')"><img src="'+esc(v.thumbnail||'')+'" loading="lazy" onerror="this.style.display=\'none\'"><div class="inf"><div class="t">'+esc((v.titulo||'').slice(0,40))+'</div></div></div>';
+        });
+        html += '</div>';
+      }else{
+        html += '<div class="empty" style="padding:15px">Sin videos aun</div>';
+      }
+      det.innerHTML = html;
+    });
+  });
+}
+
+function compartirPlaylist(id){
+  var url = window.location.origin + "/playlists.html?id=" + id;
+  if(navigator.share){
+    navigator.share({title:"Playlist ZonaHack",url:url}).catch(function(){});
+  }else{
+    navigator.clipboard.writeText(url).then(function(){alert("Link copiado!");});
+  }
+}
+
+function eliminarPlaylist(id){
+  if(!confirm("Eliminar playlist?")) return;
+  api("DELETE","playlist_videos?playlist_id=eq."+id).then(function(){
+    api("DELETE","playlists?id=eq."+id).then(function(){
+      document.body.removeChild(document.querySelector('[style*="z-index:200"]'));
+      cargarMisPlaylists();
+    });
+  });
+}
+
+function reproducir(vid,tit){
+  window.location.href = "/?q=" + encodeURIComponent(tit||"video");
+}
+
+// ─── COMPARTIR DESDE URL ────────────────
+var urlParams = new URLSearchParams(window.location.search);
+var shareId = urlParams.get("id");
+if(shareId){verPlaylist(parseInt(shareId));}
+
+// ─── AGREGAR VIDEO A PLAYLIST (desde index.html) ──
+window.agregarAPlaylist = function(vid,tit,thumb){
+  var titulo = tit || "Video";
+  var thumbnail = thumb || "";
+  api("GET","playlists?creador=eq."+encodeURIComponent(USER)+"&order=created_at.desc&limit=50").then(function(d){
+    if(!d||!d.length){alert("Primero crea una playlist");mostrar("crear");return;}
+    var opts = d.map(function(p,i){return (i+1)+". "+p.nombre;}).join("\n");
+    var sel = prompt("Elegi playlist:\n"+opts+"\n\nNumero:");
+    if(!sel) return;
+    var idx = parseInt(sel)-1;
+    if(idx<0||idx>=d.length){alert("Numero invalido");return;}
+    api("POST","playlist_videos",{playlist_id:d[idx].id,video_id:vid,titulo:titulo,thumbnail:thumbnail,added_by:USER}).then(function(){
+      alert("✅ Agregado a: "+d[idx].nombre);
+    });
+  });
+};
+
+// Iniciar
+mostrar("mis");
+</script>
+<script src="/errores.js" defer></script>
+<script src="/update_check.js" defer></script>
+</body>
+</html>

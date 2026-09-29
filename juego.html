@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>🪙 Atrapamonedas · ZonaHack</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#07090e;--card:rgba(13,17,23,.9);--border:#1c2531;--text:#d7e2ef;--muted:#6d7f93;--accent:#ffca28;--green:#2ee6a8;--red:#ff5a5a}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;display:flex;flex-direction:column}
+.bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.orb{position:absolute;border-radius:50%;filter:blur(90px);opacity:.3;animation:flotar 18s ease-in-out infinite}
+.orb1{width:420px;height:420px;background:radial-gradient(circle,rgba(255,202,40,.18),transparent 70%);top:-160px;right:-120px}
+.orb2{width:460px;height:460px;background:radial-gradient(circle,rgba(122,92,255,.18),transparent 70%);bottom:-180px;left:-150px;animation-delay:-7s}
+@keyframes flotar{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(18px,-12px) scale(1.06)}}
+.header{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border);background:rgba(7,9,14,.92);backdrop-filter:blur(10px);position:sticky;top:0;z-index:100}
+.logo{width:40px;height:40px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px;background:linear-gradient(135deg,rgba(255,202,40,.25),rgba(122,92,255,.25));border:1px solid rgba(255,202,40,.4)}
+.ttl{flex:1}
+.ttl h1{font-size:.95em;letter-spacing:2px;font-weight:900;font-family:'Courier New',monospace;color:#fff}
+.ttl span{font-size:.6em;color:var(--muted)}
+.back{color:var(--accent);text-decoration:none;font-size:.7em;padding:6px 10px;border:1px solid var(--border);border-radius:8px}
+.wrap{max-width:760px;margin:0 auto;padding:16px 14px 40px;width:100%;position:relative;z-index:1;display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start}
+.game-card{flex:1;min-width:300px;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px}
+.hud{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.hud .st{flex:1;min-width:80px;text-align:center;border:1px solid var(--border);border-radius:10px;padding:7px 6px}
+.hud .st b{display:block;font-size:1.2em;color:var(--accent)}
+.hud .st span{font-size:.58em;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+#game{margin:0 auto;display:block;width:100%;max-width:420px;border-radius:12px;background:#0b0f16;border:1px solid var(--border);touch-action:none}
+.ctrl{margin-top:10px;text-align:center;font-size:.68em;color:var(--muted)}
+.btn{margin-top:10px;width:100%;padding:12px;border:none;border-radius:12px;background:linear-gradient(135deg,#ffca28,#ff8c00);color:#2a1400;font-weight:900;font-size:.9em;cursor:pointer;font-family:inherit}
+.btn:active{transform:scale(.98)}
+.board{width:280px;min-width:250px;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px}
+.board h3{font-size:.78em;color:var(--accent);letter-spacing:1px;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.conex{font-size:.6em;padding:4px 10px;border-radius:14px;margin-left:auto}
+.conex.on{color:var(--green);border:1px solid rgba(46,230,168,.35)}
+.conex.off{color:var(--red);border:1px solid rgba(255,90,90,.35)}
+.row{display:flex;align-items:center;gap:8px;padding:7px 8px;border-bottom:1px solid var(--border);font-size:.74em}
+.row:last-child{border-bottom:none}
+.row.me{background:rgba(255,202,40,.08);border-radius:8px}
+.pos{width:26px;color:var(--muted);font-weight:800;text-align:center}
+.medal{font-size:1.1em}
+.name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.score{font-weight:900;color:var(--accent)}
+.empty{padding:16px;text-align:center;color:var(--muted);font-size:.72em}
+.sync{font-size:.6em;color:var(--muted);text-align:center;margin-top:8px;min-height:14px}
+</style>
+</head>
+<body>
+<div class="bg"><div class="orb orb1"></div><div class="orb orb2"></div></div>
+
+<div class="header">
+  <div class="logo">🪙</div>
+  <div class="ttl"><h1>ATRAPAMONEDAS</h1><span>atrapá monedas · evitá las bombas · puntaje en Firebase</span></div>
+  <a href="/" class="back">←</a>
+</div>
+
+<div class="wrap">
+  <div class="game-card">
+    <div class="hud">
+      <div class="st"><b id="hScore">0</b><span>Puntos</span></div>
+      <div class="st"><b id="hLives">❤️❤️❤️</b><span>Vidas</span></div>
+      <div class="st"><b id="hBest">0</b><span>Récord local</span></div>
+    </div>
+    <canvas id="game" width="400" height="480"></canvas>
+    <div class="ctrl">◀ ▶ para moverte · o arrastrá con el dedo · 🪙 +1 · ⭐ +5 · 💣 pierde una vida</div>
+    <button class="btn" id="btnStart" onclick="startGame()">▶ Jugar</button>
+  </div>
+
+  <div class="board">
+    <h3>🏆 Ranking global <span class="conex off" id="conex">📡</span></h3>
+    <div id="board"><div class="empty">Conectando a Firebase…</div></div>
+    <div class="sync" id="sync"></div>
+  </div>
+</div>
+
+<script src="/firebase_zh.js"></script>
+<script>
+var USER = localStorage.getItem('vh_usuario')||'anon';
+var BEST = parseInt(localStorage.getItem('zh_atrapamonedas_best')||'0',10)||0;
+document.getElementById('hBest').textContent = BEST;
+
+// ─── CANVAS ───
+var cv = document.getElementById('game');
+var ctx = cv.getContext('2d');
+var W = cv.width, H = cv.height;
+var PLAYER_W = 66, PLAYER_H = 14;
+var player = { x: W/2 };
+var items = [];
+var score = 0, lives = 3;
+var over = false, running = false;
+var lastSpawn = 0, spawnInt = 650;
+var speed = 2.4;
+var prevX = W/2;
+
+function reset(){
+  player.x = W/2; items = []; score = 0; lives = 3;
+  speed = 2.4; spawnInt = 650; over = false;
+  lastSpawn = performance.now();
+  document.getElementById('hScore').textContent = '0';
+  document.getElementById('hLives').textContent = '❤️❤️❤️';
+}
+
+// entrada por teclado
+var keys = {};
+document.addEventListener('keydown', function(e){
+  keys[e.key] = true;
+  if(e.key==='ArrowLeft'||e.key==='ArrowRight'||e.key==='a'||e.key==='d') e.preventDefault();
+});
+document.addEventListener('keyup', function(e){ keys[e.key] = false; });
+
+// entrada por mouse/touch (arrastrar)
+function moverA(clientX){
+  var rect = cv.getBoundingClientRect();
+  var x = (clientX - rect.left) * (W / rect.width);
+  player.x = Math.max(PLAYER_W/2, Math.min(W - PLAYER_W/2, x));
+}
+cv.addEventListener('mousemove', function(e){ if(running&&!over&&e.buttons) moverA(e.clientX); });
+cv.addEventListener('mousedown', function(e){ moverA(e.clientX); });
+cv.addEventListener('touchmove', function(e){ e.preventDefault(); if(running&&!over) moverA(e.touches[0].clientX); }, {passive:false});
+cv.addEventListener('touchstart', function(e){ e.preventDefault(); moverA(e.touches[0].clientX); }, {passive:false});
+
+function spawn(){
+  var r = Math.random();
+  var tipo = r < 0.62 ? 'coin' : (r < 0.82 ? 'bomb' : 'star');
+  var size = tipo==='coin'?12 : tipo==='star'?14 : 15;
+  items.push({ tipo: tipo, x: 14+Math.random()*(W-28), y: -20, s: size, vy: speed*(0.8+Math.random()*0.5) });
+}
+
+function draw(){
+  ctx.clearRect(0,0,W,H);
+  // fondo
+  ctx.fillStyle = '#0b0f16'; ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle = 'rgba(255,202,40,.06)'; ctx.lineWidth=1;
+  for(var g=0;g<W;g+=20){ ctx.beginPath(); ctx.moveTo(g,0); ctx.lineTo(g,H); ctx.stroke(); }
+  for(var h2=0;h2<H;h2+=20){ ctx.beginPath(); ctx.moveTo(0,h2); ctx.lineTo(W,h2); ctx.stroke(); }
+
+  // items
+  items.forEach(function(it){
+    ctx.save();
+    if(it.tipo==='coin'){
+      ctx.fillStyle = '#ffca28'; ctx.shadowColor='rgba(255,202,40,.8)'; ctx.shadowBlur=12;
+      ctx.beginPath(); ctx.arc(it.x, it.y, it.s, 0, Math.PI*2); ctx.fill();
+      ctx.shadowBlur=0;
+      ctx.strokeStyle='#ff8c00'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(it.x, it.y, it.s, 0, Math.PI*2); ctx.stroke();
+      ctx.fillStyle='#b8860b'; ctx.font='bold '+it.s+'px monospace'; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText('$', it.x, it.y+1);
+    } else if(it.tipo==='star'){
+      ctx.fillStyle='#7a5cff'; ctx.shadowColor='rgba(122,92,255,.9)'; ctx.shadowBlur=14;
+      ctx.beginPath();
+      for(var a=0;a<10;a++){
+        var rad = a%2===0 ? it.s : it.s*0.45;
+        var ang = -Math.PI/2 + a*Math.PI/5;
+        var px = it.x + Math.cos(ang)*rad, py = it.y + Math.sin(ang)*rad;
+        a===0 ? ctx.moveTo(px,py) : ctx.lineTo(px,py);
+      }
+      ctx.closePath(); ctx.fill(); ctx.shadowBlur=0;
+    } else {
+      ctx.fillStyle = '#ff5a5a'; ctx.shadowColor='rgba(255,90,90,.8)'; ctx.shadowBlur=10;
+      ctx.beginPath(); ctx.arc(it.x, it.y, it.s, 0, Math.PI*2); ctx.fill(); ctx.shadowBlur=0;
+      ctx.fillStyle='#2a0a0a'; ctx.font='bold 9px monospace'; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText('💥', it.x, it.y+1);
+    }
+    ctx.restore();
+  });
+
+  // jugador (cesta)
+  ctx.save();
+  ctx.fillStyle = '#2ee6a8'; ctx.shadowColor='rgba(46,230,168,.9)'; ctx.shadowBlur=14;
+  ctx.beginPath();
+  var px=player.x, pw=PLAYER_W;
+  ctx.moveTo(px-pw/2, H-24); ctx.lineTo(px-pw/2+10, H-44); ctx.lineTo(px+pw/2-10, H-44); ctx.lineTo(px+pw/2, H-24);
+  ctx.closePath(); ctx.fill();
+  ctx.shadowBlur=0;
+  ctx.fillStyle='#0b0f16';
+  ctx.fillRect(px-pw/2+3, H-27, pw-6, 4);
+  ctx.restore();
+
+  if(over){
+    ctx.fillStyle='rgba(0,0,0,.55)'; ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='#ffca28'; ctx.font='bold 26px monospace'; ctx.textAlign='center';
+    ctx.fillText('¡GAME OVER!', W/2, H/2-16);
+    ctx.fillStyle='#fff'; ctx.font='15px monospace';
+    ctx.fillText('Puntos: '+score, W/2, H/2+16);
+  }
+}
+
+function update(dt){
+  if(over) return;
+  // teclado
+  var vel = 0;
+  if(keys['ArrowLeft']||keys['a']) vel -= 1;
+  if(keys['ArrowRight']||keys['d']) vel += 1;
+  if(vel) player.x += vel*260*dt;
+  player.x = Math.max(PLAYER_W/2, Math.min(W - PLAYER_W/2, player.x));
+
+  // dificultad progresiva
+  speed = 2.4 + score*0.05;
+  spawnInt = Math.max(340, 650 - score*6);
+
+  lastSpawn = lastSpawn || performance.now();
+  if(performance.now() - lastSpawn > spawnInt){
+    spawn(); lastSpawn = performance.now();
+  }
+
+  for(var i=items.length-1;i>=0;i--){
+    var it = items[i];
+    it.y += it.vy;
+    if(it.y > H + 24){ items.splice(i,1); continue; }
+    // colisión con la cesta
+    if(it.y + it.s >= H-44 && it.y - it.s <= H-20 && Math.abs(it.x - player.x) < (PLAYER_W/2 + it.s*0.6)){
+      if(it.tipo==='coin') score += 1;
+      else if(it.tipo==='star') score += 5;
+      else { lives--; document.getElementById('hLives').textContent = '❤️'.repeat(Math.max(0,lives)) + '🖤'.repeat(Math.max(0,3-lives)); }
+      items.splice(i,1);
+      document.getElementById('hScore').textContent = score;
+      if(lives <= 0){ gameOver(); return; }
+    }
+  }
+}
+
+function loop(t){
+  var dt = Math.min(0.05, (t - (loop._t||t))/1000 || 0.016);
+  loop._t = t;
+  if(running) update(dt);
+  draw();
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+
+function gameOver(){
+  over = true; running = false;
+  document.getElementById('btnStart').textContent = '▶ Jugar de nuevo';
+  if(score > BEST){ BEST = score; localStorage.setItem('zh_atrapamonedas_best', String(BEST)); document.getElementById('hBest').textContent = BEST;
+    try{
+      if(localStorage.getItem('zh_disc_juego')==='1'){
+        var dest=(localStorage.getItem('zh_disc_destino')||'').trim();
+        fetch('/api/discord_send?mensaje='+encodeURIComponent('🏆 ¡Nuevo récord en Atrapamonedas: '+score+' puntos (por '+USER+')!')+(dest?'&destino='+encodeURIComponent(dest):'')).catch(function(){});
+      }
+    }catch(e){}
+  }
+  if(score > 0) guardarScore();
+}
+
+function startGame(){
+  reset();
+  running = true;
+  document.getElementById('btnStart').textContent = '▶ Jugando…';
+}
+
+// ─── FIREBASE (puntajes) ───
+var cx = document.getElementById('conex');
+function renderBoard(){
+  var el = document.getElementById('board');
+  if(!window._scores || !Object.keys(window._scores).length){
+    el.innerHTML = '<div class="empty">Todavía no hay puntajes. ¡Sé el primero!</div>';
+    document.getElementById('sync').textContent = '';
+    return;
+  }
+  var arr = Object.keys(window._scores).map(function(k){ return window._scores[k]; })
+    .filter(function(s){ return s && typeof s.s === 'number'; })
+    .sort(function(a,b){ return b.s - a.s; })
+    .slice(0,10);
+  if(!arr.length){ el.innerHTML = '<div class="empty">Todavía no hay puntajes</div>'; return; }
+  var med = ['🥇','🥈','🥉'];
+  el.innerHTML = arr.map(function(s,i){
+    return '<div class="row'+(String(s.u)===USER?' me':'')+'">'
+      +'<span class="pos">'+(med[i]||(i+1))+'</span>'
+      +'<span class="name">'+esc(s.u)+'</span>'
+      +'<span class="score">'+s.s+'</span></div>';
+  }).join('');
+  document.getElementById('sync').textContent = '● En vivo · se actualiza solo';
+}
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+
+function guardarScore(){
+  ZHFirebase.push('juegos_scores', { u: USER, s: score, ts: Date.now() })
+    .then(function(){ document.getElementById('sync').textContent = '✅ Puntaje guardado en Firebase'; })
+    .catch(function(){ document.getElementById('sync').textContent = '⚠️ No se pudo guardar'; });
+}
+
+ZHFirebase.init(function(){
+  if(ZHFirebase.ready){ cx.className = 'conex on'; cx.textContent = '🟢'; }
+  else { cx.className = 'conex off'; cx.textContent = '🔴'; document.getElementById('board').innerHTML='<div class="empty">Sin conexión a Firebase</div>'; }
+  ZHFirebase.on('juegos_scores', function(obj){ window._scores = obj||{}; renderBoard(); });
+});
+</script>
+<script src="/logger_zh.js?v=2026"></script>
+</body>
+</html>

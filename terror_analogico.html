@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>📼 Analog Horror - ZonaHack</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#050505;color:#d8c8b0;font-family:'Courier New',monospace;min-height:100vh}
+.header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid rgba(140,120,80,.15);background:#050505;position:sticky;top:0;z-index:100}
+.header h1{color:#c0392b;font-size:.9em;text-shadow:0 0 10px rgba(192,57,43,.15);letter-spacing:1px}
+.back{color:#c0392b;text-decoration:none;font-size:.65em;padding:4px 8px;border:1px solid rgba(140,120,80,.1);border-radius:3px}
+.back:hover{border-color:rgba(192,57,43,.3)}
+.container{max-width:1000px;margin:0 auto;padding:10px}
+.hero{background:linear-gradient(180deg,#0a0808,#050505);border:1px solid rgba(140,120,80,.1);border-radius:4px;padding:15px;margin-bottom:10px;text-align:center}
+.hero h2{color:#c0392b;font-size:.9em;letter-spacing:2px;text-shadow:0 0 15px rgba(192,57,43,.2)}
+.hero p{color:rgba(216,200,176,.25);font-size:.62em;margin-top:4px;letter-spacing:1px}
+.cats{display:flex;gap:3px;flex-wrap:wrap;margin-bottom:8px}
+.cats button{padding:5px 10px;border:1px solid rgba(140,120,80,.08);border-radius:2px;background:rgba(0,0,0,.3);color:rgba(216,200,176,.3);font-size:.58em;cursor:pointer;font-family:'Courier New',monospace;transition:.2s}
+.cats button:hover,.cats button.active{color:#c0392b;border-color:rgba(192,57,43,.2);text-shadow:0 0 8px rgba(192,57,43,.2)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:5px}
+.card{border:1px solid rgba(140,120,80,.04);border-radius:3px;overflow:hidden;cursor:pointer;background:#0a0808;transition:all .15s;position:relative}
+.card:hover{border-color:rgba(192,57,43,.15);box-shadow:0 0 15px rgba(192,57,43,.05)}
+.card img{width:100%;aspect-ratio:16/9;object-fit:cover;background:#000;filter:saturate(.7) contrast(1.1)}
+.card .inf{padding:6px}
+.card .t{font-size:.62em;color:rgba(216,200,176,.5);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card .c{font-size:.55em;color:rgba(140,120,80,.3);margin-top:1px}
+.status{text-align:center;font-size:.6em;color:rgba(140,120,80,.3);margin:6px 0;min-height:14px;letter-spacing:1px}
+.loading{text-align:center;padding:25px;color:rgba(140,120,80,.2);font-size:.62em}
+.loading::after{content:'';display:block;width:14px;height:14px;margin:6px auto;border:1px solid rgba(192,57,43,.1);border-top-color:#c0392b;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media(max-width:480px){.grid{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="header">
+  <a href="/" class="back">←</a>
+  <h1>📼 TERROR ANALOGICO</h1>
+  <div style="width:40px"></div>
+</div>
+<div class="container">
+  <div class="hero">
+    <h2>📼 SIGNAL FOUND</h2>
+    <p>Analog horror, paranormal, videos raros, psicofonías y fenómenos inexplicables</p>
+  </div>
+  <div class="cats" id="catBtns">
+    <button class="active" onclick="buscarTH('analog horror',this)">📼 Analog Horror</button>
+    <button onclick="buscarTH('paranormal casos reales espeluznantes',this)">👻 Paranormal</button>
+    <button onclick="buscarTH('psicofonias reales captadas',this)">🎙️ Psicofonías</button>
+    <button onclick="buscarTH('ovnis avistamientos reales documental',this)">👽 OVNIS</button>
+    <button onclick="buscarTH('fantasmas captados en camara real',this)">📹 Fantasmas Reales</button>
+    <button onclick="buscarTH('casas embrujadas investigacion paranormal',this)">🏚️ Casas Embrujadas</button>
+    <button onclick="buscarTH('criaturas misteriosas criptidos reales',this)">🦇 Criptidos</button>
+    <button onclick="buscarTH('brujeria rituales paranormales reales',this)">🧙 Brujería</button>
+    <button onclick="buscarTH('historias terror reales argentina paranormal',this)">🇦🇷 Arg Paranormal</button>
+    <button onclick="buscarTH('national geographic paranormal documental',this)">📡 NatGeo Paranormal</button>
+    <button onclick="buscarTH('analog horror completo espanol',this)">🇪🇸 En español</button>
+    <button onclick="buscarTH('local58 analog horror',this)">📺 Local58</button>
+    <button onclick="buscarTH('gemini home entertainment',this)">🏠 Gemini</button>
+    <button onclick="buscarTH('mandela catalogue',this)">📇 Mandela</button>
+    <button onclick="buscarTH('the monument mythos',this)">🗽 Monument</button>
+    <button onclick="buscarTH('analog horror found footage',this)">📹 Found Footage</button>
+    <button onclick="buscarTH('creepypasta analog horror',this)">👁️ Creepypasta</button>
+    <button onclick="buscarTH('vhs horror videos',this)">📼 VHS Horror</button>
+    <button onclick="buscarTH('videos raros perturbadores',this)">👻 Videos Raros</button>
+    <button onclick="buscarTH('midwest angelica',this)">💒 Midwest Angelica</button>
+    <button onclick="buscarTH('sinister smile tv',this)">😈 Sinister Smile</button>
+    <button onclick="buscarTH('smile tv show',this)">📡 Smile TV</button>
+    <button onclick="buscarTH('the walten files',this)">🐰 Walten Files</button>
+    <button onclick="buscarTH('sonic.exe',this)">🔴 Sonic.EXE</button>
+    <button onclick="buscarTH('ben drowned',this)">🔊 BEN Drowned</button>
+    <button onclick="buscarTH('analog horror youtube',this)">▶️ YouTube Horror</button>
+    <button onclick="buscarTH('analog horror historia',this)">📖 Historias</button>
+    <button onclick="buscarTH('analog horror canal 6',this)">📺 Canal 6</button>
+    <button onclick="buscarTH('analog horror 3am',this)">🌙 3AM</button>
+    <button onclick="buscarTH('analog horror rec',this)">📼 REC</button>
+    <button onclick="buscarTH('analog horror argentina',this)">🇦🇷 ARG</button>
+    <button onclick="buscarTH('analog horror mexico',this)">🇲🇽 MEX</button>
+    <button onclick="buscarTH('beyond the void analog horror',this)">🌌 Beyond Void</button>
+    <button onclick="buscarTH('squimpus mcgrimpus',this)">🐷 Squimpus</button>
+    <button onclick="buscarTH('suprised by darkness',this)">🌑 Darkness</button>
+    <button onclick="buscarTH('channel 7 analog horror',this)">📺 Canal 7</button>
+    <button onclick="buscarTH('analog horror usa',this)">🇺🇸 USA</button>
+    <button onclick="buscarTH('analog horror espana',this)">🇪🇸 España</button>
+    <button onclick="buscarTH('analog horror colombia',this)">🇨🇴 Colombia</button>
+    <button onclick="buscarTH('analog horror chile',this)">🇨🇱 Chile</button>
+    <button onclick="buscarTH('analog horror peru',this)">🇵🇪 Perú</button>
+    <button onclick="buscarTH('analog horror uruguay',this)">🇺🇾 Uruguay</button>
+    <button onclick="buscarTH('analog horror juego perdido',this)">🎮 Juego Perdido</button>
+    <button onclick="buscarTH('analog horror para no dormir',this)">😴 No Dormir</button>
+    <button onclick="buscarTH('analog horror mas aterrador',this)">☠️ Aterrador</button>
+    <button onclick="buscarTH('analog horror top mejores',this)">🏆 Top</button>
+    <button onclick="buscarTH('analog horror latino',this)">🌎 Latino</button>
+    <button onclick="buscarTH('analog horror vs creepypasta',this)">⚔️ VS</button>
+    <button onclick="buscarTH('analog horror 2024',this)">📅 2024</button>
+    <button onclick="buscarTH('analog horror 2025',this)">📅 2025</button>
+    <button onclick="buscarTH('analog horror 2026',this)">📅 2026</button>
+    <button onclick="buscarTH('analog horror documental',this)">🎥 Documental</button>
+    <button onclick="buscarTH('analog horror explicado',this)">🧠 Explicado</button>
+  </div>
+  <div class="status" id="thStatus">Selecciona una categoria...</div>
+  <div class="grid" id="thGrid"></div>
+  <div id="thLoad" style="display:none;text-align:center;margin:8px 0">
+    <button onclick="cargarMasTH()" style="padding:5px 16px;border:1px solid rgba(192,57,43,.1);border-radius:2px;background:rgba(0,0,0,.3);color:#c0392b;cursor:pointer;font-size:.6em;font-family:'Courier New',monospace">MÁS SEÑAL...</button>
+  </div>
+
+  <!-- SECCION HISTORIAS PARANORMALES (TEXTO) -->
+  <div class="crt" style="margin-top:14px">
+    <div class="head"><span>📖 HISTORIAS PARANORMALES REALES</span><span id="pStatus">...</span></div>
+    <div class="filtros" style="margin:8px 0">
+      <button onclick="cargarHistorias(this)" class="active">📖 CARGAR HISTORIAS</button>
+      <button onclick="limpiarHistorias(this)">🗑 LIMPIAR</button>
+    </div>
+    <div id="paranormalStories" style="display:flex;flex-direction:column;gap:6px;max-height:500px;overflow:auto"></div>
+  </div>
+</div>
+
+<script>
+var thResults = [];
+var lastTHQ = "";
+var thBusy = false;
+// Variaciones que se buscan en paralelo para llenar la señal
+function thVariaciones(q){
+  var base = q;
+  var v = [base];
+  if(base.toLowerCase().indexOf("analog horror") === -1){
+    v.push(base + " analog horror");
+  } else {
+    v.push(base + " espanol");
+    v.push(base + " completo");
+    v.push(base + " video");
+  }
+  v.push(base + " parte 1");
+  v.push(base + " full");
+  return v;
+}
+
+function esc(s){return (s||"").replace(/[&<>"]/g,function(m){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m];});}
+
+function buscarTH(q,btn){
+  if(!q || thBusy) return;
+  lastTHQ = q;
+  thResults = [];
+  thBusy = true;
+  document.querySelectorAll("#catBtns button").forEach(function(b){b.classList.remove("active");});
+  if(btn) btn.classList.add("active");
+  document.getElementById("thStatus").textContent = ">> BUSCANDO SEÑAL...";
+  document.getElementById("thGrid").innerHTML = '<div class="loading">Buscando señal...</div>';
+  document.getElementById("thLoad").style.display = "none";
+  // Busqueda en paralelo con varias variaciones
+  var qs = thVariaciones(q).slice(0,4);
+  var pendientes = qs.length;
+  var acumulados = {};
+  qs.forEach(function(term){
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET","/api/search_multi?q="+encodeURIComponent(term),true);
+    xhr.timeout = 30000;
+    xhr.onload = function(){
+      pendientes--;
+      try{
+        var data = JSON.parse(xhr.responseText);
+        var items = data.results || [];
+        items.forEach(function(it){
+          if(!it.id) return;
+          if(!acumulados[it.id]) acumulados[it.id] = it;
+        });
+      }catch(e){}
+      if(pendientes <= 0){
+        thBusy = false;
+        thResults = Object.values(acumulados);
+        if(!thResults.length){
+          document.getElementById("thGrid").innerHTML = '<div class="loading" style="grid-column:1/-1;padding:30px">SEÑAL PERDIDA...</div>';
+          document.getElementById("thStatus").textContent = "Sin resultados";
+          return;
+        }
+        mostrarTH(thResults);
+        document.getElementById("thStatus").textContent = thResults.length + " grabaciones capturadas";
+        document.getElementById("thLoad").style.display = "block";
+      }
+    };
+    xhr.onerror = function(){ pendientes--; if(pendientes<=0){thBusy=false;} };
+    xhr.send();
+  });
+}
+
+function mostrarTH(items){
+  var h = "";
+  items.forEach(function(it,i){
+    if(!it.id) return;
+    var srcBadge = it.source==='youtube'?'YT':it.source==='archive'?'AR':it.source==='dailymotion'?'DM':it.source==='vimeo'?'VM':'?';
+    h += '<div class="card" onclick="verTH('+i+')">';
+    if(it.thumb) h += '<img src="'+it.thumb+'" loading="lazy">';
+    else h += '<div style="aspect-ratio:16/9;background:#000;display:flex;align-items:center;justify-content:center;font-size:1.5em;opacity:.3">📼</div>';
+    h += '<div class="inf"><div class="t">'+esc((it.title||"").slice(0,50))+'</div>';
+    h += '<div class="c">['+srcBadge+'] '+esc((it.channel||"").slice(0,30))+'</div>';
+    h += '</div></div>';
+  });
+  document.getElementById("thGrid").innerHTML = h;
+}
+
+var thVarPool = ["analog horror","terrifying","creepy","disturbing","found footage","vhs","lost media","paranormal","parte 2","parte 3","episodio","capitulo","completo","espanol","analog horror recopilacion","analog horror argentina","analog horror mexico","analog horror 3am","analog horror canal","analog horror tv"];
+
+function cargarMasTH(){
+  if(!lastTHQ || thBusy) return;
+  thBusy = true;
+  var extra = thVarPool[Math.floor(Math.random()*thVarPool.length)];
+  var q = lastTHQ + " " + extra;
+  var btn = document.querySelector("#thLoad button");
+  if(btn){btn.disabled=true;btn.textContent="...";}
+  var xhr = new XMLHttpRequest();
+  xhr.open("GET","/api/search_multi?q="+encodeURIComponent(q),true);
+  xhr.timeout = 30000;
+  xhr.onload = function(){
+    thBusy = false;
+    try{
+      var data = JSON.parse(xhr.responseText);
+      var items = data.results || [];
+      var nuevos = 0;
+      items.forEach(function(it){
+        if(!it.id || thResults.some(function(r){return r.id===it.id;})) return;
+        thResults.push(it);
+        nuevos++;
+        var idx = thResults.length - 1;
+        var div = document.createElement("div"); div.className = "card";
+        var srcBadge = it.source==='youtube'?'YT':it.source==='archive'?'AR':it.source==='dailymotion'?'DM':it.source==='vimeo'?'VM':'?';
+        div.innerHTML = '<div onclick="verTH('+idx+')">'+
+          (it.thumb?'<img src="'+it.thumb+'" loading="lazy">':'<div style="aspect-ratio:16/9;background:#000;display:flex;align-items:center;justify-content:center;font-size:1.5em;opacity:.3">📼</div>')+
+          '<div class="inf"><div class="t">'+esc((it.title||"").slice(0,50))+'</div>'+
+          '<div class="c">['+srcBadge+'] '+esc((it.channel||"").slice(0,30))+'</div></div></div>';
+        document.getElementById("thGrid").appendChild(div);
+      });
+      document.getElementById("thStatus").textContent = thResults.length + " grabaciones capturadas" + (nuevos?" (+"+nuevos+")":"");
+    }catch(e){}
+    if(btn){btn.disabled=false;btn.textContent="MÁS SEÑAL...";}
+  };
+  xhr.onerror = function(){ thBusy=false; if(btn){btn.disabled=false;btn.textContent="MÁS SEÑAL...";} };
+  xhr.send();
+}
+
+function verTH(idx){
+  var it = thResults[idx];
+  if(!it) return;
+  // Reproducir en el mismo sitio segun fuente
+  var overlay = document.createElement("div");
+  overlay.style.cssText = "position:fixed;top:0;left:0;right:0;bottom:0;background:#000;z-index:999;display:flex;flex-direction:column";
+  overlay.innerHTML = '<div style="display:flex;align-items:center;padding:5px 10px;background:#050505;border-bottom:1px solid rgba(140,120,80,.1)"><button onclick="document.body.removeChild(this.parentNode.parentNode)" style="background:none;border:none;color:#c0392b;font-size:1.2em;cursor:pointer">←</button><div style="flex:1;font-size:.62em;color:rgba(216,200,176,.5);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 8px">📼 '+esc(it.title||'')+'</div></div><div style="flex:1;position:relative">';
+  var iframe = document.createElement("iframe");
+  iframe.style.cssText = "width:100%;height:100%;border:none";
+  if(it.source==='youtube') iframe.src = "https://www.youtube-nocookie.com/embed/"+it.id+"?autoplay=1&rel=0";
+  else if(it.source==='archive') iframe.src = "https://archive.org/embed/"+it.id.replace("ia_","")+"?autoplay=1";
+  else if(it.source==='dailymotion') iframe.src = "https://www.dailymotion.com/embed/video/"+it.id+"?autoplay=1";
+  else if(it.source==='vimeo') iframe.src = "https://player.vimeo.com/video/"+it.id;
+  else { iframe.src = it.url || ""; }
+  overlay.lastChild.appendChild(iframe);
+  document.body.appendChild(overlay);
+  overlay.onclick = function(e){ if(e.target===overlay) document.body.removeChild(overlay); };
+}
+
+// Iniciar
+buscarTH("analog horror", document.querySelector("#catBtns button.active"));
+
+// ─── HISTORIAS PARANORMALES EN TEXTO ──
+var paranormalCache = [];
+function cargarHistorias(btn){
+  if(btn){
+    document.querySelectorAll("#paranormalStories").forEach(function(){});
+    btn.classList.add("active");
+  }
+  var el = document.getElementById("paranormalStories");
+  var st = document.getElementById("pStatus");
+  el.innerHTML = '<div class="loading">Conjurando historias paranormales...</div>';
+  st.textContent = "Buscando...";
+  var xhr = new XMLHttpRequest();
+  xhr.open("GET","/api/historias_terror",true);
+  xhr.timeout = 30000;
+  xhr.onload = function(){
+    try{
+      var data = JSON.parse(xhr.responseText);
+      var h = data.results || [];
+      if(!h.length){el.innerHTML='<div class="loading">Sin historias por ahora...</div>';st.textContent="sin señal";return;}
+      paranormalCache = h;
+      st.textContent = h.length + " historias paranormales · " + (data.fuente||"creepypastas.com");
+      var html = h.map(function(x,i){
+        return '<div class="entrada int3" onclick="leerHistoria('+i+')" style="cursor:pointer;border-left:2px solid rgba(192,57,43,.15);background:rgba(0,0,0,.25);padding:9px 11px;border-radius:0 3px 3px 0;margin-bottom:6px">'+
+          '<div class="eh" style="display:flex;justify-content:space-between;font-size:.55em;color:rgba(140,120,80,.4);margin-bottom:4px"><span><b style="color:#c0392b">📖</b> <span class="tag tag-senal" style="display:inline-block;padding:0 5px;font-size:.52em;border-radius:2px;border:1px solid rgba(231,76,60,.4);color:#e74c3c">PARANORMAL</span></span><span>'+esc(x.autor||"anonimo")+'</span></div>'+
+          '<div class="txt" style="font-size:.72em;color:#c0392b;margin-bottom:2px">'+esc((x.titulo||"").slice(0,80))+'</div>'+
+          '<div class="txt" style="font-size:.65em;color:rgba(200,184,154,.7);line-height:1.5;opacity:.7">'+esc((x.texto||"").slice(0,150))+'...</div>'+
+          '</div>';
+      }).join("");
+      el.innerHTML = html;
+    }catch(e){ el.innerHTML='<div class="loading">Error al leer historias</div>'; st.textContent="error"; }
+  };
+  xhr.onerror = function(){ el.innerHTML='<div class="loading">Sin conexión</div>'; st.textContent="offline"; };
+  xhr.send();
+}
+
+function limpiarHistorias(btn){
+  document.getElementById("paranormalStories").innerHTML = '<div class="loading">esperando nuevas señales paranormales...</div>';
+  document.getElementById("pStatus").textContent = "...";
+}
+
+function leerHistoria(idx){
+  var h = paranormalCache[idx];
+  if(!h) return;
+  var ov = document.createElement("div");
+  ov.style.cssText = "position:fixed;top:0;left:0;right:0;bottom:0;background:#050505;z-index:999;display:flex;flex-direction:column";
+  ov.innerHTML =
+    '<div style="display:flex;align-items:center;padding:5px 10px;background:#0a0808;border-bottom:1px solid rgba(140,120,80,.1)">'+
+      '<button onclick="document.body.removeChild(this.parentNode.parentNode)" style="background:none;border:none;color:#c0392b;font-size:1.2em;cursor:pointer">←</button>'+
+      '<div style="flex:1;font-size:.62em;color:#c0392b;padding:0 8px">📖 '+esc(h.titulo||'')+'</div>'+
+      '<a href="'+esc(h.url||'#')+'" target="_blank" style="font-size:.58em;color:rgba(200,184,154,.4);text-decoration:none">FUENTE ↗</a>'+
+    '</div>'+
+    '<div style="flex:1;overflow:auto;padding:18px;font-family:\'Courier New\',monospace;font-size:.8em;line-height:1.9;color:#c8b89a;max-width:680px;margin:0 auto;width:100%">'+
+      '<div style="color:#c0392b;letter-spacing:2px;font-size:.6em;margin-bottom:14px">HISTORIA PARANORMAL REAL</div>'+
+      '<div style="white-space:pre-wrap">'+esc(h.texto||'')+'</div>'+
+      '<div style="margin-top:18px;font-size:.58em;color:rgba(140,120,80,.3)">— '+esc(h.autor||'anonimo')+' —</div>'+
+    '</div>';
+  document.body.appendChild(ov);
+}
+setTimeout(function(){ cargarHistorias(); }, 3000);
+</script>
+<script src="/errores.js" defer></script>
+<script src="/update_check.js" defer></script>
+</body>
+</html>

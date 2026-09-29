@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>ZonaOS - Sistema Operativo</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;user-select:none}
+body{background:#000;color:#c8d6e5;font-family:'Courier New',monospace;overflow:hidden;height:100vh;width:100vw}
+:root{--win:#0f1310;--winb:rgba(194,178,128,.25);--title:#12160f;--acc:#00ff41;--khaki:#c2b280;--olive:#6b7a3f}
+::selection{background:rgba(0,255,65,.2)}
+
+/* ─── BOOT ─────────────────────────── */
+#boot{position:fixed;inset:0;background:#000;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#00ff41}
+#boot .bline{font-size:.9em;letter-spacing:2px;min-height:1.2em;text-align:left;width:420px;max-width:90vw;margin:2px 0;opacity:0}
+#boot .bline.on{opacity:1}
+#boot .bar{width:420px;max-width:80vw;height:14px;border:1px solid #00ff41;margin-top:14px;position:relative;overflow:hidden}
+#boot .bar i{position:absolute;top:0;left:0;bottom:0;width:0%;background:#00ff41;transition:width .2s}
+
+/* ─── DESKTOP ──────────────────────── */
+#desktop{position:fixed;inset:0;background:radial-gradient(circle at 30% 30%,#1a2410,#0a0d08 60%,#050608);background-size:100% 100%}
+#desktop::after{content:'';position:absolute;inset:0;pointer-events:none;opacity:.07;background:radial-gradient(ellipse at 15% 30%,#4a532f 0,transparent 45%),radial-gradient(ellipse at 60% 70%,#39411f 0,transparent 50%),radial-gradient(ellipse at 85% 30%,#4a532f 0,transparent 42%)}
+#deskIcons{position:absolute;top:42px;left:10px;display:flex;flex-direction:column;gap:4px;z-index:5}
+.icon{width:86px;padding:8px 4px;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;border:1px solid transparent;border-radius:4px;color:rgba(232,238,225,.85);transition:.15s}
+.icon:hover{background:rgba(194,178,128,.08);border-color:rgba(194,178,128,.2)}
+.icon .i{font-size:1.9em;line-height:1}
+.icon .l{font-size:.55em;text-align:center;line-height:1.2;text-shadow:0 1px 2px #000}
+
+/* ─── TOP PANEL (estilo Linux/GNOME) ── */
+#topPanel{position:fixed;top:0;left:0;right:0;height:34px;background:rgba(10,13,9,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--winb);display:flex;align-items:center;padding:0 10px;gap:14px;z-index:1500;font-size:.62em;color:var(--khaki);letter-spacing:1px}
+#topPanel .tp-izq{display:flex;align-items:center;gap:14px}
+#tpAppsBtn{background:none;border:1px solid var(--winb);color:#00ff41;padding:3px 10px;font-family:inherit;font-size:.68em;letter-spacing:1px;cursor:pointer;border-radius:3px}
+#tpAppsBtn:hover{background:#00ff4110}
+#tpClock{color:var(--khaki);flex:1;text-align:center}
+#tpRight{display:flex;align-items:center;gap:12px;color:var(--khaki)}
+#tpRight .ind{display:flex;align-items:center;gap:3px;opacity:.85}
+#tpAppsMenu{position:fixed;top:38px;left:6px;width:300px;background:#0e120c;border:1px solid var(--winb);border-radius:4px;z-index:1600;display:none;box-shadow:0 8px 30px rgba(0,0,0,.6);max-height:70vh;overflow-y:auto}
+#tpAppsMenu.show{display:block}
+#tpAppsMenu .am-h{background:#00ff4108;border-bottom:1px solid var(--winb);padding:8px 10px;color:#00ff41;font-size:.68em;letter-spacing:2px;text-transform:uppercase}
+#tpAppsMenu .am-i{display:flex;align-items:center;gap:8px;padding:7px 12px;font-size:.66em;color:#c8d6e5;cursor:pointer;border-bottom:1px solid rgba(194,178,128,.05)}
+#tpAppsMenu .am-i:hover{background:#00ff4110;color:#00ff41}
+#tpAppsMenu .am-i .ico{width:18px;text-align:center}
+#topPanel #tpBar{width:100%;height:2px;background:#00ff41;position:absolute;bottom:0;left:0}
+
+/* ─── TASKBAR ──────────────────────── */
+#taskbar{position:fixed;bottom:0;left:0;right:0;height:44px;background:#0c0f0a;border-top:1px solid var(--winb);display:flex;align-items:center;padding:0 6px;gap:4px;z-index:1000}
+#startBtn{display:flex;align-items:center;gap:6px;padding:5px 10px;border:1px solid var(--winb);background:#12160f;color:#00ff41;font-family:inherit;cursor:pointer;font-size:.7em;letter-spacing:1px}
+#startBtn:hover{background:#1a2014}
+#taskApps{display:flex;gap:4px;flex:1;overflow-x:auto;padding:0 6px}
+#taskApps::-webkit-scrollbar{height:3px}
+.tapp{display:flex;align-items:center;gap:4px;padding:4px 8px;border:1px solid var(--winb);background:#12160f;color:var(--khaki);font-size:.6em;cursor:pointer;max-width:160px;white-space:nowrap;overflow:hidden}
+.tapp:hover{background:#1a2014}
+.tapp.act{background:#00ff4111;border-color:#00ff4155;color:#00ff41}
+#clock{color:var(--khaki);font-size:.65em;padding:0 8px;letter-spacing:1px}
+
+/* ─── EXPLORADOR DE ARCHIVOS (Files) ── */
+.fm{display:flex;height:100%;font-size:.72em}
+.fm-side{width:130px;background:#0a0d09;border-right:1px solid var(--winb);padding:6px;flex-shrink:0;overflow-y:auto}
+.fm-side .fm-fav{padding:4px 6px;color:var(--khaki);cursor:pointer;border-radius:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fm-side .fm-fav:hover{background:#00ff4110;color:#00ff41}
+.fm-side .fm-fav.act{background:#00ff4115;color:#00ff41}
+.fm-main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.fm-path{display:flex;align-items:center;gap:4px;padding:5px 8px;border-bottom:1px solid var(--winb);background:#0e120c;color:#00ff41;font-size:.7em;flex-shrink:0}
+.fm-path .cr{color:var(--khaki);cursor:pointer}
+.fm-path .cr:hover{color:#00ff41}
+.fm-grid{flex:1;overflow-y:auto;padding:8px;display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:4px;align-content:start}
+.fm-item{padding:8px 4px;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;border:1px solid transparent;border-radius:4px;text-align:center}
+.fm-item:hover{background:#00ff4108;border-color:var(--winb)}
+.fm-item .i{font-size:1.7em}
+.fm-item .l{font-size:.52em;color:var(--khaki);word-break:break-word;line-height:1.2}
+.fm-item.dir .l{color:#c8d6e5}
+.fm-empty{color:rgba(194,178,128,.4);font-size:.65em;text-align:center;padding:20px;grid-column:1/-1}
+
+/* ─── START MENU ───────────────────── */
+#startMenu{position:fixed;bottom:48px;left:6px;width:240px;background:#0e120c;border:1px solid var(--winb);border-radius:4px;z-index:1100;display:none;box-shadow:0 8px 30px rgba(0,0,0,.6)}
+#startMenu.show{display:block}
+#startMenu .sm-h{background:#00ff4108;border-bottom:1px solid var(--winb);padding:8px 10px;color:#00ff41;font-size:.65em;letter-spacing:2px;text-transform:uppercase}
+#startMenu .sm-i{display:flex;align-items:center;gap:8px;padding:7px 12px;font-size:.65em;color:#c8d6e5;cursor:pointer;border-bottom:1px solid rgba(194,178,128,.05)}
+#startMenu .sm-i:hover{background:#00ff4110;color:#00ff41}
+#startMenu .sm-i .ico{width:18px;text-align:center}
+
+/* ─── WINDOWS ──────────────────────── */
+.win{position:absolute;min-width:260px;min-height:120px;background:var(--win);border:1px solid var(--winb);border-radius:4px;box-shadow:0 10px 40px rgba(0,0,0,.6);display:none;z-index:100;overflow:hidden}
+.win.open{display:flex;flex-direction:column}
+.win.focus{z-index:500;border-color:#00ff4155}
+.win .title{display:flex;align-items:center;gap:6px;padding:5px 8px;background:var(--title);border-bottom:1px solid var(--winb);font-size:.68em;color:var(--khaki);letter-spacing:1px;cursor:move;flex-shrink:0}
+.win .title .t{flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.win .title .x{width:18px;height:18px;display:flex;align-items:center;justify-content:center;background:#3a1d1d;color:#e74c3c;border:1px solid #e74c3c44;border-radius:3px;cursor:pointer;font-size:.8em}
+.win .title .x:hover{background:#e74c3c;color:#fff}
+.win .body{flex:1;overflow:auto;padding:10px;font-size:.72em;line-height:1.5;background:#0d110d}
+
+/* APPS */
+.term{height:100%;background:#0a0d09;padding:8px;font-size:.75em;color:#00ff41;overflow-y:auto;white-space:pre-wrap;font-family:'Courier New',monospace;min-height:220px}
+.term .in{display:flex;gap:4px;align-items:center}
+.term input{flex:1;background:transparent;border:none;color:#00ff41;outline:none;font-family:inherit;font-size:.75em}
+.app-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:6px}
+.app-tile{padding:10px;text-align:center;border:1px solid var(--winb);border-radius:4px;cursor:pointer;background:#12160f}
+.app-tile:hover{border-color:#00ff4155;background:#00ff4108}
+.app-tile .i{font-size:1.6em}
+.app-tile .l{font-size:.55em;color:var(--khaki);margin-top:4px}
+.sys-row{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(194,178,128,.06);font-size:.7em}
+.sys-row b{color:var(--khaki)}
+canvas{margin:0 auto;display:block;background:#000;border:1px solid var(--winb)}
+.calc{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;max-width:220px}
+.calc .d{grid-column:1/-1;background:#0a0d09;border:1px solid var(--winb);padding:8px;text-align:right;font-size:1.1em;color:#00ff41;min-height:30px;overflow:hidden}
+.calc button{padding:10px;border:1px solid var(--winb);background:#12160f;color:#c8d6e5;cursor:pointer;font-family:inherit;font-size:.85em}
+.calc button:hover{background:#00ff4110}
+.calc .op{color:#00ff41}
+.calc .eq{background:#00ff4115;color:#00ff41;grid-column:1/-1}
+
+/* MOVIL */
+@media(max-width:600px){
+  .icon{width:72px}
+  .win{min-width:220px}
+  #clock{display:none}
+  .tapp{max-width:110px}
+}
+</style>
+</head>
+<body>
+
+<!-- BOOT -->
+<div id="boot">
+  <div id="bootLines"></div>
+  <div class="bar"><i id="bootBar"></i></div>
+</div>
+
+<!-- TOP PANEL (estilo Linux/GNOME) -->
+<div id="topPanel">
+  <div class="tp-izq">
+    <button id="tpAppsBtn">⬛ Actividades</button>
+    <span style="color:#00ff41">🐧 ZONA-LINUX</span>
+  </div>
+  <div id="tpClock">--:--</div>
+  <div id="tpRight">
+    <span class="ind">📶 100%</span>
+    <span class="ind">🔊</span>
+    <span class="ind">🔋 87%</span>
+  </div>
+  <div id="tpBar"></div>
+</div>
+<div id="tpAppsMenu"></div>
+
+<!-- DESKTOP -->
+<div id="desktop">
+  <div id="deskIcons"></div>
+</div>
+
+<!-- START MENU -->
+<div id="startMenu"></div>
+
+<!-- TASKBAR -->
+<div id="taskbar">
+  <button id="startBtn">🪖 <span>ZONA</span></button>
+  <div id="taskApps"></div>
+  <div id="clock"></div>
+</div>
+
+<script>
+/* ═══════════ BOOT ═══════════ */
+var BOOT_LINES=[
+  "ZONA-OS BIOS v1.2.0",
+  "SISTEMA: ZONAHACK UNIFIED",
+  "MEMORIA: 8,192 MB OK",
+  "DETECTANDO UNIDADES...",
+  "HDD: /dev/zona0 (256GB) OK",
+  "CARGA DEL KERNEL 0x0040:0x0000",
+  "MONTANDO /root /usr /var",
+  "INICIANDO SERVICIOS DE SEGURIDAD",
+  "AUTENTICANDO OPERADOR...",
+  "BIENVENIDO AL SISTEMA, OPERADOR"
+];
+var bootLinesEl=document.getElementById('bootLines');
+var bootBar=document.getElementById('bootBar');
+var blDone=0,barW=0;
+function typeLine(txt,el,fn){
+  var i=0;el.classList.add('on');
+  var iv=setInterval(function(){
+    el.textContent=txt.slice(0,i);i++;
+    if(i>txt.length){clearInterval(iv);fn&&fn();}
+  },12);
+}
+BOOT_LINES.forEach(function(ln,idx){
+  setTimeout(function(){
+    var el=document.createElement('div');el.className='bline';bootLinesEl.appendChild(el);
+    typeLine('> '+ln,el,function(){blDone++});
+    barW=(idx+1)/BOOT_LINES.length*100;bootBar.style.width=barW+'%';
+  },idx*300);
+});
+setTimeout(function(){document.getElementById('boot').style.opacity=0;setTimeout(function(){document.getElementById('boot').style.display='none'},400);},BOOT_LINES.length*300+700);
+
+/* ═══════════ APPS ═══════════ */
+var APPS={
+  terminal:{i:'💻',name:'Terminal',w:430,h:320,html:function(){return '<div class="term" id="termOut"><span style="color:var(--khaki)">ZONA-OS Terminal v2.0</span>\nEscribí un comando. Ayuda: <b style="color:#00ff41">help</b></div><div class="term" style="height:auto"><div class="in"><span style="color:#00ff41">operador@zona:~$</span><input id="termIn" autocomplete="off" spellcheck="false"></div></div>'}},
+  navegador:{i:'🌐',name:'Navegador',w:480,h:340,html:function(){return '<div style="display:flex;gap:4px;margin-bottom:8px"><input id="navUrl" value="https://offlinevideoplayer.vercel.app" style="flex:1;background:#0a0d09;border:1px solid var(--winb);color:var(--khaki);padding:5px 8px;font-family:inherit;font-size:.7em;outline:none"><button onclick="navGo()" style="background:#12160f;border:1px solid var(--winb);color:#00ff41;padding:5px 10px;cursor:pointer;font-family:inherit">Ir</button></div><iframe id="navFrame" style="width:100%;height:calc(100% - 40px);border:1px solid var(--winb);background:#fff"></iframe>'}},
+  juegos:{i:'🎮',name:'Juegos',w:420,h:360,html:function(){return '<div class="app-grid">'+Object.keys(GAMES).map(function(k){return '<div class="app-tile" onclick="openGame(\''+k+'\')"><div class="i">'+GAMES[k].ico+'</div><div class="l">'+GAMES[k].name+'</div></div>';}).join('')+'</div>'}},
+  info:{i:'🖥️',name:'Info del Sistema',w:360,h:320,html:function(){
+    var d=new Date();
+    return '<div class="sys-row"><span>SO</span><b>ZONA-OS 2.0 "Cerbero"</b></div><div class="sys-row"><span>Núcleo</span><b>zh-kernel 5.15.0</b></div><div class="sys-row"><span>Operador</span><b>'+esc(localStorage.getItem("vh_usuario")||"anon")+'</b></div><div class="sys-row"><span>Hostname</span><b>zona-linux</b></div><div class="sys-row"><span>Uptime</span><b id="upTime">0s</b></div><div class="sys-row"><span>Fecha</span><b>'+d.toLocaleDateString()+'</b></div><div class="sys-row"><span>Hora</span><b id="sysClock"></b></div><div class="sys-row"><span>Arquitectura</span><b>x86_64</b></div><div class="sys-row"><span>Seguridad</span><b style="color:#00ff41">FIREWALL: ACTIVO</b></div><div class="sys-row"><span>Unidad</span><b id="sysUnidad">-</b></div>';
+  }},
+  calc:{i:'🧮',name:'Calculadora',w:240,h:300,html:function(){return '<div class="calc"><div class="d" id="cDisp">0</div><button onclick="cIn(\'7\')">7</button><button onclick="cIn(\'8\')">8</button><button onclick="cIn(\'9\')">9</button><button class="op" onclick="cOp(\'/\')">÷</button><button onclick="cIn(\'4\')">4</button><button onclick="cIn(\'5\')">5</button><button onclick="cIn(\'6\')">6</button><button class="op" onclick="cOp(\'*\')">×</button><button onclick="cIn(\'1\')">1</button><button onclick="cIn(\'2\')">2</button><button onclick="cIn(\'3\')">3</button><button class="op" onclick="cOp(\'-\')">−</button><button onclick="cIn(\'0\')">0</button><button onclick="cOp(\'.\')">.</button><button onclick="cClear()">C</button><button class="op" onclick="cOp(\'+\')">+</button><button class="eq" onclick="cEq()">=</button></div>'}},
+  monitor:{i:'📈',name:'Monitor',w:360,h:300,html:function(){return '<div style="text-align:center;padding:10px;color:var(--khaki);font-size:.7em">ACTIVIDAD DEL SISTEMA</div><canvas id="monC" width="300" height="220" style="width:100%;height:auto"></canvas>'}},
+  notas:{i:'📝',name:'Notas',w:340,h:300,html:function(){return '<textarea id="notasArea" style="width:100%;height:100%;background:#0a0d09;border:1px solid var(--winb);color:var(--khaki);padding:8px;font-family:inherit;font-size:.75em;resize:none;outline:none" placeholder="Notas del operador..."></textarea>'}},
+  rompehielos:{i:'🧠',name:'Memoria',w:360,h:340,html:function(){return '<div style="text-align:center;margin-bottom:8px;color:var(--khaki);font-size:.65em">Memorizá y repetí la secuencia</div><div id="memBoard" style="display:grid;grid-template-columns:repeat(3,60px);gap:6px;justify-content:center;margin:10px 0"></div><div style="text-align:center"><button onclick="memStart()" style="background:#00ff4115;border:1px solid #00ff4155;color:#00ff41;padding:6px 18px;cursor:pointer;font-family:inherit">▶ Iniciar</button></div><div id="memInfo" style="text-align:center;font-size:.7em;color:var(--khaki);margin-top:8px">Nivel: 0</div>'}},
+  editor:{i:'📄',name:'Editor',w:460,h:360,html:function(){return '<div style="display:flex;gap:4px;margin-bottom:6px"><input id="editName" value="documento.txt" style="flex:1;background:#0a0d09;border:1px solid var(--winb);color:var(--khaki);padding:5px 8px;font-family:inherit;font-size:.7em;outline:none"><button onclick="editGuardar()" style="background:#00ff4115;border:1px solid #00ff4155;color:#00ff41;padding:5px 12px;cursor:pointer;font-family:inherit;font-size:.7em">💾 Guardar</button></div><textarea id="editArea" style="width:100%;height:calc(100% - 40px);background:#0a0d09;border:1px solid var(--winb);color:var(--khaki);padding:8px;font-family:inherit;font-size:.75em;resize:none;outline:none" placeholder="Escribí tu documento aquí..."></textarea>'}},
+  reloj:{i:'🕐',name:'Reloj Mundial',w:380,h:340,html:function(){return '<div style="text-align:center;margin-bottom:8px;color:var(--khaki);font-size:.65em">Zonas horarias</div><div id="relojZonas" style="display:flex;flex-direction:column;gap:4px"></div>'}},
+  camara:{i:'📷',name:'Cámara',w:360,h:300,html:function(){return '<div style="text-align:center;color:var(--khaki);font-size:.65em;margin-bottom:8px">Cámara del operador</div><video id="camV" autoplay playsinline muted style="width:100%;border:1px solid var(--winb);background:#000;border-radius:4px"></video><div style="text-align:center;margin-top:8px"><button onclick="camCapturar()" style="background:#00ff4115;border:1px solid #00ff4155;color:#00ff41;padding:6px 16px;cursor:pointer;font-family:inherit">📸 Capturar</button></div><div id="camOut" style="text-align:center;margin-top:6px"></div>'}},
+  files:{i:'🗂️',name:'Archivos',w:520,h:380,html:function(){return '<div class="fm"><div class="fm-side" id="fmSide"></div><div class="fm-main"><div class="fm-path" id="fmPath"></div><div class="fm-grid" id="fmGrid"></div></div></div>'}}
+};
+
+var DESKTOP_ICONS=[
+  {i:'💻',name:'Terminal',app:'terminal'},
+  {i:'🌐',name:'Navegador',app:'navegador'},
+  {i:'🎮',name:'Juegos',app:'juegos'},
+  {i:'🖥️',name:'Info',app:'info'},
+  {i:'🧮',name:'Calculadora',app:'calc'},
+  {i:'📝',name:'Notas',app:'notas'},
+  {i:'📈',name:'Monitor',app:'monitor'},
+  {i:'🧠',name:'Memoria',app:'rompehielos'},
+  {i:'📄',name:'Editor',app:'editor'},
+  {i:'🕐',name:'Reloj',app:'reloj'},
+  {i:'📷',name:'Cámara',app:'camara'},
+  {i:'🗂️',name:'Archivos',app:'files'}
+];
+
+/* GAMES */
+var GAMES={
+  snake:{ico:'🐍',name:'Snake',start:function(){initSnake()}},
+  pong:{ico:'🏓',name:'Pong',start:function(){initPong()}},
+  tres:{ico:'❌⭕',name:'Ta-Te-Ti',start:function(){initTres()}},
+  clicker:{ico:'🖱️',name:'Clicker',start:function(){initClicker()}}
+};
+
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+
+/* ═══════════ DESKTOP + WINDOWS ═══════════ */
+var openApps={};
+var winCount=0;
+function buildDesktop(){
+  var h=DESKTOP_ICONS.map(function(ic){return '<div class="icon" ondblclick="openApp(\''+ic.app+'\')" onclick="selIcon(this)"><div class="i">'+ic.i+'</div><div class="l">'+ic.name+'</div></div>';}).join('');
+  document.getElementById('deskIcons').innerHTML=h;
+}
+function selIcon(el){document.querySelectorAll('.icon').forEach(function(i){i.style.background='transparent';i.style.borderColor='transparent';});el.style.background='rgba(0,255,65,.08)';el.style.borderColor='#00ff4144';}
+function openApp(id){
+  if(openApps[id]&&document.getElementById('win-'+id)){focusWin(id);return;}
+  var a=APPS[id];if(!a)return;
+  var w=document.createElement('div');
+  w.className='win';w.id='win-'+id;
+  var x=60+(winCount%5)*30,y=40+(winCount%5)*24;
+  w.style.left=x+'px';w.style.top=y+'px';w.style.width=a.w+'px';w.style.height=a.h+'px';
+  w.innerHTML='<div class="title"><span>'+a.i+'</span><span class="t">'+a.name+'</span><span class="x" onclick="closeApp(\''+id+'\')">✕</span></div><div class="body">'+a.html()+'</div>';
+  document.body.appendChild(w);
+  winCount++;
+  openApps[id]=w;
+  makeDraggable(w);
+  w.classList.add('open');w.classList.add('focus');
+  addTask(id,a);
+  afterOpen(id);
+}
+function focusWin(id){
+  var w=openApps[id];if(!w)return;
+  document.querySelectorAll('.win').forEach(function(x){x.classList.remove('focus');});
+  w.classList.add('focus');
+  document.querySelectorAll('.tapp').forEach(function(t){t.classList.toggle('act',t.dataset.app===id);});
+}
+function addTask(id,a){
+  var t=document.createElement('div');
+  t.className='tapp';t.dataset.app=id;
+  t.innerHTML=a.i+' '+a.name;
+  t.onclick=function(){if(openApps[id]){var w=openApps[id];if(w.classList.contains('focus')){closeApp(id);}else{focusWin(id);}}else{openApp(id);}};
+  document.getElementById('taskApps').appendChild(t);
+}
+function makeDraggable(w){
+  var h=w.querySelector('.title'),sx,sy,ox,oy,dx=false;
+  h.addEventListener('mousedown',function(e){
+    if(e.target.classList.contains('x')||e.target.closest('.wctl'))return;
+    sx=e.clientX;sy=e.clientY;ox=w.offsetLeft;oy=w.offsetTop;dx=true;focusWin(w.id.replace('win-',''));
+  });
+  document.addEventListener('mousemove',function(e){
+    if(!dx)return;
+    var nx=ox+e.clientX-sx, ny=oy+e.clientY-sy;
+    // Mantener la ventana dentro del viewport (dejando la taskbar libre)
+    var maxX=window.innerWidth-w.offsetWidth-4;
+    var maxY=window.innerHeight-w.offsetHeight-52; // 44 taskbar + margen
+    if(nx<2)nx=2; if(ny<40)ny=40; // debajo del panel superior (34px)
+    if(nx>maxX)nx=maxX; if(ny>maxY)ny=maxY;
+    w.style.left=nx+'px';w.style.top=ny+'px';
+  });
+  document.addEventListener('mouseup',function(){dx=false;});
+}
+
+/* ═══════════ TERMINAL ═══════════ */
+function afterOpen(id){
+  if(id==='terminal'){var inp=document.getElementById('termIn');if(inp){inp.addEventListener('keydown',function(e){if(e.key==='Enter')termCmd(inp.value);});inp.focus();}}
+  if(id==='info'){startInfo();}
+  if(id==='monitor'){startMonitor();}
+  if(id==='notas'){var ta=document.getElementById('notasArea');if(ta){ta.value=localStorage.getItem('vh_notas')||'';ta.addEventListener('input',function(){localStorage.setItem('vh_notas',ta.value);});}}
+  if(id==='editor'){var ea=document.getElementById('editArea');if(ea){ea.value=localStorage.getItem('vh_edit_doc')||'';ea.addEventListener('input',function(){localStorage.setItem('vh_edit_doc',ea.value);});}}
+  if(id==='reloj'){startReloj();}
+  if(id==='camara'){startCam();}
+  if(id==='files'){fmInit();}
+}
+function termCmd(cmd){
+  var out=document.getElementById('termOut');
+  var inp=document.getElementById('termIn');
+  if(!out)return;
+  var c=cmd.trim().toLowerCase().split(/\s+/);
+  out.innerHTML+='\n<span style="color:#00ff41">operador@zona:~$</span> '+esc(cmd)+'\n';
+  var r='';
+  switch(c[0]){
+    case 'help': case 'ayuda': r='Comandos:\n  help       - muestra ayuda\n  quien/whoami - operador actual\n  fecha      - fecha y hora\n  hora       - hora actual\n  rango      - tu rango militar\n  ram/memoria - memoria del sistema\n  version    - version del SO\n  zona       - abrir ZonaHack\n  juegos     - lista de juegos\n  ip         - direccion de red\n  whoami     - usuario actual\n  echo TXT   - repetir texto\n  limpiar/clear - limpiar pantalla\n  apagar     - cerrar sesion\n  reiniciar  - recargar el SO\n  salir      - cerrar terminal';break;
+    case 'quien': case 'whoami': r='Operador: '+esc(localStorage.getItem("vh_usuario")||"anon");break;
+    case 'fecha': r=String(new Date());break;
+    case 'hora': r='Hora: '+new Date().toLocaleTimeString();break;
+    case 'ip': r='Dirección IP local: 192.168.1.'+(Math.floor(Math.random()*200)+1)+' (RED ZONA)';break;
+    case 'memoria': case 'ram': r='Memoria RAM: 8,192 MB (utilizada: '+(Math.floor(Math.random()*2000)+2500)+' MB / '+(Math.floor(Math.random()*20)+35)+'%)';break;
+    case 'version': r='ZONA-OS 2.0 "Cerbero" (zh-kernel 5.15.0)';break;
+    case 'zona': r='Abriendo ZonaHack...';setTimeout(function(){window.open('https://offlinevideoplayer.vercel.app','_blank');},200);break;
+    case 'juegos': r='Juegos: snake, pong, tres, clicker. Escribí: juegos NOMBRE';break;
+    case 'echo': r=esc(c.slice(1).join(' '));break;
+    case 'clear': case 'limpiar': out.innerHTML='';break;
+    case 'apagar': case 'salir': closeApp('terminal');break;
+    case 'reiniciar': r='Reiniciando ZONA-OS...';setTimeout(function(){location.reload();},600);break;
+    default:
+      if(c[0]==='juegos'&&GAMES[c[1]]){openGame(c[1]);r='Lanzando '+GAMES[c[1]].name+'...';}
+      else r='Comando no reconocido: '+esc(cmd)+' (escribí help)';
+  }
+  if(r)out.innerHTML+='<span style="color:var(--khaki)">'+r+'</span>';
+  out.scrollTop=out.scrollHeight;
+  inp.value='';
+}
+
+/* ═══════════ NAVEGADOR ═══════════ */
+function navGo(){var u=document.getElementById('navUrl').value;var f=document.getElementById('navFrame');if(f)f.src=u;}
+
+/* ═══════════ CALC ═══════════ */
+var cCur='',cPrev='',cOpv='';
+function cDisp(){var d=document.getElementById('cDisp');if(d)d.textContent=cCur||cPrev||'0';}
+function cIn(v){cCur+=v;cDisp();}
+function cOp(o){if(o==='.'){if(cCur.indexOf('.')<0)cCur+='.';cDisp();return;}if(cCur!==''){cPrev=cCur;cCur='';}cOpv=o;cDisp();}
+function cEq(){if(!cOpv||cPrev==='')return;var a=parseFloat(cPrev),b=parseFloat(cCur||cPrev);var r=cOpv==='+'?a+b:cOpv==='-'?a-b:cOpv==='*'?a*b:cOpv==='/'?(b===0?'ERR':a/b):0;cCur=String(r);cPrev='';cOpv='';cDisp();}
+function cClear(){cCur='';cPrev='';cOpv='';cDisp();}
+
+/* ═══════════ INFO ═══════════ */
+var upT0=Date.now();
+function startInfo(){var el=document.getElementById('upTime');if(el){var iv=setInterval(function(){if(!document.getElementById('upTime')){clearInterval(iv);return;}el.textContent=Math.floor((Date.now()-upT0)/1000)+'s';},1000);}
+  var sc=document.getElementById('sysClock');if(sc){var iv2=setInterval(function(){if(!document.getElementById('sysClock')){clearInterval(iv2);return;}sc.textContent=new Date().toLocaleTimeString();},1000);}
+  var un=document.getElementById('sysUnidad');if(un&&window.ZHRango){try{var u=window.ZHRango.rangoActual().rango.nombre||'—';un.textContent=u;}catch(e){}}}
+
+/* ═══════════ MONITOR ═══════════ */
+function startMonitor(){var c=document.getElementById('monC');if(!c)return;var ctx=c.getContext('2d');var pts=[];for(var i=0;i<60;i++)pts.push(Math.random()*30+30);var iv=setInterval(function(){if(!document.getElementById('monC')){clearInterval(iv);return;}pts.shift();pts.push(Math.random()*40+20);ctx.fillStyle='#0a0d09';ctx.fillRect(0,0,c.width,c.height);ctx.strokeStyle='rgba(0,255,65,.3)';for(var i=1;i<5;i++){ctx.beginPath();ctx.moveTo(0,c.height/5*i);ctx.lineTo(c.width,c.height/5*i);ctx.stroke();}ctx.strokeStyle='#00ff41';ctx.lineWidth=2;ctx.beginPath();for(var i=0;i<pts.length;i++){var x=i/60*c.width;var y=c.height-pts[i];if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);}ctx.stroke();},150);}
+
+/* ═══════════ EDITOR ═══════════ */
+function editGuardar(){
+  var name=document.getElementById('editName').value||'documento.txt';
+  var txt=document.getElementById('editArea').value;
+  try{localStorage.setItem('vh_edit_doc',txt);}catch(e){}
+  // Descargar como archivo
+  var blob=new Blob([txt],{type:'text/plain'});
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);a.download=name;a.click();
+  URL.revokeObjectURL(a.href);
+  alert('✅ Archivo "'+name+'" guardado');
+}
+
+/* ═══════════ RELOJ MUNDIAL ═══════════ */
+function startReloj(){
+  var zonas=[
+    {n:'🕐 Buenos Aires (AR)',tz:'America/Argentina/Buenos_Aires'},
+    {n:'🕐 Ciudad de México (MX)',tz:'America/Mexico_City'},
+    {n:'🕐 Madrid (ES)',tz:'Europe/Madrid'},
+    {n:'🕐 Nueva York (US)',tz:'America/New_York'},
+    {n:'🕐 Tokio (JP)',tz:'Asia/Tokyo'},
+    {n:'🕐 Londres (UK)',tz:'Europe/London'}
+  ];
+  function pintar(){
+    var cont=document.getElementById('relojZonas');
+    if(!cont){clearInterval(iv);return;}
+    cont.innerHTML=zonas.map(function(z){
+      var t;
+      try{t=new Date().toLocaleTimeString('es-AR',{timeZone:z.tz,hour:'2-digit',minute:'2-digit',second:'2-digit'});}
+      catch(e){t='--:--:--';}
+      var fecha;
+      try{fecha=new Date().toLocaleDateString('es-AR',{timeZone:z.tz,day:'2-digit',month:'2-digit'});}catch(e){fecha='';}
+      return '<div class="sys-row"><span>'+z.n+'</span><b>'+t+' <span style="color:rgba(194,178,128,.4);font-size:.85em">'+fecha+'</span></b></div>';
+    }).join('');
+  }
+  var iv=setInterval(pintar,1000);
+  pintar();
+}
+
+/* ═══════════ CÁMARA ═══════════ */
+var camStream=null;
+function startCam(){
+  var v=document.getElementById('camV');
+  if(!v)return;
+  if(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia){
+    navigator.mediaDevices.getUserMedia({video:true,audio:false}).then(function(stream){
+      camStream=stream;v.srcObject=stream;v.play().catch(function(){});
+    }).catch(function(){
+      var out=document.getElementById('camOut');
+      if(out)out.innerHTML='<span style="color:#e74c3c;font-size:.65em">✗ Cámara no disponible o sin permiso</span>';
+    });
+  }else{
+    var out=document.getElementById('camOut');
+    if(out)out.innerHTML='<span style="color:#e74c3c;font-size:.65em">✗ Tu dispositivo no soporta cámara</span>';
+  }
+}
+function camCapturar(){
+  var v=document.getElementById('camV');
+  var out=document.getElementById('camOut');
+  if(!v||!v.srcObject){if(out)out.innerHTML='<span style="color:#e74c3c;font-size:.65em">Cámara inactiva</span>';return;}
+  var c=document.createElement('canvas');
+  c.width=v.videoWidth||320;c.height=v.videoHeight||240;
+  c.getContext('2d').drawImage(v,0,0,c.width,c.height);
+  var a=document.createElement('a');
+  a.href=c.toDataURL('image/png');a.download='captura_zona.png';a.click();
+  if(out)out.innerHTML='<span style="color:#00ff41;font-size:.65em">✅ Captura guardada</span>';
+}
+// Detener la cámara al cerrar la ventana
+function closeApp(id){
+  var w=openApps[id];if(w){w.remove();delete openApps[id];}
+  var t=document.querySelector('.tapp[data-app="'+id+'"]');if(t)t.remove();
+  if(id==='camara'&&camStream){camStream.getTracks().forEach(function(tr){tr.stop();});camStream=null;}
+}
+
+/* ═══════════ EXPLORADOR DE ARCHIVOS (estilo Linux) ═══════════ */
+// Sistema de archivos virtual tipo Linux, persistido en localStorage
+var FM_KEY="zh_fs";
+var fmCur="/home/operador";
+var fmHist=[];
+
+// Estructura inicial del sistema de archivos
+function fmDefaultFS(){
+  return {
+    "/": {
+      "bin":{}, "etc":{"passwd":"operador:x:1000:1000::/home/operador:/bin/bash\nroot:x:0:0::/root:/bin/bash\n",
+                      "hostname":"zona-linux\n","motd":"Bienvenido a ZONA-LINUX\n"},
+      "home":{"operador":{"Documentos":{},"Descargas":{},"Imagenes":{},".bashrc":"# config de operador\nalias ll='ls -la'\n","nota.txt":"Hola operador, este es tu sistema.\n"}},
+      "usr":{"bin":{},"lib":{},"share":{}},
+      "var":{"log":{"sistema.log":"[OK] ZONA-OS iniciado correctamente\n[OK] Servicios de seguridad activos\n"}},
+      "tmp":{}, "media":{}, "root":{}, "opt":{}, "mnt":{}
+    }
+  };
+}
+function fmLoad(){
+  try{var d=JSON.parse(localStorage.getItem(FM_KEY));if(d&&d["/"])return d;}catch(e){}
+  return fmDefaultFS();
+}
+function fmSave(fs){try{localStorage.setItem(FM_KEY,JSON.stringify(fs));}catch(e){}}
+// Obtener el objeto de una ruta (dir o archivo)
+function fmGet(path){
+  var fs=fmLoad();
+  var parts=path.split("/").filter(Boolean);
+  var node=fs["/"];
+  for(var i=0;i<parts.length;i++){
+    if(!node||typeof node!=="object"||node[parts[i]]===undefined)return null;
+    node=node[parts[i]];
+  }
+  return node;
+}
+function fmIsDir(node){return node&&typeof node==="object"&&!Array.isArray(node);}
+// Navegar a una ruta
+function fmNav(path){
+  if(!path||path[0]!=="/")path="/"+path;
+  path=path.replace(/\/+/g,"/").replace(/\/$/,"")||"/";
+  var node=fmGet(path);
+  if(!node||!fmIsDir(node))return;
+  fmHist.push(fmCur);
+  fmCur=path;
+  fmRender();
+}
+function fmGoBack(){
+  if(fmHist.length){fmCur=fmHist.pop();fmRender();}
+}
+// Renderizar el explorador
+function fmRender(){
+  var side=document.getElementById("fmSide");
+  var pathEl=document.getElementById("fmPath");
+  var grid=document.getElementById("fmGrid");
+  if(!side||!grid)return;
+  var node=fmGet(fmCur);
+  // Barra lateral con lugares
+  var lugares=[
+    {n:"🏠 Inicio",p:"/home/operador"},{n:"📁 Raíz",p:"/"},{n:"📂 Documentos",p:"/home/operador/Documentos"},
+    {n:"🗄️ /etc",p:"/etc"},{n:"💾 /usr",p:"/usr"},{n:"📊 /var",p:"/var"},
+    {n:"🗑️ /tmp",p:"/tmp"},{n:"📦 /opt",p:"/opt"},{n:"🔧 /bin",p:"/bin"}
+  ];
+  side.innerHTML='<div class="fm-fav" style="color:#00ff41;letter-spacing:1px">LUGARES</div>'+
+    lugares.map(function(l){return '<div class="fm-fav'+(fmCur===l.p?' act':'')+'" onclick="fmNav(\''+l.p+'\')">'+l.n+'</div>';}).join('')+
+    '<div style="margin-top:10px;border-top:1px solid var(--winb);padding-top:6px">'+
+    '<div class="fm-fav" onclick="fmNuevaCarpeta()">📁 Nueva carpeta</div>'+
+    '<div class="fm-fav" onclick="fmNuevoArchivo()">📄 Nuevo archivo</div>'+
+    '</div>';
+  // Breadcrumb de ruta
+  var partes=fmCur.split("/").filter(Boolean);
+  var acc="";
+  pathEl.innerHTML='<span style="color:#00ff41">📁</span> ';
+  if(fmCur!=="/"){
+    pathEl.innerHTML+='<span class="cr" onclick="fmNav(\'/\')">/</span>';
+  }
+  partes.forEach(function(p,i){
+    acc+="/"+p;
+    pathEl.innerHTML+='<span class="cr" onclick="fmNav(\''+acc+'\')">'+esc(p)+'</span>/';
+  });
+  // Grilla de contenido
+  if(!node||!fmIsDir(node)){grid.innerHTML='<div class="fm-empty">Carpeta vacía o inaccesible</div>';return;}
+  var keys=Object.keys(node);
+  if(!keys.length){grid.innerHTML='<div class="fm-empty">Carpeta vacía</div>';return;}
+  grid.innerHTML=keys.map(function(k){
+    var n=node[k];
+    if(fmIsDir(n)){
+      return '<div class="fm-item dir" ondblclick="fmNav(\''+fmCur+"/"+k+'\')" onclick="fmSel(this)"><div class="i">📁</div><div class="l">'+esc(k)+'</div></div>';
+    }else{
+      return '<div class="fm-item" ondblclick="fmAbrirArchivo(\''+fmCur+"/"+k+'\')" onclick="fmSel(this)"><div class="i">📄</div><div class="l">'+esc(k)+'</div></div>';
+    }
+  }).join('');
+}
+function fmSel(el){
+  var all=document.querySelectorAll("#fmGrid .fm-item");
+  all.forEach(function(i){i.style.background='';i.style.borderColor='';});
+  el.style.background='rgba(0,255,65,.08)';el.style.borderColor='#00ff4155';
+}
+// Abrir archivo de texto en el editor
+function fmAbrirArchivo(path){
+  var node=fmGet(path);
+  if(!node)return;
+  openApp("editor");
+  setTimeout(function(){
+    var ea=document.getElementById("editArea");
+    if(ea){ea.value=node;}
+  },50);
+}
+function fmNuevaCarpeta(){
+  var n=prompt("Nombre de la carpeta:");
+  if(!n)return;
+  n=n.trim().replace(/[/\\]/g,"");
+  if(!n)return;
+  var fs=fmLoad();
+  var node=fmGet(fmCur);
+  if(!node||!fmIsDir(node))return;
+  if(node[n]){alert("Ya existe un elemento con ese nombre");return;}
+  node[n]={};
+  fmSave(fs);fmRender();
+}
+function fmNuevoArchivo(){
+  var n=prompt("Nombre del archivo (ej: notas.txt):");
+  if(!n)return;
+  n=n.trim().replace(/[/\\]/g,"");
+  if(!n)return;
+  var fs=fmLoad();
+  var node=fmGet(fmCur);
+  if(!node||!fmIsDir(node))return;
+  if(node[n]){alert("Ya existe un elemento con ese nombre");return;}
+  node[n]="";
+  fmSave(fs);fmRender();
+}
+function fmInit(){fmCur="/home/operador";fmHist=[];fmRender();}
+
+/* ═══════════ GAMES ═══════════ */
+function openGame(id){openApp('juegos');var body=document.querySelector('#win-juegos .body');if(body&&GAMES[id])body.innerHTML='<div style="margin-bottom:6px"><button onclick="volverJuegos()" style="background:none;border:none;color:var(--khaki);cursor:pointer;font-size:.7em">← Volver</button></div>'+(GAMES[id].html?GAMES[id].html():'')+'<div id="gameZone"></div>';GAMES[id].start();}
+function volverJuegos(){var body=document.querySelector('#win-juegos .body');if(body)body.innerHTML=APPS.juegos.html();}
+/* ---- Snake ---- */
+var snake={running:false};
+function initSnake(){var z=document.getElementById('gameZone');if(!z)return;z.innerHTML='<canvas id="snakeC" width="300" height="300"></canvas><div style="text-align:center;margin-top:6px;font-size:.65em;color:var(--khaki)">Flechas para mover · Pausa: ESPACIO</div>';var c=document.getElementById('snakeC');var ctx=c.getContext('2d');var g=15,rows=20,cols=20;var s=[{x:10,y:10}];var dir={x:1,y:0},nd={x:1,y:0};var food={x:15,y:10};var score=0;var gameOver=false,playing=false;
+  function spawn(){food={x:Math.floor(Math.random()*cols),y:Math.floor(Math.random()*rows)};for(var i=0;i<s.length;i++){if(s[i].x===food.x&&s[i].y===food.y)spawn();}}
+  spawn();
+  function step(){if(gameOver||!playing)return;dir=nd;var h={x:s[0].x+dir.x,y:s[0].y+dir.y};if(h.x<0||h.x>=cols||h.y<0||h.y>=rows){gameOver=true;draw();return;}for(var i=0;i<s.length;i++){if(s[i].x===h.x&&s[i].y===h.y){gameOver=true;draw();return;}}s.unshift(h);if(h.x===food.x&&h.y===food.y){score++;spawn();}else{s.pop();}draw();}
+  function draw(){ctx.fillStyle='#0a0d09';ctx.fillRect(0,0,c.width,c.height);ctx.strokeStyle='rgba(0,255,65,.1)';for(var i=0;i<=cols;i++){ctx.beginPath();ctx.moveTo(i*g,0);ctx.lineTo(i*g,c.height);ctx.stroke();ctx.beginPath();ctx.moveTo(0,i*g);ctx.lineTo(c.width,i*g);ctx.stroke();}ctx.fillStyle='#e74c3c';ctx.fillRect(food.x*g+1,food.y*g+1,g-2,g-2);for(var i=0;i<s.length;i++){ctx.fillStyle=i===0?'#00ff41':'#2ecc71';ctx.fillRect(s[i].x*g+1,s[i].y*g+1,g-2,g-2);}ctx.fillStyle='var(--khaki)';ctx.font='10px monospace';ctx.fillText('PUNTOS: '+score,6,12);if(gameOver){ctx.fillStyle='#e74c3c';ctx.font='18px monospace';ctx.fillText('GAME OVER',80,150);ctx.fillText('ESPACIO = jugar',70,172);}}
+  window.addEventListener('keydown',function k(e){if(e.key==='ArrowUp')nd={x:0,y:-1};else if(e.key==='ArrowDown')nd={x:0,y:1};else if(e.key==='ArrowLeft')nd={x:-1,y:0};else if(e.key==='ArrowRight')nd={x:1,y:0};else if(e.key===' '){e.preventDefault();if(gameOver){s=[{x:10,y:10}];dir={x:1,y:0};nd={x:1,y:0};score=0;gameOver=false;spawn();}playing=!playing;}if(snake.running===false){snake.running=true;setInterval(step,120);}});
+  draw();
+}
+/* ---- Pong ---- */
+function initPong(){var z=document.getElementById('gameZone');if(!z)return;z.innerHTML='<canvas id="pongC" width="360" height="240"></canvas><div style="text-align:center;font-size:.6em;color:var(--khaki)">W/S o flechas · el robot no perdona</div>';var c=document.getElementById('pongC');var ctx=c.getContext('2d');var W=360,H=240;var pad=6,pw=8,ph=40;var p1={x:8,y:H/2-ph/2},p2={x:W-pad-pw-8,y:H/2-ph/2};var b={x:W/2,y:H/2,vx:3,vy:2,r:4};var s1=0,s2=0;
+  function step(){b.x+=b.vx;b.y+=b.vy;if(b.y<0||b.y>H){b.vy*=-1;b.y=Math.max(0,Math.min(H,b.y));}if(b.x<p1.x+pw+pad&&b.x>p1.x&&b.y>p1.y&&b.y<p1.y+ph){b.vx*=-1;b.x=p1.x+pw+pad;}if(b.x>p2.x-pad&&b.x<p2.x+pw&&b.y>p2.y&&b.y<p2.y+ph){b.vx*=-1;b.x=p2.x-pad;}if(b.x<0){s2++;reset(1);}if(b.x>W){s1++;reset(0);}if(b.y>p2.y+ph/2-10)p2.y+=2;else if(b.y<p2.y+ph/2+10)p2.y-=2;p2.y=Math.max(0,Math.min(H-ph,p2.y));
+    ctx.fillStyle='#0a0d09';ctx.fillRect(0,0,W,H);ctx.strokeStyle='rgba(0,255,65,.2)';ctx.beginPath();ctx.setLineDash([5,5]);ctx.moveTo(W/2,0);ctx.lineTo(W/2,H);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle='#00ff41';ctx.fillRect(p1.x,p1.y,pw,ph);ctx.fillRect(p2.x,p2.y,pw,ph);ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,Math.PI*2);ctx.fill();ctx.fillStyle='var(--khaki)';ctx.font='14px monospace';ctx.fillText(s1+'  :  '+s2,W/2-20,18);}
+  function reset(dir){b={x:W/2,y:H/2,vx:dir?3:-3,vy:2,r:4};}
+  window.addEventListener('keydown',function k(e){if(e.key==='w'||e.key==='ArrowUp')p1.y-=16;if(e.key==='s'||e.key==='ArrowDown')p1.y+=16;p1.y=Math.max(0,Math.min(H-ph,p1.y));});
+  setInterval(step,20);
+}
+/* ---- Ta-Te-Ti ---- */
+var tresState;
+function initTres(){var z=document.getElementById('gameZone');if(!z)return;tresState={t:['','','','','','','','',''],turn:'X',over:false};z.innerHTML='<div style="text-align:center;color:var(--khaki);font-size:.7em;margin-bottom:6px">Turno: <span id="tresTurn">X</span></div><div style="display:grid;grid-template-columns:repeat(3,70px);gap:4px;justify-content:center">'+[0,1,2,3,4,5,6,7,8].map(function(i){return '<div id="tres'+i+'" onclick="tresPlay('+i+')" style="width:70px;height:70px;border:1px solid var(--winb);display:flex;align-items:center;justify-content:center;font-size:2em;cursor:pointer;background:#12160f">'+tresState.t[i]+'</div>';}).join('')+'</div><div style="text-align:center;margin-top:8px"><button onclick="initTres()" style="background:none;border:1px solid var(--winb);color:#00ff41;padding:5px 14px;cursor:pointer;font-family:inherit">Reiniciar</button></div>';}
+function tresPlay(i){if(tresState.over||tresState.t[i])return;tresState.t[i]=tresState.turn;document.getElementById('tres'+i).textContent=tresState.turn;var w=checkTres();if(w){tresState.over=true;alert((w==='empate'?'Empate':w+' gana! 🎉'));return;}tresState.turn=tresState.turn==='X'?'O':'X';document.getElementById('tresTurn').textContent=tresState.turn;}
+function checkTres(){var t=tresState.t;var l=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];for(var i=0;i<l.length;i++){var a=l[i][0],b=l[i][1],c=l[i][2];if(t[a]&&t[a]===t[b]&&t[b]===t[c])return t[a];}return t.indexOf('')<0?'empate':'';}
+/* ---- Clicker ---- */
+var clickerState;
+function initClicker(){var z=document.getElementById('gameZone');if(!z)return;clickerState={clicks:0};z.innerHTML='<div style="text-align:center;padding:10px"><div style="font-size:3em">🖱️</div><div style="color:var(--khaki);font-size:.7em;margin:8px 0">Clickeá lo más rápido posible (10s)</div><button onclick="clickerClick()" style="width:120px;height:120px;border-radius:50%;border:2px solid #00ff41;background:#00ff4110;color:#00ff41;font-size:1em;cursor:pointer;font-family:inherit">CLIC</button><div style="color:#00ff41;font-size:1.4em;margin-top:10px" id="clickCount">0</div><div style="font-size:.6em;color:var(--khaki)">Tiempo: <span id="clickTime">10</span>s</div></div>';var t=10;var iv=setInterval(function(){t--;var el=document.getElementById('clickTime');if(el)el.textContent=t;if(t<=0){clearInterval(iv);alert('¡'+clickerState.clicks+' clicks!');}},1000);}
+function clickerClick(){clickerState.clicks++;var el=document.getElementById('clickCount');if(el)el.textContent=clickerState.clicks;}
+
+/* ═══════════ START MENU + CLOCK ═══════════ */
+function buildStart(){var items=DESKTOP_ICONS.map(function(ic){return '<div class="sm-i" onclick="openApp(\''+ic.app+'\');toggleStart(0)"><span class="ico">'+ic.i+'</span>'+ic.name+'</div>';}).join('')+'<div class="sm-i" onclick="toggleStart(0);document.getElementById(\'boot\').style.display=\'none\';"><span class="ico">🔒</span>Cerrar sesión</div>';
+  document.getElementById('startMenu').innerHTML='<div class="sm-h">🪖 Menú de operador</div>'+items;}
+function toggleStart(force){var m=document.getElementById('startMenu');var show=(force===undefined)?!m.classList.contains('show'):force;m.classList.toggle('show',show);}
+document.addEventListener('click',function(e){if(!e.target.closest('#startMenu')&&!e.target.closest('#startBtn'))toggleStart(0);});
+function clockTick(){var d=new Date();var el=document.getElementById('clock');if(el)el.textContent=d.toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit'})+' '+d.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});}
+
+/* ═══════════ PANEL SUPERIOR (Linux/GNOME) ═══════════ */
+function tpBuild(){
+  var m=document.getElementById('tpAppsMenu');
+  if(!m)return;
+  var items=DESKTOP_ICONS.map(function(ic){
+    return '<div class="am-i" onclick="openApp(\''+ic.app+'\');tpToggle(0)"><span class="ico">'+ic.i+'</span>'+ic.name+'</div>';
+  }).join('');
+  m.innerHTML='<div class="am-h">🐧 Aplicaciones</div>'+items;
+}
+function tpToggle(force){
+  var m=document.getElementById('tpAppsMenu');
+  if(!m)return;
+  var show=(force===undefined)?!m.classList.contains('show'):force;
+  m.classList.toggle('show',show);
+}
+function tpClockTick(){
+  var el=document.getElementById('tpClock');
+  if(!el)return;
+  el.textContent=new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
+}
+
+document.getElementById('tpAppsBtn').addEventListener('click',function(e){e.stopPropagation();tpToggle();});
+document.addEventListener('click',function(e){
+  if(!e.target.closest('#tpAppsMenu')&&!e.target.closest('#tpAppsBtn'))tpToggle(0);
+});
+
+document.getElementById('startBtn').addEventListener('click',function(){toggleStart();});
+tpBuild();tpClockTick();setInterval(tpClockTick,1000);
+buildDesktop();buildStart();clockTick();setInterval(clockTick,15000);
+</script>
+</body>
+</html>

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>📡 ZonaHack - Monitor Realtime</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0a;color:#c8d6e5;font-family:'Courier New',monospace;padding:10px;min-height:100vh}
+.header{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(0,255,65,.1);margin-bottom:10px}
+.header h1{color:#00ff41;font-size:1em;text-shadow:0 0 6px rgba(0,255,65,.1)}
+.header .status{font-size:.65em;color:rgba(200,214,229,.3)}
+.stats{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.stat{border:1px solid rgba(0,255,65,.06);border-radius:3px;padding:6px 10px;font-size:.65em;flex:1;min-width:80px;text-align:center}
+.stat .num{color:#00ff41;font-size:1.3em;font-weight:bold}
+.stat .lbl{color:rgba(200,214,229,.3);margin-top:2px}
+.filtros{display:flex;gap:4px;margin-bottom:8px;flex-wrap:wrap}
+.filtros button{padding:3px 10px;border:1px solid rgba(0,255,65,.08);border-radius:2px;background:rgba(0,255,65,.02);color:rgba(0,255,65,.5);cursor:pointer;font-size:.6em;font-family:'Courier New',monospace;transition:.2s}
+.filtros button:hover,.filtros button.activo{border-color:rgba(0,255,65,.2);color:#00ff41;background:rgba(0,255,65,.05)}
+#log{border:1px solid rgba(0,255,65,.06);border-radius:3px;max-height:70vh;overflow-y:auto;padding:5px;font-size:.68em;line-height:1.5}
+#log::-webkit-scrollbar{width:3px}
+#log::-webkit-scrollbar-thumb{background:rgba(0,255,65,.1);border-radius:2px}
+.evento{padding:4px 6px;border-bottom:1px solid rgba(0,255,65,.03);animation:fadeIn .15s;display:flex;gap:6px;align-items:flex-start}
+.evento .hora{color:rgba(200,214,229,.15);white-space:nowrap;font-size:.85em;min-width:60px}
+.evento .tabla{color:#00ff41;min-width:80px;font-weight:bold}
+.evento .accion{min-width:50px;font-weight:bold}
+.evento .accion.INSERT{color:#2ecc71}
+.evento .accion.UPDATE{color:#f1c40f}
+.evento .accion.DELETE{color:#e74c3c}
+.evento .datos{color:rgba(200,214,229,.4);word-break:break-all;flex:1}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:translateY(0)}}
+.vacio{text-align:center;padding:30px;color:rgba(200,214,229,.15);font-size:.8em}
+.footer{text-align:center;padding:10px 0;font-size:.6em;color:rgba(200,214,229,.1)}
+.limpiar{padding:4px 12px;border:1px solid rgba(231,76,60,.15);border-radius:2px;background:rgba(231,76,60,.03);color:#e74c3c;cursor:pointer;font-size:.6em;font-family:'Courier New',monospace}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>📡 Realtime Monitor</h1>
+  <div class="status" id="status">Desconectado</div>
+</div>
+
+<div class="stats">
+  <div class="stat"><div class="num" id="statEventos">0</div><div class="lbl">Eventos</div></div>
+  <div class="stat"><div class="num" id="statConexion">0</div><div class="lbl">Conectado</div></div>
+  <div class="stat"><div class="num" id="statTablas">0</div><div class="lbl">Tablas</div></div>
+</div>
+
+<div class="filtros" id="filtros">
+  <button class="activo" onclick="toggleFiltro('todas',this)">Todas</button>
+  <button onclick="toggleFiltro('logs',this)">📋 logs</button>
+  <button onclick="toggleFiltro('chat_mensajes',this)">💬 chat</button>
+  <button onclick="toggleFiltro('me_gusta',this)">👍 likes</button>
+  <button onclick="toggleFiltro('favoritos',this)">❤ favs</button>
+  <button onclick="toggleFiltro('videos',this)">🎬 videos</button>
+  <button onclick="toggleFiltro('mantenimiento',this)">🔧 mantenimiento</button>
+  <button onclick="toggleFiltro('progreso',this)">📺 progreso</button>
+  <button onclick="toggleFiltro('visitas',this)">👁 visitas</button>
+  <button class="limpiar" onclick="limpiarLog()">🗑 Limpiar</button>
+</div>
+
+<div id="log"><div class="vacio">Conectando al servidor Realtime...</div></div>
+<div class="footer">ZonaHack Monitor - Los datos se actualizan en tiempo real via Supabase WebSocket</div>
+
+<script>
+var WS_URL = "wss://xfwolaurpeofysnymqle.supabase.co/realtime/v1/websocket?apikey=sb_publishable_3VvBUD5Bdu3Uaq59fJ99MQ_XDCtujUU&vsn=1.0.0";
+var TABLAS = ["logs","chat_mensajes","me_gusta","favoritos","videos","mantenimiento","progreso","visitas","vip","amigos","canales_vivo","actualizaciones"];
+var filtroActivo = "todas";
+var eventos = 0;
+var ws = null;
+
+function conectar(){
+  try{
+    ws = new WebSocket(WS_URL);
+    ws.onopen = function(){
+      document.getElementById("status").textContent = "🟢 Conectado";
+      document.getElementById("statConexion").textContent = "1";
+      TABLAS.forEach(function(t){
+        ws.send(JSON.stringify({topic:"realtime:"+t, event:"phx_join", payload:{}, ref:1}));
+      });
+      document.getElementById("statTablas").textContent = TABLAS.length;
+      agregarEvento({tabla:"sistema",accion:"CONECTADO",datos:"Monitor Realtime iniciado"});
+    };
+    ws.onmessage = function(e){
+      try{
+        var msg = JSON.parse(e.data);
+        if(msg.event === "INSERT" || msg.event === "UPDATE" || msg.event === "DELETE"){
+          var tabla = (msg.topic||"").replace("realtime:","");
+          var datos = msg.payload ? JSON.stringify(msg.payload.record || msg.payload.old_record || {}, null, 1).slice(0,300) : "{}";
+          agregarEvento({tabla:tabla, accion:msg.event, datos:datos});
+          eventos++;
+          document.getElementById("statEventos").textContent = eventos;
+        }
+      }catch(err){}
+    };
+    ws.onclose = function(){
+      document.getElementById("status").textContent = "🔴 Desconectado";
+      document.getElementById("statConexion").textContent = "0";
+      setTimeout(conectar, 3000);
+    };
+    ws.onerror = function(){
+      document.getElementById("status").textContent = "⚠️ Error";
+    };
+  }catch(e){}
+}
+
+function agregarEvento(ev){
+  var log = document.getElementById("log");
+  var vacio = log.querySelector(".vacio");
+  if(vacio) log.innerHTML = "";
+
+  // Aplicar filtro
+  if(filtroActivo !== "todas" && ev.tabla !== filtroActivo) return;
+
+  var d = document.createElement("div");
+  d.className = "evento";
+  var hora = new Date().toLocaleTimeString();
+  d.innerHTML =
+    '<span class="hora">' + hora + '</span>' +
+    '<span class="tabla">' + ev.tabla + '</span>' +
+    '<span class="accion ' + ev.accion + '">' + ev.accion + '</span>' +
+    '<span class="datos">' + esc(ev.datos) + '</span>';
+  log.appendChild(d);
+  log.scrollTop = log.scrollHeight;
+
+  // Limitar a 500 eventos
+  while(log.children.length > 500) log.removeChild(log.firstChild);
+}
+
+function toggleFiltro(tabla, btn){
+  filtroActivo = tabla;
+  document.querySelectorAll("#filtros button").forEach(function(b){b.classList.remove("activo");});
+  if(btn) btn.classList.add("activo");
+  // Re-aplicar filtro: mostrar/ocultar eventos existentes
+  var log = document.getElementById("log");
+  Array.from(log.children).forEach(function(ev){
+    var t = (ev.querySelector(".tabla")||{}).textContent || "";
+    if(filtroActivo === "todas" || t === filtroActivo){
+      ev.style.display = "flex";
+    } else {
+      ev.style.display = "none";
+    }
+  });
+}
+
+function limpiarLog(){
+  document.getElementById("log").innerHTML = '<div class="vacio">Eventos limpiados</div>';
+  eventos = 0;
+  document.getElementById("statEventos").textContent = "0";
+}
+
+function esc(s){
+  if(!s) return "";
+  return s.replace(/[&<>"]/g,function(m){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m];}).slice(0,500);
+}
+
+conectar();
+</script>
+</body>
+</html>

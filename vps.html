@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="theme-color" content="#0a0a0a">
+<title>VPS Control</title>
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/icon_96.png" type="image/png">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Courier New',Courier,monospace;background:#0a0a0a;color:#c8d6e5;min-height:100vh}
+body::before{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,255,65,.015) 2px,rgba(0,255,65,.015) 4px),radial-gradient(circle at 20% 50%,rgba(0,255,65,.03) 0,transparent 50%);pointer-events:none;z-index:99998}
+.header{background:#0a0a0a;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(0,255,65,.1);position:sticky;top:0;z-index:100}
+.header h1{font-size:1.05em;color:#00ff41;text-shadow:0 0 8px rgba(0,255,65,.2);letter-spacing:1px}
+.header .sub{font-size:.58em;color:rgba(0,255,65,.4);letter-spacing:2px;margin-top:2px}
+.header .icon-btn{background:transparent;border:1px solid rgba(0,255,65,.25);color:#00ff41;border-radius:4px;padding:7px 11px;font-family:inherit;font-size:.85em;cursor:pointer}
+.header .icon-btn:active{border-color:#00ff41;box-shadow:0 0 10px rgba(0,255,65,.2)}
+.container{max-width:760px;margin:0 auto;padding:12px}
+.card{background:#0d0d0d;border:1px solid rgba(0,255,65,.07);border-radius:4px;padding:13px 14px;margin-bottom:10px}
+.card .h{font-size:.7em;color:#00ff41;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.card .h::before{content:'';width:14px;height:2px;background:#00ff41;box-shadow:0 0 6px rgba(0,255,65,.5)}
+.badge{font-size:.58em;padding:3px 8px;border-radius:12px;border:1px solid;letter-spacing:.5px;margin-left:auto}
+.badge.ok{color:#2ecc71;border-color:rgba(46,204,113,.4);background:rgba(46,204,113,.06)}
+.badge.bad{color:#e74c3c;border-color:rgba(231,76,60,.4);background:rgba(231,76,60,.06)}
+.badge.warn{color:#f1c40f;border-color:rgba(241,196,15,.4);background:rgba(241,196,15,.06)}
+.kv{display:flex;justify-content:space-between;gap:10px;font-size:.64em;color:rgba(200,214,229,.65);padding:4px 0;border-bottom:1px dashed rgba(0,255,65,.05);line-height:1.5}
+.kv:last-child{border-bottom:none}
+.kv b{color:#00ff41;font-weight:normal;text-align:right;word-break:break-all}
+.kv .ip{color:#f1c40f}
+pre{background:#060606;border:1px solid rgba(0,255,65,.08);border-radius:4px;padding:10px;font-size:.62em;color:#8fa89f;white-space:pre-wrap;word-break:break-all;line-height:1.6;max-height:300px;overflow:auto;margin-top:8px}
+.actions{display:flex;gap:7px;margin-top:11px;flex-wrap:wrap}
+.btn{flex:1;min-width:80px;background:transparent;border:1px solid rgba(0,255,65,.25);color:#00ff41;border-radius:4px;padding:9px 6px;font-family:inherit;font-size:.7em;cursor:pointer;text-align:center;letter-spacing:.5px}
+.btn:active{border-color:#00ff41;box-shadow:0 0 8px rgba(0,255,65,.15)}
+.btn.danger{border-color:rgba(231,76,60,.35);color:#e74c3c}
+.btn.warn{border-color:rgba(241,196,15,.35);color:#f1c40f}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+.svc-row{display:flex;gap:8px;margin-top:6px}
+.svc-row input{flex:1;background:#0a0a0a;border:1px solid rgba(0,255,65,.15);color:#c8d6e5;border-radius:4px;padding:8px 10px;font-family:inherit;font-size:.7em;outline:none}
+.svc-row input:focus{border-color:rgba(0,255,65,.5)}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;display:none;align-items:center;justify-content:center;padding:16px}
+.overlay.show{display:flex}
+.modal{background:#0d0d0d;border:1px solid rgba(0,255,65,.2);border-radius:6px;padding:18px;width:100%;max-width:400px;max-height:85vh;overflow-y:auto}
+.modal h3{color:#00ff41;font-size:.85em;letter-spacing:1px;margin-bottom:12px;text-transform:uppercase}
+.modal h3::before{content:'';display:inline-block;width:14px;height:2px;background:#00ff41;vertical-align:middle;margin-right:7px;box-shadow:0 0 6px rgba(0,255,65,.5)}
+.field{margin-bottom:11px}
+.field label{display:block;font-size:.6em;color:rgba(0,255,65,.6);margin-bottom:4px;letter-spacing:.5px}
+.field input,.field select{width:100%;background:#0a0a0a;border:1px solid rgba(0,255,65,.15);color:#c8d6e5;border-radius:4px;padding:9px 10px;font-family:inherit;font-size:.75em;outline:none}
+.field input:focus,.field select:focus{border-color:rgba(0,255,65,.5)}
+.field select option{background:#0d0d0d}
+.modal .btn{margin-top:6px}
+.modal-msg{font-size:.7em;color:#f1c40f;margin-top:8px;min-height:16px;line-height:1.5}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#0d0d0d;border:1px solid rgba(0,255,65,.35);color:#00ff41;border-radius:4px;padding:9px 14px;font-size:.68em;z-index:300;display:none;max-width:90%;text-align:center;box-shadow:0 0 16px rgba(0,255,65,.15)}
+.toast.err{border-color:rgba(231,76,60,.5);color:#e74c3c}
+.loading{text-align:center;color:rgba(0,255,65,.5);font-size:.7em;padding:30px}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(0,255,65,.2);border-top-color:#00ff41;border-radius:50%;animation:sp .8s linear infinite;vertical-align:middle;margin-right:8px}
+@keyframes sp{to{transform:rotate(360deg)}}
+.footer{text-align:center;color:rgba(0,255,65,.25);font-size:.55em;margin:18px 0 8px;line-height:1.9;letter-spacing:1px}
+.warnbox{font-size:.62em;color:rgba(241,196,15,.7);border:1px solid rgba(241,196,15,.15);background:rgba(241,196,15,.03);border-radius:4px;padding:9px 11px;line-height:1.7;margin-bottom:8px}
+</style>
+</head>
+<body>
+<div class="header">
+  <div>
+    <h1>VPS CONTROL</h1>
+    <div class="sub">SSH DIRECTO · ADMINISTRACION</div>
+  </div>
+  <button class="icon-btn" onclick="loadStatus()">⟳ Refrescar</button>
+</div>
+
+<div class="container">
+  <div class="card" id="statusCard">
+    <div class="h">Estado del servidor<span class="badge warn" id="connBadge">conectando</span></div>
+    <div id="statusBody"><div class="loading"><span class="spin"></span>Conectando por SSH...</div></div>
+  </div>
+
+  <div class="card">
+    <div class="h">Servicio</div>
+    <div class="svc-row">
+      <input id="svcInput" placeholder="nombre del servicio (default: zonahack)">
+      <button class="btn" style="flex:0 0 auto;min-width:70px" onclick="saveSvc()">Guardar</button>
+    </div>
+    <div class="actions">
+      <button class="btn" onclick="svcAction('status')">Estado</button>
+      <button class="btn" onclick="svcAction('start')">Iniciar</button>
+      <button class="btn" onclick="svcAction('stop')">Detener</button>
+      <button class="btn warn" onclick="svcAction('restart')">Reiniciar</button>
+    </div>
+    <pre id="svcOut" style="display:none"></pre>
+  </div>
+
+  <div class="card">
+    <div class="h">Logs del servicio</div>
+    <div class="svc-row">
+      <select id="logLines" style="flex:0 0 110px;background:#0a0a0a;border:1px solid rgba(0,255,65,.15);color:#c8d6e5;border-radius:4px;padding:8px;font-family:inherit;font-size:.7em;outline:none">
+        <option value="40">40 líneas</option>
+        <option value="100">100 líneas</option>
+        <option value="200">200 líneas</option>
+      </select>
+      <button class="btn" style="flex:0 0 auto;min-width:70px" onclick="loadLogs()">Ver logs</button>
+    </div>
+    <pre id="logsOut"></pre>
+  </div>
+
+  <div class="card">
+    <div class="h" style="color:#e74c3c">Zona de peligro</div>
+    <div class="warnbox">⚠ Reiniciar reinicia el sistema operativo de la VPS. Apagar la deja totalmente apagada: solo la podés volver a prender desde el panel del proveedor.</div>
+    <div class="actions">
+      <button class="btn warn" onclick="confirmDanger('reboot')">↻ Reiniciar servidor</button>
+      <button class="btn danger" onclick="confirmDanger('shutdown')">⏻ Apagar servidor</button>
+    </div>
+  </div>
+
+  <div class="footer">VPS CONTROL · CONEXION SSH SEGURA · TU SERVIDOR, TUS REGLAS</div>
+</div>
+
+<div class="overlay" id="pinOverlay">
+  <div class="modal">
+    <h3>PIN de acceso</h3>
+    <div class="modal-msg">El panel está protegido. Ingresá el PIN configurado.</div>
+    <div class="field" style="margin-top:10px">
+      <input type="password" id="pinInput" placeholder="PIN" autocomplete="off">
+    </div>
+    <button class="btn" onclick="savePin()">Entrar</button>
+    <div class="modal-msg" id="pinMsg"></div>
+  </div>
+</div>
+
+<div class="overlay" id="dangerOverlay">
+  <div class="modal">
+    <h3 id="dangerTitle">Confirmar</h3>
+    <div class="modal-msg" id="dangerMsg" style="color:#e74c3c"></div>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button class="btn danger" id="dangerOk" onclick="doDanger()">Confirmar</button>
+      <button class="btn" onclick="hide('dangerOverlay')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+var API="/api/vps";
+var pin=localStorage.getItem("vps_panel_key")||"";
+var dangerAction=null;
+
+function api(action,params){
+  params=params||{};
+  params.action=action;
+  if(pin)params.key=pin;
+  var qs=Object.keys(params).map(function(k){return encodeURIComponent(k)+"="+encodeURIComponent(params[k]);}).join("&");
+  return fetch(API+"?"+qs).then(function(r){
+    return r.json().then(function(d){return {status:r.status,data:d};});
+  });
+}
+
+function toast(msg,err){
+  var t=document.getElementById("toast");
+  t.textContent=msg;
+  t.className="toast"+(err?" err":"");
+  t.style.display="block";
+  clearTimeout(t._tm);
+  t._tm=setTimeout(function(){t.style.display="none";},2800);
+}
+function show(id){document.getElementById(id).classList.add("show");}
+function hide(id){document.getElementById(id).classList.remove("show");}
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
+function curSvc(){return document.getElementById("svcInput").value.trim()||localStorage.getItem("vps_service")||"zonahack";}
+function saveSvc(){var s=document.getElementById("svcInput").value.trim();if(s)localStorage.setItem("vps_service",s);toast("Servicio: "+s);loadLogs();}
+
+function savePin(){
+  pin=document.getElementById("pinInput").value.trim();
+  if(pin)localStorage.setItem("vps_panel_key",pin);
+  hide("pinOverlay");
+  loadStatus();
+}
+
+function loadStatus(){
+  var b=document.getElementById("statusBody");
+  var badge=document.getElementById("connBadge");
+  badge.textContent="conectando";badge.className="badge warn";
+  b.innerHTML='<div class="loading"><span class="spin"></span>Conectando por SSH...</div>';
+  api("status").then(function(r){
+    var d=r.data;
+    if(r.status===401&&d.error==="falta_key"){show("pinOverlay");b.innerHTML='<div class="loading">Ingresá el PIN.</div>';return;}
+    if(d.error){badge.textContent="error";badge.className="badge bad";b.innerHTML='<div class="modal-msg" style="color:#e74c3c">'+esc(d.error)+'</div>';return;}
+    badge.textContent="conectado";badge.className="badge ok";
+    var active=/active/i.test(d.service||"");
+    var badgeSvc=active?'<span class="badge ok">● activo</span>':'<span class="badge bad">○ inactivo</span>';
+    document.getElementById("svcInput").value=curSvc();
+    b.innerHTML=
+      kv("Servicio",curSvc()+" "+badgeSvc)+
+      kv("Host",(d.hostname||"").split("\n").join(" · "))+
+      kv("Uptime",esc(d.uptime||""))+
+      kv("Load",esc(d.load||""))+
+      '<div style="font-size:.64em;color:rgba(0,255,65,.6);margin:8px 0 4px">MEMORIA (MB)</div><pre>'+esc(d.memory||"")+'</pre>'+
+      '<div style="font-size:.64em;color:rgba(0,255,65,.6);margin:8px 0 4px">DISCO</div><pre>'+esc(d.disk||"")+'</pre>'+
+      '<div style="font-size:.64em;color:rgba(0,255,65,.6);margin:8px 0 4px">SERVICIO</div><pre>'+esc(d.service||"")+'</pre>';
+    if(active)loadLogs();
+  }).catch(function(e){
+    badge.textContent="error";badge.className="badge bad";
+    b.innerHTML='<div class="modal-msg" style="color:#e74c3c">Error: '+esc(e.message)+'</div>';
+  });
+}
+
+function kv(k,v){return '<div class="kv"><span>'+esc(k)+'</span><b class="ip">'+v+'</b></div>';}
+
+function svcAction(cmd){
+  var pre=document.getElementById("svcOut");
+  pre.style.display="block";
+  pre.textContent="Ejecutando "+cmd+"...";
+  api("service",{cmd:cmd,service:curSvc()}).then(function(r){
+    var d=r.data;
+    if(d.error){pre.textContent="Error: "+d.error;toast(d.error,true);return;}
+    pre.textContent=(d.output||d.msg||"OK");
+    toast((d.msg||"Comando "+cmd+" ejecutado"),d.cmd==="stop");
+    if(cmd!=="stop")setTimeout(loadStatus,1500);
+  }).catch(function(e){pre.textContent="Error: "+e.message;});
+}
+
+function loadLogs(){
+  var pre=document.getElementById("logsOut");
+  pre.textContent="Cargando logs...";
+  var lines=document.getElementById("logLines").value;
+  api("logs",{lines:lines,service:curSvc()}).then(function(r){
+    var d=r.data;
+    if(d.error){pre.textContent="Error: "+d.error;toast(d.error,true);return;}
+    pre.textContent=d.logs||"(sin logs)";
+  }).catch(function(e){pre.textContent="Error: "+e.message;});
+}
+
+function confirmDanger(act){
+  dangerAction=act;
+  var t=document.getElementById("dangerTitle"),m=document.getElementById("dangerMsg"),ok=document.getElementById("dangerOk");
+  if(act==="reboot"){
+    t.textContent="Reiniciar servidor";
+    m.innerHTML='La VPS se va a <b style="color:#f1c40f">reiniciar</b>. Corta la conexión unos segundos. ¿Continuar?';
+    ok.textContent="Sí, reiniciar";
+  }else{
+    t.textContent="Apagar servidor";
+    m.innerHTML='La VPS se va a <b style="color:#e74c3c">APAGAR</b>. Solo la podés prender de nuevo desde el panel del proveedor. ¿Seguro?';
+    ok.textContent="Sí, apagar";
+  }
+  show("dangerOverlay");
+}
+function doDanger(){
+  if(!dangerAction)return;
+  hide("dangerOverlay");
+  toast("Enviando comando "+dangerAction+"...");
+  api(dangerAction,{}).then(function(r){
+    var d=r.data;
+    if(d.ok)toast(d.msg||"Comando enviado");
+    else toast(d.error||"Error",true);
+  }).catch(function(e){toast(e.message,true);});
+}
+
+document.getElementById("svcInput").value=curSvc();
+loadStatus();
+</script>
+<script src="/errores.js" defer></script>
+</body>
+</html>

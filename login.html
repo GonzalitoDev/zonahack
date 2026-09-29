@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>ZonaHack - Acceso</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--muted:#6d7f93;--accent:#00e5ff;--violet:#7a5cff}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#07090e;color:#d7e2ef;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:.5;animation:flotar 16s ease-in-out infinite}
+.orb1{width:460px;height:460px;background:radial-gradient(circle,rgba(0,229,255,.25),transparent 70%);top:-160px;right:-120px}
+.orb2{width:500px;height:500px;background:radial-gradient(circle,rgba(122,92,255,.25),transparent 70%);bottom:-200px;left:-160px;animation-delay:-6s}
+@keyframes flotar{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(20px,-14px) scale(1.08)}}
+.card{position:relative;z-index:1;background:rgba(13,17,23,.85);border:1px solid rgba(0,229,255,.15);border-radius:20px;padding:34px 30px;max-width:400px;width:100%;text-align:center;backdrop-filter:blur(12px);box-shadow:0 0 60px rgba(0,229,255,.06)}
+.logo{font-size:3em;filter:drop-shadow(0 0 18px rgba(0,229,255,.35))}
+h1{font-size:1.35em;margin:6px 0 2px;letter-spacing:3px;color:#fff;font-family:'Courier New',monospace;background:linear-gradient(90deg,#00e5ff,#7a5cff);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+p.sub{color:var(--muted);font-size:.68em;margin-bottom:20px;letter-spacing:1px}
+.tabs{display:flex;gap:6px;margin-bottom:16px;background:rgba(0,0,0,.3);border-radius:12px;padding:4px}
+.tab{flex:1;padding:9px;border:none;border-radius:9px;background:transparent;color:var(--muted);cursor:pointer;font-size:.7em;letter-spacing:1px;font-family:inherit;transition:.2s;font-weight:700}
+.tab.active{background:linear-gradient(135deg,rgba(0,229,255,.16),rgba(122,92,255,.16));color:var(--accent)}
+input{width:100%;padding:12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.08);background:rgba(0,0,0,.4);color:#e8f0f8;font-size:.85em;margin-bottom:10px;outline:none;font-family:inherit;transition:border-color .2s}
+input:focus{border-color:rgba(0,229,255,.5);box-shadow:0 0 12px rgba(0,229,255,.1)}
+input::placeholder{color:rgba(216,232,255,.3)}
+.mainbtn{width:100%;padding:13px;border:none;border-radius:12px;background:linear-gradient(135deg,#00e5ff,#7a5cff);color:#03140a;font-weight:800;font-size:.85em;cursor:pointer;letter-spacing:1px;font-family:inherit;transition:.2s}
+.mainbtn:hover{box-shadow:0 0 20px rgba(0,229,255,.3)}
+.mainbtn:disabled{opacity:.4}
+.guest{width:100%;margin-top:8px;padding:11px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:var(--muted);font-size:.74em;cursor:pointer;font-family:inherit;transition:.2s}
+.guest:hover{color:#fff;border-color:rgba(255,255,255,.2)}
+#status{margin-top:14px;font-size:.72em;color:var(--muted);min-height:18px}
+.ok{color:#2ee6a8!important}
+.err{color:#ff5a5a!important}
+#info{margin-top:12px;font-size:.6em;color:var(--muted)}
+.req{color:#ff5a5a;font-size:.62em;margin-bottom:14px}
+.pw-wrap{position:relative;width:100%}
+.pw-wrap input{padding-right:44px}
+.pw-toggle{position:absolute;top:7px;right:7px;width:32px;height:32px;border:none;background:none;color:var(--muted);font-size:.9em;cursor:pointer;border-radius:8px}
+.pw-toggle:hover{color:var(--accent);background:rgba(0,229,255,.08)}
+#forceBar{height:4px;border-radius:2px;background:rgba(255,255,255,.06);margin:-4px 0 10px;overflow:hidden}
+#forceFill{height:100%;width:0;border-radius:2px;transition:width .3s,background .3s}
+#forceTxt{font-size:.55em;color:var(--muted);margin-bottom:8px;text-align:left;display:none}
+.lock{background:rgba(255,90,90,.08)!important;border-color:rgba(255,90,90,.3)!important;color:#ff9a8f!important}
+textarea{width:100%;padding:12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.08);background:rgba(0,0,0,.4);color:#e8f0f8;font-size:.85em;margin-bottom:10px;outline:none;font-family:inherit;resize:vertical;min-height:70px}
+textarea:focus{border-color:rgba(0,229,255,.5)}
+textarea::placeholder{color:rgba(216,232,255,.3)}
+.link{color:var(--muted);font-size:.65em;cursor:pointer;text-decoration:none;display:block;margin-top:12px;letter-spacing:1px;transition:.2s}
+.link:hover{color:var(--accent)}
+.back{color:var(--muted);font-size:.7em;cursor:pointer;display:block;margin-top:12px;transition:.2s}
+.back:hover{color:var(--accent)}
+.rec-pass{background:rgba(0,0,0,.4);border:1px dashed rgba(0,229,255,.3);border-radius:10px;padding:9px;font-size:.95em;color:var(--accent);letter-spacing:2px;word-break:break-all;margin:6px 0;font-family:'Courier New',monospace}
+</style>
+</head>
+<body>
+<div class="bg"><div class="orb orb1"></div><div class="orb orb2"></div></div>
+<div class="card">
+<div class="logo">💀</div>
+<h1>ZONAHACK</h1>
+<p class="sub">INGRESÁ A TU CUENTA</p>
+<div class="tabs" id="tabs">
+  <button class="tab active" id="tabLogin" onclick="mostrarTab('login')">ACCEDER</button>
+  <button class="tab" id="tabReg" onclick="mostrarTab('reg')">CREAR CUENTA</button>
+</div>
+<div id="formLogin">
+  <input id="loginUser" placeholder="Usuario" maxlength="30" autocomplete="username">
+  <div class="pw-wrap">
+    <input id="loginPass" type="password" placeholder="Contraseña" autocomplete="current-password">
+    <button type="button" class="pw-toggle" onclick="togglePass('loginPass',this)" title="Mostrar/ocultar">👁</button>
+  </div>
+  <button class="mainbtn" onclick="iniciarSesion()">ENTRAR ▸</button>
+  <button class="guest" onclick="entrarInvitado()">👤 Entrar sin cuenta (invitado)</button>
+  <a class="link" onclick="mostrarRecover()">🔑 ¿Olvidaste tu contraseña?</a>
+</div>
+<div id="formReg" style="display:none">
+  <input id="regUser" placeholder="Nombre de usuario" maxlength="30" autocomplete="username">
+  <input id="regEmail" placeholder="Email (opcional)" maxlength="60" autocomplete="email">
+  <div class="pw-wrap">
+    <input id="regPass" type="password" placeholder="Contraseña (min 4)" autocomplete="new-password">
+    <button type="button" class="pw-toggle" onclick="togglePass('regPass',this)" title="Mostrar/ocultar">👁</button>
+  </div>
+  <div id="forceBar"><div id="forceFill"></div></div>
+  <div id="forceTxt"></div>
+  <div class="pw-wrap">
+    <input id="regPass2" type="password" placeholder="Repetir contraseña" autocomplete="new-password">
+    <button type="button" class="pw-toggle" onclick="togglePass('regPass2',this)" title="Mostrar/ocultar">👁</button>
+  </div>
+  <button class="mainbtn" onclick="registrarse()">CREAR CUENTA ▸</button>
+  <button class="guest" onclick="entrarInvitado()">👤 Mejor entrar sin cuenta</button>
+  <p style="font-size:.6em;color:rgba(255,255,255,.4);text-align:center;margin-top:8px">Al crear una cuenta aceptás el <a href="/legal.html" target="_blank" style="color:#00ff41">Aviso Legal y Política de Privacidad</a></p>
+</div>
+<div id="formRecover" style="display:none">
+  <p class="req">🔑 RECUPERAR CONTRASEÑA</p>
+  <p style="margin-bottom:14px;color:var(--muted);font-size:.68em">Pedile al admin que te cambie la contraseña. Cuando la cambie, la vas a poder ver acá.</p>
+  <input id="recUser" placeholder="Tu usuario" maxlength="30">
+  <input id="recEmail" placeholder="Email registrado (opcional)" maxlength="60">
+  <textarea id="recMotivo" placeholder="¿Por qué no podés entrar? (opcional)" maxlength="300"></textarea>
+  <button class="mainbtn" onclick="enviarSolicitud()">📨 ENVIAR SOLICITUD AL ADMIN</button>
+  <a class="link" onclick="consultarSolicitud()">🔎 Ver estado de mi solicitud</a>
+  <div id="statusRec"></div>
+  <a class="back" onclick="volverLogin()">← Volver al acceso</a>
+</div>
+<div id="status"></div>
+<div id="info">Sin cuenta podés entrar como invitado, pero perdés tu progreso</div>
+</div>
+
+<script src="/firebase_zh.js"></script>
+<script>
+var SB = "https://xfwolaurpeofysnymqle.supabase.co";
+var KEY = "sb_publishable_3VvBUD5Bdu3Uaq59fJ99MQ_XDCtujUU";
+var H = {"apikey":KEY,"Authorization":"Bearer "+KEY,"Content-Type":"application/json"};
+
+// Hash LEGACY (DJB2, 31 bits) — inseguro, se mantiene solo para poder migrar cuentas viejas
+function hashPass(s){
+  var h = 5381;
+  for(var i=0;i<s.length;i++){ h = ((h<<5)+h) + s.charCodeAt(i); h = h & 0x7fffffff; }
+  return "zh$" + h.toString(36) + "$" + s.length;
+}
+
+// Hash fuerte (SHA-256 vía Web Crypto, con el usuario como sal) para cuentas nuevas/migradas
+function sha256Hex(str){
+  var enc = new TextEncoder().encode(str);
+  return crypto.subtle.digest("SHA-256", enc).then(function(buf){
+    return Array.from(new Uint8Array(buf)).map(function(b){ return b.toString(16).padStart(2,"0"); }).join("");
+  });
+}
+function hashPassStrong(usuario, pass){
+  if(!(window.crypto && window.crypto.subtle)){
+    // Contexto no seguro (http fuera de localhost): no hay Web Crypto, usar el legado como ultimo recurso
+    return Promise.resolve(hashPass(pass));
+  }
+  return sha256Hex("zh-salt-" + usuario + "-" + pass + "-zh2026").then(function(hex){ return "zh2$" + hex; });
+}
+
+function esc(s){return (s||"").replace(/[&<>"]/g,function(m){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m];});}
+
+// Generar ID único de usuario (ZH-XXXX-XXXX)
+function generarUserId(){
+  function r4(){ return Math.random().toString(36).slice(2,6).toUpperCase(); }
+  return "ZH-" + r4() + "-" + r4();
+}
+// Guardar user_id en localStorage y en la DB (si no tiene)
+function asegurarUserId(u){
+  var id = localStorage.getItem("vh_user_id");
+  if(!id || id.indexOf("ZH-") !== 0){
+    id = generarUserId();
+    localStorage.setItem("vh_user_id", id);
+  }
+  // Guardar en la DB
+  try{
+    fetch(SB+"/rest/v1/usuarios_ext?usuario_nombre=eq."+encodeURIComponent(u),{method:"PATCH",headers:Object.assign({Prefer:"return=minimal"},H),
+      body:JSON.stringify({user_id:id})}).catch(function(){
+        // Si no existe la fila, crear
+        fetch(SB+"/rest/v1/usuarios_ext",{method:"POST",headers:Object.assign({Prefer:"resolution=merge-duplicates,return=minimal"},H),
+          body:JSON.stringify({usuario_nombre:u,user_id:id,online:true,ultima_conexion:new Date().toISOString()})}).catch(function(){});
+      });
+  }catch(e){}
+  return id;
+}
+
+function mostrarTab(t){
+  document.getElementById("tabLogin").classList.toggle("active", t==="login");
+  document.getElementById("tabReg").classList.toggle("active", t==="reg");
+  document.getElementById("formLogin").style.display = t==="login" ? "" : "none";
+  document.getElementById("formReg").style.display = t==="reg" ? "" : "none";
+  document.getElementById("formRecover").style.display = "none";
+  document.getElementById("tabs").style.display = "";
+  document.getElementById("status").textContent = "";
+  document.getElementById("statusRec").textContent = "";
+}
+
+function api(path, opts){
+  return fetch(SB+"/rest/v1/"+path, Object.assign({headers:H}, opts||{})).then(function(r){return r.json().catch(function(){return [];});});
+}
+
+// ─── RECUPERAR CONTRASEÑA ─────────────────────────────────────────────
+var REC_ESTADO = {pendiente:"PENDIENTE", hecho:"RESUELTA", denegado:"DENEGADA"};
+
+function mostrarRecover(){
+  document.getElementById("tabs").style.display = "none";
+  document.getElementById("formLogin").style.display = "none";
+  document.getElementById("formReg").style.display = "none";
+  document.getElementById("formRecover").style.display = "";
+  document.getElementById("status").textContent = "";
+  var u = document.getElementById("loginUser").value.trim();
+  if(u) document.getElementById("recUser").value = u;
+  setTimeout(function(){
+    var el = document.getElementById("recUser");
+    if(el) el.focus();
+  }, 300);
+}
+
+function volverLogin(){
+  document.getElementById("tabs").style.display = "";
+  document.getElementById("formRecover").style.display = "none";
+  document.getElementById("statusRec").textContent = "";
+  mostrarTab("login");
+}
+
+function enviarSolicitud(){
+  var u = document.getElementById("recUser").value.trim().toLowerCase();
+  var em = document.getElementById("recEmail").value.trim();
+  var motivo = document.getElementById("recMotivo").value.trim();
+  var sr = document.getElementById("statusRec");
+  if(!u){ sr.innerHTML = '<span class="err">Ingresá tu usuario</span>'; return; }
+  sr.innerHTML = '<span style="color:rgba(0,255,65,.5)">Verificando...</span>';
+  api("cuentas?select=usuario,email&usuario=eq."+encodeURIComponent(u)+"&limit=1").then(function(c){
+    if(!c || !c.length){ sr.innerHTML = '<span class="err">Ese usuario no existe</span>'; return; }
+    if(em && c[0].email && c[0].email.toLowerCase() !== em.toLowerCase()){
+      sr.innerHTML = '<span class="err">El email no coincide con el registrado</span>'; return;
+    }
+    api("recuperar_pass?select=id,estado&usuario=eq."+encodeURIComponent(u)+"&estado=eq.pendiente&limit=1").then(function(pend){
+      if(pend && pend.length){
+        sr.innerHTML = '<span class="err">Ya tenés una solicitud pendiente. Mirá su estado abajo.</span>';
+        consultarSolicitud();
+        return;
+      }
+      fetch(SB+"/rest/v1/recuperar_pass",{method:"POST",headers:H,body:JSON.stringify({
+        usuario:u, email:c[0].email || em, motivo:motivo, estado:"pendiente"
+      })}).then(function(r){
+        if(!r.ok){ sr.innerHTML = '<span class="err">Error al enviar la solicitud</span>'; return; }
+        sr.innerHTML = '<span class="ok">✓ Solicitud enviada al admin. Cuando te la cambie, la nueva contraseña va a aparecer acá.</span>';
+        document.getElementById("recEmail").value = "";
+        document.getElementById("recMotivo").value = "";
+      }).catch(function(){ sr.innerHTML = '<span class="err">Error de red</span>'; });
+    });
+  }).catch(function(){ sr.innerHTML = '<span class="err">Error de red</span>'; });
+}
+
+function consultarSolicitud(){
+  var u = document.getElementById("recUser").value.trim().toLowerCase();
+  var sr = document.getElementById("statusRec");
+  if(!u){ sr.innerHTML = '<span class="err">Ingresá tu usuario</span>'; return; }
+  sr.innerHTML = '<span style="color:rgba(0,255,65,.5)">Buscando...</span>';
+  api("recuperar_pass?select=id,estado,respuesta,nueva_pass,resuelto_por,creado,resuelto&usuario=eq."+encodeURIComponent(u)+"&order=creado.desc&limit=1").then(function(d){
+    if(!d || !d.length){ sr.innerHTML = '<span class="err">No encontré solicitudes para ese usuario</span>'; return; }
+    var r = d[0];
+    var html = '<span style="color:rgba(0,255,65,.8)">Estado: <b>'+esc(REC_ESTADO[r.estado]||r.estado)+'</b></span>';
+    if(r.estado === "hecho" && r.nueva_pass){
+      html += '<br><span style="color:rgba(0,255,65,.6);font-size:.6em">✓ El admin te cambió la contraseña:</span>';
+      html += '<div class="rec-pass">'+esc(r.nueva_pass)+'</div>';
+      html += '<button onclick="usarNuevaPass()" style="font-size:.65em;padding:8px">USARLA PARA ENTRAR ▸</button>';
+    }else if(r.estado === "denegado"){
+      html += '<br><span class="err">Solicitud denegada por el admin</span>';
+    }else{
+      html += '<br><span style="color:rgba(0,255,65,.4);font-size:.6em">Esperá a que un admin la procese.</span>';
+    }
+    if(r.respuesta) html += '<br><span style="color:rgba(0,255,65,.6)">📝 '+esc(r.respuesta)+'</span>';
+    html += '<br><span style="color:rgba(0,255,65,.25);font-size:.55em">Solicitada: '+new Date(r.creado).toLocaleString()+(r.resuelto?' · Resuelta: '+new Date(r.resuelto).toLocaleString():"")+'</span>';
+    sr.innerHTML = html;
+  }).catch(function(){ sr.innerHTML = '<span class="err">Error de red</span>'; });
+}
+
+function usarNuevaPass(){
+  // Pre-cargar la nueva contraseña en el form de acceso
+  var div = document.querySelector("#statusRec .rec-pass");
+  if(div){
+    document.getElementById("loginPass").value = div.textContent;
+    document.getElementById("loginUser").value = document.getElementById("recUser").value.trim().toLowerCase();
+  }
+  volverLogin();
+  var st = document.getElementById("status");
+  if(st) st.innerHTML = '<span class="ok">Contraseña precargada. Tocá ENTRAR ▸</span>';
+}
+
+// ─── ANTI FUERZA BRUTA (cliente) ────────────────────────────────────────
+var MAX_INTENTOS = 5;          // máx intentos fallidos
+var BLOQUEO_MS = 60000;        // 60 seg de bloqueo
+var _lockKey = "zh_login_lock";
+var _lockTimer = null;
+
+function getLock(){
+  try{ return JSON.parse(localStorage.getItem(_lockKey)||"null"); }
+  catch(e){ return null; }
+}
+function setLock(obj){
+  try{ localStorage.setItem(_lockKey, JSON.stringify(obj)); }catch(e){}
+}
+// Devuelve ms restantes de bloqueo (0 = sin bloqueo)
+function bloqueoRestante(){
+  var l = getLock();
+  if(!l || !l.hasta) return 0;
+  var rest = l.hasta - Date.now();
+  return rest > 0 ? rest : 0;
+}
+function registrarFallo(){
+  var l = getLock() || {fallos:0, hasta:0};
+  l.fallos = (l.fallos||0) + 1;
+  if(l.fallos >= MAX_INTENTOS){
+    l.hasta = Date.now() + BLOQUEO_MS;
+    l.fallos = 0;
+  }
+  setLock(l);
+}
+function registrarExito(){ setLock(null); }
+// Aplica el bloqueo visual (deshabilita el form + countdown)
+function aplicarBloqueo(){
+  var rest = bloqueoRestante();
+  var st = document.getElementById("status");
+  var btn = document.querySelector("#formLogin button");
+  var inputs = [document.getElementById("loginUser"), document.getElementById("loginPass")];
+  if(rest > 0){
+    if(btn) btn.disabled = true;
+    inputs.forEach(function(i){ if(i) i.disabled = true; });
+    if(st) st.innerHTML = '<span class="err">🔒 Demasiados intentos. Esperá <span id="lockCount">'+
+      Math.ceil(rest/1000)+'</span>s</span>';
+    var card = document.querySelector(".card");
+    if(card) card.classList.add("lock");
+    if(_lockTimer) clearInterval(_lockTimer);
+    _lockTimer = setInterval(function(){
+      var r = bloqueoRestante();
+      if(r <= 0){
+        clearInterval(_lockTimer); _lockTimer=null;
+        if(btn) btn.disabled=false;
+        inputs.forEach(function(i){ if(i) i.disabled=false; });
+        if(card) card.classList.remove("lock");
+        if(st && st.innerHTML.indexOf("lockCount")>=0) st.textContent="";
+        return;
+      }
+      var el = document.getElementById("lockCount");
+      if(el) el.textContent = Math.ceil(r/1000);
+    }, 500);
+    return true;
+  }
+  return false;
+}
+// Llamar al cargar y antes de cada intento
+function verificarBloqueo(){
+  if(bloqueoRestante() > 0){ aplicarBloqueo(); return true; }
+  return false;
+}
+
+// ─── UX: mostrar/ocultar contraseña ────────────────────────────────────
+function togglePass(id, btn){
+  var inp = document.getElementById(id);
+  if(!inp) return;
+  if(inp.type === "password"){ inp.type = "text"; if(btn) btn.textContent = "🙈"; }
+  else{ inp.type = "password"; if(btn) btn.textContent = "👁"; }
+}
+
+// ─── UX: indicador de fuerza de contraseña ─────────────────────────────
+function medirFuerza(p){
+  var score = 0;
+  if(!p) return {n:0,label:"",color:"rgba(0,255,65,.08)"};
+  if(p.length >= 4) score++;
+  if(p.length >= 8) score++;
+  if(/[A-Z]/.test(p) && /[a-z]/.test(p)) score++;
+  if(/\d/.test(p)) score++;
+  if(/[^A-Za-z0-9]/.test(p)) score++;
+  score = Math.min(score, 5);
+  var labels = ["Muy débil","Débil","Media","Buena","Muy buena"];
+  var colors = ["#e74c3c","#e67e22","#f1c40f","#2ecc71","#00ff41"];
+  return {n:score, label:labels[score-1]||"", color:colors[score-1]||"#00ff41"};
+}
+function actualizarFuerza(){
+  var p = document.getElementById("regPass").value;
+  var fill = document.getElementById("forceFill");
+  var txt = document.getElementById("forceTxt");
+  var f = medirFuerza(p);
+  if(fill) fill.style.width = (f.n/5*100)+"%";
+  if(fill) fill.style.background = f.color;
+  if(txt){
+    if(p.length === 0){ txt.style.display="none"; }
+    else{ txt.style.display="block"; txt.textContent = "Fuerza: "+f.label; txt.style.color=f.color; }
+  }
+}
+
+// ─── UX: validación de formato ─────────────────────────────────────────
+function usuarioValido(u){ return /^[a-z0-9_.-]{3,30}$/.test(u||""); }
+function emailValido(em){ return !em || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em); }
+
+function mostrarStatus(html, ok){
+  var st = document.getElementById("status");
+  if(st) st.innerHTML = html;
+}
+
+function iniciarSesion(){
+  var u = document.getElementById("loginUser").value.trim().toLowerCase();
+  var p = document.getElementById("loginPass").value;
+  var st = document.getElementById("status");
+  if(!u || !p){ st.innerHTML = '<span class="err">Ingresá usuario y contraseña</span>'; return; }
+  if(verificarBloqueo()) return;
+  var btn = document.querySelector("#formLogin button");
+  btn.disabled = true; btn.textContent = "VERIFICANDO...";
+  function fallar(){
+    btn.disabled = false; btn.textContent = "ENTRAR ▸";
+    registrarFallo();
+    st.innerHTML = '<span class="err">✗ Usuario o contraseña incorrectos</span>';
+    verificarBloqueo();
+  }
+  function loginOk(){
+    btn.disabled = false; btn.textContent = "ENTRAR ▸";
+    registrarExito();
+    localStorage.setItem("vh_usuario", u);
+    localStorage.setItem("vh_sesion", btoa(u+":"+Date.now()));
+    asegurarUserId(u);
+    fetch(SB+"/rest/v1/usuarios_ext",{method:"POST",headers:Object.assign({Prefer:"resolution=merge-duplicates,return=minimal"},H),
+      body:JSON.stringify({usuario_nombre:u, online:true, ultima_conexion:new Date().toISOString()})}).catch(function(){});
+    st.innerHTML = '<span class="ok">✓ ACCESO CONCEDIDO</span>';
+    setTimeout(function(){ window.location.href = "/"; }, 800);
+  }
+
+  // Cuentas nuevas viven en Firestore. Si todavia no migro, cae al fallback de Supabase.
+  ZHFirebase.get("cuentas/"+u).then(function(cuenta){
+    if(cuenta && cuenta.password){
+      return hashPassStrong(u,p).then(function(hpNew){
+        if(cuenta.password === hpNew){ loginOk(); return; }
+        if(cuenta.password === hashPass(p)){
+          ZHFirebase.update("cuentas/"+u, {password:hpNew}).catch(function(){});
+          loginOk();
+          return;
+        }
+        fallar();
+      });
+    }
+    // No existe en Firestore: migracion perezosa de una cuenta vieja de Supabase
+    return api("cuentas?select=usuario,email,password&usuario=eq."+encodeURIComponent(u)+"&limit=1").then(function(d){
+      var vieja = d && d.length ? d[0] : null;
+      if(!vieja || !vieja.password){ fallar(); return; }
+      return hashPassStrong(u,p).then(function(hpNew){
+        var coincide = (vieja.password === hpNew) || (vieja.password === hashPass(p));
+        if(!coincide){ fallar(); return; }
+        ZHFirebase.set("cuentas/"+u, {usuario:u, email:vieja.email||"", password:hpNew, created_at:new Date().toISOString()}).catch(function(){});
+        loginOk();
+      });
+    });
+  }).catch(function(){
+    btn.disabled = false; btn.textContent = "ENTRAR ▸";
+    st.innerHTML = '<span class="err">✗ Error de red. Intentalo de nuevo</span>';
+  });
+}
+
+function registrarse(){
+  var u = document.getElementById("regUser").value.trim().toLowerCase();
+  var em = document.getElementById("regEmail").value.trim();
+  var p1 = document.getElementById("regPass").value;
+  var p2 = document.getElementById("regPass2").value;
+  var st = document.getElementById("status");
+  if(!u || u.length < 3){ st.innerHTML = '<span class="err">El usuario necesita al menos 3 caracteres</span>'; return; }
+  if(!usuarioValido(u)){ st.innerHTML = '<span class="err">Solo letras, números, _ . - (3-30)</span>'; return; }
+  if(!emailValido(em)){ st.innerHTML = '<span class="err">Email inválido</span>'; return; }
+  if(p1.length < 4){ st.innerHTML = '<span class="err">La contraseña necesita al menos 4 caracteres</span>'; return; }
+  if(p1 !== p2){ st.innerHTML = '<span class="err">✗ Las contraseñas no coinciden</span>'; return; }
+  var btn = document.querySelector("#formReg button");
+  btn.disabled = true; btn.textContent = "CREANDO CUENTA...";
+  Promise.all([
+    ZHFirebase.get("cuentas/"+u).catch(function(){ return null; }),
+    api("cuentas?usuario=eq."+encodeURIComponent(u)+"&limit=1").catch(function(){ return []; })
+  ]).then(function(r){
+    var existe = !!r[0] || (r[1] && r[1].length>0);
+    if(existe){ btn.disabled=false; btn.textContent="CREAR CUENTA ▸"; st.innerHTML='<span class="err">✗ Ese usuario ya existe</span>'; return; }
+    hashPassStrong(u,p1).then(function(hp){
+      ZHFirebase.set("cuentas/"+u, {usuario:u, email:em, password:hp, created_at:new Date().toISOString()}).then(function(){
+        btn.disabled=false; btn.textContent="CREAR CUENTA ▸";
+        localStorage.setItem("vh_usuario", u);
+        localStorage.setItem("vh_sesion", btoa(u+":"+Date.now()));
+        asegurarUserId(u);
+        fetch(SB+"/rest/v1/usuarios_ext",{method:"POST",headers:Object.assign({Prefer:"resolution=merge-duplicates,return=minimal"},H),
+          body:JSON.stringify({usuario_nombre:u, online:true, ultima_conexion:new Date().toISOString()})}).catch(function(){});
+        st.innerHTML = '<span class="ok">✓ CUENTA CREADA</span>';
+        setTimeout(function(){ window.location.href = "/"; }, 800);
+      }).catch(function(){ btn.disabled=false; btn.textContent="CREAR CUENTA ▸"; st.innerHTML='<span class="err">Error de red</span>'; });
+    });
+  });
+}
+
+// Si ya hay sesión válida, ir directo
+if(localStorage.getItem("vh_sesion")){
+  document.getElementById("info").textContent = "Ya tenés sesión iniciada. Redirigiendo...";
+  setTimeout(function(){ window.location.href = "/"; }, 600);
+}
+
+// Anti fuerza bruta: aplicar bloqueo pendiente al cargar
+verificarBloqueo();
+
+document.getElementById("loginPass").addEventListener("keydown", function(e){ if(e.key==="Enter") iniciarSesion(); });
+document.getElementById("regPass2").addEventListener("keydown", function(e){ if(e.key==="Enter") registrarse(); });
+document.getElementById("regPass").addEventListener("input", actualizarFuerza);
+document.getElementById("recUser").addEventListener("keydown", function(e){ if(e.key==="Enter") consultarSolicitud(); });
+document.getElementById("recEmail").addEventListener("keydown", function(e){ if(e.key==="Enter") enviarSolicitud(); });
+
+// Entrar sin cuenta (invitado)
+function entrarInvitado(){
+  localStorage.setItem("vh_usuario","anon");
+  localStorage.setItem("vh_sesion", btoa("anon:"+Date.now()));
+  localStorage.setItem("vh_user_id", generarUserId());
+  window.location.href="/";
+}
+
+// Abrir directo en "Crear cuenta" si viene ?tab=reg
+(function(){
+  try{ if(location.search.indexOf("tab=reg")>=0) mostrarTab("reg"); }catch(e){}
+})();
+
+// Validación en tiempo real (borde verde/rojo)
+["loginUser","regUser","regEmail"].forEach(function(id){
+  var el = document.getElementById(id);
+  if(!el) return;
+  el.addEventListener("input", function(){
+    var v = el.value.trim();
+    var ok = id==="regEmail" ? emailValido(v) : usuarioValido(v.toLowerCase());
+    el.style.borderColor = !v ? "" : (ok ? "rgba(0,255,65,.4)" : "rgba(231,76,60,.5)");
+  });
+});
+
+// Focus inicial
+setTimeout(function(){
+  var el = document.getElementById("loginUser");
+  if(el) el.focus();
+}, 300);
+</script>
+<script src="/errores.js" defer></script>
+<script src="/update_check.js" defer></script>
+<script src="/logger_zh.js?v=2026"></script>
+</body>
+</html>

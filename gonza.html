@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<title>🔔 Avisar a Gonza</title>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#2ee6a8">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#07090e;--card:rgba(13,17,23,.92);--border:#1c2531;--text:#d7e2ef;--muted:#6d7f93;--accent:#2ee6a8;--violet:#7a5cff;--danger:#ff5a5a}
+html,body{height:100%}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;display:flex;flex-direction:column;overflow:hidden;height:100dvh}
+.bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.orb{position:absolute;border-radius:50%;filter:blur(90px);opacity:.3;animation:flotar 18s ease-in-out infinite}
+.orb1{width:420px;height:420px;background:radial-gradient(circle,rgba(46,230,168,.2),transparent 70%);top:-150px;right:-110px}
+.orb2{width:460px;height:460px;background:radial-gradient(circle,rgba(122,92,255,.2),transparent 70%);bottom:-180px;left:-140px;animation-delay:-7s}
+@keyframes flotar{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(18px,-12px) scale(1.06)}}
+.wrap{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;min-height:0}
+.header{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border);background:rgba(7,9,14,.92);backdrop-filter:blur(10px)}
+.logo{width:38px;height:38px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:19px;background:linear-gradient(135deg,rgba(46,230,168,.25),rgba(122,92,255,.25));border:1px solid rgba(46,230,168,.4)}
+.ttl{flex:1;min-width:0}
+.ttl h1{font-size:.92em;letter-spacing:2px;font-weight:900;font-family:'Courier New',monospace;color:#fff}
+.ttl span{font-size:.58em;color:var(--muted)}
+.back{color:var(--accent);text-decoration:none;font-size:.7em;padding:6px 10px;border:1px solid var(--border);border-radius:8px;flex-shrink:0}
+.main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:18px;min-height:0}
+.estado{font-size:.78em;letter-spacing:2px;color:var(--accent);font-weight:800;text-align:center;min-height:22px}
+.btn-big{width:190px;height:190px;border-radius:50%;border:none;background:linear-gradient(135deg,#2ee6a8,#00e5ff);color:#03140a;font-size:4.4em;cursor:pointer;font-family:inherit;box-shadow:0 0 60px rgba(46,230,168,.5);transition:.15s;flex-shrink:0;touch-action:none;-webkit-tap-highlight-color:transparent}
+.btn-big:active{transform:scale(.94)}
+.btn-big.ok{background:linear-gradient(135deg,#ff8c42,#ff5a5a);box-shadow:0 0 70px rgba(255,90,90,.55)}
+.btn-big.bloqueado{background:linear-gradient(135deg,#555,#333);box-shadow:none;color:#aaa}
+.hint{font-size:.62em;color:var(--muted);text-align:center;line-height:1.6;padding:0 16px}
+.mensaje-wrap{width:100%;max-width:420px;display:flex;gap:8px;padding:0 10px}
+.mensaje-wrap input{flex:1;background:var(--card);border:1px solid var(--border);border-radius:14px;color:var(--text);padding:13px 15px;font-size:16px;outline:none;font-family:inherit}
+.mensaje-wrap input:focus{border-color:var(--accent)}
+.mini{background:var(--card);border:1px solid var(--border);border-radius:12px;color:var(--muted);padding:8px 12px;font-size:.6em;cursor:pointer;font-family:inherit}
+#ultimo{font-size:.64em;color:var(--muted);text-align:center;min-height:18px}
+@media (min-width:700px){
+  .wrap{max-width:640px;margin:0 auto;width:100%;border-left:1px solid var(--border);border-right:1px solid var(--border)}
+  .btn-big{width:210px;height:210px}
+}
+/* ── PANTALLA DE BLOQUEO ── */
+#lock{position:fixed;inset:0;z-index:900;background:radial-gradient(circle at 50% 40%,#0a1a22 0%,#07090e 70%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:24px;text-align:center}
+#lock .candado{font-size:3.4em;filter:drop-shadow(0 0 18px rgba(46,230,168,.6))}
+#lock h2{font-size:.95em;letter-spacing:2px;font-family:'Courier New',monospace;color:#fff}
+#lock p{font-size:.66em;color:var(--muted);max-width:300px;line-height:1.6}
+#lock input{width:min(320px,90%);background:var(--card);border:1px solid var(--border);border-radius:14px;color:var(--text);padding:15px 16px;font-size:16px;outline:none;font-family:inherit;text-align:center;letter-spacing:1px}
+#lock input:focus{border-color:var(--accent)}
+#lock .lockbtn{background:linear-gradient(135deg,#2ee6a8,#7a5cff);color:#03140a;border:none;border-radius:14px;padding:14px 34px;font-weight:800;font-size:.85em;cursor:pointer;font-family:inherit}
+#lock .err{font-size:.66em;color:#ff5a5a;min-height:16px}
+</style>
+</head>
+<body>
+<div class="bg"><div class="orb orb1"></div><div class="orb orb2"></div></div>
+
+<div class="wrap">
+  <div id="lock">
+    <div class="candado">🔒</div>
+    <h2>ACCESO RESTRINGIDO</h2>
+    <p>Este botón de aviso está protegido. Ingresá la contraseña para poder avisar a Gonza.</p>
+    <input type="password" id="lockPass" placeholder="Contraseña de acceso" onkeydown="if(event.key==='Enter')desbloquear()">
+    <button class="lockbtn" onclick="desbloquear()">ENTRAR</button>
+    <div class="err" id="lockErr"></div>
+  </div>
+
+  <div class="header">
+    <div class="logo">🔔</div>
+    <div class="ttl"><h1>AVISAR A GONZA</h1><span id="verTxt">botón de aviso · notifica al celular</span></div>
+    <a href="/asistente.html" class="back">←</a>
+  </div>
+
+  <div class="main">
+    <div class="estado" id="estado">LISTO · tocá para avisar a Gonza</div>
+    <button class="btn-big" id="btnBig" onclick="avisar()">🔔</button>
+    <div class="hint">Tocá el botón y Gonza recibe una notificación al momento en su celular.<br>Opcional: escribí un mensaje antes de tocar.</div>
+    <div class="mensaje-wrap">
+      <input id="inp" placeholder="Mensaje opcional..." onkeydown="if(event.key==='Enter')avisar()">
+      <button class="mini" onclick="avisar()">ENVIAR</button>
+    </div>
+    <label class="toggle" style="display:flex;align-items:center;gap:8px;font-size:.68em;color:var(--muted);cursor:pointer;user-select:none">
+      <input type="checkbox" id="todosCheck" style="width:18px;height:18px;accent-color:var(--accent)">
+      📣 Mencionar a todos del servidor
+    </label>
+    <div style="width:100%;max-width:420px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:10px 12px">
+      <div style="font-size:.64em;color:var(--accent);letter-spacing:1px;margin-bottom:8px">📡 SERVIDORES (activá dónde avisar)</div>
+      <div id="srvList" style="font-size:.68em;line-height:2">Cargando...</div>
+    </div>
+    <div id="pushEstado" style="width:100%;max-width:420px;font-size:.62em;color:var(--muted);text-align:center">📱 Activando notificaciones al celular...</div>
+    <button class="mini" id="bloqBtn" onclick="toggleBloqueo()" style="font-size:.66em;padding:9px 16px">🔒 Bloquear botón</button>
+    <div id="ultimo"></div>
+  </div>
+</div>
+
+<script>
+function $(i){ return document.getElementById(i); }
+function esc(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+// ─── BLOQUEO CON CONTRASEÑA ───
+var claveOK = localStorage.getItem("zh_gonza_clave") || "";
+// ─── SERVIDORES DEL BOT (activar/desactivar) ───
+function cargarServidores(){
+  if(!claveOK) return;
+  fetch("/api/aviso_servidores?clave="+encodeURIComponent(claveOK))
+  .then(function(r){return r.json();}).then(function(d){
+    if(!d||!d.ok){ $("srvList").textContent="No se pudieron cargar los servidores"; return; }
+    var srv=d.servidores||[];
+    if(!srv.length){ $("srvList").textContent="El bot no está en ningún servidor todavía."; return; }
+    $("srvList").innerHTML=srv.map(function(s){
+      var on=s.activo?"checked":"";
+      return '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px">'+
+        '<span>🏢 '+esc(s.nombre)+'</span>'+
+        '<label style="display:flex;align-items:center;gap:6px;cursor:pointer;color:'+(s.activo?'var(--accent)':'var(--muted)')+'">'+
+        (s.activo?"ACTIVO":"APAGADO")+
+        '<input type="checkbox" '+on+' style="width:18px;height:18px;accent-color:var(--accent)" '+
+        'onchange="toggleServidor(\''+esc(s.id)+'\',this.checked)"></label></div>';
+    }).join("");
+  }).catch(function(){ $("srvList").textContent="Error de conexión al cargar servidores"; });
+}
+function toggleServidor(gid, on){
+  var estado = on ? "on" : "off";
+  fetch("/api/aviso_servidores?clave="+encodeURIComponent(claveOK)+"&accion=toggle&guild="+encodeURIComponent(gid)+"&estado="+estado)
+  .then(function(r){return r.json();}).then(function(){ cargarServidores(); })
+  .catch(function(){ cargarServidores(); });
+}
+// ─── PUSH NOTIFICATIONS (celular como app normal) ───
+function urlBase64ToUint8Array(base64){
+  var padding="=".repeat((4-base64.length%4)%4);
+  var b64=(base64+padding).replace(/-/g,"+").replace(/_/g,"/");
+  var raw=atob(b64), arr=new Uint8Array(raw.length);
+  for(var i=0;i<raw.length;i++) arr[i]=raw.charCodeAt(i);
+  return arr;
+}
+function suscribirPush(){
+  if(!("serviceWorker" in navigator) || !("PushManager" in window)) return;
+  if(!claveOK) return;
+  navigator.serviceWorker.register("/sw_asistente.js").then(function(){
+    return navigator.serviceWorker.ready;
+  }).then(function(reg){
+    return fetch("/api/push/config").then(function(r){return r.json();}).then(function(d){
+      if(!d||!d.vapid_public) return null;
+      return reg.pushManager.subscribe({userVisibleOnly:true, applicationServerKey:urlBase64ToUint8Array(d.vapid_public)});
+    });
+  }).then(function(sub){
+    if(!sub) return;
+    return fetch("/api/push/suscribir?clave="+encodeURIComponent(claveOK)+
+      "&endpoint="+encodeURIComponent(sub.endpoint)+
+      "&p256dh="+encodeURIComponent(b64(sub.getKey("p256dh")))+
+      "&auth="+encodeURIComponent(b64(sub.getKey("auth")))+
+      "&dispositivo="+encodeURIComponent(navigator.userAgent.slice(0,40)));
+  }).then(function(r){ return r?r.json():null; }).then(function(d){
+    if(d&&d.ok) $("pushEstado").textContent="✅ Notificaciones push activadas en este dispositivo";
+  }).catch(function(){});
+}
+function b64(buf){
+  var s="";
+  var bytes=new Uint8Array(buf);
+  for(var i=0;i<bytes.length;i++) s+=String.fromCharCode(bytes[i]);
+  return btoa(s).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+}
+// ─── BLOQUEO DEL BOTÓN (solo GONZA con su clave de jefe) ───
+var ownerClave=localStorage.getItem("zh_gonza_owner")||"";
+function cargarBloqueo(){
+  if(!claveOK) return;
+  fetch("/api/aviso_bloqueo?clave="+encodeURIComponent(claveOK)+"&accion=estado")
+  .then(function(r){return r.json();}).then(function(d){
+    if(d&&d.ok) aplicarBloqueo(d.bloqueado);
+  }).catch(function(){});
+}
+function pedirGonza(callback){
+  if(ownerClave){ callback(); return; }
+  var c=prompt("👑 Clave de GONZA (solo él puede bloquear el botón):");
+  if(!c){ $("estado").textContent="LISTO · tocá para avisar a Gonza"; return; }
+  fetch("/api/owner_verificar?clave="+encodeURIComponent(c.trim()))
+  .then(function(r){return r.json();}).then(function(d){
+    if(d&&d.ok){
+      ownerClave=c.trim();
+      localStorage.setItem("zh_gonza_owner", ownerClave);
+      callback();
+    }else{
+      $("estado").textContent="❌ Clave incorrecta · solo Gonza puede bloquear";
+      setTimeout(function(){ $("estado").textContent="LISTO · tocá para avisar a Gonza"; },2500);
+    }
+  }).catch(function(){ $("estado").textContent="❌ Error de conexión"; });
+}
+function toggleBloqueo(){
+  if(!claveOK){ $("lock").style.display="flex"; return; }
+  pedirGonza(function(){
+    var accion = $("bloqBtn").dataset.blq==="1" ? "desbloquear" : "bloquear";
+    fetch("/api/aviso_bloqueo?clave="+encodeURIComponent(claveOK)+"&accion="+accion+"&clave_owner="+encodeURIComponent(ownerClave))
+    .then(function(r){return r.json();}).then(function(d){
+      if(d&&d.ok) aplicarBloqueo(d.bloqueado);
+      else if(d&&d.error==="SOLO_GONZA"){ ownerClave=""; localStorage.removeItem("zh_gonza_owner"); $("estado").textContent="❌ Solo Gonza puede bloquear"; setTimeout(function(){ $("estado").textContent="LISTO · tocá para avisar a Gonza"; },2500); }
+    }).catch(function(){});
+  });
+}
+function aplicarBloqueo(bloqueado){
+  $("bloqBtn").dataset.blq = bloqueado?"1":"0";
+  if(bloqueado){
+    $("bloqBtn").textContent="🔓 Desbloquear botón";
+    $("bloqBtn").style.borderColor="#ff5a5a";
+    $("bloqBtn").style.color="#ff5a5a";
+    $("btnBig").classList.add("bloqueado");
+    $("btnBig").textContent="🔒";
+    $("estado").textContent="BLOQUEADO · un admin lo bloqueó";
+  }else{
+    $("bloqBtn").textContent="🔒 Bloquear botón";
+    $("bloqBtn").style.borderColor="";
+    $("bloqBtn").style.color="";
+    $("btnBig").classList.remove("bloqueado");
+    $("btnBig").textContent="🔔";
+    $("estado").textContent="LISTO · tocá para avisar a Gonza";
+  }
+}
+function desbloquear(){
+  var c=$("lockPass").value.trim();
+  if(!c) return;
+  fetch("/api/aviso_verificar?clave="+encodeURIComponent(c))
+  .then(function(r){return r.json();}).then(function(d){
+    if(d&&d.ok){
+      claveOK=c;
+      localStorage.setItem("zh_gonza_clave", c);
+      $("lock").style.display="none";
+      cargarServidores();
+      cargarBloqueo();
+      suscribirPush();
+    }else{
+      $("lockErr").textContent="❌ Contraseña incorrecta";
+      $("lockPass").value="";
+    }
+  }).catch(function(){ $("lockErr").textContent="❌ Error de conexión"; });
+}
+// si ya está desbloqueado (clave guardada), ocultar el candado y cargar servidores + push + bloqueo
+if(claveOK){ $("lock").style.display="none"; cargarServidores(); cargarBloqueo(); suscribirPush(); }
+function beep(){
+  try{
+    var ctx=new (window.AudioContext||window.webkitAudioContext)();
+    var o=ctx.createOscillator(), g=ctx.createGain();
+    o.frequency.value=880; o.type="sine"; g.gain.value=.2;
+    o.connect(g); g.connect(ctx.destination);
+    o.start(); setTimeout(function(){ o.stop(); },200);
+  }catch(e){}
+}
+function avisar(){
+  if(!claveOK){ $("lock").style.display="flex"; return; }
+  if($("bloqBtn").dataset.blq==="1"){ $("estado").textContent="🔒 BLOQUEADO · un admin lo bloqueó"; beep(); return; }
+  var t=$("inp").value.trim();
+  var todos=$("todosCheck").checked;
+  $("inp").value="";
+  $("btnBig").classList.add("ok");
+  $("estado").textContent="ENVIANDO...";
+  beep();
+  var u="/api/aviso?clave="+encodeURIComponent(claveOK)+"&mensaje="+encodeURIComponent(t||"🔔 Alguien tocó el botón de aviso.")+(todos?"&mencionar_todos=si":"");
+  fetch(u)
+  .then(function(r){return r.json();}).then(function(d){
+    if(d&&d.ok){
+      $("estado").textContent="✅ ¡GONZA NOTIFICADO!";
+      $("ultimo").textContent="Aviso enviado"+(todos?" (mencionó a todos)":"")+": "+(t||"(sin mensaje)");
+      $("btnBig").textContent="✅";
+      beep();
+    }else if(d&&d.error==="CLAVE_INCORRECTA"){
+      claveOK=""; localStorage.removeItem("zh_gonza_clave");
+      $("lock").style.display="flex";
+      $("lockErr").textContent="❌ Sesión vencida · ingresá la contraseña";
+      $("estado").textContent="LISTO · tocá para avisar a Gonza";
+      $("btnBig").classList.remove("ok");
+    }else{
+      $("estado").textContent="❌ Error";
+      $("ultimo").textContent=esc(d&&d.error||"No se pudo enviar");
+    }
+    setTimeout(function(){ $("estado").textContent="LISTO · tocá para avisar a Gonza"; $("btnBig").textContent="🔔"; $("btnBig").classList.remove("ok"); },2500);
+  }).catch(function(){
+    $("estado").textContent="❌ Error de conexión";
+    setTimeout(function(){ $("estado").textContent="LISTO · tocá para avisar a Gonza"; $("btnBig").classList.remove("ok"); $("btnBig").textContent="🔔"; },2500);
+  });
+}
+// notificación del navegador (opcional, si el usuario lo permite)
+if("Notification" in window && Notification.permission!=="granted" && Notification.permission!=="denied"){
+  Notification.requestPermission();
+}
+</script>
+</body>
+</html>

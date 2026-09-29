@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>💬 Discord · ZonaHack</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#07090e;--card:rgba(13,17,23,.9);--border:#1c2531;--text:#d7e2ef;--muted:#6d7f93;--accent:#5865F2;--green:#2ee6a8;--red:#ff5a5a;--gold:#f1c40f}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh}
+.bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.orb{position:absolute;border-radius:50%;filter:blur(90px);opacity:.3;animation:flotar 18s ease-in-out infinite}
+.orb1{width:460px;height:460px;background:radial-gradient(circle,rgba(88,101,242,.25),transparent 70%);top:-170px;right:-120px}
+.orb2{width:500px;height:500px;background:radial-gradient(circle,rgba(122,92,255,.18),transparent 70%);bottom:-200px;left:-160px;animation-delay:-7s}
+@keyframes flotar{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(20px,-14px) scale(1.08)}}
+.header{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border);background:rgba(7,9,14,.92);backdrop-filter:blur(10px);position:sticky;top:0;z-index:100}
+.logo{width:40px;height:40px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px;background:linear-gradient(135deg,rgba(88,101,242,.3),rgba(122,92,255,.3));border:1px solid rgba(88,101,242,.5)}
+.ttl{flex:1;min-width:0}
+.ttl h1{font-size:.95em;letter-spacing:2px;font-weight:900;font-family:'Courier New',monospace;color:#fff}
+.ttl span{font-size:.6em;color:var(--muted)}
+.back{color:var(--accent);text-decoration:none;font-size:.7em;padding:6px 10px;border:1px solid var(--border);border-radius:8px}
+.container{max-width:640px;margin:0 auto;padding:16px 14px 40px;position:relative;z-index:1}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:14px}
+.card h3{font-size:.8em;color:var(--accent);letter-spacing:1px;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.conex{display:inline-flex;align-items:center;gap:7px;font-size:.7em;padding:6px 14px;border-radius:20px}
+.conex.on{color:var(--green);border:1px solid rgba(46,230,168,.35);background:rgba(46,230,168,.08)}
+.conex.off{color:var(--red);border:1px solid rgba(255,90,90,.35);background:rgba(255,90,90,.08)}
+.status-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin-top:10px}
+.st{background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:10px;padding:9px 10px;text-align:center}
+.st b{display:block;font-size:1.05em;color:#fff}
+.st span{font-size:.56em;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+textarea,input{width:100%;background:rgba(0,0,0,.4);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:11px 13px;font-size:.8em;outline:none;font-family:inherit}
+textarea:focus,input:focus{border-color:var(--accent)}
+textarea{resize:vertical;min-height:80px}
+.btn{background:linear-gradient(135deg,#5865F2,#7a5cff);color:#fff;border:none;border-radius:12px;padding:12px 20px;font-weight:800;font-size:.82em;cursor:pointer;font-family:inherit;width:100%;margin-top:8px}
+.btn:active{transform:scale(.98)}
+.btn.ghost{background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--text)}
+.status{font-size:.68em;color:var(--muted);text-align:center;min-height:16px;margin-top:8px}
+.tog{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:12px;margin-bottom:8px;background:rgba(0,0,0,.25);cursor:pointer}
+.tog .ic{font-size:1.3em}
+.tog .tx{flex:1;font-size:.78em}
+.tog .tx small{display:block;color:var(--muted);font-size:.8em}
+.switch{width:44px;height:24px;border-radius:12px;background:#222b36;position:relative;transition:.2s;flex-shrink:0}
+.switch.on{background:#5865F2}
+.switch::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:.2s}
+.switch.on::after{left:23px}
+.cmds{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.cmd{background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:9px;padding:6px 10px;font-size:.62em;color:var(--muted);font-family:'Courier New',monospace}
+</style>
+</head>
+<body>
+<div class="bg"><div class="orb orb1"></div><div class="orb orb2"></div></div>
+
+<div class="header">
+  <div class="logo">💬</div>
+  <div class="ttl"><h1>DISCORD ZONAHACK</h1><span>bot zonahackbot · te llega a tu DM</span></div>
+  <a href="/" class="back">←</a>
+</div>
+
+<div class="container">
+  <div class="card">
+    <h3>🤖 Estado del bot <span class="conex off" id="conex">📡</span></h3>
+    <div class="status-grid" id="statusGrid"><div class="st"><b>…</b><span>Cargando</span></div></div>
+  </div>
+
+  <div class="card">
+    <h3>⚙️ Configurar (1 vez)</h3>
+    <div style="font-size:.72em;color:var(--muted);line-height:1.7;margin-bottom:8px">
+      1️⃣ <b>Invitá el bot a tu servidor:</b> abrí el link, elegí tu servidor y aceptá.<br>
+      2️⃣ En Discord, andá al perfil de <b>zonahackbot</b> → tocá <b>Mensaje</b> (abre un DM con el bot).<br>
+      3️⃣ Poné acá <b>tu ID de Discord</b> y listo 👇
+    </div>
+    <a class="btn ghost" style="display:block;text-align:center;text-decoration:none" id="inviteLink" href="#" target="_blank" rel="noopener">➕ INVITAR ZONAHACKBOT A MI SERVIDOR</a>
+    <div style="margin-top:8px">
+      <input id="destino" placeholder="Tu ID de Discord (ej: 1504343667144527896)">
+      <button class="btn ghost" onclick="guardarDestino()">💾 Guardar mi ID</button>
+    </div>
+    <div class="status" id="stCfg"></div>
+  </div>
+
+  <div class="card">
+    <h3>✉️ Enviar mensaje a tu Discord (DM)</h3>
+    <textarea id="msgTxt" placeholder="Escribí lo que quieras que te llegue a tu Discord…"></textarea>
+    <button class="btn" onclick="enviarDM()">📨 ENVIAR A MI DISCORD</button>
+    <div class="status" id="stMsg"></div>
+    <div class="cmds">
+      <span class="cmd">💡 también funciona el bot: /chiste /frase /horoscopo /refran /baile @user</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>🔔 Avisos automáticos a Discord</h3>
+    <div class="tog" onclick="toggle('pelis')">
+      <div class="ic">🎬</div>
+      <div class="tx">Avisarme en Discord cuando <b>suba una película</b><small>se activa en el Subidor de Películas</small></div>
+      <div class="switch" id="sw_pelis"></div>
+    </div>
+    <div class="tog" onclick="toggle('juego')">
+      <div class="ic">🎮</div>
+      <div class="tx">Avisarme en Discord cuando <b>haya un récord en Atrapamonedas</b><small>se activa al terminar el juego</small></div>
+      <div class="switch" id="sw_juego"></div>
+    </div>
+    <div class="status" id="stTog"></div>
+  </div>
+</div>
+
+<script>
+function $(id){return document.getElementById(id);}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+
+// Estado del bot
+var BOT_APP_ID='';
+fetch('/api/discord_bot').then(function(r){return r.json();}).then(function(d){
+  var cx=$('conex');
+  if(d&&d.conectado){ cx.className='conex on'; cx.innerHTML='🟢 <span class="dot"></span> Conectado'; }
+  else { cx.className='conex off'; cx.innerHTML='🔴 <span class="dot"></span> Desconectado'; }
+  BOT_APP_ID=d.app_id||BOT_APP_ID;
+  if(BOT_APP_ID) $('inviteLink').href='https://discord.com/oauth2/authorize?client_id='+BOT_APP_ID+'&scope=bot&permissions=0';
+  $('statusGrid').innerHTML =
+    '<div class="st"><b>'+esc(d.nombre||'zonahackbot')+'</b><span>Nombre</span></div>'+
+    '<div class="st"><b>'+esc(d.bot_user||'?')+'</b><span>Usuario</span></div>'+
+    '<div class="st"><b>'+(d.activo?'✅ ON':'⛔ OFF')+'</b><span>Estado</span></div>'+
+    '<div class="st"><b>'+(d.commands_count||0)+'</b><span>Comandos</span></div>';
+}).catch(function(){ $('conex').className='conex off'; $('conex').innerHTML='🔴 <span class="dot"></span> Error'; });
+
+function getDestino(){ return (localStorage.getItem('zh_disc_destino')||'').trim()||'1504343667144527896'; }
+function guardarDestino(){
+  var v=$('destino').value.trim();
+  if(!v){ $('stCfg').textContent='Poné tu ID de Discord'; return; }
+  localStorage.setItem('zh_disc_destino', v);
+  $('stCfg').textContent='✅ ID guardado. Ya podés enviar mensajes.';
+  setTimeout(function(){$('stCfg').textContent='';},2500);
+}
+$('destino').value=localStorage.getItem('zh_disc_destino')||'';
+
+function enviarDM(){
+  var t=$('msgTxt').value.trim();
+  if(!t){ $('stMsg').textContent='Escribí un mensaje primero'; return; }
+  $('stMsg').textContent='⏳ Enviando…';
+  fetch('/api/discord_send?mensaje='+encodeURIComponent(t)+'&destino='+encodeURIComponent(getDestino()))
+  .then(function(r){return r.json();}).then(function(d){
+    $('stMsg').textContent = d.ok ? '✅ ¡Llegó a tu Discord!' : ('❌ '+(d.error||'error'));
+    if(d.ok) $('msgTxt').value='';
+  }).catch(function(){ $('stMsg').textContent='❌ Error de conexión'; });
+}
+
+// Avisos automáticos
+var KEYS={pelis:'zh_disc_pelis',juego:'zh_disc_juego'};
+function pintar(){
+  Object.keys(KEYS).forEach(function(k){
+    var on=localStorage.getItem(KEYS[k])==='1';
+    $('sw_'+k).className='switch'+(on?' on':'');
+  });
+}
+function toggle(k){
+  var on=localStorage.getItem(KEYS[k])==='1';
+  localStorage.setItem(KEYS[k], on?'0':'1');
+  pintar();
+  $('stTog').textContent = on?'🔕 Aviso desactivado':'🔔 Aviso activado. ¡Guardado!';
+  setTimeout(function(){$('stTog').textContent='';},2500);
+}
+pintar();
+</script>
+<script src="/logger_zh.js?v=2026"></script>
+</body>
+</html>

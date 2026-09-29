@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>🍩 Los Simpson - ZonaHack</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0a;color:#c8d6e5;min-height:100vh;font-family:'Courier New',monospace}
+.header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid rgba(0,255,65,.1);position:sticky;top:0;z-index:100;background:#0a0a0a}
+.header h1{color:#f1c40f;font-size:1.1em;text-shadow:0 0 8px rgba(241,196,15,.15)}
+.back{color:#00ff41;text-decoration:none;font-size:.72em;padding:5px 10px;border:1px solid rgba(0,255,65,.1);border-radius:3px}
+.back:hover{border-color:rgba(0,255,65,.2)}
+.container{max-width:1000px;margin:0 auto;padding:10px}
+.hero{background:#0d0d0d;border:1px solid rgba(241,196,15,.08);border-radius:4px;padding:15px;margin-bottom:10px;text-align:center}
+.hero h2{color:#f1c40f;font-size:1em;text-shadow:0 0 6px rgba(241,196,15,.1)}
+.hero p{color:rgba(200,214,229,.4);font-size:.7em;margin-top:4px}
+.cats{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px}
+.cats button{padding:5px 12px;border:1px solid rgba(241,196,15,.08);border-radius:3px;background:rgba(241,196,15,.02);color:rgba(241,196,15,.5);cursor:pointer;font-size:.62em;font-family:'Courier New',monospace;transition:.2s}
+.cats button:hover,.cats button.active{color:#f1c40f;border-color:rgba(241,196,15,.2);background:rgba(241,196,15,.05)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:5px}
+.card{border:1px solid rgba(241,196,15,.04);border-radius:4px;overflow:hidden;cursor:pointer;background:#0d0d0d;transition:all .15s}
+.card:hover{border-color:rgba(241,196,15,.12);box-shadow:0 0 10px rgba(241,196,15,.03)}
+.card img{width:100%;aspect-ratio:16/9;object-fit:cover;background:#000}
+.card .inf{padding:6px}
+.card .t{font-size:.68em;color:rgba(200,214,229,.7);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card .c{font-size:.58em;color:rgba(200,214,229,.3);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.status{text-align:center;font-size:.65em;color:rgba(200,214,229,.3);margin:6px 0;min-height:16px}
+.loading{text-align:center;padding:30px;color:rgba(200,214,229,.2);font-size:.72em}
+.loading::after{content:'';display:block;width:18px;height:18px;margin:8px auto;border:1px solid rgba(241,196,15,.1);border-top-color:#f1c40f;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.load-more{text-align:center;margin:8px 0}
+.load-more button{padding:6px 18px;border:1px solid rgba(241,196,15,.1);border-radius:3px;background:rgba(241,196,15,.03);color:#f1c40f;cursor:pointer;font-size:.65em;font-family:'Courier New',monospace;transition:.2s}
+.load-more button:hover{border-color:rgba(241,196,15,.2)}
+@media(max-width:480px){.grid{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="header">
+  <a href="/" class="back">← Volver</a>
+  <h1>🍩 Los Simpson</h1>
+  <div style="width:50px"></div>
+</div>
+<div class="container">
+  <div class="hero">
+    <h2>🍩 Capitulos completos</h2>
+    <p>Todos los episodios de Los Simpson en español latino</p>
+  </div>
+  <div class="cats" id="cats">
+    <button class="active" onclick="buscarSimpson('Los Simpson capitulo completo espanol latino',this)">🔥 Populares</button>
+    <button onclick="buscarSimpson('Los Simpson temporada 1 capitulo completo espanol',this)">📺 Temp 1</button>
+    <button onclick="buscarSimpson('Los Simpson temporada 2 capitulo completo espanol',this)">📺 Temp 2</button>
+    <button onclick="buscarSimpson('Los Simpson temporada 3 capitulo completo espanol',this)">📺 Temp 3</button>
+    <button onclick="buscarSimpson('Los Simpson temporada 4 capitulo completo espanol',this)">📺 Temp 4</button>
+    <button onclick="buscarSimpson('Los Simpson temporada 5 capitulo completo espanol',this)">📺 Temp 5</button>
+    <button onclick="buscarSimpson('Los Simpson temporada 6 capitulo completo espanol',this)">📺 Temp 6</button>
+    <button onclick="buscarSimpson('Los Simpson temporada 7 capitulo completo espanol',this)">📺 Temp 7</button>
+    <button onclick="buscarSimpson('Los Simpson temporada 8 capitulo completo espanol',this)">📺 Temp 8</button>
+    <button onclick="buscarSimpson('Los Simpson temporada 9 capitulo completo espanol',this)">📺 Temp 9</button>
+    <button onclick="buscarSimpson('Los Simpson temporada 10 capitulo completo espanol',this)">📺 Temp 10</button>
+    <button onclick="buscarSimpson('Los Simpson temporada 11 12 capitulo completo espanol',this)">📺 Temp 11-12</button>
+    <button onclick="buscarSimpson('Los Simpson temporada 13 14 15 capitulo completo espanol',this)">📺 Temp 13-15</button>
+    <button onclick="buscarSimpson('mejores episodios Los Simpson espanol latino',this)">🏆 Mejores</button>
+    <button onclick="buscarSimpson('Los Simpson pelicula espanol latino completa',this)">🎬 Pelicula</button>
+  </div>
+  <div class="status" id="status">Selecciona una temporada</div>
+  <div class="grid" id="grid"><div class="loading" style="grid-column:1/-1">Cargando episodios...</div></div>
+  <div class="load-more" id="loadMore" style="display:none"><button onclick="cargarMasSimpson()">Cargar mas episodios</button></div>
+</div>
+
+<script>
+var resultadosSimpson = [];
+var ultimaBusquedaSimpson = "";
+var variantesSimpson = ["completo","espanol latino","HD","Los Simpson","capitulo"];
+
+function esc(s){return (s||"").replace(/[&<>"]/g,function(m){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m];});}
+
+function buscarSimpson(q,btn){
+  if(!q) return;
+  ultimaBusquedaSimpson = q;
+  resultadosSimpson = [];
+  document.querySelectorAll("#cats button").forEach(function(b){b.classList.remove("active");});
+  if(btn) btn.classList.add("active");
+  document.getElementById("status").textContent = "Buscando: " + q;
+  document.getElementById("grid").innerHTML = '<div class="loading" style="grid-column:1/-1">Buscando episodios...</div>';
+  document.getElementById("loadMore").style.display = "none";
+  var xhr = new XMLHttpRequest();
+  xhr.open("GET","/api/search?q="+encodeURIComponent(q),true);
+  xhr.timeout = 30000;
+  xhr.onload = function(){
+    try{
+      var data = JSON.parse(xhr.responseText);
+      var items = data.results || [];
+      if(!items.length){
+        document.getElementById("grid").innerHTML = '<div class="loading" style="grid-column:1/-1">Sin episodios encontrados</div>';
+        document.getElementById("status").textContent = "Sin resultados";
+        return;
+      }
+      resultadosSimpson = items;
+      mostrarResultadosSimpson(items);
+      document.getElementById("status").textContent = items.length + " episodios encontrados";
+      document.getElementById("loadMore").style.display = "block";
+    }catch(e){
+      document.getElementById("grid").innerHTML = '<div class="loading" style="grid-column:1/-1">Error al buscar</div>';
+    }
+  };
+  xhr.onerror = function(){
+    document.getElementById("grid").innerHTML = '<div class="loading" style="grid-column:1/-1">Error de conexion</div>';
+  };
+  xhr.send();
+}
+
+function mostrarResultadosSimpson(items){
+  var h = "";
+  items.forEach(function(it,i){
+    if(!it.id) return;
+    h += '<div class="card" onclick="reproducirSimpson('+i+')">';
+    if(it.thumb) h += '<img src="'+it.thumb+'" loading="lazy">';
+    else h += '<div style="aspect-ratio:16/9;background:#000;display:flex;align-items:center;justify-content:center;font-size:2em;opacity:.3">🍩</div>';
+    h += '<div class="inf"><div class="t">'+esc((it.title||"").slice(0,60))+'</div>';
+    if(it.channel) h += '<div class="c">'+esc(it.channel)+'</div>';
+    h += '</div></div>';
+  });
+  document.getElementById("grid").innerHTML = h;
+}
+
+function cargarMasSimpson(){
+  if(!ultimaBusquedaSimpson) return;
+  var extra = variantesSimpson[Math.floor(Math.random()*variantesSimpson.length)];
+  var q = ultimaBusquedaSimpson + " " + extra;
+  var btn = document.querySelector("#loadMore button");
+  if(btn){btn.disabled=true;btn.textContent="Cargando...";}
+  var xhr = new XMLHttpRequest();
+  xhr.open("GET","/api/search?q="+encodeURIComponent(q),true);
+  xhr.timeout = 30000;
+  xhr.onload = function(){
+    try{
+      var data = JSON.parse(xhr.responseText);
+      var items = data.results || [];
+      var nuevas = 0;
+      items.forEach(function(it){
+        if(!it.id || resultadosSimpson.some(function(r){return r.id===it.id;})) return;
+        resultadosSimpson.push(it);
+        nuevas++;
+        var idx = resultadosSimpson.length - 1;
+        var div = document.createElement("div");
+        div.className = "card";
+        div.innerHTML = '<div onclick="reproducirSimpson('+idx+')">'+
+          (it.thumb?'<img src="'+it.thumb+'" loading="lazy">':'<div style="aspect-ratio:16/9;background:#000;display:flex;align-items:center;justify-content:center;font-size:2em;opacity:.3">🍩</div>')+
+          '<div class="inf"><div class="t">'+esc((it.title||"").slice(0,60))+'</div>'+
+          (it.channel?'<div class="c">'+esc(it.channel)+'</div>':'')+
+          '</div></div>';
+        document.getElementById("grid").appendChild(div);
+      });
+      document.getElementById("status").textContent = resultadosSimpson.length + " episodios";
+    }catch(e){}
+    if(btn){btn.disabled=false;btn.textContent="Cargar mas episodios";}
+  };
+  xhr.send();
+}
+
+function reproducirSimpson(idx){
+  var it = resultadosSimpson[idx];
+  if(!it) return;
+  // Abrir en el reproductor principal via URL
+  window.location.href = "/?q=" + encodeURIComponent(it.title + " " + (it.channel||""));
+}
+
+// Cargar al inicio
+buscarSimpson("Los Simpson capitulo completo espanol latino", document.querySelector("#cats button.active"));
+</script>
+<script src="/errores.js" defer></script>
+<script src="/update_check.js" defer></script>
+</body>
+</html>

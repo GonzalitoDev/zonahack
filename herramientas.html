@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>🔧 Tools - ZonaHack</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0a;color:#c8d6e5;font-family:'Courier New',monospace;min-height:100vh}
+.header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid rgba(0,200,255,.1);background:#050505;position:sticky;top:0;z-index:100}
+.header h1{color:#00c8ff;font-size:.85em;letter-spacing:1px}
+.back{color:#00c8ff;text-decoration:none;font-size:.65em;padding:4px 8px;border:1px solid rgba(0,200,255,.15);border-radius:3px}
+.container{max-width:1000px;margin:0 auto;padding:12px}
+.hero{background:linear-gradient(180deg,#050d10,#0a0a0a);border:1px solid rgba(0,200,255,.1);border-radius:4px;padding:16px;margin-bottom:10px;text-align:center}
+.hero h2{color:#00c8ff;font-size:.9em;letter-spacing:2px}
+.hero p{color:rgba(0,200,255,.35);font-size:.62em;margin-top:4px}
+.cats{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px}
+.cats button{padding:5px 12px;border:1px solid rgba(0,200,255,.1);border-radius:2px;background:rgba(0,0,0,.3);color:rgba(0,200,255,.4);font-size:.58em;cursor:pointer;font-family:'Courier New',monospace;transition:.2s}
+.cats button:hover,.cats button.active{color:#00c8ff;border-color:rgba(0,200,255,.3);background:rgba(0,200,255,.05)}
+.section-title{color:#00c8ff;font-size:.72em;letter-spacing:1px;margin:14px 0 6px;padding-bottom:4px;border-bottom:1px solid rgba(0,200,255,.08)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px}
+.tool-card{border:1px solid rgba(0,200,255,.06);border-radius:4px;padding:12px;cursor:pointer;transition:.2s;background:#050a0d}
+.tool-card:hover{border-color:rgba(0,200,255,.2);transform:translateY(-2px)}
+.tool-card.builtin{border-color:rgba(46,204,113,.12)}
+.tool-card.builtin:hover{border-color:rgba(46,204,113,.3)}
+.tool-card .top{display:flex;align-items:flex-start;gap:8px;margin-bottom:6px}
+.tool-card .ico{font-size:1.8em;min-width:35px;text-align:center}
+.tool-card .nm{font-size:.72em;color:#00c8ff;font-weight:bold}
+.tool-card .nm .badge{font-size:.55em;padding:1px 5px;border-radius:2px;margin-left:4px}
+.badge-built{background:rgba(46,204,113,.15);color:#2ecc71;border:1px solid rgba(46,204,113,.3)}
+.badge-dl{background:rgba(0,200,255,.1);color:#00c8ff;border:1px solid rgba(0,200,255,.2)}
+.tool-card .desc{font-size:.58em;color:rgba(200,214,229,.45);line-height:1.4;margin-bottom:4px}
+.tool-card .meta{font-size:.52em;color:rgba(0,200,255,.25)}
+.tool-card .actions{display:flex;gap:4px;margin-top:6px}
+.tool-card .actions button{padding:4px 10px;border:1px solid rgba(0,200,255,.15);border-radius:2px;background:rgba(0,200,255,.03);color:#00c8ff;cursor:pointer;font-size:.52em;font-family:'Courier New',monospace;letter-spacing:1px}
+.tool-card .actions button:hover{background:rgba(0,200,255,.08)}
+.tool-card .actions button.fav{border-color:rgba(241,196,15,.2);color:#f1c40f}
+.tool-card .actions button.fav:hover{background:rgba(241,196,15,.06)}
+/* MODAL de herramientas builtin */
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.9);z-index:999;display:none;flex-direction:column}
+.modal-overlay.show{display:flex}
+.modal-overlay .m-head{display:flex;align-items:center;padding:10px 14px;background:#050a0d;border-bottom:1px solid rgba(0,200,255,.1)}
+.modal-overlay .m-head button{background:none;border:none;color:#00c8ff;font-size:1.2em;cursor:pointer}
+.modal-overlay .m-head .m-title{flex:1;color:#00c8ff;font-size:.72em;padding:0 8px;letter-spacing:1px}
+.modal-overlay .m-body{flex:1;display:flex;flex-direction:column;padding:16px;overflow:auto;max-width:600px;margin:0 auto;width:100%}
+.m-body textarea,.m-body input{background:#050a0d;border:1px solid rgba(0,200,255,.15);border-radius:3px;color:#c8d6e5;padding:10px;font-size:.7em;font-family:'Courier New',monospace;width:100%;margin:4px 0;resize:vertical}
+.m-body textarea:focus,.m-body input:focus{border-color:#00c8ff;outline:none}
+.m-body label{font-size:.62em;color:rgba(0,200,255,.5);letter-spacing:1px;margin-top:6px}
+.m-body button{padding:8px 16px;border:1px solid #00c8ff;border-radius:3px;background:rgba(0,200,255,.05);color:#00c8ff;cursor:pointer;font-size:.65em;font-family:'Courier New',monospace;margin:4px 0;letter-spacing:1px}
+.m-body button:hover{background:rgba(0,200,255,.12)}
+.m-body .result{padding:10px;border:1px solid rgba(0,200,255,.1);border-radius:3px;background:#020a0a;font-size:.68em;word-break:break-all;min-height:40px;margin:4px 0;color:#00c8ff}
+.m-body .qr-canvas{text-align:center;margin:8px 0}
+.m-body .pw-strength{height:4px;border-radius:2px;margin-top:4px;transition:.3s}
+@media(max-width:480px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="header">
+  <a href="/" class="back">←</a>
+  <h1>🔧 HERRAMIENTAS</h1>
+  <span style="font-size:.52em;color:rgba(0,200,255,.25)">100% Legal</span>
+</div>
+<div class="container">
+  <div class="hero">
+    <h2>🔧 HERRAMIENTAS 100% LEGALES Y SIN VIRUS</h2>
+    <p>Herramientas propias (usar ahora) + descargas verificadas de sitios oficiales</p>
+  </div>
+  <div class="cats" id="catBtns">
+    <button class="active" onclick="filtrar('todas',this)">🔧 TODAS</button>
+    <button onclick="filtrar('builtin',this)">⚡ Integradas</button>
+    <button onclick="filtrar('generadores',this)">🔐 Generadores</button>
+    <button onclick="filtrar('convertidor',this)">🔄 Convertidores</button>
+    <button onclick="filtrar('descarga',this)">📥 Descargas</button>
+    <button onclick="filtrar('ciberseguridad',this)">🛡 Ciberseguridad</button>
+    <button onclick="filtrar('windows',this)">🪟 Windows</button>
+    <button onclick="filtrar('mac',this)">🍎 Mac</button>
+    <button onclick="filtrar('linux',this)">🐧 Linux</button>
+  </div>
+
+  <div class="section-title">⚡ HERRAMIENTAS INTEGRADAS (usar ahora, sin descargar)</div>
+  <div class="grid" id="builtinGrid"></div>
+
+  <div class="section-title">📥 DESCARGAS OFICIALES (sitios de los fabricantes)</div>
+  <div class="grid" id="downloadGrid"></div>
+</div>
+
+<div class="modal-overlay" id="modal">
+  <div class="m-head">
+    <button onclick="cerrarModal()">←</button>
+    <span class="m-title" id="modalTitle"></span>
+  </div>
+  <div class="m-body" id="modalBody"></div>
+</div>
+
+<script>
+var SB="https://xfwolaurpeofysnymqle.supabase.co";
+var KEY="sb_publishable_3VvBUD5Bdu3Uaq59fJ99MQ_XDCtujUU";
+var H={"apikey":KEY,"Authorization":"Bearer "+KEY,"Content-Type":"application/json","Prefer":"return=minimal"};
+var USER=localStorage.getItem("vh_usuario")||"anon";
+var favs=[];
+
+function esc(s){return(s||'').replace(/[&<>]/g,function(m){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m];});}
+function $(id){return document.getElementById(id);}
+
+// Registrar uso de herramienta
+function registrarUso(tool,accion){
+  try{
+    fetch(SB+"/rest/v1/logs",{method:"POST",headers:H,body:JSON.stringify({
+      usuario_nombre:USER, accion:"uso_herramienta", detalle:tool+": "+accion
+    })});
+    try{ if(window.ZHRango) ZHRango.sumar(2, "Usaste "+tool); }catch(e){}
+  }catch(e){}
+}
+
+// Favoritos
+function cargarFavs(){
+  try{favs=JSON.parse(localStorage.getItem("vh_tool_favs")||"[]");}catch(e){favs=[];}
+}
+function toggleFav(id){
+  var idx=favs.indexOf(id);
+  if(idx>=0)favs.splice(idx,1);else favs.push(id);
+  localStorage.setItem("vh_tool_favs",JSON.stringify(favs));
+  renderTodo(document.getElementById("catBtns").querySelector(".active"));
+}
+function esFav(id){return favs.indexOf(id)>=0;}
+
+// ─── HERRAMIENTAS INTEGRADAS ──────────
+var BUILTIN=[
+  {id:"qr",ico:"📱",nom:"QR Generator",cat:"generadores",
+   desc:"Genera codigos QR desde texto o URLs. Escaneable con cualquier celular.",
+   tags:"generador qr codigo",
+   open:function(){
+     var h='<label>Texto o URL:</label><input id="qrInput" placeholder="https://..." value="https://offlinevideoplayer.vercel.app">';
+     h+='<button onclick="generarQR()">Generar QR</button><div class="qr-canvas" id="qrCanvas"></div>';
+     $("modalBody").innerHTML=h;$("modalTitle").textContent="📱 QR Generator";
+     $("modal").classList.add("show");registrarUso("qr","abrir");
+   }},
+  {id:"password",ico:"🔑",nom:"Password Generator",cat:"generadores",
+   desc:"Crea contraseñas seguras. Personaliza longitud, caracteres especiales, numeros.",
+   tags:"password contraseña seguro",
+   open:function(){
+     var h='<label>Longitud:</label><input type="range" min="8" max="64" value="16" id="pwLen" oninput="genPW()"><span id="pwLenVal" style="margin-left:8px">16</span>';
+     h+='<label><input type="checkbox" id="pwUpper" checked onchange="genPW()"> Mayusculas</label>';
+     h+='<label><input type="checkbox" id="pwNum" checked onchange="genPW()"> Numeros</label>';
+     h+='<label><input type="checkbox" id="pwSym" onchange="genPW()"> Simbolos</label>';
+     h+='<div class="result" id="pwResult" style="font-size:1.2em;text-align:center;letter-spacing:2px" ondblclick="navigator.clipboard.writeText(this.textContent);alert(\'Copiado!\')"></div>';
+     h+='<div class="pw-strength" id="pwStrength"></div>';
+     h+='<button onclick="navigator.clipboard.writeText(document.getElementById(\'pwResult\').textContent);alert(\'Copiado!\')">📋 Copiar</button>';
+     $("modalBody").innerHTML=h;$("modalTitle").textContent="🔑 Password Generator";
+     $("modal").classList.add("show");genPW();registrarUso("password","abrir");
+   }},
+  {id:"base64",ico:"🔄",nom:"Base64 Encode/Decode",cat:"convertidor",
+   desc:"Codifica y decodifica texto en Base64. Util para URLs, APIs, datos binarios.",
+   tags:"base64 codificar decodificar",
+   open:function(){
+     var h='<label>Texto:</label><textarea id="b64Input" rows="4" oninput="b64Auto()" placeholder="Escribi texto..."></textarea>';
+     h+='<button onclick="b64Encode()">🔒 Encode</button> <button onclick="b64Decode()">🔓 Decode</button>';
+     h+='<label>Resultado:</label><textarea id="b64Output" rows="4" readonly></textarea>';
+     h+='<button onclick="navigator.clipboard.writeText(document.getElementById(\'b64Output\').value);alert(\'Copiado!\')">📋 Copiar</button>';
+     $("modalBody").innerHTML=h;$("modalTitle").textContent="🔄 Base64";
+     $("modal").classList.add("show");registrarUso("base64","abrir");
+   }},
+  {id:"json",ico:"📋",nom:"JSON Formatter",cat:"convertidor",
+   desc:"Formatea y valida JSON. Minifica o embellece. Detecta errores de sintaxis.",
+   tags:"json formato validar",
+   open:function(){
+     var h='<textarea id="jsonInput" rows="6" placeholder=\'{"ejemplo":"pega tu JSON aqui"}\'></textarea>';
+     h+='<button onclick="jsonFormat()">✨ Formatear</button> <button onclick="jsonMinify()">📦 Minificar</button>';
+     h+='<label>Resultado:</label><textarea id="jsonOutput" rows="6" readonly></textarea>';
+     h+='<button onclick="navigator.clipboard.writeText(document.getElementById(\'jsonOutput\').value);alert(\'Copiado!\')">📋 Copiar</button>';
+     $("modalBody").innerHTML=h;$("modalTitle").textContent="📋 JSON Formatter";
+     $("modal").classList.add("show");registrarUso("json","abrir");
+   }},
+  {id:"url",ico:"🔗",nom:"URL Encode/Decode",cat:"convertidor",
+   desc:"Codifica y decodifica URLs. Caracteres especiales a formato web seguro.",
+   tags:"url encode decode codificar",
+   open:function(){
+     var h='<textarea id="urlInput" rows="3" placeholder="Texto o URL..."></textarea>';
+     h+='<button onclick="urlEncode()">🔒 Encode</button> <button onclick="urlDecode()">🔓 Decode</button>';
+     h+='<textarea id="urlOutput" rows="3" readonly></textarea>';
+     $("modalBody").innerHTML=h;$("modalTitle").textContent="🔗 URL Encode/Decode";
+     $("modal").classList.add("show");registrarUso("url","abrir");
+   }},
+  {id:"hash",ico:"🔐",nom:"Hash Generator",cat:"generadores",
+   desc:"Genera hashes MD5, SHA-1, SHA-256 desde texto. Verifica integridad de archivos.",
+   tags:"hash md5 sha checksum",
+   open:function(){
+     var h='<textarea id="hashInput" rows="3" placeholder="Texto para hashear..." oninput="genHash()"></textarea>';
+     h+='<label>MD5:</label><div class="result" id="md5"></div>';
+     h+='<label>SHA-1:</label><div class="result" id="sha1"></div>';
+     h+='<label>SHA-256:</label><div class="result" id="sha256"></div>';
+     $("modalBody").innerHTML=h;$("modalTitle").textContent="🔐 Hash Generator";
+     $("modal").classList.add("show");registrarUso("hash","abrir");
+   }},
+  {id:"color",ico:"🎨",nom:"Color Picker & Converter",cat:"convertidor",
+   desc:"Selecciona colores y convierte entre HEX, RGB, HSL. Copia codigos CSS.",
+   tags:"color hex rgb hsl picker",
+   open:function(){
+     var h='<input type="color" id="colorPick" value="#00c8ff" oninput="updateColor()" style="width:100%;height:60px;cursor:pointer">';
+     h+='<label>HEX:</label><div class="result" id="hexVal" style="cursor:pointer" onclick="navigator.clipboard.writeText(this.textContent);alert(\'Copiado!\')">#00c8ff</div>';
+     h+='<label>RGB:</label><div class="result" id="rgbVal">rgb(0,200,255)</div>';
+     h+='<label>HSL:</label><div class="result" id="hslVal"></div>';
+     $("modalBody").innerHTML=h;$("modalTitle").textContent="🎨 Color Picker";
+     $("modal").classList.add("show");updateColor();registrarUso("color","abrir");
+   }},
+  {id:"countdown",ico:"⏱️",nom:"Countdown Timer",cat:"generadores",
+   desc:"Temporizador. Configura minutos y segundos. Alarma al finalizar.",
+   tags:"timer cronometro cuenta regresiva",
+   open:function(){
+     var h='<label>Minutos:</label><input type="number" id="cdMin" value="5" min="1" max="120">';
+     h+='<label>Segundos:</label><input type="number" id="cdSec" value="0" min="0" max="59">';
+     h+='<button onclick="startCountdown()">▶ Iniciar</button> <button onclick="stopCountdown()">⏹ Parar</button>';
+     h+='<div style="font-size:3em;text-align:center;margin:16px 0;color:#00c8ff;letter-spacing:4px" id="cdDisplay">05:00</div>';
+     $("modalBody").innerHTML=h;$("modalTitle").textContent="⏱️ Countdown";
+     $("modal").classList.add("show");registrarUso("countdown","abrir");
+   }},
+];
+var cdInterval=null;
+
+// ─── FUNCIONES BUILT-IN ─────────────
+function generarQR(){
+  var t=($("qrInput").value||"https://offlinevideoplayer.vercel.app");
+  var u="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data="+encodeURIComponent(t);
+  $("qrCanvas").innerHTML='<img src="'+u+'" style="max-width:200px;border:2px solid #00c8ff" loading="lazy">';
+}
+function genPW(){
+  var len=parseInt($("pwLen").value);$("pwLenVal").textContent=len;
+  var ch="abcdefghijklmnopqrstuvwxyz";
+  if($("pwUpper").checked)ch+="ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  if($("pwNum").checked)ch+="0123456789";
+  if($("pwSym").checked)ch+="!@#$%&*_+-=";
+  var pw="";for(var i=0;i<len;i++)pw+=ch[Math.floor(Math.random()*ch.length)];
+  $("pwResult").textContent=pw;
+  // Fortaleza
+  var str=len>14?3:len>10?2:1;
+  var colors=["#e74c3c","#f1c40f","#2ecc71"];var widths=["33%","66%","100%"];
+  var el=$("pwStrength");el.style.background=colors[str-1];el.style.width=widths[str-1];
+}
+function b64Encode(){try{$("b64Output").value=btoa($("b64Input").value||"");}catch(e){$("b64Output").value="Error: "+e.message;}}
+function b64Decode(){try{$("b64Output").value=atob($("b64Input").value||"");}catch(e){$("b64Output").value="Error: "+e.message;}}
+function b64Auto(){try{b64Encode();}catch(e){}}
+function jsonFormat(){try{var d=JSON.parse($("jsonInput").value);$("jsonOutput").value=JSON.stringify(d,null,2);}catch(e){$("jsonOutput").value="Error: "+e.message;}}
+function jsonMinify(){try{var d=JSON.parse($("jsonInput").value);$("jsonOutput").value=JSON.stringify(d);}catch(e){$("jsonOutput").value="Error: "+e.message;}}
+function urlEncode(){$("urlOutput").value=encodeURIComponent($("urlInput").value||"");}
+function urlDecode(){$("urlOutput").value=decodeURIComponent($("urlInput").value||"");}
+function genHash(){
+  var t=$("hashInput").value||"";
+  try{
+    var enc=new TextEncoder().encode(t);
+    crypto.subtle.digest("SHA-256",enc).then(function(h){$("sha256").textContent=Array.from(new Uint8Array(h)).map(function(b){return b.toString(16).padStart(2,"0");}).join("");});
+    crypto.subtle.digest("SHA-1",enc).then(function(h){$("sha1").textContent=Array.from(new Uint8Array(h)).map(function(b){return b.toString(16).padStart(2,"0");}).join("");});
+  }catch(e){}
+  $("md5").textContent="MD5 requiere libreria externa";
+}
+function updateColor(){
+  var c=$("colorPick").value;
+  $("hexVal").textContent=c;
+  var r=parseInt(c.slice(1,3),16),g=parseInt(c.slice(3,5),16),b=parseInt(c.slice(5,7),16);
+  $("rgbVal").textContent="rgb("+r+","+g+","+b+")";
+  var max=Math.max(r,g,b)/255,min=Math.min(r,g,b)/255,d=(max-min);
+  var l=(max+min)/2,s=d/(1-Math.abs(2*l-1));
+  var hh=0;if(d){if(max===r/255)hh=((g/255-b/255)/d)%6;else if(max===g/255)hh=(b/255-r/255)/d+2;else hh=(r/255-g/255)/d+4;}
+  hh=Math.round(hh*60);if(hh<0)hh+=360;
+  $("hslVal").textContent="hsl("+hh+","+Math.round(s*100)+"%,"+Math.round(l*100)+"%)";
+}
+function startCountdown(){var m=parseInt($("cdMin").value)||0;var s=parseInt($("cdSec").value)||0;var total=m*60+s;if(cdInterval)clearInterval(cdInterval);cdInterval=setInterval(function(){if(total<=0){clearInterval(cdInterval);$("cdDisplay").textContent="00:00";alert("Tiempo!");return;}total--;var mm=Math.floor(total/60),ss=total%60;$("cdDisplay").textContent=(mm<10?"0":"")+mm+":"+(ss<10?"0":"")+ss;},1000);registrarUso("countdown","iniciar");}
+function stopCountdown(){if(cdInterval)clearInterval(cdInterval);cdInterval=null;}
+
+// ─── HERRAMIENTAS DE DESCARGA ──────────
+var DOWNLOADS=[
+  {id:"vlc",ico:"🎬",nom:"VLC Media Player",cat:"descarga",tags:"windows mac linux",
+   desc:"Reproductor universal. MKV, MP4, AVI, DVD. Sin codecs extra.",ver:"3.0.21",tam:"38 MB",
+   web:"https://www.videolan.org/vlc/",dl:"https://www.videolan.org/vlc/download-windows.html"},
+  {id:"libre",ico:"📝",nom:"LibreOffice",cat:"descarga",tags:"windows mac linux",
+   desc:"Suite ofimatica. Writer, Calc, Impress. 100% compatible MS Office.",ver:"25.2",tam:"330 MB",
+   web:"https://www.libreoffice.org/",dl:"https://www.libreoffice.org/download/"},
+  {id:"obs",ico:"📹",nom:"OBS Studio",cat:"descarga",tags:"windows mac linux",
+   desc:"Grabador y streamer. Twitch, YouTube, grabacion.",ver:"31.0",tam:"120 MB",
+   web:"https://obsproject.com/",dl:"https://obsproject.com/download"},
+  {id:"gimp",ico:"🎨",nom:"GIMP",cat:"descarga",tags:"windows mac linux",
+   desc:"Editor de imagenes profesional. Capas, filtros.",ver:"3.0",tam:"250 MB",
+   web:"https://www.gimp.org/",dl:"https://www.gimp.org/downloads/"},
+  {id:"vscode",ico:"💻",nom:"VS Code",cat:"descarga",tags:"windows mac linux",
+   desc:"Editor de codigo. Extensiones, Git, debugger.",ver:"1.100",tam:"90 MB",
+   web:"https://code.visualstudio.com/",dl:"https://code.visualstudio.com/Download"},
+  {id:"python",ico:"🐍",nom:"Python",cat:"descarga",tags:"windows mac linux",
+   desc:"Lenguaje de programacion. IA, web, datos.",ver:"3.13",tam:"27 MB",
+   web:"https://www.python.org/",dl:"https://www.python.org/downloads/"},
+  {id:"audacity",ico:"🎙️",nom:"Audacity",cat:"descarga",tags:"windows mac linux",
+   desc:"Editor de audio profesional. Multipista.",ver:"3.7",tam:"25 MB",
+   web:"https://www.audacityteam.org/",dl:"https://www.audacityteam.org/download/"},
+  {id:"7zip",ico:"🗜️",nom:"7-Zip",cat:"descarga",tags:"windows linux",
+   desc:"Compresor. ZIP, RAR, 7z. Mejor ratio.",ver:"24.09",tam:"1.5 MB",
+   web:"https://www.7-zip.org/",dl:"https://www.7-zip.org/download.html"},
+  {id:"handbrake",ico:"🎞️",nom:"HandBrake",cat:"descarga",tags:"windows mac linux",
+   desc:"Conversor de video. MP4, MKV. Presets.",ver:"1.9",tam:"15 MB",
+   web:"https://handbrake.fr/",dl:"https://handbrake.fr/downloads.php"},
+  {id:"firefox",ico:"🦊",nom:"Firefox",cat:"descarga",tags:"windows mac linux",
+   desc:"Navegador libre. Privacidad, extensiones.",ver:"135",tam:"60 MB",
+   web:"https://www.mozilla.org/firefox/",dl:"https://www.mozilla.org/firefox/download/"},
+  {id:"blender",ico:"🧊",nom:"Blender",cat:"descarga",tags:"windows mac linux",
+   desc:"Suite 3D. Modelado, animacion, render.",ver:"4.3",tam:"350 MB",
+   web:"https://www.blender.org/",dl:"https://www.blender.org/download/"},
+  {id:"kali",ico:"🐉",nom:"Kali Linux",cat:"ciberseguridad",tags:"linux",
+   desc:"SO hacking etico. 600+ herramientas.",ver:"2024.4",tam:"3 GB",
+   web:"https://www.kali.org/",dl:"https://www.kali.org/get-kali/"},
+  {id:"nmap",ico:"🎯",nom:"Nmap",cat:"ciberseguridad",tags:"windows mac linux",
+   desc:"Escáner de red. Puertos, servicios.",ver:"7.95",tam:"30 MB",
+   web:"https://nmap.org/",dl:"https://nmap.org/download.html"},
+  {id:"metasploit",ico:"💣",nom:"Metasploit",cat:"ciberseguridad",tags:"windows linux",
+   desc:"Pentesting. Exploits, payloads.",ver:"6.4",tam:"500 MB",
+   web:"https://www.metasploit.com/",dl:"https://www.metasploit.com/download"},
+  {id:"burp",ico:"🕸️",nom:"Burp Suite Community",cat:"ciberseguridad",tags:"windows mac linux",
+   desc:"Proxy seguridad web.",ver:"2024.12",tam:"350 MB",
+   web:"https://portswigger.net/burp",dl:"https://portswigger.net/burp/communitydownload"},
+  {id:"wireshark",ico:"🦈",nom:"Wireshark",cat:"ciberseguridad",tags:"windows mac linux",
+   desc:"Analizador de red. Captura paquetes.",ver:"4.4",tam:"75 MB",
+   web:"https://www.wireshark.org/",dl:"https://www.wireshark.org/download.html"},
+  {id:"jdownloader",ico:"📥",nom:"JDownloader 2",cat:"descarga",tags:"windows mac linux",
+   desc:"Gestor descargas. Mega, Drive, YT.",ver:"2.0",tam:"70 MB",
+   web:"https://jdownloader.org/",dl:"https://jdownloader.org/download/index"},
+  {id:"ytdlp",ico:"📺",nom:"yt-dlp",cat:"descarga",tags:"windows mac linux",
+   desc:"Descarga videos. +1000 sitios.",ver:"2024.12",tam:"3 MB",
+   web:"https://github.com/yt-dlp/yt-dlp",dl:"https://github.com/yt-dlp/yt-dlp/releases"},
+  {id:"powertoys",ico:"⚡",nom:"PowerToys",cat:"windows",tags:"windows",
+   desc:"Utilidades Microsoft. Buscador, teclado.",ver:"0.89",tam:"75 MB",
+   web:"https://github.com/microsoft/PowerToys",dl:"https://github.com/microsoft/PowerToys/releases"},
+  {id:"notepad",ico:"📋",nom:"Notepad++",cat:"windows",tags:"windows",
+   desc:"Editor de texto avanzado.",ver:"8.7",tam:"4 MB",
+   web:"https://notepad-plus-plus.org/",dl:"https://notepad-plus-plus.org/downloads/"},
+];
+
+// ─── RENDER ──────────────────────────
+function renderBuiltin(list){
+  var h='';
+  (list||BUILTIN).forEach(function(t){
+    var f=esFav(t.id);
+    h+='<div class="tool-card builtin"><div class="top"><div class="ico">'+t.ico+'</div>';
+    h+='<div class="nm">'+esc(t.nm)+'<span class="badge badge-built">INTEGRADA</span></div></div>';
+    h+='<div class="desc">'+esc(t.desc)+'</div>';
+    h+='<div class="actions"><button onclick="BUILTIN.find(function(b){return b.id===\''+t.id+'\'}).open()">🚀 USAR</button>';
+    h+='<button class="fav" onclick="toggleFav(\''+t.id+'\');renderTodo(document.querySelector(\'#catBtns button.active\'))">'+(f?'❤️':'🤍')+'</button></div></div>';
+  });
+  $("builtinGrid").innerHTML=h;
+}
+
+function renderDownloads(list){
+  var h='';
+  (list||DOWNLOADS).forEach(function(t){
+    var f=esFav(t.id);
+    h+='<div class="tool-card"><div class="top"><div class="ico">'+t.ico+'</div>';
+    h+='<div class="nm">'+esc(t.nm)+'<span class="badge badge-dl">DESCARGA</span></div></div>';
+    h+='<div class="desc">'+esc(t.desc)+'</div>';
+    h+='<div class="meta">v'+t.ver+' | '+t.tam+' | '+t.tags.toUpperCase()+'</div>';
+    h+='<div class="actions"><a href="'+t.dl+'" target="_blank" rel="noopener" style="color:#00c8ff;text-decoration:none;font-size:.55em;padding:4px 10px;border:1px solid rgba(0,200,255,.15);border-radius:2px">⬇ DESCARGAR</a>';
+    h+='<a href="'+t.web+'" target="_blank" rel="noopener" style="color:rgba(0,200,255,.4);text-decoration:none;font-size:.55em;padding:4px 10px;border:1px solid rgba(0,200,255,.06);border-radius:2px">🌐 Web</a>';
+    h+='<button class="fav" onclick="toggleFav(\''+t.id+'\');renderTodo(document.querySelector(\'#catBtns button.active\'))" style="background:none;border:1px solid rgba(241,196,15,.15);border-radius:2px;color:#f1c40f;cursor:pointer;font-size:.55em;padding:4px 6px">'+(f?'❤️':'🤍')+'</button></div></div>';
+  });
+  $("downloadGrid").innerHTML=h;
+}
+
+function renderTodo(btn){
+  var cat=(btn?btn.textContent.trim().toLowerCase().replace(/[^a-z]/g,''):'todas');
+  if(!btn||cat==="todas"){renderBuiltin();renderDownloads();return;}
+  if(cat==="builtin"){renderBuiltin();$("downloadGrid").innerHTML='';return;}
+  var blist=BUILTIN.filter(function(t){return t.cat===cat||(t.tags||"").indexOf(cat)>=0;});
+  var dlist=DOWNLOADS.filter(function(t){return t.cat===cat||(t.tags||"").indexOf(cat)>=0;});
+  renderBuiltin(blist);renderDownloads(dlist);
+}
+
+function filtrar(cat,btn){
+  document.querySelectorAll("#catBtns button").forEach(function(b){b.classList.remove("active");});
+  if(btn)btn.classList.add("active");
+  renderTodo(btn);
+}
+function cerrarModal(){$("modal").classList.remove("show");$("modalBody").innerHTML="";if(cdInterval){clearInterval(cdInterval);cdInterval=null;}}
+
+cargarFavs();renderTodo();
+</script>
+<script src="/errores.js" defer></script>
+<script src="/update_check.js" defer></script>
+</body>
+</html>

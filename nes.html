@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>🕹️ NES Emulator - ZonaHack</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Courier New',Courier,monospace;background:#0a0a0a;color:#c8d6e5;padding:10px;max-width:900px;margin:0 auto;text-align:center;min-height:100vh}
+h1{color:#e74c3c;font-size:1.2em;margin:10px 0;text-shadow:0 0 8px rgba(231,76,60,.15)}
+.sub{color:rgba(200,214,229,.4);font-size:.68em;margin-bottom:8px}
+.back{color:#00ff41;text-decoration:none;font-size:.68em;display:block;margin-bottom:8px}
+.back:hover{text-shadow:0 0 6px rgba(0,255,65,.15)}
+canvas{background:#000;border-radius:4px;max-width:100%;image-rendering:pixelated;width:100%;max-height:70vh;border:1px solid rgba(0,255,65,.08);touch-action:none}
+.controles{display:flex;gap:4px;flex-wrap:wrap;justify-content:center;margin:8px 0}
+.controles button{padding:8px 14px;border:1px solid rgba(0,255,65,.1);border-radius:4px;color:white;font-weight:600;font-size:.7em;cursor:pointer;min-width:50px;touch-action:manipulation;font-family:'Courier New',monospace;transition:.2s}
+.controles button:hover{transform:scale(1.05)}
+.btn-nes{background:#c0392b}
+.btn-nes-a{background:#2ecc71}
+.btn-nes-b{background:#e74c3c}
+.btn-nes-select{background:#888}
+.btn-nes-start{background:#f39c12}
+.upload-area{border:1px dashed rgba(0,255,65,.15);border-radius:6px;padding:20px;margin:8px 0;cursor:pointer;background:rgba(0,255,65,.02);transition:.2s}
+.upload-area:hover{border-color:rgba(0,255,65,.3);box-shadow:0 0 15px rgba(0,255,65,.03)}
+.upload-area:active{background:rgba(0,255,65,.05)}
+.upload-area .ico{font-size:2em;margin-bottom:5px}
+#status{font-size:.7em;color:rgba(200,214,229,.4);margin:5px 0;min-height:18px}
+input[type=file]{display:none}
+.d-pad{display:grid;grid-template-columns:repeat(3,50px);gap:2px;justify-content:center;margin:5px}
+.d-pad button{height:40px;border:1px solid rgba(0,255,65,.08);border-radius:4px;background:#111;color:white;font-size:1em;font-family:'Courier New',monospace;transition:.1s}
+.d-pad button:active{background:#00ff41;color:#000}
+.d-pad .empty{visibility:hidden}
+.ab-btns{display:flex;gap:10px;justify-content:center;margin:5px}
+.ab-btns button{width:50px;height:50px;border-radius:50%;border:1px solid rgba(0,255,65,.1);color:white;font-weight:bold;font-size:.9em;font-family:'Courier New',monospace;transition:.1s}
+.ab-btns button:active{transform:scale(.92)}
+.ab-btns .a{background:#2ecc71}
+.ab-btns .b{background:#e74c3c}
+/* ─── LIBRERIA ──────────────────────── */
+.tabs{display:flex;gap:3px;margin:8px 0;flex-wrap:wrap;justify-content:center}
+.tab{padding:5px 12px;border:1px solid rgba(0,255,65,.06);border-radius:3px;background:transparent;color:rgba(0,255,65,.4);cursor:pointer;font-size:.6em;font-family:'Courier New',monospace;transition:.15s}
+.tab:hover,.tab.active{color:#00ff41;border-color:rgba(0,255,65,.12)}
+.library-row{display:flex;gap:4px;margin:6px 0;flex-wrap:wrap}
+.library-row input{flex:1;min-width:100px;padding:5px 8px;border:1px solid rgba(0,255,65,.08);border-radius:3px;background:#0a0a0a;color:#c8d6e5;font-size:.65em;outline:none;font-family:'Courier New',monospace}
+.library-row input:focus{border-color:rgba(0,255,65,.15)}
+.lib-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:5px;margin:6px 0}
+.game-card{border:1px solid rgba(0,255,65,.04);border-radius:4px;padding:8px;cursor:pointer;background:#0d0d0d;transition:.15s;text-align:center;position:relative}
+.game-card:hover{border-color:rgba(0,255,65,.1);transform:translateY(-2px)}
+.game-card .ico{font-size:1.5em;margin-bottom:3px}
+.game-card .nm{font-size:.65em;color:rgba(200,214,229,.6)}
+.game-card .dm{font-size:.55em;color:rgba(200,214,229,.25)}
+.game-card .fav{position:absolute;top:4px;right:6px;font-size:.8em;cursor:pointer}
+.game-card .fav:hover{transform:scale(1.2)}
+.game-card.favorito{border-color:rgba(241,196,15,.15)}
+.game-card.historial{border-color:rgba(52,152,219,.1)}
+.game-card .times{position:absolute;top:4px;left:6px;font-size:.55em;color:rgba(200,214,229,.2)}
+.save-bar{display:flex;gap:4px;justify-content:center;margin:6px 0;flex-wrap:wrap}
+.save-bar button{padding:6px 12px;border:1px solid rgba(0,255,65,.08);border-radius:3px;background:rgba(0,255,65,.02);color:rgba(0,255,65,.5);cursor:pointer;font-size:.6em;font-family:'Courier New',monospace;transition:.15s}
+.save-bar button:hover{border-color:rgba(0,255,65,.15);color:#00ff41}
+.save-bar button.danger{border-color:rgba(231,76,60,.1);color:#e74c3c}
+.save-bar button.danger:hover{border-color:rgba(231,76,60,.2)}
+.save-bar button.gold{border-color:rgba(241,196,15,.1);color:#f1c40f}
+.save-bar button.gold:hover{border-color:rgba(241,196,15,.2)}
+@media(min-width:768px){.d-pad{grid-template-columns:repeat(3,60px)}.d-pad button{height:50px}.ab-btns button{width:60px;height:60px}}
+@media(max-width:480px){.lib-grid{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<h1>🕹️ NES Emulator</h1>
+<p class="sub">Cargá tus ROMs de NES y jugá en el navegador</p>
+<a class="back" href="/juegos.html">&larr; Volver a juegos</a>
+
+<!-- LIBRERIA -->
+<div class="tabs">
+  <button class="tab active" onclick="cambiarLib('biblioteca')">📚 Biblioteca</button>
+  <button class="tab" onclick="cambiarLib('favoritos')">❤️ Favoritos</button>
+  <button class="tab" onclick="cambiarLib('historial')">🕐 Historial</button>
+</div>
+<div class="library-row">
+  <input id="libSearch" placeholder="Buscar juego..." onkeydown="if(event.key==='Enter')buscarLibro()">
+  <button onclick="buscarLibro()" style="padding:5px 12px;border:1px solid rgba(0,255,65,.08);border-radius:3px;background:rgba(0,255,65,.02);color:#00ff41;cursor:pointer;font-size:.6em;font-family:'Courier New',monospace">🔍</button>
+</div>
+<div id="libGrid" class="lib-grid"></div>
+<div id="tab-lib-biblioteca"></div>
+<div id="tab-lib-favoritos"></div>
+<div id="tab-lib-historial"></div>
+
+<div id="uploadZone" class="upload-area" onclick="document.getElementById('romInput').click()">
+<div class="ico">📂</div>
+<div>Cargar ROM de NES (.nes)</div>
+<div style="font-size:.7em;color:rgba(200,214,229,.25);margin-top:3px">O arrastra un archivo .nes o .zip</div>
+</div>
+<input type="file" id="romInput" accept=".nes,.zip" onchange="cargarROM(event)">
+<div class="library-row" style="margin-top:6px">
+  <input id="romUrl" placeholder="O pegá el enlace de una ROM NES (.nes/.zip) de Archive.org..." onkeydown="if(event.key==='Enter')cargarROMURL()">
+  <button onclick="cargarROMURL()" style="padding:5px 12px;border:1px solid rgba(0,255,65,.08);border-radius:3px;background:rgba(0,255,65,.02);color:#00ff41;cursor:pointer;font-size:.6em;font-family:'Courier New',monospace">📥 Cargar por URL</button>
+</div>
+
+<div id="juegosRecomendados" style="margin:8px 0">
+<div style="font-size:.75em;color:rgba(200,214,229,.4);margin-bottom:5px">🎮 Juegos recomendados (carga automatica):</div>
+<div id="listaRecomendados" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:5px"></div>
+</div>
+
+<div id="scoreDisplay" style="font-size:.72em;color:#f1c40f;margin:4px 0;display:none">🏆 Puntaje: <span id="puntajeNES">0</span></div>
+
+<canvas id="nesCanvas"></canvas>
+
+<!-- BARRA DE GUARDADO -->
+<div id="saveBar" class="save-bar" style="display:none">
+  <button onclick="guardarPartida()">💾 Guardar</button>
+  <button onclick="cargarPartida()">📂 Cargar</button>
+  <button class="danger" onclick="borrarPartida()">🗑️ Borrar</button>
+  <button class="gold" onclick="pantallaCompletaNES()">⛶ Pantalla completa</button>
+</div>
+
+<div id="controlsNES" style="display:none">
+<div class="d-pad">
+<button class="empty"></button>
+<button onpointerdown="nesPress('up');event.preventDefault()" onpointerup="nesRelease('up')" onpointerleave="nesRelease('up')">▲</button>
+<button class="empty"></button>
+<button onpointerdown="nesPress('left');event.preventDefault()" onpointerup="nesRelease('left')" onpointerleave="nesRelease('left')">◀</button>
+<button onpointerdown="nesPress('down');event.preventDefault()" onpointerup="nesRelease('down')" onpointerleave="nesRelease('down')">▼</button>
+<button onpointerdown="nesPress('right');event.preventDefault()" onpointerup="nesRelease('right')" onpointerleave="nesRelease('right')">▶</button>
+</div>
+<div class="ab-btns">
+<button class="b" onpointerdown="nesPress('b');event.preventDefault()" onpointerup="nesRelease('b')" onpointerleave="nesRelease('b')">B</button>
+<button class="a" onpointerdown="nesPress('a');event.preventDefault()" onpointerup="nesRelease('a')" onpointerleave="nesRelease('a')">A</button>
+</div>
+<div class="controles">
+<button class="btn-nes-select" onpointerdown="nesPress('select');event.preventDefault()" onpointerup="nesRelease('select')" onpointerleave="nesRelease('select')">SELECT</button>
+<button class="btn-nes-start" onpointerdown="nesPress('start');event.preventDefault()" onpointerup="nesRelease('start')" onpointerleave="nesRelease('start')">START</button>
+<button class="btn-nes" onclick="resetNES()">RESET</button>
+</div>
+<div style="font-size:.6em;color:rgba(200,214,229,.35);margin-top:6px;letter-spacing:.5px">⌨️ <b style="color:#00ff41">Flechas</b> mover · <b style="color:#2ecc71">Z</b>=A · <b style="color:#e74c3c">X</b>=B · <b style="color:#888">Shift</b>=Select · <b style="color:#f39c12">Enter</b>=Start</div>
+</div>
+<div id="status">Arrastra o selecciona un archivo .nes para jugar</div>
+
+<script>
+var API_URL = "https://xfwolaurpeofysnymqle.supabase.co";
+var API_KEY = "sb_publishable_3VvBUD5Bdu3Uaq59fJ99MQ_XDCtujUU";
+var usuario = localStorage.getItem('vh_usuario') || 'anon';
+var nesEmu = null;
+var frameId = null;
+var puntaje = 0;
+
+// ─── LIBRERIA LOCAL ──────────────────────
+var LIB_KEY = "vh_nes_lib";   // biblioteca de juegos
+var FAV_KEY = "vh_nes_fav";   // favoritos
+var HIST_KEY = "vh_nes_hist"; // historial
+var SAVE_KEY = "vh_nes_save"; // partidas guardadas
+
+function getLS(k){try{return JSON.parse(localStorage.getItem(k)||'[]');}catch(e){return[];}}
+function setLS(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+
+// Biblioteca base con juegos conocidos
+var LIBRO_BASE = [
+  {nom:"Micro Mages", rom:"micro-mages", desc:"Homebrew - Plataforma", ico:"🎮"},
+  {nom:"7 Grand Dad", rom:"7granddad", desc:"Bootleg - Clasico", ico:"👴"},
+  {nom:"Gaplus", rom:"gaplus", desc:"Arcade - Nave", ico:"🚀"},
+  {nom:"Nebs 'n Debs", rom:"nebs-debs", desc:"Homebrew - Arcade", ico:"🪐"},
+  {nom:"Super Mario Bros", ico:"🍄", desc:"Clasico plataforma", buscar:"super mario bros nes rom"},
+  {nom:"Contra", ico:"💣", desc:"Accion clasica", buscar:"contra nes rom"},
+  {nom:"Mega Man 2", ico:"🤖", desc:"Plataforma clasica", buscar:"mega man 2 nes rom"},
+  {nom:"Duck Hunt", ico:"🦆", desc:"Shooting clasico", buscar:"duck hunt nes rom"},
+  {nom:"Pac-Man", ico:"👾", desc:"Arcade clasico", buscar:"pac man nes rom"},
+  {nom:"Donkey Kong", ico:"🦍", desc:"Arcade clasico", buscar:"donkey kong nes rom"},
+  {nom:"Tetris NES", ico:"🧱", desc:"Puzzle clasico", buscar:"tetris nes rom"},
+  {nom:"The Legend of Zelda", ico:"⚔️", desc:"Aventura clasica", buscar:"legend of zelda nes rom"},
+  {nom:"Metroid", ico:"🪐", desc:"Exploracion clasica", buscar:"metroid nes rom"},
+  {nom:"Castlevania", ico:"🧛", desc:"Accion clasica", buscar:"castlevania nes rom"},
+  {nom:"Bomberman", ico:"💣", desc:"Puzzle clasico", buscar:"bomberman nes rom"},
+  {nom:"Excitebike", ico:"🏍️", desc:"Carreras clasicas", buscar:"excitebike nes rom"},
+  {nom:"Kirby's Adventure", ico:"🌸", desc:"Plataforma clasica", buscar:"kirby adventure nes rom"},
+  {nom:"Final Fantasy", ico:"🐉", desc:"RPG clasico", buscar:"final fantasy nes rom"},
+  {nom:"Battle City", ico:"🛡️", desc:"Accion clasica", buscar:"battle city nes rom"},
+];
+
+// ─── LIBRERIA UI ─────────────────────────
+function mostrarBiblioteca() {
+  var lib = getLS(LIB_KEY);
+  // Combinar base + guardados
+  var todos = [];
+  LIBRO_BASE.forEach(function(b){ if(!todos.some(function(t){return t.nom===b.nom;})) todos.push(b); });
+  lib.forEach(function(j){ if(!todos.some(function(t){return t.nom===j.nom;})) todos.push(j); });
+
+  var div = document.getElementById('libGrid');
+  div.innerHTML = todos.map(function(j, i) {
+    var fav = getLS(FAV_KEY).some(function(f){return f.nom===j.nom;});
+    return '<div class="game-card'+(fav?' favorito':'')+'" onclick="cargarJuegoLibro('+i+')">'+
+      '<div class="ico">'+(j.ico||'🎮')+'</div>'+
+      '<div class="nm">'+j.nom+'</div>'+
+      '<div class="dm">'+(j.desc||'')+'</div>'+
+      '<span class="fav" onclick="event.stopPropagation();toggleFav('+i+')">'+(fav?'❤️':'🤍')+'</span></div>';
+  }).join('') || '<div style="font-size:.6em;color:rgba(200,214,229,.2);padding:15px">Sin juegos</div>';
+}
+
+function cambiarLib(tab) {
+  document.querySelectorAll('.tab').forEach(function(b){b.classList.remove('active');});
+  document.querySelectorAll('.tab')[tab==='biblioteca'?0:tab==='favoritos'?1:2].classList.add('active');
+  var div = document.getElementById('libGrid');
+  if(tab==='biblioteca') mostrarBiblioteca();
+  else if(tab==='favoritos'){
+    var favs = getLS(FAV_KEY);
+    div.innerHTML = favs.map(function(f, i){
+      return '<div class="game-card favorito" onclick="cargarJuegoNombre(\''+esc(f.nom)+'\')">'+
+        '<div class="ico">'+(f.ico||'🎮')+'</div><div class="nm">'+f.nom+'</div>'+
+        '<div class="dm">'+(f.desc||'')+'</div></div>';
+    }).join('') || '<div style="font-size:.6em;color:rgba(200,214,229,.2);padding:15px">Sin favoritos</div>';
+  } else {
+    var hist = getLS(HIST_KEY);
+    div.innerHTML = hist.slice(0,10).map(function(f, i){
+      return '<div class="game-card historial" onclick="cargarJuegoNombre(\''+esc(f.nom)+'\')">'+
+        '<div class="ico">'+(f.ico||'🎮')+'</div><div class="nm">'+f.nom+'</div>'+
+        '<span class="times">🕐 '+new Date(f.ts).toLocaleDateString()+'</span></div>';
+    }).join('') || '<div style="font-size:.6em;color:rgba(200,214,229,.2);padding:15px">Sin historial</div>';
+  }
+}
+
+function toggleFav(i) {
+  var lib = getLS(LIB_KEY);
+  var base = LIBRO_BASE[i] || lib[i-lib.length] || {nom:"Juego",desc:"",ico:"🎮"};
+  var favs = getLS(FAV_KEY);
+  var idx = favs.findIndex(function(f){return f.nom===base.nom;});
+  if(idx>=0) favs.splice(idx,1); else favs.push(base);
+  setLS(FAV_KEY, favs);
+  mostrarBiblioteca();
+}
+
+function cargarJuegoLibro(i) {
+  var lib = getLS(LIB_KEY);
+  var j = LIBRO_BASE[i] || lib[i-LIBRO_BASE.length];
+  if(!j) return;
+  // Registrar historial
+  var hist = getLS(HIST_KEY);
+  hist = hist.filter(function(h){return h.nom!==j.nom;});
+  hist.unshift({nom:j.nom, ico:j.ico||'🎮', ts:Date.now()});
+  setLS(HIST_KEY, hist.slice(0,20));
+
+  if(j.rom) { cargarJuegoRecomendadoPorNombre(j.nom); return; }
+  if(j.buscar) {
+    document.getElementById('status').textContent = '🔍 Buscando ROM de '+j.nom+'...';
+    window.open('https://archive.org/search?query='+encodeURIComponent(j.buscar), '_blank');
+    return;
+  }
+}
+
+function cargarJuegoNombre(nom) {
+  var todos = LIBRO_BASE.concat(getLS(LIB_KEY));
+  var j = todos.find(function(t){return t.nom===nom;});
+  if(j && j.rom) { cargarJuegoRecomendadoPorNombre(nom); }
+  else if(j && j.buscar) window.open('https://archive.org/search?query='+encodeURIComponent(j.buscar), '_blank');
+}
+
+function buscarLibro() {
+  var q = document.getElementById('libSearch').value.trim();
+  if(!q) { mostrarBiblioteca(); return; }
+  var todos = LIBRO_BASE.concat(getLS(LIB_KEY));
+  var filtrados = todos.filter(function(j){ return (j.nom||'').toLowerCase().includes(q.toLowerCase()); });
+  var div = document.getElementById('libGrid');
+  div.innerHTML = filtrados.map(function(j, i){
+    return '<div class="game-card" onclick="cargarJuegoLibro('+todos.indexOf(j)+')">'+
+      '<div class="ico">'+(j.ico||'🎮')+'</div><div class="nm">'+j.nom+'</div>'+
+      '<div class="dm">'+(j.desc||'')+'</div></div>';
+  }).join('') || '<div style="font-size:.6em;color:rgba(200,214,229,.2);padding:15px">Sin resultados</div>';
+}
+
+function esc(s){return (s||"").replace(/[&<>"]/g,function(m){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m];});}
+
+// ─── JUEGOS RECOMENDADOS (existente) ────
+var JUEGOS_NES = [
+    {nom:"Micro Mages", rom:"micro-mages", desc:"Homebrew - Plataforma"},
+    {nom:"7 Grand Dad", rom:"7granddad", desc:"Bootleg - Clasico"},
+    {nom:"Gaplus", rom:"gaplus", desc:"Arcade - Nave"},
+    {nom:"Nebs 'n Debs", rom:"nebs-debs", desc:"Homebrew - Arcade"},
+    {nom:"Buscar mas ROMs", url:"https://archive.org/search?query=nes+homebrew&sort=-downloads", desc:"Internet Archive"},
+];
+
+function mostrarRecomendados() {
+    var div = document.getElementById('listaRecomendados');
+    div.innerHTML = JUEGOS_NES.map(function(j, i) {
+        return '<div class="game-card" style="padding:8px;margin:2px" onclick="cargarJuegoRecomendado('+i+')">'
+            + '<div style="font-size:.7em;font-weight:bold;color:#00ff41">'+j.nom+'</div>'
+            + '<div style="font-size:.55em;color:rgba(200,214,229,.3)">'+j.desc+'</div></div>';
+    }).join('');
+}
+mostrarRecomendados();
+
+function cargarJuegoRecomendadoPorNombre(nom) {
+  var idx = JUEGOS_NES.findIndex(function(j){return j.nom===nom;});
+  if(idx>=0) cargarJuegoRecomendado(idx);
+}
+
+function cargarJuegoRecomendado(idx) {
+    var j = JUEGOS_NES[idx];
+    if (!j) return;
+    if (j.url) { window.open(j.url, '_blank'); return; }
+    if (!j.rom) return;
+    document.getElementById('status').textContent = 'Descargando '+j.nom+'...';
+    fetch('/api/proxy_rom?rom='+j.rom).then(function(r){
+        if (!r.ok) { return r.json().then(function(d){throw new Error(d.error || 'HTTP '+r.status);}); }
+        return r.arrayBuffer();
+    }).then(function(buf){
+        procesarROM(new Uint8Array(buf), j.nom+'.nes');
+    }).catch(function(e){
+        document.getElementById('status').textContent = 'Error: '+e.message+' - Arrastra el archivo .nes manualmente';
+    });
+}
+
+// ─── DRAG & DROP (existente) ────────────
+var zone = document.getElementById('uploadZone');
+zone.addEventListener('dragover', function(e){e.preventDefault();zone.style.borderColor='#00ff41';});
+zone.addEventListener('dragleave', function(){zone.style.borderColor='rgba(0,255,65,.15)';});
+zone.addEventListener('drop', function(e){e.preventDefault();zone.style.borderColor='rgba(0,255,65,.15)';if(e.dataTransfer.files.length)cargarROM({target:{files:e.dataTransfer.files}});});
+
+// ─── CARGAR ROM (existente) ─────────────
+function cargarROM(event) {
+    var file = event.target.files[0];
+    if (!file) return;
+    document.getElementById('status').textContent = 'Cargando ' + file.name + '...';
+    var reader = new FileReader();
+    reader.onload = function(e) {
+        var data = new Uint8Array(e.target.result);
+        procesarROM(data, file.name);
+    };
+    reader.readAsArrayBuffer(file);
+}
+
+// Cargar ROM desde una URL (juega CUALQUIER juego pegando su enlace)
+function cargarROMURL() {
+    var u = document.getElementById('romUrl').value.trim();
+    if (!u) { document.getElementById('status').textContent = 'Pegá un enlace de ROM NES'; return; }
+    if (!/^https?:\/\//i.test(u)) { document.getElementById('status').textContent = 'Ingresá una URL válida (https://...)'; return; }
+    document.getElementById('status').textContent = '⬇ Descargando ROM...';
+    fetch('/api/proxy_rom?url=' + encodeURIComponent(u)).then(function(r){
+        if (!r.ok) return r.json().then(function(d){throw new Error(d.error || 'HTTP '+r.status);});
+        return r.arrayBuffer();
+    }).then(function(buf){
+        procesarROM(new Uint8Array(buf), 'rom');
+    }).catch(function(e){
+        document.getElementById('status').textContent = '❌ Error: ' + e.message;
+    });
+}
+
+function procesarROM(data, nombre) {
+    // Agregar a la biblioteca local
+    var lib = getLS(LIB_KEY);
+    var nom = (nombre||'').replace('.nes','').replace('.zip','');
+    if(nom && !lib.some(function(j){return j.nom===nom;})) {
+      lib.push({nom:nom, ico:'🎮', desc:'ROM local cargada'});
+      setLS(LIB_KEY, lib);
+    }
+    // Registrar historial
+    var hist = getLS(HIST_KEY);
+    hist = hist.filter(function(h){return h.nom!==nom;});
+    hist.unshift({nom:nom, ico:'🎮', ts:Date.now()});
+    setLS(HIST_KEY, hist.slice(0,20));
+
+    var esZip = data[0] === 0x50 && data[1] === 0x4B;
+    if (esZip) {
+        document.getElementById('status').textContent = 'Extrayendo ZIP...';
+        // Asegurar que JSZip este cargado antes de usarlo
+        var procesarZip = function() {
+            try {
+                var zip = new JSZip(data);
+                var nesFile = null;
+                zip.forEach(function(path, file) {
+                    if (!nesFile && path.toLowerCase().endsWith('.nes') && !file.dir) {
+                        nesFile = {name: path, data: file.async('uint8array')};
+                    }
+                });
+                if (nesFile) {
+                    nesFile.data.then(function(romData) {
+                        iniciarEmulador(romData, nombre + ' - ' + nesFile.name.split('/').pop());
+                    });
+                } else {
+                    document.getElementById('status').textContent = '❌ No se encontro archivo .nes dentro del ZIP';
+                }
+            } catch(e) {
+                document.getElementById('status').textContent = '❌ Error al leer ZIP: ' + e.message;
+            }
+        };
+        if (typeof JSZip === 'undefined') {
+            var sj = document.createElement('script');
+            sj.src = '/jszip.min.js';
+            sj.onload = procesarZip;
+            sj.onerror = function(){ document.getElementById('status').textContent = '❌ Error cargando ZIP support'; };
+            document.head.appendChild(sj);
+        } else {
+            procesarZip();
+        }
+        return;
+    }
+    document.getElementById('status').textContent = 'Cargando ROM...';
+    setTimeout(function() { iniciarEmulador(data, nombre); }, 100);
+}
+
+// ─── INICIAR EMULADOR (existente) ───────
+var _romPendiente = null;
+var _nombrePendiente = null;
+
+function iniciarEmulador(rom, nombre) {
+    _romPendiente = rom;
+    _nombrePendiente = nombre;
+    document.getElementById('saveBar').style.display = 'flex';
+
+    if (typeof JSZip === 'undefined') {
+        var s1 = document.createElement('script');
+        s1.src = '/jszip.min.js';
+        s1.onload = function() { cargarJsnes(); };
+        s1.onerror = function() { document.getElementById('status').textContent = '❌ Error cargando librerias'; };
+        document.head.appendChild(s1);
+    } else {
+        cargarJsnes();
+    }
+}
+
+function cargarJsnes() {
+    if (typeof jsnes !== 'undefined') {
+        // Patch: asegurar que nes.stop exista (version jsnes antigua)
+        if (jsnes && jsnes.NES && !jsnes.NES.prototype.stop) {
+            jsnes.NES.prototype.stop = function() { this._stopped = true; };
+        }
+        arrancarNES();
+        return;
+    }
+    var s2 = document.createElement('script');
+    s2.src = '/jsnes.min.js';
+    s2.onload = function() {
+        // Patch: asegurar que nes.stop exista
+        if (jsnes && jsnes.NES && !jsnes.NES.prototype.stop) {
+            jsnes.NES.prototype.stop = function() { this._stopped = true; };
+        }
+        arrancarNES();
+    };
+    s2.onerror = function() {
+        document.getElementById('status').textContent = '❌ No se pudo cargar el emulador. Verifica tu conexion.';
+    };
+    document.head.appendChild(s2);
+}
+
+function arrancarNES() {
+    var rom = _romPendiente;
+    var nombre = _nombrePendiente;
+    if (!rom) return;
+
+    try {
+        var canvas = document.getElementById('nesCanvas');
+        canvas.width = 256;
+        canvas.height = 240;
+
+        var nes = new jsnes.NES({
+            onFrame: function(frameBuffer) {
+                var ctx = canvas.getContext('2d');
+                var imageData = ctx.createImageData(256, 240);
+                for (var i = 0; i < frameBuffer.length; i++) {
+                    imageData.data[i*4] = (frameBuffer[i] >> 16) & 0xFF;
+                    imageData.data[i*4+1] = (frameBuffer[i] >> 8) & 0xFF;
+                    imageData.data[i*4+2] = frameBuffer[i] & 0xFF;
+                    imageData.data[i*4+3] = 0xFF;
+                }
+                ctx.putImageData(imageData, 0, 0);
+            },
+            onAudioSample: function() {}
+        });
+
+        // jsnes espera un string binario, no un Uint8Array
+        var romStr = '';
+        // Conversión rapida Uint8Array -> string binario
+        var chunkSize = 8192;
+        for (var i = 0; i < rom.length; i += chunkSize) {
+            var chunk = rom.subarray(i, i + chunkSize);
+            romStr += String.fromCharCode.apply(null, chunk);
+        }
+        try {
+            nes.loadROM(romStr);
+        } catch(e) {
+            var detalle = '';
+            var mapperInfo = '';
+            // Diagnostico del header iNES
+            if (rom && rom.length >= 16) {
+                var hdr = String.fromCharCode(rom[0], rom[1], rom[2], rom[3]);
+                if (hdr === 'NES\u001a') {
+                    var prgBanks = rom[4];
+                    var chrBanks = rom[5];
+                    var mapper = ((rom[7] & 0xF0) | ((rom[6] & 0xF0) >> 4));
+                    var supported = [0,1,2,3,4].indexOf(mapper) >= 0;
+                    detalle = 'Formato iNES OK | PRG: ' + prgBanks + ' | CHR: ' + chrBanks + ' | Mapper: ' + mapper;
+                    mapperInfo = supported
+                        ? 'Mapper ' + mapper + ' soportado ✓'
+                        : 'Mapper ' + mapper + ' NO soportado por este emulador (solo mappers 0-4)';
+                } else {
+                    detalle = 'Header invalido: ' + hdr.split('').map(function(c){return c.charCodeAt(0).toString(16);}).join(' ');
+                }
+            }
+            document.getElementById('status').textContent = '❌ ROM no valida. Probá con otro archivo .nes (formato iNES)';
+            document.getElementById('status').innerHTML += '<br><span style="font-size:.7em;color:#888">' + detalle + '</span>';
+            if (mapperInfo) document.getElementById('status').innerHTML += '<br><span style="font-size:.7em;color:' + (mapperInfo.indexOf('NO')>=0?'#e74c3c':'#00ff41') + '">' + mapperInfo + '</span>';
+            document.getElementById('status').innerHTML += '<br><span style="font-size:.7em;color:#888">Buscá ROMs con mapper 0-4 en Archive.org</span>';
+            return;
+        }
+        nesEmu = nes;
+
+        document.getElementById('controlsNES').style.display = 'block';
+        document.getElementById('uploadZone').style.display = 'none';
+        document.getElementById('scoreDisplay').style.display = 'block';
+        document.getElementById('saveBar').style.display = 'flex';
+        document.getElementById('status').textContent = '✅ ' + nombre + ' - Jugando!';
+        // Quitar el foco de cualquier botón para que el teclado vaya al juego
+        try { if(document.activeElement && document.activeElement.blur) document.activeElement.blur(); } catch(e){}
+
+        if (frameId) cancelAnimationFrame(frameId);
+        function frame() {
+            if (nesEmu) {
+                nesEmu.frame();
+                frameId = requestAnimationFrame(frame);
+            }
+        }
+        frame();
+
+    } catch (err) {
+        document.getElementById('status').textContent = '❌ Error: ' + err.message;
+    }
+}
+
+// ─── CONTROLES ──────────────────────────
+var keys = {};
+// Códigos de botón CORRECTOS para este jsnes (BUTTON_UP=4, DOWN=5, LEFT=6, RIGHT=7, A=0, B=1, SELECT=2, START=3)
+var NES_BTN = {up:4, down:5, left:6, right:7, a:0, b:1, select:2, start:3};
+function nesPress(key) {
+    if (!nesEmu) return;
+    if (NES_BTN[key] !== undefined) {
+        nesEmu.buttonDown(1, NES_BTN[key]);
+        keys[key] = true;
+    }
+}
+function nesRelease(key) {
+    if (!nesEmu) return;
+    if (NES_BTN[key] !== undefined) {
+        nesEmu.buttonUp(1, NES_BTN[key]);
+        keys[key] = false;
+    }
+}
+
+// ─── TECLADO (robusto) ──────────────────
+var KB = {arrowup:'up', arrowdown:'down', arrowleft:'left', arrowright:'right', z:'a', x:'b', shift:'select', enter:'start'};
+document.addEventListener('keydown', function(e) {
+    var k = String(e.key||'').toLowerCase();
+    if (KB[k]) { e.preventDefault(); nesPress(KB[k]); }
+});
+document.addEventListener('keyup', function(e) {
+    var k = String(e.key||'').toLowerCase();
+    if (KB[k]) { nesRelease(KB[k]); }
+});
+// Evitar que las flechas scrolleen la página incluso si el foco está en el canvas
+window.addEventListener('keydown', function(e) {
+    if (KB[String(e.key||'').toLowerCase()]) e.preventDefault();
+}, {passive:false});
+
+function resetNES() {
+    if (nesEmu) {
+        try { nesEmu.reset(); } catch(e) {}
+    }
+}
+
+// ─── GUARDAR / CARGAR PARTIDA (LocalStorage) ──
+// jsnes expone getState()/setState() para guardar partida
+function guardarPartida() {
+    if (!nesEmu) return;
+    try {
+        var state = nesEmu.getState();
+        setLS(SAVE_KEY, state);
+        document.getElementById('status').textContent = '💾 Partida guardada!';
+        setTimeout(function(){document.getElementById('status').textContent = '✅ ' + (_nombrePendiente||'ROM') + ' - Jugando!';},1500);
+    } catch(e) {
+        document.getElementById('status').textContent = '❌ Este juego no permite guardar partida';
+    }
+}
+
+function cargarPartida() {
+    if (!nesEmu) return;
+    var state = getLS(SAVE_KEY);
+    if (!state || !state.length) { document.getElementById('status').textContent = 'No hay partida guardada'; return; }
+    try {
+        nesEmu.setState(state);
+        document.getElementById('status').textContent = '📂 Partida cargada!';
+        setTimeout(function(){document.getElementById('status').textContent = '✅ ' + (_nombrePendiente||'ROM') + ' - Jugando!';},1500);
+    } catch(e) {
+        document.getElementById('status').textContent = '❌ No se pudo cargar la partida';
+    }
+}
+
+function borrarPartida() {
+    localStorage.removeItem(SAVE_KEY);
+    document.getElementById('status').textContent = '🗑️ Partida borrada';
+    setTimeout(function(){document.getElementById('status').textContent = '✅ ' + (_nombrePendiente||'ROM') + ' - Jugando!';},1500);
+}
+
+// ─── PANTALLA COMPLETA ──────────────────
+function pantallaCompletaNES() {
+    var el = document.getElementById('nesCanvas');
+    if (el.requestFullscreen) { el.requestFullscreen(); }
+    else if (el.webkitRequestFullscreen) { el.webkitRequestFullscreen(); }
+    else if (el.msRequestFullscreen) { el.msRequestFullscreen(); }
+}
+
+// ─── GAMEPAD SUPPORT ────────────────────
+// Mapeo de gamepad (botones: 0=A, 1=B, 12=up, 13=down, 14=left, 15=right, 8=select, 9=start)
+var gamepadMap = {
+    up: {btn:12}, down: {btn:13}, left: {btn:14}, right: {btn:15},
+    a: {btn:0}, b: {btn:1}, select: {btn:8}, start: {btn:9}
+};
+var gamepadPrev = {};
+
+function leerGamepad() {
+    var pads = navigator.getGamepads ? navigator.getGamepads() : [];
+    var gp = pads[0];
+    if (!gp) return;
+    Object.keys(gamepadMap).forEach(function(key) {
+        var b = gp.buttons[gamepadMap[key].btn];
+        var pressed = b && b.pressed;
+        var prev = gamepadPrev[key];
+        if (pressed && !prev) nesPress(key);
+        if (!pressed && prev) nesRelease(key);
+        gamepadPrev[key] = pressed;
+    });
+}
+setInterval(leerGamepad, 50);
+
+// Inicializar biblioteca
+mostrarBiblioteca();
+</script>
+<script src="/errores.js" defer></script>
+<script src="/update_check.js" defer></script>
+</body>
+</html>

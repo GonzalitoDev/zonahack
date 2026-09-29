@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>🧊 Creador de Juegos - ZonaHack</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0a;color:#e0e0e0;font-family:'Courier New',monospace;min-height:100vh;overflow:hidden}
+.header{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;border-bottom:1px solid rgba(0,255,200,.1);background:#050505}
+.header h1{color:#00ffc8;font-size:.82em;letter-spacing:2px}
+.back{color:#00ffc8;text-decoration:none;font-size:.62em;padding:4px 8px;border:1px solid rgba(0,255,200,.15);border-radius:3px}
+.container{display:flex;height:calc(100vh - 44px)}
+.sidebar{width:170px;background:#050a08;border-right:1px solid rgba(0,255,200,.08);padding:8px;display:flex;flex-direction:column;gap:6px;overflow-y:auto}
+.sidebar h3{color:#00ffc8;font-size:.62em;letter-spacing:1px;border-bottom:1px solid rgba(0,255,200,.1);padding-bottom:3px}
+.palette{display:grid;grid-template-columns:repeat(3,1fr);gap:3px}
+.palette .blk{width:100%;aspect-ratio:1;border:2px solid rgba(255,255,255,.08);cursor:pointer;transition:.15s}
+.palette .blk:hover{transform:scale(1.1);border-color:#fff}
+.palette .blk.sel{border-color:#fff;box-shadow:0 0 10px rgba(255,255,255,.5);transform:scale(1.15)}
+.tools{display:flex;flex-direction:column;gap:3px}
+.tools button{padding:7px;border:1px solid rgba(0,255,200,.1);background:rgba(0,255,200,.03);color:#00ffc8;font-size:.55em;cursor:pointer;font-family:'Courier New',monospace;letter-spacing:1px;transition:.15s}
+.tools button:hover{border-color:rgba(0,255,200,.3);background:rgba(0,255,200,.06)}
+.tools button.sel{border-color:#00ffc8;background:rgba(0,255,200,.08)}
+.tools button.play{border-color:#f1c40f;color:#f1c40f;font-size:.7em;padding:10px;font-weight:bold}
+.tools button.play:hover{background:rgba(241,196,15,.08)}
+.tools button.play.sel{background:rgba(241,196,15,.15);animation:pulse .8s infinite}
+@keyframes pulse{50%{opacity:.5}}
+.main-area{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px;position:relative}
+canvas{background:#020404;border:1px solid rgba(0,255,200,.06);cursor:crosshair;touch-action:none;image-rendering:pixelated}
+.status{font-size:.55em;color:rgba(0,255,200,.4);margin-top:4px;letter-spacing:1px;text-align:center}
+.info{font-size:.5em;color:rgba(0,255,200,.25);margin-top:2px;text-align:center}
+.mobile-controls{display:none;gap:8px;margin-top:4px;flex-wrap:wrap;justify-content:center}
+.mobile-controls button{width:50px;height:50px;border:1px solid rgba(0,255,200,.15);background:rgba(0,255,200,.05);color:#00ffc8;border-radius:8px;font-size:1.2em;cursor:pointer;font-family:'Courier New',monospace}
+.mobile-controls button:active{background:rgba(0,255,200,.2)}
+@media(max-width:768px){
+  .sidebar{width:100%;flex-direction:row;flex-wrap:wrap;padding:4px;max-height:70px;gap:4px;overflow-x:auto;overflow-y:hidden}
+  .sidebar h3{display:none}
+  .palette{grid-template-columns:repeat(9,26px);gap:2px}
+  .tools{flex-direction:row}
+  .tools button{padding:4px 8px;font-size:.5em}
+  .tools button.play{padding:4px 12px}
+  .mobile-controls{display:flex}
+}
+</style>
+</head>
+<body>
+<div class="header">
+  <a href="/" class="back">←</a>
+  <h1>🧊 CREADOR DE JUEGOS</h1>
+  <div style="font-size:.55em;color:rgba(0,255,200,.3)">Editor + Jugar</div>
+</div>
+<div class="container">
+  <div class="sidebar">
+    <h3>🎨 BLOQUES</h3>
+    <div class="palette" id="palette"></div>
+    <h3>🛠 HERRAMIENTAS</h3>
+    <div class="tools">
+      <button id="btnBuild" class="sel" onclick="setMode('build')">🧱 Editar</button>
+      <button id="btnPlay" class="play" onclick="setMode('play')">▶ JUGAR</button>
+      <button onclick="limpiarTodo()">🗑</button>
+      <button onclick="guardarNivel()">💾</button>
+      <button onclick="cargarNivel()">📂</button>
+    </div>
+  </div>
+  <div class="main-area">
+    <canvas id="gameCanvas"></canvas>
+    <div class="status" id="status">🧱 Modo Edicion - Click para colocar bloques</div>
+    <div class="info">Flechas/Z/X = mover y saltar | R=reiniciar</div>
+    <div class="mobile-controls" id="mobileCtrls" style="display:none">
+      <button onpointerdown="mobileBtn('left')" onpointerup="mobileBtnOff('left')">◀</button>
+      <button onpointerdown="mobileBtn('up')" onpointerup="mobileBtnOff('up')">▲</button>
+      <button onpointerdown="mobileBtn('right')" onpointerup="mobileBtnOff('right')">▶</button>
+      <button onpointerdown="mobileBtn('a')" onpointerup="mobileBtnOff('a')" style="width:65px;background:rgba(46,204,113,.1);color:#2ecc71">A</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var GRID_W=32, GRID_H=20, CELL=24;
+var mode='build';
+var currentBlock='#00ffc8';
+var world=[];
+var player={x:2,y:2,vx:0,vy:0,onGround:false};
+var keys={};
+
+var BLOCKS=[
+  {color:'#00ffc8',name:'Agua',solid:false},{color:'#2ecc71',name:'Cesped',solid:true},
+  {color:'#8B4513',name:'Tierra',solid:true},{color:'#808080',name:'Piedra',solid:true},
+  {color:'#C0C0C0',name:'Metal',solid:true},{color:'#e74c3c',name:'Lava',solid:false,damage:true},
+  {color:'#3498db',name:'Azul',solid:true},{color:'#f1c40f',name:'Oro',solid:true},
+  {color:'#9b59b6',name:'Purpura',solid:true},{color:'#e67e22',name:'Naranja',solid:true},
+  {color:'#1abc9c',name:'Turquesa',solid:true},{color:'#ff69b4',name:'Rosa',solid:true},
+  {color:'#FFD700',name:'Meta',solid:false,win:true},{color:'#ff4444',name:'Pinches',solid:true,damage:true},
+  {color:'#ffffff',name:'Nube',solid:false},{color:'#111111',name:'Pared',solid:true},
+  {color:'#a0522d',name:'Madera',solid:true},{color:'#27ae60',name:'Verde',solid:true},
+];
+
+function initWorld(){
+  world=[];for(var y=0;y<GRID_H;y++){world[y]=[];for(var x=0;x<GRID_W;x++){world[y][x]=null;}}
+}
+initWorld();
+
+var canvas=document.getElementById('gameCanvas');
+var ctx=canvas.getContext('2d');
+resizeCanvas();
+
+function resizeCanvas(){
+  canvas.width=Math.min(GRID_W*CELL,window.innerWidth-180);
+  canvas.height=Math.min(GRID_H*CELL+40,window.innerHeight-140);
+  if(window.innerWidth<=768){canvas.width=Math.min(GRID_W*CELL,window.innerWidth-10);canvas.height=Math.min(GRID_H*CELL+40,window.innerHeight-200);}
+}
+window.addEventListener('resize',resizeCanvas);
+
+// ─── PALETA ────────────────────────────
+function buildPalette(){
+  var h='';BLOCKS.forEach(function(b,i){h+='<div class="blk'+(b.color===currentBlock?' sel':'')+'" style="background:'+b.color+'" onclick="selBlock('+i+')" title="'+b.name+'"></div>';});
+  document.getElementById('palette').innerHTML=h;
+}buildPalette();
+
+function selBlock(i){currentBlock=BLOCKS[i].color;buildPalette();}
+
+function setMode(m){
+  mode=m;
+  document.getElementById('btnBuild').classList.toggle('sel',m==='build');
+  document.getElementById('btnPlay').classList.toggle('sel',m==='play');
+  document.getElementById('mobileCtrls').style.display=(m==='play'&&window.innerWidth<=768)?'flex':'none';
+  if(m==='play'){resetPlayer();}
+  document.getElementById('status').textContent=m==='play'?'▶ JUGANDO - Flechas mover, X saltar':'🧱 Modo Edicion - Click para colocar';
+  canvas.style.cursor=m==='play'?'default':'crosshair';
+}
+
+// ─── PLAYER ────────────────────────────
+function resetPlayer(){player={x:2,y:1,vx:0,vy:0,onGround:false};}
+
+function isSolid(x,y){
+  if(x<0||x>=GRID_W||y<0||y>=GRID_H)return y>=GRID_H;
+  if(!world[y]||!world[y][x])return false;
+  var b=BLOCKS.find(function(bk){return bk.color===world[y][x];});
+  return b&&b.solid;
+}
+
+function isHazard(x,y){
+  if(x<0||x>=GRID_W||y<0||y>=GRID_H)return false;
+  if(!world[y]||!world[y][x])return false;
+  var b=BLOCKS.find(function(bk){return bk.color===world[y][x];});
+  return b&&(b.damage||b.win);
+}
+
+function isWin(x,y){
+  if(x<0||x>=GRID_W||y<0||y>=GRID_H)return false;
+  if(!world[y]||!world[y][x])return false;
+  var b=BLOCKS.find(function(bk){return bk.color===world[y][x];});
+  return b&&b.win;
+}
+
+function updatePlayer(dt){
+  if(mode!=='play')return;
+  // Input
+  var move=0;
+  if(keys['ArrowLeft']||keys['a'])move=-1;
+  if(keys['ArrowRight']||keys['d'])move=1;
+  if((keys['ArrowUp']||keys['x']||keys[' ']||keys['Spacebar'])&&player.onGround){player.vy=-8;player.onGround=false;}
+  player.vx=move*6;
+  player.vy+=0.6; // gravedad
+  if(player.vy>12)player.vy=12;
+  // Movimiento X
+  player.x+=player.vx*(dt||1);
+  if(isSolid(Math.floor(player.x+0.25),Math.floor(player.y))||isSolid(Math.floor(player.x+0.75),Math.floor(player.y))){
+    player.x-=player.vx*(dt||1);player.vx=0;
+  }
+  // Movimiento Y
+  player.y+=player.vy*(dt||1);
+  player.onGround=false;
+  if(isSolid(Math.floor(player.x+0.3),Math.floor(player.y+0.9))||isSolid(Math.floor(player.x+0.7),Math.floor(player.y+0.9))){
+    player.y=Math.floor(player.y+0.9)-0.9;player.vy=0;player.onGround=true;
+  }
+  // Colision techo
+  if(player.y<0){player.y=0;player.vy=0;}
+  // Peligro
+  var cx=Math.floor(player.x+0.5);var cy=Math.floor(player.y+0.5);
+  if(isHazard(cx,cy)){
+    if(isWin(cx,cy)){document.getElementById('status').textContent='🏆 GANASTE! R para reiniciar';setMode('build');}
+    else{resetPlayer();document.getElementById('status').textContent='💀 Moriste! R para reiniciar';setMode('build');}
+  }
+  if(player.y>GRID_H){resetPlayer();document.getElementById('status').textContent='💀 Caiste! R para reiniciar';setMode('build');}
+}
+
+// ─── DIBUJAR ──────────────────────────
+function draw(){
+  ctx.fillStyle='#020404';ctx.fillRect(0,0,canvas.width,canvas.height);
+  // Grid
+  for(var y=0;y<GRID_H;y++)for(var x=0;x<GRID_W;x++){
+    if(world[y][x]){
+      ctx.fillStyle=world[y][x];
+      ctx.fillRect(x*CELL,y*CELL,CELL-1,CELL-1);
+      // Sombra 3D
+      ctx.fillStyle='rgba(0,0,0,.3)';ctx.fillRect(x*CELL+CELL-3,y*CELL,3,CELL-1);
+      ctx.fillStyle='rgba(0,0,0,.15)';ctx.fillRect(x*CELL,y*CELL+CELL-3,CELL-1,3);
+    }
+    if(mode==='build'){
+      ctx.strokeStyle='rgba(0,255,200,.03)';ctx.strokeRect(x*CELL,y*CELL,CELL,CELL);
+    }
+  }
+  // Player
+  if(mode==='play'){
+    var px=Math.floor(player.x*CELL);var py=Math.floor(player.y*CELL);
+    ctx.fillStyle='#f1c40f';ctx.fillRect(px+2,py+2,CELL-4,CELL-4);
+    ctx.fillStyle='#000';ctx.fillRect(px+CELL/2-2,py+4,4,4); // ojos
+    ctx.fillStyle='#fff';ctx.fillRect(px+CELL/2-2,py+3,2,2);
+  }
+}
+
+// ─── EDITOR ────────────────────────────
+function getGrid(e){
+  var r=canvas.getBoundingClientRect();
+  var mx=e.clientX-r.left,my=e.clientY-r.top;
+  return{x:Math.floor(mx/CELL),y:Math.floor(my/CELL)};
+}
+
+canvas.addEventListener('mousedown',function(e){
+  if(mode!=='build')return;
+  var p=getGrid(e);
+  if(p.x>=0&&p.x<GRID_W&&p.y>=0&&p.y<GRID_H){
+    if(e.button===2||e.ctrlKey){world[p.y][p.x]=null;}
+    else{world[p.y][p.x]=currentBlock;}
+    draw();
+  }
+});
+
+canvas.addEventListener('mousemove',function(e){
+  if(mode!=='build')return;
+  if(e.buttons===1){
+    var p=getGrid(e);
+    if(p.x>=0&&p.x<GRID_W&&p.y>=0&&p.y<GRID_H){world[p.y][p.x]=currentBlock;draw();}
+  }
+});
+canvas.addEventListener('contextmenu',function(e){e.preventDefault();});
+
+canvas.addEventListener('touchstart',function(e){
+  e.preventDefault();
+  if(mode!=='build')return;
+  var p=getGrid(e.touches[0]);
+  if(p.x>=0&&p.x<GRID_W&&p.y>=0&&p.y<GRID_H){world[p.y][p.x]=currentBlock;draw();}
+},{passive:false});
+
+canvas.addEventListener('touchmove',function(e){
+  e.preventDefault();
+  if(mode!=='build')return;
+  var p=getGrid(e.touches[0]);
+  if(p.x>=0&&p.x<GRID_W&&p.y>=0&&p.y<GRID_H){world[p.y][p.x]=currentBlock;draw();}
+},{passive:false});
+
+// ─── INPUT ─────────────────────────────
+document.addEventListener('keydown',function(e){
+  keys[e.key]=true;
+  if(e.key==='r'||e.key==='R'){resetPlayer();setMode('play');}
+  if(e.key==='Escape'){setMode('build');}
+  e.preventDefault();
+});
+document.addEventListener('keyup',function(e){keys[e.key]=false;});
+
+function mobileBtn(k){
+  if(k==='left')keys['ArrowLeft']=true;
+  if(k==='right')keys['ArrowRight']=true;
+  if(k==='up'||k==='a'){keys['x']=true;if(player.onGround){player.vy=-8;player.onGround=false;}}
+}
+function mobileBtnOff(k){
+  if(k==='left')keys['ArrowLeft']=false;
+  if(k==='right')keys['ArrowRight']=false;
+  if(k==='up'||k==='a')keys['x']=false;
+}
+
+// ─── ACCIONES ─────────────────────────
+function limpiarTodo(){if(confirm('Borrar todo?')){initWorld();draw();}}
+function guardarNivel(){
+  try{localStorage.setItem('vh_level',JSON.stringify(world));document.getElementById('status').textContent='💾 Nivel guardado!';}catch(e){}
+}
+function cargarNivel(){
+  try{var d=JSON.parse(localStorage.getItem('vh_level')||'null');if(d){world=d;draw();document.getElementById('status').textContent='📂 Nivel cargado!';}else{document.getElementById('status').textContent='Sin niveles guardados';}}catch(e){}
+}
+
+// ─── GAME LOOP ────────────────────────
+var lastTime=0;
+function loop(now){
+  var dt = Math.min((now-lastTime)/16.67, 3);
+  updatePlayer(dt);
+  draw();
+  lastTime=now;
+  requestAnimationFrame(loop);
+}
+draw();
+requestAnimationFrame(loop);
+</script>
+<script src="/errores.js" defer></script>
+<script src="/update_check.js" defer></script>
+</body>
+</html>

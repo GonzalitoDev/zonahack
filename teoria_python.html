@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<title>📘 Zona Teoría · Python · ZonaHack</title>
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/icon_96.png" type="image/png">
+<meta name="theme-color" content="#00ff41">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:radial-gradient(circle at 20% 10%,rgba(0,255,65,.05),transparent 50%),radial-gradient(circle at 85% 85%,rgba(0,229,255,.04),transparent 50%),#07090e;color:#d7e2ef;font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh}
+.wrap{max-width:1000px;margin:0 auto;padding:14px}
+.hdr{display:flex;align-items:center;gap:10px;padding-bottom:10px;border-bottom:1px solid rgba(0,255,65,.2)}
+.hdr .logo{font-size:1.6em}
+.hdr h1{font-size:1em;letter-spacing:2px;font-family:'Courier New',monospace;color:#00ff41;text-shadow:0 0 12px rgba(0,255,65,.4)}
+.hdr span{font-size:.56em;color:#6d7f93;letter-spacing:1px}
+.hdr a{margin-left:auto;color:#00ff41;text-decoration:none;font-size:.7em;border:1px solid rgba(0,255,65,.25);padding:5px 10px;border-radius:8px}
+.hero{text-align:center;padding:14px;border:1px solid rgba(0,255,65,.14);border-radius:16px;margin:12px 0;background:rgba(0,20,0,.3)}
+.hero .big{font-size:2em}
+.hero h2{color:#00ff41;letter-spacing:2px;font-size:1em;margin:6px 0;text-shadow:0 0 14px rgba(0,255,65,.5)}
+.hero p{font-size:.6em;color:#6d7f93}
+.badge{display:inline-block;margin-top:6px;background:rgba(0,255,65,.08);border:1px solid rgba(0,255,65,.25);color:#00ff41;font-size:.56em;padding:3px 10px;border-radius:16px;letter-spacing:1px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.chip{padding:8px 13px;border-radius:18px;border:1px solid rgba(0,255,65,.2);background:rgba(0,255,65,.04);color:rgba(0,255,65,.7);font-size:.62em;cursor:pointer;font-family:inherit}
+.chip:hover{color:#00ff41;border-color:#00ff41}
+.chip.on{background:rgba(0,255,65,.15);border-color:#00ff41;color:#00ff41;font-weight:700}
+.lec{background:rgba(13,17,23,.92);border:1px solid rgba(0,255,65,.15);border-radius:16px;padding:18px;animation:fadeIn .3s both}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.lec h2{color:#fff;font-size:1.05em;letter-spacing:1px;margin-bottom:4px}
+.lec .sub{font-size:.6em;color:#6d7f93;margin-bottom:14px}
+.lec h3{color:#00ff41;font-size:.82em;margin:16px 0 6px;letter-spacing:.5px}
+.lec p{font-size:.72em;color:#c8d6e5;line-height:1.8;margin-bottom:8px}
+.lec b{color:#fff}
+.lec .nota{background:rgba(0,229,255,.05);border:1px solid rgba(0,229,255,.2);color:#aef;border-radius:10px;padding:10px 12px;font-size:.66em;line-height:1.7;margin:10px 0}
+.lec .ejlink{display:inline-block;margin-top:10px;background:linear-gradient(135deg,#00ff41,#00e5ff);color:#03140a;padding:9px 16px;border-radius:10px;font-weight:800;font-size:.68em;text-decoration:none}
+pre{background:#060a06;border:1px solid rgba(0,255,65,.2);border-radius:10px;padding:12px;font-family:'Courier New',monospace;font-size:.74em;line-height:1.6;overflow-x:auto;color:#00ff41;margin:8px 0}
+pre .c{color:#4d7a5a}
+pre .k{color:#f1c40f}
+pre .s{color:#ffd166}
+pre .f{color:#00e5ff}
+.foot{text-align:center;font-size:.56em;color:#6d7f93;letter-spacing:1px;margin-top:16px;padding-bottom:20px}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="hdr">
+    <div class="logo">📘</div>
+    <div><h1>ZONA TEORÍA</h1><span>PYTHON · APRENDÉ ANTES DE PRACTICAR</span></div>
+    <a href="/python_ejercicios.html">🐍 Ejercicios →</a>
+  </div>
+
+  <div class="hero">
+    <div class="big">📘</div>
+    <h2>TEORÍA DE PYTHON EN ESPAÑOL</h2>
+    <p>Lecciones cortas y claras. Cada tema termina con ejercicios para practicar.</p>
+    <span class="badge">📘 9 TEMAS · COMPLEMENTA LOS EJERCICIOS</span>
+  </div>
+
+  <div class="chips" id="chips"></div>
+  <div class="lec" id="lec"></div>
+
+  <div class="foot">ZONAHACK · ZONA TEORÍA · PYTHON 📘</div>
+</div>
+
+<script>
+var TEMAS = [
+  {n:"1. Variables y tipos", 
+   h:"Variables, números y texto",
+   sub:"Lo básico: guardar datos en variables.",
+   body:
+     '<p>Una <b>variable</b> guarda un dato. Python <b>no necesita declarar el tipo</b>: lo deduce solo.</p>'+
+     '<pre><span class="k">edad</span> = <span class="f">21</span>       <span class="c"># int (entero)</span>\n'+
+     '<span class="k">precio</span> = <span class="f">99.9</span>   <span class="c"># float (decimal)</span>\n'+
+     '<span class="k">nombre</span> = <span class="s">"Gonza"</span> <span class="c"># str (texto)</span>\n'+
+     '<span class="k">es_vip</span> = <span class="f">True</span>  <span class="c"># bool (True/False)</span></pre>'+
+     '<p>Tipos principales: <b>int</b> (enteros), <b>float</b> (decimales), <b>str</b> (texto), <b>bool</b> (verdadero/falso), <b>list</b> (lista), <b>dict</b> (diccionario).</p>'+
+     '<p>Podés sumar números, concatenar texto con <b>+</b> o usar <b>f-strings</b> para meter variables en un texto:</p>'+
+     '<pre>print(<span class="s">f"Hola {nombre}, tenés {edad} años"</span>)</pre>'+
+     '<div class="nota">💡 Un f-string empieza con <b>f</b> y mete variables entre llaves <b>{}</b>.</div>'+
+     '<a class="ejlink" href="/python_ejercicios.html">▶ Practicar: Hola Mundo y Suma</a>'},
+  {n:"2. Strings (texto)", 
+   h:"Trabajar con texto",
+   sub:"Operaciones con cadenas.",
+   body:
+     '<p>Un <b>string</b> es texto. Podés:</p>'+
+     '<pre>s = <span class="s">"ZonaHack"</span>\n'+
+     'len(s)          <span class="c"># → 8 (cantidad de caracteres)</span>\n'+
+     's[0]            <span class="c"># → "Z" (primer carácter, indexado desde 0)</span>\n'+
+     's[1:4]          <span class="c"># → "ona" (cortar)</span>\n'+
+     's.lower()       <span class="c"># → "zonahack"</span>\n'+
+     's.upper()       <span class="c"># → "ZONAHACK"</span>\n'+
+     's[::-1]         <span class="c"># → "kcaHanoZ" (al revés)</span>\n'+
+     's.count(<span class="s">"a"</span>)    <span class="c"># → 2 (cuántas veces aparece)</span></pre>'+
+     '<p>Para contar vocales o ver si algo es palíndromo, recorrés el texto con un <b>for</b>.</p>'+
+     '<div class="nota">💡 <b>len()</b> sirve para strings Y listas: devuelve la cantidad de elementos.</div>'+
+     '<a class="ejlink" href="/python_ejercicios.html">▶ Practicar: Invertir, Vocales, Palíndromo</a>'},
+  {n:"3. Condicionales (if/else)",
+   h:"Tomar decisiones",
+   sub:"El programa decide qué hacer según una condición.",
+   body:
+     '<pre><span class="k">n</span> = <span class="f">7</span>\n'+
+     '<span class="k">if</span> n % <span class="f">2</span> == <span class="f">0</span>:\n'+
+     '    print(<span class="s">"es par"</span>)\n'+
+     '<span class="k">elif</span> n == <span class="f">7</span>:\n'+
+     '    print(<span class="s">"es 7"</span>)\n'+
+     '<span class="k">else</span>:\n'+
+     '    print(<span class="s">"es impar"</span>)</pre>'+
+     '<p>Comparaciones: <b>==</b> (igual), <b>!=</b> (distinto), <b>&gt;</b>, <b>&lt;</b>, <b>&gt;=</b>, <b>&lt;=</b>. Combinadas con <b>and</b>, <b>or</b>, <b>not</b>.</p>'+
+     '<p><b>%</b> es el módulo (resto de la división). <b>n % 2 == 0</b> → es par.</p>'+
+     '<div class="nota">⚠️ ¡Ojo con los <b>dos puntos</b> y la <b>indentación</b> (espacios)! En Python el bloque se define por la sangría.</div>'+
+     '<a class="ejlink" href="/python_ejercicios.html">▶ Practicar: Par/impar, Primo, FizzBuzz</a>'},
+  {n:"4. Bucles (for/while)",
+   h:"Repetir cosas",
+   sub:"Iterar sobre elementos o repetir mientras una condición se cumpla.",
+   body:
+     '<pre><span class="k">for</span> i <span class="k">in</span> range(<span class="f">5</span>):   <span class="c"># 0,1,2,3,4</span>\n'+
+     '    print(i)\n\n'+
+     '<span class="k">for</span> c <span class="k">in</span> <span class="s">"hola"</span>:  <span class="c"># recorre cada carácter</span>\n'+
+     '    print(c)\n\n'+
+     '<span class="k">for</span> x <span class="k">in</span> [<span class="f">1</span>,<span class="f">2</span>,<span class="f">3</span>]: <span class="c"># recorre una lista</span>\n'+
+     '    print(x)</pre>'+
+     '<p><b>range(n)</b> genera 0..n-1. <b>range(a, b)</b> genera a..b-1.</p>'+
+     '<p>El <b>while</b> repite mientras la condición sea verdadera (cuidado con los bucles infinitos):</p>'+
+     '<pre>total = <span class="f">0</span>\n'+
+     '<span class="k">while</span> total &lt; <span class="f">10</span>:\n'+
+     '    total += <span class="f">2</span></pre>'+
+     '<div class="nota">💡 <b>+=</b> suma y guarda: <b>total += 2</b> es lo mismo que <b>total = total + 2</b>.</div>'+
+     '<a class="ejlink" href="/python_ejercicios.html">▶ Practicar: Suma rango, Factorial, Fibonacci</a>'},
+  {n:"5. Funciones",
+   h:"Reutilizar código",
+   sub:"Un bloque con nombre que recibe datos y devuelve un resultado.",
+   body:
+     '<pre><span class="k">def</span> suma(a, b):\n'+
+     '    <span class="k">return</span> a + b\n\n'+
+     'resultado = suma(<span class="f">3</span>, <span class="f">4</span>)   <span class="c"># → 7</span>\n'+
+     'print(resultado)</pre>'+
+     '<p><b>def</b> define la función. Los parámetros van entre paréntesis. <b>return</b> devuelve el valor.</p>'+
+     '<p>Si la función no tiene <b>return</b>, devuelve <b>None</b> (nada).</p>'+
+     '<p>Ejemplo con parámetros y operación:</p>'+
+     '<pre><span class="k">def</span> es_par(n):\n'+
+     '    <span class="k">return</span> n % <span class="f">2</span> == <span class="f">0</span></pre>'+
+     '<div class="nota">💡 La mayoría de los ejercicios piden completar una función: leé la firma <b>def ...</b> y completá el cuerpo + <b>return</b>.</div>'+
+     '<a class="ejlink" href="/python_ejercicios.html">▶ Practicar: Suma, Factorial, Fibonacci</a>'},
+  {n:"6. Listas",
+   h:"Colecciones ordenadas",
+   sub:"Guardar varios valores en orden, modificables.",
+   body:
+     '<pre>nums = [<span class="f">3</span>, <span class="f">1</span>, <span class="f">2</span>]\n'+
+     'nums[<span class="f">0</span>]        <span class="c"># → 3 (primer elemento)</span>\n'+
+     'len(nums)    <span class="c"># → 3</span>\n'+
+     'nums.append(<span class="f">5</span>)  <span class="c"># agrega al final</span>\n'+
+     'nums.sort()  <span class="c"># ordena [1,2,3,5]</span>\n'+
+     'sum(nums)    <span class="c"># → 11</span>\n'+
+     'max(nums)    <span class="c"># → 5</span>\n'+
+     'nums[::-1]   <span class="c"># al revés</span></pre>'+
+     '<p>Para recorrer y acumular:</p>'+
+     '<pre>total = <span class="f">0</span>\n'+
+     '<span class="k">for</span> n <span class="k">in</span> nums:\n'+
+     '    total += n</pre>'+
+     '<p>Para contar cuántas veces aparece un valor, recorré y compará con <b>==</b>.</p>'+
+     '<div class="nota">💡 Para "sin duplicados" mantené el orden: agregá cada elemento solo si aún no está (usá <b>if x not in lista</b>).</div>'+
+     '<a class="ejlink" href="/python_ejercicios.html">▶ Practicar: Listas (Máximo, Sumar, Promedio...)</a>'},
+  {n:"7. Diccionarios",
+   h:"Clave → valor",
+   sub:"Guardar datos con una clave (como una agenda telefónica).",
+   body:
+     '<pre>d = {<span class="s">"nombre"</span>: <span class="s">"Gonza"</span>, <span class="s">"edad"</span>: <span class="f">21</span>}\n'+
+     'd[<span class="s">"nombre"</span>]      <span class="c"># → "Gonza"</span>\n'+
+     'd.get(<span class="s">"edad"</span>, <span class="f">0</span>)  <span class="c"># → 21</span>\n'+
+     'd.get(<span class="s">"email"</span>, <span class="s">"sin email"</span>)  <span class="c"># default si no existe</span>\n'+
+     '<span class="k">for</span> clave <span class="k">in</span> d:\n'+
+     '    print(clave, <span class="s">"="</span>, d[clave])</pre>'+
+     '<p>Para contar frecuencias (cuántas veces aparece cada letra):</p>'+
+     '<pre>f = {}\n'+
+     '<span class="k">for</span> c <span class="k">in</span> <span class="s">"abbc"</span>:\n'+
+     '    f[c] = f.get(c, <span class="f">0</span>) + <span class="f">1</span>\n'+
+     '<span class="c"># f → {"a":1, "b":2, "c":1}</span></pre>'+
+     '<div class="nota">💡 <b>d.get(clave, default)</b> es seguro: no rompe si la clave no existe.</div>'+
+     '<a class="ejlink" href="/python_ejercicios.html">▶ Practicar: Dicts (Sumar valores, Frecuencias)</a>'},
+  {n:"8. Clases (POO)",
+   h:"Objetos y métodos",
+   sub:"Agrupar datos (atributos) y funciones (métodos) en un objeto.",
+   body:
+     '<pre><span class="k">class</span> Rectangulo:\n'+
+     '    <span class="k">def</span> __init__(self, ancho, alto):\n'+
+     '        self.ancho = ancho\n'+
+     '        self.alto = alto\n'+
+     '    <span class="k">def</span> area(self):\n'+
+     '        <span class="k">return</span> self.ancho * self.alto\n\n'+
+     'r = Rectangulo(<span class="f">3</span>, <span class="f">4</span>)\n'+
+     'print(r.area())   <span class="c"># → 12</span></pre>'+
+     '<p><b>__init__</b> es el constructor (se llama al crear el objeto). <b>self</b> se refiere al propio objeto: <b>self.atributo</b> guarda el dato.</p>'+
+     '<p>Los <b>métodos</b> son funciones dentro de la clase (siempre reciben <b>self</b> como primer parámetro).</p>'+
+     '<div class="nota">💡 Para el ejercicio <b>Contador</b>: inicializá <b>self.valor = 0</b> en __init__ y sumá en incrementar.</div>'+
+     '<a class="ejlink" href="/python_ejercicios.html">▶ Practicar: Clases (Rectángulo, Contador, Persona)</a>'},
+  {n:"9. Trucos útiles",
+   h:"Atajos que te van a salvar",
+   sub:"Cositas de Python que aceleran todo.",
+   body:
+     '<pre><span class="c"># Intercambiar</span>\n'+
+     'a, b = b, a\n\n'+
+     '<span class="c"># Saber si un elemento está</span>\n'+
+     '<span class="k">if</span> x <span class="k">in</span> lista:\n\n'+
+     '<span class="c"># Enumerate (índice + valor)</span>\n'+
+     '<span class="k">for</span> i, v <span class="k">in</span> enumerate(lista):\n\n'+
+     '<span class="c"># Sorted devuelve una nueva lista ordenada</span>\n'+
+     'ordenada = sorted([<span class="f">3</span>,<span class="f">1</span>,<span class="f">2</span>])</pre>'+
+     '<p><b>s[::-1]</b> invierte strings Y listas. <b>sum(lista)</b> suma todo. <b>sorted(lista)</b> ordena sin tocar la original.</p>'+
+     '<p>Para anagramas: <b>sorted(a) == sorted(b)</b> — si usan las mismas letras, ordenadas son iguales.</p>'+
+     '<p>Para potencia sin <b>**</b>: multiplicá en un bucle (o usá el truco de los búhos: <b>base ** exp</b> si te dejaran 😄).</p>'+
+     '<div class="nota">💡 ¡Aprendé estos trucos y los ejercicios Difícil se vuelven fáciles!</div>'},
+];
+var TEMAS_EXTRA = [
+  {n:"▶ Ejercicios", url:"/python_ejercicios.html", h:"Id a practicar", sub:"28 ejercicios con ejecutor real", body:'<p>Después de leer la teoría, pasá a los ejercicios para ponerla en práctica.</p><a class="ejlink" href="/python_ejercicios.html">🐍 Ir a los ejercicios</a>'}
+];
+var all = TEMAS.concat(TEMAS_EXTRA);
+var actual = 0;
+function $(i){return document.getElementById(i);}
+function renderChips(){
+  $("chips").innerHTML=all.map(function(t,i){
+    return '<button class="chip'+(i===actual?' on':'')+'" onclick="elegir('+i+')">'+t.n+'</button>';
+  }).join("");
+}
+function elegir(i){ actual=i; renderChips(); mostrar(); }
+function mostrar(){
+  var t=all[actual];
+  $("lec").innerHTML='<h2>'+t.h+'</h2><div class="sub">'+t.sub+'</div>'+t.body;
+  $("lec").scrollIntoView({behavior:"smooth", block:"start"});
+}
+renderChips();
+mostrar();
+</script>
+</body>
+</html>

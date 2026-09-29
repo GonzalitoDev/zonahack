@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<title>ZonaLang · Tu lenguaje de programación</title>
+<meta name="theme-color" content="#2ee6a8">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#07090e;--card:rgba(13,17,23,.92);--border:#1c2531;--text:#d7e2ef;--muted:#6d7f93;--accent:#2ee6a8;--violet:#7a5cff;--gold:#f1c40f;--danger:#ff5a5a}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh}
+.wrap{max-width:980px;margin:0 auto;padding:14px;display:flex;flex-direction:column;gap:12px}
+.header{display:flex;align-items:center;gap:10px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+.logo{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;background:linear-gradient(135deg,rgba(46,230,168,.25),rgba(122,92,255,.25));border:1px solid rgba(46,230,168,.4)}
+.ttl{flex:1}
+.ttl h1{font-size:1em;letter-spacing:2px;font-family:'Courier New',monospace;color:#fff}
+.ttl span{font-size:.6em;color:var(--muted)}
+.back{color:var(--accent);text-decoration:none;font-size:.7em;padding:6px 10px;border:1px solid var(--border);border-radius:8px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px;overflow:hidden}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.tab{background:var(--card);border:1px solid var(--border);border-radius:10px;color:var(--muted);padding:8px 14px;font-size:.68em;cursor:pointer;font-family:inherit}
+.tab.on{background:var(--accent);color:#03140a;border-color:var(--accent);font-weight:800}
+.pane{display:none}
+.pane.on{display:block}
+textarea{width:100%;height:280px;background:#0a0d12;border:1px solid var(--border);border-radius:10px;color:#e6edf3;padding:12px;font-family:Consolas,monospace;font-size:.85em;line-height:1.5;resize:vertical;outline:none}
+textarea:focus{border-color:var(--accent)}
+.bar{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;align-items:center}
+.btn{background:linear-gradient(135deg,#2ee6a8,#7a5cff);color:#03140a;border:none;border-radius:10px;padding:10px 18px;font-weight:800;font-size:.75em;cursor:pointer;font-family:inherit}
+.btn.ghost{background:var(--card);border:1px solid var(--border);color:var(--text)}
+.btn.ghost:hover{border-color:var(--accent)}
+select{background:var(--card);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:9px 10px;font-size:.7em;font-family:inherit}
+#consola{width:100%;height:200px;background:#0a0d12;border:1px solid var(--border);border-radius:10px;color:#e6edf3;padding:12px;font-family:Consolas,monospace;font-size:.8em;line-height:1.5;overflow:auto;white-space:pre-wrap}
+#consola .err{color:var(--danger)}
+#consola .ok{color:var(--accent)}
+pre.code{background:#0a0d12;border:1px solid var(--border);border-radius:10px;padding:12px;font-size:.8em;line-height:1.6;overflow-x:auto;color:#e6edf3;font-family:Consolas,monospace}
+h2{font-size:.82em;color:var(--accent);letter-spacing:1px;margin:12px 0 6px}
+h3{font-size:.72em;color:var(--gold);margin:10px 0 4px}
+p,li{font-size:.72em;color:var(--text);line-height:1.6}
+ul{padding-left:18px}
+code.inline{background:rgba(255,255,255,.06);border-radius:6px;padding:1px 6px;font-family:Consolas,monospace;font-size:.92em}
+table{width:100%;border-collapse:collapse;font-size:.7em;margin-top:8px}
+td,th{border:1px solid var(--border);padding:7px 9px;text-align:left}
+th{color:var(--accent)}
+.kw{color:#7a5cff}
+.st{color:#f1c40f}
+.num{color:#2ee6a8}
+.cmt{color:#6d7f93;font-style:italic}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <div class="logo">⌘</div>
+    <div class="ttl"><h1>ZONALANG</h1><span>tu lenguaje de programación · intérprete en el navegador</span></div>
+    <a href="/asistente.html" class="back">←</a>
+  </div>
+
+  <div class="card">
+    <div class="tabs">
+      <button class="tab on" onclick="pestaña('editor',this)">⌨️ Editor</button>
+      <button class="tab" onclick="pestaña('docs',this)">📘 Documentación</button>
+      <button class="tab" onclick="pestaña('ejemplos',this)">💡 Ejemplos</button>
+    </div>
+
+    <div id="pane-editor" class="pane on">
+      <textarea id="codigo" spellcheck="false"># Hola mundo en ZonaLang
+imprimir("Hola, Gonza! 👋")
+imprimir("Este es tu propio lenguaje.")
+
+nombre = "ZonaLang"
+anio = 2026
+imprimir(nombre + " nació en " + anio)
+
+# operaciones
+suma = 5 + 3 * 2
+imprimir("5 + 3 * 2 = " + suma)
+
+# si / sino
+x = 10
+si (x > 5) {
+  imprimir("x es mayor que 5")
+} sino {
+  imprimir("x es menor o igual a 5")
+}
+
+# mientras
+i = 1
+mientras (i <= 5) {
+  imprimir("contando: " + i)
+  i = i + 1
+}
+
+# para
+para (j = 0; j < 3; j = j + 1) {
+  imprimir("vuelta " + j)
+}
+
+# función
+funcion cuadrado(n) {
+  retornar n * n
+}
+imprimir("El cuadrado de 7 es " + cuadrado(7))
+
+# fibonacci
+funcion fib(n) {
+  si (n <= 1) { retornar n }
+  retornar fib(n - 1) + fib(n - 2)
+}
+imprimir("fib(10) = " + fib(10))</textarea>
+      <div class="bar">
+        <button class="btn" onclick="ejecutar()">▶ Ejecutar</button>
+        <button class="btn ghost" onclick="limpiar()">🗑 Limpiar</button>
+        <select id="ejemploSel" onchange="cargarEjemplo(this.value)">
+          <option value="">📂 Cargar ejemplo...</option>
+          <option value="hola">Hola mundo</option>
+          <option value="calculadora">Calculadora</option>
+          <option value="fibonacci">Fibonacci</option>
+          <option value="tabla">Tabla de multiplicar</option>
+          <option value="funciones">Funciones</option>
+          <option value="cuenta">Contador regresivo</option>
+        </select>
+      </div>
+      <div style="font-size:.6em;color:var(--muted);margin-top:6px">ZonaLang · intérprete propio 100% en tu navegador</div>
+      <h2>CONSOLA</h2>
+      <div id="consola"></div>
+    </div>
+
+    <div id="pane-docs" class="pane">
+      <h2>📘 ZONALANG · GUÍA RÁPIDA</h2>
+      <p>ZonaLang es un lenguaje de programación propio con intérprete en el navegador. Sintaxis en español, sencilla y completa.</p>
+      <h3>✍️ Comentarios</h3>
+      <pre class="code"><span class="cmt"># esto es un comentario</span></pre>
+      <h3>📣 Imprimir en pantalla</h3>
+      <pre class="code">imprimir(<span class="st">"Hola, Gonza!"</span>)
+imprimir(<span class="st">"Resultado: "</span> + 42)</pre>
+      <h3>📦 Variables</h3>
+      <pre class="code">nombre = <span class="st">"ZonaLang"</span>
+edad = <span class="num">2026</span>
+precio = <span class="num">99.9</span>
+activo = verdadero   <span class="cmt"># verdadero / falso</span></pre>
+      <h3>➕ Operadores</h3>
+      <table>
+        <tr><th>Operador</th><th>Uso</th></tr>
+        <tr><td><code class="inline">+ - * / %</code></td><td>Aritmética</td></tr>
+        <tr><td><code class="inline">== != &lt; &gt; &lt;= &gt;=</code></td><td>Comparación</td></tr>
+        <tr><td><code class="inline">y</code> / <code class="inline">&amp;&amp;</code></td><td>Y lógico (and)</td></tr>
+        <tr><td><code class="inline">o</code> / <code class="inline">||</code></td><td>O lógico (or)</td></tr>
+        <tr><td><code class="inline">no</code> / <code class="inline">!</code></td><td>Negación (not)</td></tr>
+        <tr><td><code class="inline">+</code> (con texto)</td><td>Concatenar cadenas</td></tr>
+      </table>
+      <h3>🔀 Si / Sino</h3>
+      <pre class="code">si (edad &gt;= 18) {
+  imprimir(<span class="st">"Mayor de edad"</span>)
+} sino {
+  imprimir(<span class="st">"Menor"</span>)
+}</pre>
+      <h3>🔁 Mientras</h3>
+      <pre class="code">i = <span class="num">1</span>
+mientras (i &lt;= 5) {
+  imprimir(i)
+  i = i + 1
+}</pre>
+      <h3>🔁 Para</h3>
+      <pre class="code">para (j = <span class="num">0</span>; j &lt; <span class="num">10</span>; j = j + 1) {
+  imprimir(j)
+}</pre>
+      <h3>🧩 Funciones</h3>
+      <pre class="code">funcion sumar(a, b) {
+  retornar a + b
+}
+imprimir(sumar(<span class="num">3</span>, <span class="num">4</span>))  <span class="cmt"># 7</span></pre>
+      <h3>⚙️ Funciones incorporadas</h3>
+      <table>
+        <tr><th>Función</th><th>Qué hace</th></tr>
+        <tr><td><code class="inline">imprimir(x)</code></td><td>Muestra en consola</td></tr>
+        <tr><td><code class="inline">longitud(texto)</code></td><td>Cantidad de caracteres</td></tr>
+        <tr><td><code class="inline">aleatorio(n)</code></td><td>Número al azar 0..n-1</td></tr>
+        <tr><td><code class="inline">num(texto)</code></td><td>Convierte a número</td></tr>
+        <tr><td><code class="inline">str(num)</code></td><td>Convierte a texto</td></tr>
+        <tr><td><code class="inline">es_numero(x)</code></td><td>¿Es un número?</td></tr>
+      </table>
+      <h3>📌 Características</h3>
+      <ul>
+        <li>Tipos: número, texto, booleano y <code class="inline">nada</code>.</li>
+        <li>Variables automáticas (no hace falta declarar).</li>
+        <li>Funciones recursivas.</li>
+        <li>Ámbitos (scope) por bloques.</li>
+        <li>Errores claros en español.</li>
+      </ul>
+    </div>
+
+    <div id="pane-ejemplos" class="pane">
+      <h2>💡 EJEMPLOS</h2>
+      <h3>Calculadora</h3>
+      <pre class="code">a = 12
+b = 4
+imprimir("Suma: " + (a + b))
+imprimir("Resta: " + (a - b))
+imprimir("Mult: " + (a * b))
+imprimir("Div: " + (a / b))
+imprimir("Mod: " + (a % b))</pre>
+      <h3>Fibonacci</h3>
+      <pre class="code">funcion fib(n) {
+  si (n &lt;= 1) { retornar n }
+  retornar fib(n - 1) + fib(n - 2)
+}
+para (i = 0; i &lt;= 10; i = i + 1) {
+  imprimir("fib(" + i + ") = " + fib(i))
+}</pre>
+      <h3>Tabla de multiplicar</h3>
+      <pre class="code">tabla = 7
+para (i = 1; i &lt;= 10; i = i + 1) {
+  imprimir(tabla + " x " + i + " = " + (tabla * i))
+}</pre>
+      <h3>Contador regresivo</h3>
+      <pre class="code">n = 10
+mientras (n &gt; 0) {
+  imprimir("T-" + n)
+  n = n - 1
+}
+imprimir("¡Despegue! 🚀")</pre>
+      <button class="btn ghost" onclick="pestaña('editor',document.querySelector('.tab'))">→ Ir al editor</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══ ZONALANG · INTÉRPRETE PROPIO ═══
+function pestaña(id, btn){
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('on');});
+  document.querySelectorAll('.pane').forEach(function(p){p.classList.remove('on');});
+  btn.classList.add('on');
+  document.getElementById('pane-'+id).classList.add('on');
+}
+
+var consola=document.getElementById('consola');
+function salida(t, tipo){
+  var d=document.createElement('div');
+  if(tipo==='err') d.className='err';
+  if(tipo==='ok') d.className='ok';
+  d.textContent=t;
+  consola.appendChild(d);
+  consola.scrollTop=consola.scrollHeight;
+}
+function limpiar(){ consola.innerHTML=''; }
+
+// ── LEXER ──
+function tokenizar(src){
+  var tokens=[], i=0, n=src.length;
+  while(i<n){
+    var c=src[i];
+    if(c===' '||c==='\t'||c==='\n'||c==='\r'){ i++; continue; }
+    if(c==='#'){ while(i<n && src[i]!=='\n') i++; continue; }
+    if(c==='"' || c==="'"){
+      var q=c, j=i+1, s='';
+      while(j<n && src[j]!==q){ s+=src[j]; j++; }
+      if(j>=n) throw new Error('Cadena sin cerrar: '+src.slice(i,40));
+      tokens.push({t:'STR', v:s}); i=j+1; continue;
+    }
+    if(/[0-9]/.test(c)){
+      var s=c; i++;
+      while(i<n && /[0-9.]/.test(src[i])){ s+=src[i]; i++; }
+      tokens.push({t:'NUM', v:parseFloat(s)}); continue;
+    }
+    if(/[a-zA-Z_áéíóúñ]/.test(c)){
+      var s=c; i++;
+      while(i<n && /[a-zA-Z0-9_áéíóúñ]/.test(src[i])){ s+=src[i]; i++; }
+      tokens.push({t:'ID', v:s}); continue;
+    }
+    var dos=src.substr(i,2);
+    if(dos==='=='||dos==='!='||dos==='<='||dos==='>='||dos==='&&'||dos==='||'){ tokens.push({t:dos}); i+=2; continue; }
+    if('+-*/%(){}<>=,;!'.indexOf(c)>=0){ tokens.push({t:c}); i++; continue; }
+    throw new Error('Carácter desconocido: "'+c+'"');
+  }
+  tokens.push({t:'EOF'});
+  return tokens;
+}
+
+// ── PARSER ──
+function ZParser(tokens){
+  this.t=tokens; this.p=0;
+}
+ZParser.prototype.act=function(){ return this.t[this.p]; };
+ZParser.prototype.comer=function(tipo){
+  var a=this.act();
+  if(a.t!==tipo && a.v!==tipo) throw new Error('Se esperaba "'+tipo+'" y hay "'+(a.v||a.t)+'"');
+  this.p++;
+  return a;
+};
+ZParser.prototype.puntoYComa=function(){ if(this.act().t===';') this.p++; };
+ZParser.prototype.programa=function(){
+  var stmts=[];
+  while(this.act().t!=='EOF') stmts.push(this.stmt());
+  return {t:'Programa', stmts:stmts};
+};
+ZParser.prototype.bloque=function(){
+  this.comer('{');
+  var stmts=[];
+  while(this.act().t!=='}') {
+    if(this.act().t==='EOF') throw new Error('Falta "}"');
+    stmts.push(this.stmt());
+  }
+  this.comer('}');
+  return {t:'Bloque', stmts:stmts};
+};
+ZParser.prototype.stmt=function(){
+  var a=this.act();
+  if(a.t==='{') return this.bloque();
+  if(a.v==='imprimir'){ this.p++; this.comer('('); var e=this.expr(); this.comer(')'); this.puntoYComa(); return {t:'Imprimir', e:e}; }
+  if(a.v==='si'){ this.p++; this.comer('('); var cond=this.expr(); this.comer(')'); var then=this.bloque(); var els=null; if(this.act().v==='sino'){ this.p++; els=this.bloque(); } return {t:'Si', c:cond, e:then, s:els}; }
+  if(a.v==='mientras'){ this.p++; this.comer('('); var wc=this.expr(); this.comer(')'); var wb=this.bloque(); return {t:'Mientras', c:wc, e:wb}; }
+  if(a.v==='para'){ this.p++; this.comer('('); var ini=this.stmt_simple(); this.comer(';'); var pc=this.expr(); this.comer(';'); var inc=this.stmt_simple(); this.comer(')'); var pb=this.bloque(); return {t:'Para', i:ini, c:pc, n:inc, e:pb}; }
+  if(a.v==='funcion'){ this.p++; var nombre=this.comer('ID').v; this.comer('('); var params=[]; if(this.act().t!==')'){ params.push(this.comer('ID').v); while(this.act().t===','){ this.p++; params.push(this.comer('ID').v); } } this.comer(')'); var cuerpo=this.bloque(); return {t:'Funcion', nombre:nombre, params:params, cuerpo:cuerpo}; }
+  if(a.v==='retornar'){ this.p++; var re=this.expr(); this.puntoYComa(); return {t:'Retornar', e:re}; }
+  if(a.t==='ID' && this.t[this.p+1].t==='='){
+    var nombre=a.v; this.p+=2; var val=this.expr(); this.puntoYComa(); return {t:'Asignar', nombre:nombre, v:val};
+  }
+  return {t:'Expr', e:this.expr(), sinPunto:true};
+};
+ZParser.prototype.stmt_simple=function(){
+  var a=this.act();
+  if(a.t==='ID' && this.t[this.p+1].t==='='){
+    var nombre=a.v; this.p+=2; var val=this.expr(); return {t:'Asignar', nombre:nombre, v:val};
+  }
+  if(this.act().t===';'){ this.p++; return null; }
+  return {t:'Expr', e:this.expr(), sinPunto:true};
+};
+ZParser.prototype.expr=function(){ return this.or(); };
+ZParser.prototype.or=function(){
+  var e=this.and();
+  while(this.act().t==='||' || (this.act().v==='o' && this.t[this.p+1].t!=='=')){ this.p++; e={t:'Bin', op:'or', a:e, b:this.and()}; }
+  return e;
+};
+ZParser.prototype.and=function(){
+  var e=this.eq();
+  while(this.act().t==='&&' || (this.act().v==='y' && this.t[this.p+1].t!=='=')){ this.p++; e={t:'Bin', op:'and', a:e, b:this.eq()}; }
+  return e;
+};
+ZParser.prototype.eq=function(){
+  var e=this.cmp();
+  while(this.act().t==='=='||this.act().t==='!='){ var op=this.act().t; this.p++; e={t:'Bin', op:op, a:e, b:this.cmp()}; }
+  return e;
+};
+ZParser.prototype.cmp=function(){
+  var e=this.term();
+  while(this.act().t==='<'||this.act().t==='>'||this.act().t==='<='||this.act().t==='>='){ var op=this.act().t; this.p++; e={t:'Bin', op:op, a:e, b:this.term()}; }
+  return e;
+};
+ZParser.prototype.term=function(){
+  var e=this.factor();
+  while(this.act().t==='+'||this.act().t==='-'){ var op=this.act().t; this.p++; e={t:'Bin', op:op, a:e, b:this.factor()}; }
+  return e;
+};
+ZParser.prototype.factor=function(){
+  var e=this.unaria();
+  while(this.act().t==='*'||this.act().t==='/'||this.act().t==='%'){ var op=this.act().t; this.p++; e={t:'Bin', op:op, a:e, b:this.unaria()}; }
+  return e;
+};
+ZParser.prototype.unaria=function(){
+  if(this.act().t==='-'){ this.p++; return {t:'Neg', e:this.unaria()}; }
+  if(this.act().t==='!'){ this.p++; return {t:'Not', e:this.unaria()}; }
+  if(this.act().v==='no'){ this.p++; return {t:'Not', e:this.unaria()}; }
+  return this.primaria();
+};
+ZParser.prototype.primaria=function(){
+  var a=this.act();
+  if(a.t==='NUM'){ this.p++; return {t:'Num', v:a.v}; }
+  if(a.t==='STR'){ this.p++; return {t:'Str', v:a.v}; }
+  if(a.v==='verdadero'){ this.p++; return {t:'Bool', v:true}; }
+  if(a.v==='falso'){ this.p++; return {t:'Bool', v:false}; }
+  if(a.t==='('){ this.p++; var e=this.expr(); this.comer(')'); return e; }
+  if(a.t==='ID'){
+    this.p++;
+    if(this.act().t==='('){
+      this.p++; var args=[];
+      if(this.act().t!==')'){ args.push(this.expr()); while(this.act().t===','){ this.p++; args.push(this.expr()); } }
+      this.comer(')');
+      return {t:'Llamada', nombre:a.v, args:args};
+    }
+    return {t:'Var', nombre:a.v};
+  }
+  throw new Error('Expresión inesperada: "'+(a.v||a.t)+'"');
+};
+
+// ── INTERPRETE ──
+function ZEnv(padre){ this.vars={}; this.padre=padre||null; }
+ZEnv.prototype.definir=function(n,v){ this.vars[n]=v; };
+ZEnv.prototype.buscar=function(n){
+  var e=this;
+  while(e){ if(n in e.vars) return e.vars[n]; e=e.padre; }
+  throw new Error('Variable no definida: "'+n+'"');
+};
+ZEnv.prototype.asignar=function(n,v){
+  var e=this;
+  while(e){ if(n in e.vars){ e.vars[n]=v; return v; } e=e.padre; }
+  this.vars[n]=v; return v;
+};
+
+function zImprimir(x){
+  if(typeof x==='number' && !isFinite(x)) return String(x);
+  return String(x);
+}
+
+function ZInt(){
+  this.builtins={
+    longitud:function(s){ return String(s).length; },
+    aleatorio:function(n){ return Math.floor(Math.random()*n); },
+    num:function(s){ var n=parseFloat(s); return isNaN(n)?0:n; },
+    str:function(x){ return String(x); },
+    es_numero:function(x){ return typeof x==='number' && !isNaN(x); },
+  };
+}
+ZInt.prototype.eval=function(nodo, env){
+  var t=nodo.t;
+  if(t==='Programa'||t==='Bloque'){
+    var local=new ZEnv(env), r=null;
+    for(var i=0;i<nodo.stmts.length;i++){
+      var v=this.eval(nodo.stmts[i], local);
+      if(v && v.__ret !== undefined){ return v; }
+    }
+    return r;
+  }
+  if(t==='Imprimir'){ salida(zImprimir(this.eval(nodo.e, env))); return null; }
+  if(t==='Asignar'){ var val=this.eval(nodo.v, env); env.asignar(nodo.nombre, val); return null; }
+  if(t==='Si'){ if(this.truthy(this.eval(nodo.c, env))) return this.eval(nodo.e, env); else if(nodo.s) return this.eval(nodo.s, env); return null; }
+  if(t==='Mientras'){
+    var r=null, iter=0;
+    while(this.truthy(this.eval(nodo.c, env))){
+      if(++iter>100000) throw new Error('Mientras infinito (más de 100000 vueltas)');
+      var v=this.eval(nodo.e, env);
+      if(v && v.__ret !== undefined) return v;
+    }
+    return r;
+  }
+  if(t==='Para'){
+    var r=null;
+    if(nodo.i) this.eval(nodo.i, env);
+    while(this.truthy(this.eval(nodo.c, env))){
+      var v=this.eval(nodo.e, env);
+      if(v && v.__ret !== undefined) return v;
+      if(nodo.n) this.eval(nodo.n, env);
+    }
+    return r;
+  }
+  if(t==='Funcion'){
+    env.definir(nodo.nombre, {t:'Funcion', nombre:nodo.nombre, params:nodo.params, cuerpo:nodo.cuerpo, clausura:env});
+    return null;
+  }
+  if(t==='Retornar'){ return {__ret: nodo.e?this.eval(nodo.e, env):null}; }
+  if(t==='Expr'){ var r=this.eval(nodo.e, env); if(nodo.sinPunto){} return r; }
+  if(t==='Num'){ return nodo.v; }
+  if(t==='Str'){ return nodo.v; }
+  if(t==='Bool'){ return nodo.v; }
+  if(t==='Var'){ return env.buscar(nodo.nombre); }
+  if(t==='Neg'){ return -this.eval(nodo.e, env); }
+  if(t==='Not'){ return !this.truthy(this.eval(nodo.e, env)); }
+  if(t==='Bin'){
+    var a=this.eval(nodo.a, env), b=this.eval(nodo.b, env);
+    switch(nodo.op){
+      case '+': return (typeof a==='string'||typeof b==='string')? zImprimir(a)+zImprimir(b) : a+b;
+      case '-': return a-b;
+      case '*': return a*b;
+      case '/': return b===0? Infinity : a/b;
+      case '%': return a%b;
+      case '==': return a===b;
+      case '!=': return a!==b;
+      case '<': return a<b;
+      case '>': return a>b;
+      case '<=': return a<=b;
+      case '>=': return a>=b;
+      case 'and': return this.truthy(a)&&this.truthy(b);
+      case 'or': return this.truthy(a)||this.truthy(b);
+    }
+  }
+  if(t==='Llamada'){
+    var f=this.eval({t:'Var', nombre:nodo.nombre}, env);
+    var args=nodo.args.map(function(x){ return this.eval(x, env); }, this);
+    if(typeof f==='function'){ return f.apply(null, args); }
+    if(f && f.t==='Funcion'){
+      var local=new ZEnv(f.clausura);
+      for(var i=0;i<f.params.length;i++) local.definir(f.params[i], args[i]);
+      var r=this.eval(f.cuerpo, local);
+      return r && r.__ret !== undefined ? r.__ret : null;
+    }
+    throw new Error('No es una función: "'+nodo.nombre+'"');
+  }
+  throw new Error('Nodo desconocido: '+t);
+};
+ZInt.prototype.truthy=function(v){
+  if(typeof v==='boolean') return v;
+  if(typeof v==='number') return v!==0 && !isNaN(v);
+  if(typeof v==='string') return v.length>0;
+  return v!==null && v!==undefined;
+};
+
+function ejecutar(){
+  limpiar();
+  var src=document.getElementById('codigo').value;
+  try{
+    var toks=tokenizar(src);
+    var ast=new ZParser(toks).programa();
+    var int=new ZInt();
+    var global=new ZEnv(null);
+    for(var k in int.builtins) global.definir(k, int.builtins[k]);
+    var t0=performance.now();
+    int.eval(ast, global);
+    var ms=Math.round(performance.now()-t0);
+    salida('— fin del programa · '+ms+' ms —', 'ok');
+  }catch(e){
+    salida('❌ Error: '+e.message, 'err');
+  }
+}
+
+// ── EJEMPLOS ──
+var EJEMPLOS={
+  hola:'# Hola mundo\nimprimir("¡Hola, Gonza! 👋")\nimprimir("ZonaLang funciona en tu navegador.")',
+  calculadora:'# Calculadora\na = 12\nb = 4\nimprimir("Suma: " + (a + b))\nimprimir("Resta: " + (a - b))\nimprimir("Mult: " + (a * b))\nimprimir("Div: " + (a / b))\nimprimir("Mod: " + (a % b))',
+  fibonacci:'# Fibonacci\nfuncion fib(n) {\n  si (n <= 1) { retornar n }\n  retornar fib(n - 1) + fib(n - 2)\n}\npara (i = 0; i <= 10; i = i + 1) {\n  imprimir("fib(" + i + ") = " + fib(i))\n}',
+  tabla:'# Tabla de multiplicar\ntabla = 7\npara (i = 1; i <= 10; i = i + 1) {\n  imprimir(tabla + " x " + i + " = " + (tabla * i))\n}',
+  funciones:'# Funciones\nfuncion saludo(nombre, anio) {\n  imprimir("Hola " + nombre + ", estamos en " + anio)\n  retornar "listo"\n}\nr = saludo("Gonza", 2026)\nimprimir("Resultado: " + r)',
+  cuenta:'# Contador regresivo\nn = 10\nmientras (n > 0) {\n  imprimir("T-" + n)\n  n = n - 1\n}\nimprimir("¡Despegue! 🚀")'
+};
+function cargarEjemplo(id){
+  if(id && EJEMPLOS[id]) document.getElementById('codigo').value=EJEMPLOS[id];
+}
+// cargar ejemplo inicial (ya está el código por defecto)
+document.addEventListener('DOMContentLoaded', function(){ ejecutar(); });
+</script>
+</body>
+</html>

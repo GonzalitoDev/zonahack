@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>🛡 Escáner de Vulnerabilidades v2 - ZonaHack</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0a;color:#c8d6e5;font-family:'Courier New',monospace;min-height:100vh;padding:15px}
+body::before{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:radial-gradient(circle at 50% 0%,rgba(0,255,65,.05) 0,transparent 60%),repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,255,65,.012) 2px,rgba(0,255,65,.012) 4px);pointer-events:none;z-index:9998}
+.header{display:flex;align-items:center;justify-content:space-between;padding:10px 0 14px;max-width:820px;margin:0 auto}
+.header h1{color:#00ff41;font-size:1em;letter-spacing:2px;text-shadow:0 0 12px rgba(0,255,65,.25)}
+.back{color:#00ff41;text-decoration:none;font-size:.65em;padding:4px 8px;border:1px solid rgba(0,255,65,.15);border-radius:3px}
+.wrap{max-width:820px;margin:0 auto}
+.inputbar{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.inputbar input{flex:1;min-width:200px;background:#050505;border:1px solid rgba(0,255,65,.15);color:#00ff41;padding:12px 14px;border-radius:4px;font-family:'Courier New',monospace;font-size:.85em;outline:none}
+.inputbar input:focus{border-color:rgba(0,255,65,.5);box-shadow:0 0 12px rgba(0,255,65,.08)}
+.btn{padding:12px 18px;background:linear-gradient(135deg,#00b33c,#007a2a);border:none;color:#fff;border-radius:4px;font-family:'Courier New',monospace;font-weight:bold;font-size:.8em;cursor:pointer;letter-spacing:1px}
+.btn:hover{box-shadow:0 0 18px rgba(0,255,65,.3)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.ghost{background:transparent;border:1px solid rgba(0,255,65,.2);color:#00ff41}
+.status{font-size:.7em;color:#00ff41;letter-spacing:1px;margin:8px 0;min-height:18px}
+.status.err{color:#e74c3c}
+.console{background:#030303;border:1px solid rgba(0,255,65,.08);border-radius:5px;padding:14px;font-size:.68em;letter-spacing:.5px;min-height:180px;max-height:300px;overflow:auto;margin-bottom:14px;white-space:pre-wrap;word-break:break-all}
+.console .p{color:#00ff41}.console .ok{color:#00ff41}.console .warn{color:#f1c40f}.console .bad{color:#e74c3c}
+.hidden{display:none}
+.loading-bar{height:3px;background:#0a0a0a;border-radius:2px;overflow:hidden;margin:8px 0;position:relative}
+.loading-bar .fill{position:absolute;top:0;left:-30%;height:100%;width:30%;background:#00ff41;box-shadow:0 0 8px rgba(0,255,65,.5);animation:scanmove 1.1s ease-in-out infinite}
+@keyframes scanmove{0%{left:-30%}100%{left:100%}}
+
+/* Resultado */
+.result{border:1px solid rgba(0,255,65,.12);border-radius:6px;overflow:hidden;margin-bottom:14px}
+.result-head{padding:14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;border-bottom:1px solid rgba(255,255,255,.05);background:rgba(0,0,0,.3)}
+.result-head .url{font-size:.72em;color:#c8d6e5;word-break:break-all;max-width:70%}
+.result-head .score{font-size:2em;font-weight:bold;letter-spacing:1px;text-align:right}
+.result-head .score small{display:block;font-size:.3em;color:rgba(200,214,229,.5);letter-spacing:2px}
+
+/* Tabs */
+.tabs{display:flex;gap:2px;border-bottom:1px solid rgba(255,255,255,.05);padding:0 10px}
+.tabs button{background:none;border:none;color:rgba(200,214,229,.4);padding:10px 14px;font-family:'Courier New',monospace;font-size:.68em;cursor:pointer;border-bottom:2px solid transparent;letter-spacing:1px}
+.tabs button.active{color:#00ff41;border-bottom-color:#00ff41}
+.tabpane{display:none;padding:12px;background:rgba(0,0,0,.2)}
+.tabpane.active{display:block}
+
+/* Metricas */
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:12px}
+.metrics div{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.05);border-radius:4px;padding:10px;text-align:center}
+.metrics b{display:block;color:#00ff41;font-size:1.1em;margin-bottom:3px;letter-spacing:1px}
+.metrics span{font-size:.55em;color:rgba(200,214,229,.45);letter-spacing:1px}
+.metrics .warn b{color:#f1c40f}.metrics .bad b{color:#e74c3c}
+
+/* Checks */
+.checks{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px}
+.chk{padding:4px 9px;border-radius:12px;font-size:.58em;letter-spacing:1px;border:1px solid rgba(0,255,65,.2);color:#00ff41;background:rgba(0,255,65,.05)}
+.chk.on{color:#00ff41;border-color:rgba(0,255,65,.3)}
+.chk.off{color:rgba(200,214,229,.3);border-color:rgba(255,255,255,.08)}
+
+/* Findings */
+.finding{padding:8px 10px;margin:4px 0;border-radius:3px;font-size:.68em;display:flex;gap:8px;align-items:flex-start;line-height:1.5}
+.finding .sev{min-width:58px;font-weight:bold;letter-spacing:1px}
+.sev-critica{background:rgba(255,0,68,.1);border:1px solid rgba(255,0,68,.3)}
+.sev-critica .sev{color:#ff0044}
+.sev-alta{background:rgba(231,76,60,.08);border:1px solid rgba(231,76,60,.2)}
+.sev-alta .sev{color:#e74c3c}
+.sev-media{background:rgba(241,196,15,.06);border:1px solid rgba(241,196,15,.15)}
+.sev-media .sev{color:#f1c40f}
+.sev-baja{background:rgba(0,255,65,.04);border:1px solid rgba(0,255,65,.1)}
+.sev-baja .sev{color:#00ff41}
+
+/* Headers */
+.hall{padding:6px 10px;margin:3px 0;border-radius:3px;font-size:.64em;color:rgba(200,214,229,.5);background:rgba(255,255,255,.02);word-break:break-all}
+.hall b{color:#00ff41}
+
+/* Detalles */
+.meta{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}
+.meta div{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.04);border-radius:3px;padding:8px;font-size:.62em}
+.meta b{color:#00ff41;display:block;margin-bottom:3px;font-size:.85em;letter-spacing:1px}
+
+/* Historial */
+.history{margin-bottom:14px}
+.history h3{color:rgba(200,214,229,.3);font-size:.65em;letter-spacing:1px;margin-bottom:6px}
+.history .hitem{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.04);border-radius:4px;margin:3px 0;font-size:.62em;cursor:pointer}
+.history .hitem:hover{border-color:rgba(0,255,65,.2)}
+.history .hitem b{max-width:60%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.history .hitem .del{margin-left:8px;color:#e74c3c;background:none;border:none;cursor:pointer;font-size:.8em}
+
+.disclaimer{margin-top:16px;border:1px solid rgba(241,196,15,.15);border-radius:5px;padding:10px;font-size:.6em;color:rgba(200,214,229,.4);line-height:1.7}
+.toolbar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.toolbar button{padding:6px 10px;border:1px solid rgba(0,255,65,.15);border-radius:3px;background:rgba(0,0,0,.3);color:#00ff41;font-size:.6em;cursor:pointer;font-family:'Courier New',monospace}
+.toolbar button:hover{border-color:rgba(0,255,65,.4)}
+
+/* RECON */
+.rcard{background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.05);border-radius:5px;padding:12px;margin-bottom:10px}
+.rcard .rh{color:#00ff41;font-size:.68em;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:7px}
+.rcard .rh::before{content:'';width:14px;height:2px;background:#00ff41;box-shadow:0 0 6px rgba(0,255,65,.5)}
+.chips{display:flex;flex-wrap:wrap;gap:5px}
+.chips span{padding:4px 9px;border-radius:12px;font-size:.6em;letter-spacing:.5px;border:1px solid rgba(0,255,65,.2);color:#00ff41;background:rgba(0,255,65,.04)}
+.chips span.port{border-color:rgba(241,196,15,.3);color:#f1c40f}
+.chips span.sub{border-color:rgba(52,152,219,.3);color:#7ec8f0}
+.rkv{font-size:.64em;color:rgba(200,214,229,.65);padding:4px 0;border-bottom:1px dashed rgba(255,255,255,.04);display:flex;justify-content:space-between;gap:10px;line-height:1.5}
+.rkv:last-child{border-bottom:none}
+.rkv b{color:#00ff41;font-weight:normal;text-align:right;word-break:break-all}
+.rkv .warn{color:#f1c40f}.rkv .bad{color:#e74c3c}
+.rtable{width:100%;border-collapse:collapse;font-size:.62em}
+.rtable th{color:rgba(0,255,65,.5);text-align:left;padding:5px 6px;border-bottom:1px solid rgba(0,255,65,.15);letter-spacing:1px}
+.rtable td{color:rgba(200,214,229,.7);padding:5px 6px;border-bottom:1px solid rgba(255,255,255,.04);word-break:break-all;vertical-align:top}
+.rtable td.v{color:#00ff41}
+.rec-list{font-size:.62em;color:rgba(200,214,229,.65);line-height:1.8;word-break:break-all}
+.rec-list b{color:#00ff41;font-weight:normal}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(0,255,65,.2);border-top-color:#00ff41;border-radius:50%;animation:sp .8s linear infinite;vertical-align:middle;margin-right:8px}
+@keyframes sp{to{transform:rotate(360deg)}}
+.rec-hero{background:rgba(0,0,0,.35);border:1px solid rgba(0,255,65,.15);border-radius:6px;padding:14px;margin-bottom:10px}
+.rec-hero .u{color:#00ff41;font-size:.9em;word-break:break-all}
+.rec-hero .m{color:rgba(200,214,229,.55);font-size:.62em;margin-top:6px;line-height:1.7}
+</style>
+</head>
+<body>
+<div class="header">
+  <a href="/" class="back">← Volver</a>
+  <h1>🛡 ESCÁNER DE VULNERABILIDADES v2</h1>
+  <div style="width:60px"></div>
+</div>
+
+<div class="wrap">
+  <div class="inputbar">
+    <input id="url" type="text" placeholder="https://ejemplo.com" spellcheck="false">
+    <button class="btn" id="btnScan" onclick="escanear()">🛡 ESCANEAR</button>
+    <button class="btn ghost" id="btnRecon" onclick="recon()">🔎 RECON</button>
+    <button class="btn ghost" id="btnScrape" onclick="scrapear()">🕸️ SCRAPEAR</button>
+  </div>
+  <label style="display:flex;align-items:center;gap:6px;font-size:.62em;color:rgba(200,214,229,.6);margin:6px 0 10px;cursor:pointer">
+    <input type="checkbox" id="chkAutorizado" style="cursor:pointer">
+    Confirmo que este sitio es mío o tengo autorización explícita para escanearlo.
+  </label>
+
+  <div class="history hidden" id="history">
+    <h3>📜 ÚLTIMOS ESCANEOS</h3>
+    <div id="hList"></div>
+  </div>
+
+  <div class="status" id="status">Listo. Ingresá una URL y escaneá.</div>
+  <div class="loading-bar hidden" id="lbar"><div class="fill" id="lfill"></div></div>
+  <div class="console hidden" id="console"></div>
+
+  <div class="toolbar hidden" id="toolbar">
+    <button onclick="exportarTXT()">⬇ Exportar TXT</button>
+    <button onclick="exportarJSON()">⬇ Exportar JSON</button>
+    <button onclick="copiarReporte()">📋 Copiar reporte</button>
+    <button onclick="reescanear()">🔄 Reescanear</button>
+    <button id="btnIA" onclick="analizarConIA()">🤖 Analizar con Claude</button>
+  </div>
+
+  <div class="result hidden" id="result"></div>
+
+  <div class="result hidden" id="recon"></div>
+
+  <div class="result hidden" id="scrape"></div>
+
+  <div class="console hidden" id="iaBox" style="white-space:pre-wrap"></div>
+
+  <div class="disclaimer">
+    ⚠️ <b style="color:#f1c40f">USO RESPONSABLE</b><br>
+    Este escáner realiza un análisis <b>PASIVO</b>: consulta headers, cookies, rutas públicas y configuración TLS. No envía payloads ni explota nada.<br>
+    🔒 Escaneá <b>solo sitios propios o con autorización</b>.
+  </div>
+</div>
+
+<script>
+function $(id){return document.getElementById(id);}
+function esc(s){return String(s||"").replace(/[&<>]/g,function(z){return{"&":"&amp;","<":"&lt;",">":"&gt;"}[z];});}
+
+var ultimoReporte = null;
+var LS_HIST = "vh_scan_hist";
+
+function cargarHistorial(){
+  var h=[];
+  try{h=JSON.parse(localStorage.getItem(LS_HIST)||"[]");}catch(e){}
+  if(!h.length){$("history").classList.add("hidden");return;}
+  $("history").classList.remove("hidden");
+  var out="";
+  h.forEach(function(x){
+    var c=x.score>=80?"#00ff41":(x.score>=60?"#f1c40f":"#e74c3c");
+    out+='<div class="hitem" onclick="verHist(\''+esc(x.url.replace(/'/g,"\\'"))+'\')">'+
+      '<b>'+esc(x.url)+'</b><span style="color:'+c+'">'+x.score+' · '+esc(x.nivel)+'</span>'+
+      '<button class="del" onclick="event.stopPropagation();delHist(\''+esc(x.url.replace(/'/g,"\\'"))+'\')">✕</button></div>';
+  });
+  $("hList").innerHTML=out;
+}
+
+function guardarHistorial(url,score,nivel,findings){
+  var h=[];
+  try{h=JSON.parse(localStorage.getItem(LS_HIST)||"[]");}catch(e){}
+  h=h.filter(function(x){return x.url!==url;});
+  h.unshift({url:url,score:score,nivel:nivel,ts:Date.now(),
+    findings:(findings||[]).map(function(f){return {tipo:f.tipo,desc:f.desc,sev:f.sev};})});
+  h=h.slice(0,8);
+  try{localStorage.setItem(LS_HIST,JSON.stringify(h));}catch(e){}
+  cargarHistorial();
+}
+
+function firmaFinding(f){ return f.tipo+"|"+f.desc; }
+
+function compararConAnterior(d){
+  var h=[];
+  try{h=JSON.parse(localStorage.getItem(LS_HIST)||"[]");}catch(e){}
+  var anterior=null;
+  for(var i=0;i<h.length;i++){ if(h[i].url===d.url){ anterior=h[i]; break; } }
+  if(!anterior||!anterior.findings) return null;
+  var actuales=(d.findings||[]).map(firmaFinding);
+  var anteriores=anterior.findings.map(firmaFinding);
+  var nuevos=(d.findings||[]).filter(function(f){return anteriores.indexOf(firmaFinding(f))===-1;});
+  var resueltos=anterior.findings.filter(function(f){return actuales.indexOf(firmaFinding(f))===-1;});
+  return {nuevos:nuevos,resueltos:resueltos,scoreAnterior:anterior.score,fechaAnterior:anterior.ts};
+}
+
+function verHist(u){$("url").value=u;escanear();}
+function delHist(u){
+  var h=JSON.parse(localStorage.getItem(LS_HIST)||"[]").filter(function(x){return x.url!==u;});
+  localStorage.setItem(LS_HIST,JSON.stringify(h));
+  cargarHistorial();
+}
+
+function log(txt,cls){
+  var c=$("console");c.classList.remove("hidden");
+  var d=document.createElement("div");
+  d.className=cls||"p";d.textContent=txt;
+  c.appendChild(d);c.scrollTop=c.scrollHeight;
+}
+
+function escanear(){
+  var url=$("url").value.trim();
+  if(!url){$("status").textContent="⛔ Ingresá una URL primero.";$("status").className="status err";return;}
+  if(!$("chkAutorizado").checked){$("status").textContent="⛔ Confirmá primero que el sitio es tuyo o tenés autorización.";$("status").className="status err";return;}
+  if(!/^https?:\/\//i.test(url))url="https://"+url;
+  $("url").value=url;
+  var btn=$("btnScan");btn.disabled=true;
+  $("status").textContent="🛡 Escaneando "+url+"... (análisis pasivo)";
+  $("status").className="status";
+  $("result").classList.add("hidden");
+  $("recon").classList.add("hidden");
+  $("scrape").classList.add("hidden");
+  $("toolbar").classList.add("hidden");
+  var c=$("console");c.classList.remove("hidden");c.innerHTML="";
+  $("lbar").classList.remove("hidden");
+  log(">>> INICIANDO ESCANEO: "+url);
+  log(">>> Modo: PASIVO (sin payloads) — 10 checks reales: DNS, TLS, headers, cookies, forms, rutas, robots.txt, security.txt, CORS, métodos HTTP");
+  var t0=Date.now();
+  var tTiempo=setInterval(function(){
+    $("status").textContent="🛡 Escaneando "+url+"... "+((Date.now()-t0)/1000).toFixed(1)+"s (análisis pasivo real, sin payloads)";
+  },200);
+
+  fetch("/api/scanner?url="+encodeURIComponent(url))
+  .then(function(r){return r.json();})
+  .then(function(d){
+    clearInterval(tTiempo);
+    $("lbar").classList.add("hidden");
+    setTimeout(function(){c.classList.add("hidden");},500);
+    if(d.error){$("status").textContent="⛔ "+d.error;$("status").className="status err";return;}
+    ultimoReporte=d;
+    var diff=compararConAnterior(d);
+    mostrarResultado(d,diff);
+    guardarHistorial(d.url,d.score,d.nivel,d.findings);
+    log(">>> COMPLETADO en "+((Date.now()-t0)/1000).toFixed(1)+"s: "+d.host+" | score "+d.score+" | "+d.nivel,"ok");
+  })
+  .catch(function(e){
+    clearInterval(tTiempo);$("lbar").classList.add("hidden");
+    $("status").textContent="⛔ Error al escanear: "+e.message;
+    $("status").className="status err";
+    log("ERROR: "+e.message,"bad");
+  })
+  .finally(function(){btn.disabled=false;});
+}
+
+function reescanear(){escanear();}
+
+function recon(){
+  var url=$("url").value.trim();
+  if(!url){$("status").textContent="⛔ Ingresá una URL primero.";$("status").className="status err";return;}
+  if(!$("chkAutorizado").checked){$("status").textContent="⛔ Confirmá primero que el sitio es tuyo o tenés autorización.";$("status").className="status err";return;}
+  if(!/^https?:\/\//i.test(url))url="https://"+url;
+  $("url").value=url;
+  var btn=$("btnRecon");btn.disabled=true;
+  $("status").textContent="🔎 Reconociendo "+url+"... (DNS, WHOIS, subdominios, puertos, tecnologías)";
+  $("status").className="status";
+  $("result").classList.add("hidden");
+  $("scrape").classList.add("hidden");
+  $("toolbar").classList.add("hidden");
+  var rc=$("recon");
+  rc.classList.remove("hidden");
+  rc.innerHTML='<div class="loading" style="color:#00ff41"><span class="spin"></span>Recolectando información del objetivo...</div>';
+  $("lbar").classList.remove("hidden");
+  fetch("/api/scanner?url="+encodeURIComponent(url)+"&mode=recon")
+  .then(function(r){return r.json();})
+  .then(function(d){
+    $("lbar").classList.add("hidden");
+    if(d.error){$("status").textContent="⛔ "+d.error;$("status").className="status err";return;}
+    $("status").textContent="✅ Recon de "+d.host+" completado";
+    $("status").className="status";
+    renderRecon(d);
+  })
+  .catch(function(e){
+    $("lbar").classList.add("hidden");
+    $("status").textContent="⛔ Error en recon: "+e.message;
+    $("status").className="status err";
+  })
+  .finally(function(){btn.disabled=false;});
+}
+
+function renderRecon(d){
+  var h="";
+  var geo=d.geo||{};
+  h+='<div class="rec-hero"><div class="u">🔎 '+esc(d.url)+'</div>'+
+     '<div class="m">IP <b style="color:#00ff41">'+esc(d.ip||"—")+'</b>'+
+     (geo.pais?' · '+esc(geo.pais+(geo.ciudad?', '+geo.ciudad:'')):'')+
+     (geo.org?' · '+esc(geo.org):'')+
+     '</div></div>';
+
+  // ─── DNS ───
+  var dns=d.dns||{};
+  h+='<div class="rcard"><div class="rh">DNS Records</div><table class="rtable">';
+  var tipos={A:"A",AAAA:"AAAA",CNAME:"CNAME",MX:"MX",NS:"NS",TXT:"TXT",SOA:"SOA"};
+  Object.keys(tipos).forEach(function(t){
+    var vals=(dns[t]||[]).slice(0,6);
+    h+='<tr><th>'+t+'</th><td class="v">'+(vals.length?esc(vals.join("<br>")):'<span style="color:rgba(200,214,229,.3)">sin registro</span>')+'</td></tr>';
+  });
+  h+='</table></div>';
+
+  // ─── WHOIS ───
+  var w=d.whois||{};
+  if(Object.keys(w).length){
+    h+='<div class="rcard"><div class="rh">WHOIS / RDAP</div>';
+    if(w.registrar)h+=kvR("Registrar",w.registrar);
+    if(w.abuse_email)h+=kvR("Email de abuso",'<span class="warn">'+esc(w.abuse_email)+'</span>');
+    var ev=w.events||{};
+    if(ev.registration)h+=kvR("Registrado",esc(ev.registration.slice(0,10)));
+    if(ev.expiration)h+=kvR("Expira",esc(ev.expiration.slice(0,10)));
+    if((w.status||[]).length)h+=kvR("Estados",esc(w.status.slice(0,5).join(" · ")));
+    h+='</div>';
+  }
+
+  // ─── Certificado ───
+  var c=d.cert||{};
+  if(c.presente){
+    h+='<div class="rcard"><div class="rh">Certificado TLS</div>';
+    if(c.expira)h+=kvR("Expira",esc(c.expira));
+    if(c.dias_restantes!=null)h+=kvR("Días restantes",c.dias_restantes<0?'<span class="bad">'+c.dias_restantes+' (EXPiRADO)</span>':(c.dias_restantes<14?'<span class="warn">'+c.dias_restantes+'</span>':c.dias_restantes));
+    if(c.tls_version)h+=kvR("TLS",esc(c.tls_version));
+    try{
+      var org=c.emisor.filter(function(x){return x[0][0]==="organizationName";});
+      if(org.length)h+=kvR("Emisor",esc(org[0][0][1]));
+    }catch(e){}
+    if((c.sans||[]).length){
+      h+='<div style="font-size:.62em;color:rgba(0,255,65,.6);margin:6px 0 4px">DOMINIOS EN EL CERTIFICADO (SAN)</div><div class="chips">'+
+        c.sans.map(function(s){return '<span class="sub">'+esc(s)+'</span>';}).join("")+'</div>';
+    }
+    h+='</div>';
+  }
+
+  // ─── Subdominios ───
+  if((d.subdominios||[]).length){
+    h+='<div class="rcard"><div class="rh">Subdominios ('+d.subdominios.length+')</div><div class="chips">'+
+      d.subdominios.map(function(s){return '<span class="sub">'+esc(s)+'</span>';}).join("")+'</div></div>';
+  }
+
+  // ─── Puertos ───
+  if((d.puertos_abiertos||[]).length){
+    h+='<div class="rcard"><div class="rh">Puertos abiertos</div><div class="chips">'+
+      d.puertos_abiertos.map(function(p){return '<span class="port">'+p+'</span>';}).join("")+'</div></div>';
+  }
+
+  // ─── Tecnologías ───
+  if((d.tecnologias||[]).length){
+    h+='<div class="rcard"><div class="rh">Tecnologías detectadas</div><div class="chips">'+
+      d.tecnologias.map(function(t){return '<span>'+esc(t)+'</span>';}).join("")+'</div></div>';
+  }
+
+  // ─── HTTP ───
+  var hp=d.http||{};
+  h+='<div class="rcard"><div class="rh">HTTP</div>';
+  h+=kvR("Status",hp.status!=null?hp.status:'<span class="warn">sin respuesta</span>');
+  if(hp.final_url)h+=kvR("URL final",esc(hp.final_url));
+  if(hp.respuesta_ms!=null)h+=kvR("Tiempo",hp.respuesta_ms+" ms");
+  if((hp.redirecciones||[]).length){
+    h+='<div style="font-size:.62em;color:rgba(0,255,65,.6);margin:6px 0 4px">REDIRECCIONES</div>';
+    hp.redirecciones.forEach(function(rr){h+=kvR(String(rr.code),esc(rr.location));});
+  }
+  if((hp.headers&&Object.keys(hp.headers).length)){
+    h+='<div style="font-size:.62em;color:rgba(0,255,65,.6);margin:8px 0 4px">HEADERS</div>';
+    Object.keys(hp.headers).forEach(function(k){h+='<div class="hall" style="font-size:.6em"><b>'+esc(k)+':</b> '+esc(hp.headers[k])+'</div>';});
+  }
+  if((hp.cookies||[]).length){
+    h+='<div style="font-size:.62em;color:rgba(0,255,65,.6);margin:8px 0 4px">COOKIES ('+hp.cookies.length+')</div>';
+    hp.cookies.forEach(function(cook){
+      var flags=(cook.secure?"Secure":"")+(cook.http_only?" HttpOnly":"")+(cook.same_site?" SameSite="+cook.same_site:"");
+      h+=kvR(esc(cook.name),esc(flags||"sin flags"));
+    });
+  }
+  h+='</div>';
+
+  // ─── HTML ───
+  var a=d.html||{};
+  h+='<div class="rcard"><div class="rh">Contenido del HTML</div>';
+  if(a.title)h+=kvR("Título",esc(a.title));
+  if(a.meta_description)h+=kvR("Descripción",esc(a.meta_description));
+  if(a.meta_keywords)h+=kvR("Keywords",esc(a.meta_keywords));
+  if(a.lang)h+=kvR("Idioma",esc(a.lang));
+  h+=kvR("Links","<b>"+a.links+"</b> totales · <b>"+a.links_externos+"</b> externos");
+  h+=kvR("Imágenes",String(a.imagenes||0));
+  h+=kvR("Formularios","<b>"+(a.forms||0)+"</b>"+(a.forms_method_get?" · <span class='warn'>"+a.forms_method_get+" con method=GET</span>":""));
+  if((a.emails||[]).length)h+=kvR("Emails",a.emails.slice(0,10).map(esc).join("<br>"));
+  if((a.telefonos||[]).length)h+=kvR("Teléfonos",esc(a.telefonos.slice(0,5).join(" · ")));
+  if((a.scripts_externos||[]).length){
+    h+='<div style="font-size:.62em;color:rgba(0,255,65,.6);margin:6px 0 4px">SCRIPTS EXTERNOS ('+a.scripts_externos.length+')</div>';
+    h+='<div class="rec-list">'+a.scripts_externos.slice(0,12).map(esc).join("<br>")+'</div>';
+  }
+  h+='</div>';
+
+  // ─── Rutas ───
+  var rp=d.rutas||{};
+  h+='<div class="rcard"><div class="rh">Rutas públicas</div>';
+  if(rp.robots_status!=null){
+    h+=kvR("robots.txt",rp.robots_status+(rp.robots?" · "+esc(rp.robots.replace(/[\r\n]+/g," · ").slice(0,120)):""));
+    if((rp.disallow||[]).length)h+=kvR("Disallow",esc(rp.disallow.join(", ")));
+  }
+  if(rp.sitemap_status!=null)h+=kvR("sitemap.xml",rp.sitemap_status+(rp.sitemap_urls!=null?" · "+rp.sitemap_urls+" URLs":""));
+  if(rp.security_txt!=null)h+=kvR("security.txt",rp.security_txt?"<b>PRESENTE</b>":'<span class="warn">no encontrado</span>');
+  h+='</div>';
+
+  // ─── Wayback ───
+  var wb=d.wayback;
+  if(wb&&wb.total!=null){
+    h+='<div class="rcard"><div class="rh">Archivo histórico (Wayback Machine)</div>';
+    h+=kvR("Snapshots",String(wb.total));
+    if((wb.ejemplos||[]).length){
+      h+='<div style="font-size:.62em;color:rgba(0,255,65,.6);margin:6px 0 4px">EJEMPLOS</div><div class="rec-list">'+wb.ejemplos.slice(0,8).map(esc).join("<br>")+'</div>';
+    }
+    h+='</div>';
+  }
+
+  // ─── Security headers ───
+  var sh=d.security_headers||{};
+  h+='<div class="rcard"><div class="rh">Security Headers</div><div class="chips">';
+  Object.keys(sh).forEach(function(k){
+    var on=sh[k];
+    h+='<span style="'+(on?'border-color:rgba(46,204,113,.4);color:#2ecc71':'border-color:rgba(231,76,60,.35);color:#e74c3c')+'">'+esc(k)+(on?' ✓':' ✕')+'</span>';
+  });
+  h+='</div></div>';
+
+  h+='<div style="text-align:right;font-size:.55em;color:rgba(200,214,229,.2);margin-top:6px">ZonaHack Scanner · Modo RECON · '+esc(d.escaneado||"")+'</div>';
+  $("recon").innerHTML=h;
+}
+
+function kvR(k,v){return '<div class="rkv"><span>'+esc(k)+'</span><b>'+v+'</b></div>';}
+
+var ultimoScrape = null;
+
+function scrapear(){
+  var url=$("url").value.trim();
+  if(!url){$("status").textContent="⛔ Ingresá una URL primero.";$("status").className="status err";return;}
+  if(!$("chkAutorizado").checked){$("status").textContent="⛔ Confirmá primero que el sitio es tuyo o tenés autorización.";$("status").className="status err";return;}
+  if(!/^https?:\/\//i.test(url))url="https://"+url;
+  $("url").value=url;
+  var btn=$("btnScrape");btn.disabled=true;
+  $("status").textContent="🕸️ Scrapeando "+url+"... (contenido completo)";
+  $("status").className="status";
+  $("result").classList.add("hidden");
+  $("recon").classList.add("hidden");
+  $("toolbar").classList.add("hidden");
+  var sc=$("scrape");
+  sc.classList.remove("hidden");
+  sc.innerHTML='<div style="color:#00ff41"><span class="spin"></span>Extrayendo enlaces, imágenes, encabezados y texto...</div>';
+  $("lbar").classList.remove("hidden");
+  fetch("/api/scanner?url="+encodeURIComponent(url)+"&mode=scrape")
+  .then(function(r){return r.json();})
+  .then(function(d){
+    $("lbar").classList.add("hidden");
+    if(!d.ok){$("status").textContent="⛔ "+(d.error||"No se pudo scrapear la página.");$("status").className="status err";sc.classList.add("hidden");return;}
+    $("status").textContent="✅ Scrapeo de "+esc(d.url)+" completado";
+    $("status").className="status";
+    ultimoScrape=d;
+    renderScrape(d);
+  })
+  .catch(function(e){
+    $("lbar").classList.add("hidden");
+    $("status").textContent="⛔ Error al scrapear: "+e.message;
+    $("status").className="status err";
+  })
+  .finally(function(){btn.disabled=false;});
+}
+
+function renderScrape(d){
+  var ct=d.contenido||{};
+  var h="";
+  h+='<div class="rec-hero"><div class="u">🕸️ '+esc(d.titulo||d.url)+'</div>'+
+     '<div class="m">'+esc(d.url)+(d.idioma?' · idioma: '+esc(d.idioma):'')+
+     (ct.palabras?' · '+ct.palabras+' palabras (~'+ct.tiempo_lectura_min+' min de lectura)':'')+'</div></div>';
+
+  h+='<div class="toolbar" style="margin-bottom:10px">'+
+     '<button onclick="copiarTextoScrape()">📋 Copiar texto</button>'+
+     '<button onclick="exportarScrapeJSON()">⬇ Exportar JSON</button>'+
+     '<button onclick="exportarEnlacesCSV()">⬇ Enlaces (CSV)</button>'+
+     '</div>';
+
+  h+='<div class="rcard"><div class="rh">Metadatos</div>';
+  h+=kvR("Título",esc(d.titulo||"—"));
+  h+=kvR("Descripción",esc(d.descripcion||"—"));
+  if(d.canonical)h+=kvR("Canonical",esc(d.canonical));
+  if(d.favicon)h+=kvR("Favicon",'<a href="'+esc(d.favicon)+'" target="_blank" style="color:#00c8ff">ver</a>');
+  h+='</div>';
+
+  if((ct.encabezados||[]).length){
+    h+='<div class="rcard"><div class="rh">Estructura de encabezados ('+ct.encabezados.length+')</div>';
+    h+='<div class="rec-list">'+ct.encabezados.map(function(e){
+      return '<div style="margin-left:'+((e.nivel-1)*14)+'px"><b>H'+e.nivel+'</b> '+esc(e.texto)+'</div>';
+    }).join("")+'</div></div>';
+  }
+
+  h+='<div class="rcard"><div class="rh">Enlaces ('+(ct.enlaces||[]).length+' · '+(ct.enlaces_internos||0)+' internos / '+(ct.enlaces_externos||0)+' externos)</div>';
+  h+='<div class="rec-list">'+(ct.enlaces||[]).slice(0,80).map(function(l){
+    return '<div>'+(l.interno?'':'🌐 ')+'<b style="color:'+(l.interno?'#00ff41':'#7ec8f0')+'">'+esc(l.href)+'</b>'+(l.texto?' — '+esc(l.texto):'')+'</div>';
+  }).join("")+(ct.enlaces&&ct.enlaces.length>80?'<div style="color:rgba(200,214,229,.4);margin-top:4px">... y '+(ct.enlaces.length-80)+' más (exportá el CSV para verlos todos)</div>':'')+'</div></div>';
+
+  if((ct.imagenes||[]).length){
+    h+='<div class="rcard"><div class="rh">Imágenes ('+ct.imagenes.length+')</div>';
+    h+='<div class="rec-list">'+ct.imagenes.slice(0,40).map(function(im){
+      return '<div>'+esc(im.src)+(im.alt?' <span style="color:rgba(200,214,229,.4)">alt="'+esc(im.alt)+'"</span>':' <span class="warn">sin alt</span>')+'</div>';
+    }).join("")+'</div></div>';
+  }
+
+  if((ct.json_ld||[]).length){
+    h+='<div class="rcard"><div class="rh">Datos estructurados (JSON-LD) — '+ct.json_ld.length+' bloque(s)</div>';
+    h+='<div class="rec-list">'+esc(JSON.stringify(ct.json_ld,null,2)).slice(0,2000)+'</div></div>';
+  }
+
+  if(ct.texto_visible){
+    h+='<div class="rcard"><div class="rh">Texto visible (primeros '+ct.texto_visible.length+' caracteres)</div>';
+    h+='<div class="rec-list" style="max-height:220px;overflow:auto">'+esc(ct.texto_visible)+'</div></div>';
+  }
+
+  h+='<div style="text-align:right;font-size:.55em;color:rgba(200,214,229,.2);margin-top:6px">ZonaHack Scanner · Modo SCRAPER</div>';
+  $("scrape").innerHTML=h;
+}
+
+function copiarTextoScrape(){
+  if(!ultimoScrape)return;
+  var t=(ultimoScrape.contenido||{}).texto_visible||"";
+  (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(function(){
+    $("status").textContent="✅ Texto copiado al portapapeles";
+  }).catch(function(){ $("status").textContent="⛔ No se pudo copiar"; });
+}
+function exportarScrapeJSON(){
+  if(!ultimoScrape)return;
+  var host=(function(){try{return new URL(ultimoScrape.url).hostname;}catch(e){return "pagina";}})();
+  descargar("scrape_"+host.replace(/\./g,"_")+".json",JSON.stringify(ultimoScrape,null,2));
+}
+function exportarEnlacesCSV(){
+  if(!ultimoScrape)return;
+  var enlaces=(ultimoScrape.contenido||{}).enlaces||[];
+  var csv="href,texto,interno\n"+enlaces.map(function(l){
+    return '"'+l.href.replace(/"/g,'""')+'","'+(l.texto||"").replace(/"/g,'""')+'",'+(l.interno?"si":"no");
+  }).join("\n");
+  var host=(function(){try{return new URL(ultimoScrape.url).hostname;}catch(e){return "pagina";}})();
+  descargar("enlaces_"+host.replace(/\./g,"_")+".csv",csv);
+}
+
+function analizarConIA(){
+  if(!ultimoReporte)return;
+  var btn=$("btnIA"),box=$("iaBox");
+  btn.disabled=true;btn.textContent="🤖 Analizando...";
+  box.classList.remove("hidden");
+  box.innerHTML="";log2(box,">>> Consultando a Claude (esto puede tardar unos segundos)...");
+  fetch("/api/scanner?url="+encodeURIComponent(ultimoReporte.url)+"&ia=1")
+  .then(function(r){return r.json();})
+  .then(function(d){
+    box.innerHTML="";
+    if(d.analisis_ia){
+      if(d.analisis_aviso) log2(box,"ℹ️ "+d.analisis_aviso,"warn");
+      else if(d.modelo_usado) log2(box,">>> Modelo: "+d.modelo_usado);
+      log2(box,d.analisis_ia,"ok");
+    } else if(d.analisis_error){
+      log2(box,"⛔ "+d.analisis_error,"bad");
+    } else {
+      log2(box,"⛔ No se pudo obtener el análisis de la IA.","bad");
+    }
+  })
+  .catch(function(e){
+    box.innerHTML="";log2(box,"⛔ Error: "+e.message,"bad");
+  })
+  .finally(function(){btn.disabled=false;btn.textContent="🤖 Analizar con Claude";});
+}
+function log2(box,txt,cls){
+  var d=document.createElement("div");d.className=cls||"p";d.textContent=txt;box.appendChild(d);
+}
+
+function cambiarTab(name,btn){
+  document.querySelectorAll(".tabpane").forEach(function(p){p.classList.remove("active");});
+  document.querySelectorAll(".tabs button").forEach(function(b){b.classList.remove("active");});
+  $("pane-"+name).classList.add("active");
+  btn.classList.add("active");
+}
+
+function mostrarResultado(d,diff){
+  var sc=d.score||0;
+  var color=sc>=80?"#00ff41":(sc>=60?"#f1c40f":(sc>=40?"#e67e22":"#e74c3c"));
+  $("status").textContent="✅ Escaneo de "+d.host+" completado · "+d.checks_total+" checks · Nivel: "+d.nivel;
+  $("status").className="status";
+  $("toolbar").classList.remove("hidden");
+
+  var h="";
+  h+='<div class="result-head"><span class="url">'+esc(d.url)+'</span>';
+  h+='<span class="score" style="color:'+color+'">'+sc+'/100<small>'+esc(d.nivel)+'</small></span></div>';
+
+  // Tabs
+  h+='<div class="tabs">';
+  h+='<button class="active" onclick="cambiarTab(\'resumen\',this)">📊 Resumen</button>';
+  h+='<button onclick="cambiarTab(\'hallazgos\',this)">🚨 Hallazgos ('+(d.findings||[]).length+')</button>';
+  h+='<button onclick="cambiarTab(\'detalles\',this)">🔍 Detalles</button>';
+  h+='</div>';
+
+  // ─── Resumen ───
+  h+='<div class="tabpane active" id="pane-resumen">';
+
+  if(diff&&(diff.nuevos.length||diff.resueltos.length)){
+    var fecha=new Date(diff.fechaAnterior).toLocaleString('es-AR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+    h+='<div class="rcard"><div class="rh">🆚 Comparado con el escaneo del '+fecha+' (score '+diff.scoreAnterior+' → '+sc+')</div>';
+    if(diff.nuevos.length){
+      h+='<div style="color:#e74c3c;font-size:.66em;margin-bottom:4px">🆕 '+diff.nuevos.length+' hallazgo(s) nuevo(s) desde entonces:</div>';
+      h+='<div class="rec-list" style="margin-bottom:8px">'+diff.nuevos.map(function(f){
+        return '<div>['+esc((f.sev||"").toUpperCase())+'] '+esc(f.tipo)+'</div>';
+      }).join("")+'</div>';
+    }
+    if(diff.resueltos.length){
+      h+='<div style="color:#2ecc71;font-size:.66em;margin-bottom:4px">✅ '+diff.resueltos.length+' resuelto(s) desde la última vez:</div>';
+      h+='<div class="rec-list">'+diff.resueltos.map(function(f){
+        return '<div>['+esc((f.sev||"").toUpperCase())+'] '+esc(f.tipo)+'</div>';
+      }).join("")+'</div>';
+    }
+    h+='</div>';
+  }
+
+  h+='<div class="metrics">';
+  h+='<div><b>'+sc+'</b><span>SCORE</span></div>';
+  h+='<div'+(d.waf?' class="warn"':'')+'><b>'+(d.waf?"WAF":"—")+'</b><span>PROTECCIÓN</span></div>';
+  h+='<div><b>'+esc(d.ip||"—")+'</b><span>IP</span></div>';
+  h+='<div><b>'+esc(d.server||"—")+'</b><span>SERVIDOR</span></div>';
+  h+='<div><b>'+(d.respuesta_ms!=null?d.respuesta_ms+"ms":"—")+'</b><span>RESPUESTA</span></div>';
+  h+='<div><b>'+esc(d.tls_version||"—")+'</b><span>TLS</span></div>';
+  h+='</div>';
+
+  h+='<div class="checks">';
+  (d.checks_realizados||[]).forEach(function(c){
+    h+='<span class="chk on">✓ '+esc(c)+'</span>';
+  });
+  h+='</div>';
+
+  h+='<h3 style="color:#00ff41;font-size:.7em;margin:8px 0 6px;letter-spacing:1px">🚨 HALLAZGOS POR SEVERIDAD</h3>';
+  var sevs={"critica":0,"alta":0,"media":0,"baja":0};
+  (d.findings||[]).forEach(function(f){sevs[f.sev]=(sevs[f.sev]||0)+1;});
+  h+='<div class="metrics">';
+  h+='<div class="bad"><b>'+sevs.critica+'</b><span>CRÍTICOS</span></div>';
+  h+='<div class="bad"><b>'+sevs.alta+'</b><span>ALTOS</span></div>';
+  h+='<div class="warn"><b>'+sevs.media+'</b><span>MEDIOS</span></div>';
+  h+='<div><b>'+sevs.baja+'</b><span>BAJOS</span></div>';
+  h+='</div>';
+  h+='</div>';
+
+  // ─── Hallazgos ───
+  h+='<div class="tabpane" id="pane-hallazgos">';
+  if(d.findings&&d.findings.length){
+    d.findings.forEach(function(f){
+      h+='<div class="finding sev-'+esc(f.sev)+'"><span class="sev">'+esc(f.sev.toUpperCase())+'</span>';
+      h+='<span><b>'+esc(f.tipo)+'</b> — '+esc(f.desc)+'</span></div>';
+    });
+  }else{
+    h+='<div class="finding sev-baja"><span class="sev">OK</span><span>No se encontraron vulnerabilidades pasivas.</span></div>';
+  }
+  h+='</div>';
+
+  // ─── Detalles ───
+  h+='<div class="tabpane" id="pane-detalles">';
+  h+='<div class="meta">';
+  h+='<div><b>URL FINAL</b>'+esc(d.final_url||"—")+'</div>';
+  h+='<div><b>HTTP STATUS</b>'+esc(d.version||"—")+'</div>';
+  h+='<div><b>RUTAS CHEQUEADAS</b>'+esc(d.rutas_chequeadas||0)+'</div>';
+  h+='<div><b>CHECKS REALIZADOS</b>'+esc(d.checks_total||0)+'</div>';
+  if(d.tecnologias&&d.tecnologias.length)h+='<div><b>TECNOLOGÍAS</b>'+esc(d.tecnologias.join(", "))+'</div>';
+  if(d.cert&&d.cert.presente){
+    h+='<div><b>CERT EXPIRA</b>'+esc(d.cert.expira||"—")+'</div>';
+    h+='<div><b>CERT DÍAS</b>'+(d.cert.dias_restantes!=null?d.cert.dias_restantes+" días":"—")+'</div>';
+  }
+  if(d.cert&&d.cert.emisor){
+    try{
+      var e=d.cert.emisor;
+      var org=e.filter(function(x){return x[0][0]==="organizationName";});
+      if(org.length)h+='<div><b>EMISOR</b>'+esc(org[0][0][1])+'</div>';
+    }catch(ex){}
+  }
+  h+='</div>';
+
+  if(d.contenido){
+    var ct=d.contenido;
+    h+='<h3 style="color:#00ff41;font-size:.7em;margin:12px 0 6px;letter-spacing:1px">🕸️ CONTENIDO SCRAPEADO</h3>';
+    h+='<div class="meta">';
+    h+='<div><b>TÍTULO</b>'+esc(ct.titulo||"—")+'</div>';
+    h+='<div><b>DESCRIPCIÓN</b>'+esc(ct.descripcion||"—")+'</div>';
+    h+='<div><b>IDIOMA</b>'+esc(ct.idioma||"—")+'</div>';
+    h+='<div><b>FAVICON</b>'+(ct.favicon?'<a href="'+esc(ct.favicon)+'" target="_blank" style="color:#00c8ff">ver</a>':"—")+'</div>';
+    if(ct.estadisticas){
+      h+='<div><b>ENLACES / IMÁGENES</b>'+esc(ct.estadisticas.enlaces)+' / '+esc(ct.estadisticas.imagenes)+'</div>';
+      h+='<div><b>PALABRAS APROX.</b>'+esc(ct.estadisticas.palabras_aprox)+'</div>';
+    }
+    if(ct.open_graph&&ct.open_graph.site_name)h+='<div><b>OPEN GRAPH</b>'+esc(ct.open_graph.site_name)+'</div>';
+    h+='</div>';
+  }
+
+  h+='<h3 style="color:#00ff41;font-size:.7em;margin:12px 0 6px;letter-spacing:1px">📋 HEADERS RECIBIDOS</h3>';
+  var hd=0;
+  try{hd=Object.keys(d.headers||{}).length;}catch(e){}
+  if(hd){
+    Object.keys(d.headers).forEach(function(k){
+      h+='<div class="hall"><b>'+esc(k)+':</b> '+esc(d.headers[k])+'</div>';
+    });
+  }else{
+    h+='<div class="hall">Sin headers disponibles (WAF/challenge).</div>';
+  }
+  h+='<div style="margin-top:12px;text-align:right;font-size:.55em;color:rgba(200,214,229,.2)">ZonaHack Scanner v2 · Análisis pasivo</div>';
+  h+='</div>';
+
+  h+='</div>';
+  $("result").innerHTML=h;
+  $("result").classList.remove("hidden");
+}
+
+function exportarTXT(){
+  if(!ultimoReporte)return;
+  var d=ultimoReporte;
+  var txt="ZONAHACK SCANNER v2 - REPORTE\n==============================\n";
+  txt+="URL: "+d.url+"\nHost: "+d.host+"\nFecha: "+d.escaneado+"\nScore: "+d.score+"/100 ("+d.nivel+")\n";
+  txt+="IP: "+(d.ip||"—")+"\nServer: "+(d.server||"—")+"\nTLS: "+(d.tls_version||"—")+"\nChecks: "+d.checks_total+"\n\n";
+  txt+="== HALLAZGOS ==\n";
+  (d.findings||[]).forEach(function(f){txt+="["+f.sev.toUpperCase()+"] "+f.tipo+": "+f.desc+"\n";});
+  txt+="\n== CHECKLIST ==\n";
+  (d.checks_realizados||[]).forEach(function(c){txt+="[X] "+c+"\n";});
+  descargar("reporte_"+d.host.replace(/\./g,"_")+".txt",txt);
+}
+
+function exportarJSON(){
+  if(!ultimoReporte)return;
+  descargar("reporte_"+ultimoReporte.host.replace(/\./g,"_")+".json",JSON.stringify(ultimoReporte,null,2));
+}
+
+function copiarReporte(){
+  if(!ultimoReporte)return;
+  var d=ultimoReporte;
+  var t="[ZonaHack Scanner] "+d.url+" → "+d.score+"/100 ("+d.nivel+") | "+(d.findings||[]).length+" hallazgos";
+  (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(function(){
+    $("status").textContent="✅ Reporte copiado al portapapeles";
+  }).catch(function(){
+    $("status").textContent="⛔ No se pudo copiar";
+  });
+}
+
+function descargar(nombre,contenido){
+  var blob=new Blob([contenido],{type:"text/plain;charset=utf-8"});
+  var a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download=nombre;
+  document.body.appendChild(a);a.click();
+  setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(a.href);},300);
+}
+
+$("url").addEventListener("keydown",function(e){if(e.key==="Enter")escanear();});
+cargarHistorial();
+</script>
+<script src="/errores.js" defer></script>
+<script src="/update_check.js" defer></script>
+</body>
+</html>

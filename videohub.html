@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>🎬 VideoHub - Catálogo Legal</title>
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/icon_96.png" type="image/png">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Courier New',Courier,monospace;background:#0a0a0a;color:#c8d6e5;min-height:100vh}
+::-webkit-scrollbar{width:6px;background:#0a0a0a}
+::-webkit-scrollbar-thumb{background:rgba(0,255,65,.15);border-radius:3px}
+.header{background:#0a0a0a;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(0,255,65,.1);position:sticky;top:0;z-index:100}
+.header h1{font-size:1.15em;color:#00ff41;text-shadow:0 0 8px rgba(0,255,65,.2)}
+.header .sub{font-size:.6em;color:rgba(0,255,65,.4);letter-spacing:1px;margin-top:2px}
+.back-btn{color:#00ff41;text-decoration:none;font-size:.85em;padding:6px 10px;border-radius:4px;border:1px solid rgba(0,255,65,.15);transition:.2s}
+.back-btn:hover{box-shadow:0 0 8px rgba(0,255,65,.15)}
+.admin-btn{color:#f1c40f;text-decoration:none;font-size:.72em;padding:6px 10px;border-radius:4px;border:1px solid rgba(241,196,15,.2);transition:.2s;display:none}
+.admin-btn:hover{box-shadow:0 0 8px rgba(241,196,15,.15)}
+.container{max-width:1200px;margin:0 auto;padding:12px}
+.hero{background:#0d0d0d;border:1px solid rgba(0,255,65,.08);border-radius:4px;padding:16px 20px;margin-bottom:14px}
+.hero h2{font-size:1.15em;color:#00ff41;text-shadow:0 0 6px rgba(0,255,65,.15)}
+.hero p{color:#00ff41;font-size:.78em;margin-top:4px;opacity:.55;line-height:1.5}
+.tabs{display:flex;gap:4px;margin-bottom:12px;flex-wrap:wrap}
+.tab{flex:1;min-width:80px;padding:8px 0;text-align:center;border:1px solid rgba(0,255,65,.08);background:rgba(0,255,65,.02);color:#00ff41;border-radius:4px;font-size:.7em;cursor:pointer;transition:.2s;opacity:.6}
+.tab:hover{opacity:1;border-color:rgba(0,255,65,.25);box-shadow:0 0 8px rgba(0,255,65,.05)}
+.tab.active{background:rgba(0,255,65,.08);border-color:#00ff41;opacity:1;font-weight:bold;text-shadow:0 0 6px rgba(0,255,65,.15)}
+.tab-content{display:none}
+.tab-content.active{display:block}
+.filters{background:#0d0d0d;border:1px solid rgba(0,255,65,.06);border-radius:4px;padding:10px;margin-bottom:12px}
+.search-box{display:flex;gap:6px;margin-bottom:10px}
+.search-box input{flex:1;padding:9px 12px;border:1px solid rgba(0,255,65,.15);border-radius:4px;background:#0a0a0a;color:#00ff41;font-size:.82em;outline:none;font-family:'Courier New',monospace}
+.search-box input:focus{border-color:#00ff41;box-shadow:0 0 8px rgba(0,255,65,.08)}
+.search-box input::placeholder{color:rgba(0,255,65,.2)}
+.search-box button{padding:9px 16px;border:1px solid #00ff41;border-radius:4px;background:rgba(0,255,65,.08);color:#00ff41;cursor:pointer;font-size:.75em;font-family:'Courier New',monospace;transition:.2s}
+.search-box button:hover{background:rgba(0,255,65,.15);box-shadow:0 0 10px rgba(0,255,65,.1)}
+.filter-row{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.filter-row select{padding:6px 8px;border:1px solid rgba(0,255,65,.12);border-radius:4px;background:#0a0a0a;color:#00ff41;font-size:.7em;font-family:'Courier New',monospace;outline:none}
+.chip{padding:4px 10px;border:1px solid rgba(0,255,65,.08);border-radius:14px;background:rgba(0,255,65,.03);color:rgba(0,255,65,.55);cursor:pointer;font-size:.62em;font-family:'Courier New',monospace;transition:.2s}
+.chip:hover{color:#00ff41;border-color:rgba(0,255,65,.2)}
+.chip.active{background:rgba(0,255,65,.1);border-color:#00ff41;color:#00ff41;text-shadow:0 0 6px rgba(0,255,65,.15)}
+.genre-row{display:flex;gap:4px;flex-wrap:wrap;margin-top:8px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
+.movie-card{border-radius:4px;overflow:hidden;background:#0d0d0d;cursor:pointer;transition:transform .2s;border:1px solid rgba(0,255,65,.06);position:relative}
+.movie-card:hover{transform:translateY(-3px);border-color:rgba(0,255,65,.2);box-shadow:0 0 12px rgba(0,255,65,.05)}
+.movie-card img{width:100%;aspect-ratio:2/3;object-fit:cover;display:block;background:#0a0a0a}
+.movie-card .noimg{width:100%;aspect-ratio:2/3;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#0d1524,#0a0d0f);color:rgba(0,255,65,.25);font-size:2em}
+.movie-card .info{padding:7px}
+.movie-card .title{font-size:.7em;color:#c8d6e5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.3;min-height:1.9em}
+.movie-card .meta{font-size:.6em;color:rgba(0,255,65,.5);margin-top:3px;display:flex;gap:5px;flex-wrap:wrap}
+.movie-card .badge{position:absolute;top:5px;left:5px;font-size:.55em;padding:2px 6px;border-radius:3px;background:rgba(0,0,0,.75);color:#00ff41;border:1px solid rgba(0,255,65,.2)}
+.movie-card .prog{height:3px;background:#1a1f42;margin:6px 6px 0;border-radius:2px;overflow:hidden}
+.movie-card .prog span{display:block;height:100%;background:#00ff41;box-shadow:0 0 4px rgba(0,255,65,.4)}
+.section-title{font-size:.8em;color:#00ff41;margin:14px 0 8px;display:flex;align-items:center;gap:6px;opacity:.75;text-transform:uppercase;letter-spacing:1px}
+.section-title span{color:rgba(0,255,65,.4);text-transform:none;font-size:.7em}
+.loading{text-align:center;padding:40px;color:rgba(0,255,65,.4);font-size:.82em;font-family:'Courier New',monospace;grid-column:1/-1}
+.loading::after{content:'';display:block;width:20px;height:20px;margin:10px auto;border:1px solid rgba(0,255,65,.1);border-top-color:#00ff41;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty{text-align:center;padding:45px 10px;color:rgba(0,255,65,.3);font-size:.8em;grid-column:1/-1}
+.pager{display:flex;gap:6px;justify-content:center;align-items:center;margin:14px 0}
+.pager button{padding:6px 14px;border:1px solid rgba(0,255,65,.15);border-radius:4px;background:rgba(0,255,65,.04);color:#00ff41;cursor:pointer;font-size:.68em;font-family:'Courier New',monospace}
+.pager button:hover{background:rgba(0,255,65,.1)}
+.pager button:disabled{opacity:.3;cursor:default}
+.pager span{font-size:.68em;color:rgba(0,255,65,.5)}
+/* MODAL */
+.modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.88);z-index:200;overflow-y:auto;padding:20px}
+.modal-overlay.open{display:block}
+.modal{background:#0d0d0d;border:1px solid rgba(0,255,65,.12);border-radius:6px;max-width:760px;margin:20px auto;overflow:hidden;animation:slideUp .3s;position:relative}
+@keyframes slideUp{from{transform:translateY(40px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-backdrop{width:100%;aspect-ratio:16/6;object-fit:cover;background:#0a0a0a;display:block}
+.modal-noback{width:100%;aspect-ratio:16/6;background:linear-gradient(180deg,#0d1524,#0a0d0f);display:flex;align-items:center;justify-content:center;color:rgba(0,255,65,.15);font-size:3em}
+.modal-body{padding:16px}
+.modal-title{font-size:1.15em;color:#00ff41;margin-bottom:2px;text-shadow:0 0 6px rgba(0,255,65,.1)}
+.modal-close{position:absolute;top:10px;right:10px;background:rgba(0,0,0,.7);border:1px solid rgba(0,255,65,.2);color:#00ff41;font-size:1.1em;cursor:pointer;padding:2px 10px;border-radius:4px;z-index:5}
+.modal-meta{display:flex;gap:8px;flex-wrap:wrap;font-size:.72em;margin:8px 0}
+.modal-meta .badge{padding:3px 8px;border-radius:3px;border:1px solid rgba(0,255,65,.12);color:#00ff41}
+.modal-meta .badge.rating{border-color:rgba(241,196,15,.3);color:#f1c40f}
+.modal-desc{font-size:.76em;color:rgba(200,214,229,.65);line-height:1.6;margin-bottom:10px;max-height:110px;overflow-y:auto}
+.modal-genres{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:12px}
+.modal-genres .g{padding:2px 8px;border-radius:3px;border:1px solid rgba(0,255,65,.08);color:#00ff41;font-size:.66em}
+.modal-btns{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.btn{padding:9px 16px;border-radius:4px;border:1px solid rgba(0,255,65,.2);background:rgba(0,255,65,.07);color:#00ff41;cursor:pointer;font-size:.72em;font-family:'Courier New',monospace;transition:.2s}
+.btn:hover{background:rgba(0,255,65,.15);box-shadow:0 0 10px rgba(0,255,65,.08)}
+.btn.play{border-color:#00ff41;background:rgba(0,255,65,.12)}
+.btn.fav.active{border-color:rgba(231,76,60,.5);color:#ff5b5b;background:rgba(231,76,60,.1)}
+.btn.fav.active:hover{background:rgba(231,76,60,.2)}
+.btn:disabled{opacity:.35;cursor:default;box-shadow:none}
+.src-line{font-size:.62em;color:rgba(0,255,65,.4);margin-top:8px;border-top:1px solid rgba(0,255,65,.06);padding-top:8px}
+.src-line b{color:#00ff41}
+/* PLAYER */
+.player-wrap{margin-top:10px;background:#000;border:1px solid rgba(0,255,65,.15);border-radius:4px;overflow:hidden}
+.player-wrap video{width:100%;display:block;max-height:430px;background:#000}
+.player-wrap iframe{width:100%;height:430px;border:0;display:block}
+.no-source{text-align:center;padding:28px 12px;color:rgba(0,255,65,.4);font-size:.8em;border:1px dashed rgba(0,255,65,.15);border-radius:4px;margin-top:10px}
+.no-source .big{font-size:1.6em;color:rgba(0,255,65,.25);display:block;margin-bottom:8px}
+/* HISTORIAL */
+.hlist{display:flex;flex-direction:column;gap:6px}
+.hitem{display:flex;gap:8px;background:#0d0d0d;border:1px solid rgba(0,255,65,.05);border-radius:4px;padding:8px;align-items:center}
+.hitem img{width:50px;height:75px;object-fit:cover;border-radius:2px;background:#0a0a0a}
+.hitem .noimg{width:50px;height:75px;display:flex;align-items:center;justify-content:center;background:#0d1524;color:rgba(0,255,65,.2);font-size:1.4em;border-radius:2px}
+.hitem .info{flex:1;overflow:hidden}
+.hitem .t{font-size:.72em;color:#c8d6e5;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hitem .bar{height:3px;background:#1a1f42;border-radius:2px;margin:4px 0}
+.hitem .bar span{display:block;height:100%;background:#00ff41;border-radius:2px}
+.hitem .meta{font-size:.6em;color:rgba(0,255,65,.4)}
+.hitem button{padding:4px 8px;border:1px solid rgba(0,255,65,.1);border-radius:3px;background:transparent;color:#00ff41;font-size:.58em;cursor:pointer;font-family:'Courier New',monospace;white-space:nowrap}
+.hitem button:hover{background:rgba(0,255,65,.1)}
+.hitem button.del:hover{color:#ff5b5b;border-color:rgba(231,76,60,.3)}
+.note{text-align:center;color:rgba(0,255,65,.3);font-size:.6em;margin-top:16px;line-height:1.6;border-top:1px solid rgba(0,255,65,.05);padding-top:12px}
+@media(min-width:768px){.grid{grid-template-columns:repeat(auto-fill,minmax(155px,1fr))}}
+@media(max-width:480px){.container{padding:6px}.grid{grid-template-columns:repeat(3,1fr);gap:5px}.modal-overlay{padding:8px}.modal{margin:8px auto}.player-wrap iframe{height:220px}}
+</style>
+</head>
+<body>
+<div class="header">
+  <a href="/" class="back-btn">← Volver</a>
+  <div style="text-align:center">
+    <h1>🎬 VideoHub</h1>
+    <div class="sub">CATALOGO LEGAL · SOLO FUENTES AUTORIZADAS</div>
+  </div>
+  <a href="/videohub_admin.html" class="admin-btn" id="adminBtn">👑 Admin</a>
+</div>
+<div class="container">
+  <div class="hero">
+    <h2>🎬 Películas con reproducción legal</h2>
+    <p>Catálogo con metadatos de fuentes oficiales (TMDB) y reproducción únicamente desde proveedores que autorizan el embed/playback (dominio público, CC, contenido propio).</p>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" id="tabBtnCatalog" onclick="switchTab('catalog')">🎞 Catálogo</button>
+    <button class="tab" id="tabBtnContinue" onclick="switchTab('continue')">⏯ Continuar</button>
+    <button class="tab" id="tabBtnFavs" onclick="switchTab('favs')">❤ Favoritos</button>
+    <button class="tab" id="tabBtnHistory" onclick="switchTab('history')">📺 Historial</button>
+  </div>
+
+  <div id="tab-catalog" class="tab-content active">
+    <div class="filters">
+      <div class="search-box">
+        <input id="searchInput" placeholder="Buscar películas..." oninput="onSearch()">
+        <button onclick="search()">Buscar</button>
+      </div>
+      <div class="filter-row">
+        <select id="yearFilter" onchange="applyFilters()"><option value="">Año: Todos</option></select>
+        <select id="catFilter" onchange="applyFilters()"><option value="">Categoría: Todas</option></select>
+      </div>
+      <div class="genre-row" id="genreRow"></div>
+    </div>
+    <div class="grid" id="catalogGrid"><div class="loading">Cargando catálogo...</div></div>
+    <div class="pager" id="pager" style="display:none">
+      <button onclick="changePage(-1)" id="prevBtn">←</button>
+      <span id="pageInfo"></span>
+      <button onclick="changePage(1)" id="nextBtn">→</button>
+    </div>
+  </div>
+
+  <div id="tab-continue" class="tab-content">
+    <div class="section-title">⏯ Continuar viendo <span>retomá donde quedaste</span></div>
+    <div class="hlist" id="continueList"><div class="loading">Cargando...</div></div>
+  </div>
+
+  <div id="tab-favs" class="tab-content">
+    <div class="section-title">❤ Tus favoritos</div>
+    <div class="grid" id="favsGrid"><div class="loading">Cargando...</div></div>
+  </div>
+
+  <div id="tab-history" class="tab-content">
+    <div class="section-title">📺 Historial</div>
+    <div class="hlist" id="historyList"><div class="loading">Cargando...</div></div>
+  </div>
+
+  <div class="note">VideoHub solo reproduce contenido cuyo proveedor autoriza explícitamente el playback o embedding.<br>
+  No descargamos películas de sitios externos, no buscamos enlaces ocultos y no evadimos DRM ni paywalls.</div>
+</div>
+
+<!-- MODAL DETALLE -->
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div id="modalBackdrop"></div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+var SB="https://xfwolaurpeofysnymqle.supabase.co";
+var KEY="sb_publishable_3VvBUD5Bdu3Uaq59fJ99MQ_XDCtujUU";
+var API="/api/videohub";
+var USER=localStorage.getItem("vh_usuario")||"";
+if(!USER){USER="user_"+Date.now().toString(36).slice(-4);localStorage.setItem("vh_usuario",USER);}
+var currentTab="catalog";
+var currentGenre="";
+var page=1;var totalPages=1;
+var loadedDetail=null;
+var saveTimer=null;
+var hlsInst=null;
+
+function esc(s){return (s||"").replace(/[&<>"']/g,z=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[z]);}
+function apiGet(params){return fetch(API+"?"+new URLSearchParams(params)).then(r=>r.json().catch(()=>({})));}
+function apiPost(action,data){return fetch(API+"?"+new URLSearchParams({action:action}),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(data)}).then(r=>r.json().catch(()=>({})));}
+function switchTab(t){currentTab=t;document.querySelectorAll(".tab").forEach(b=>b.classList.remove("active"));document.getElementById("tabBtn"+t.charAt(0).toUpperCase()+t.slice(1)).classList.add("active");document.querySelectorAll(".tab-content").forEach(c=>c.classList.remove("active"));document.getElementById("tab-"+t).classList.add("active");if(t==="catalog")loadCatalog();if(t==="continue")loadContinue();if(t==="favs")loadFavs();if(t==="history")loadHistory();}
+
+// ─── CATALOGO ───
+function onSearch(){clearTimeout(onSearch._t);onSearch._t=setTimeout(search,450);}
+function search(){page=1;loadCatalog();}
+function applyFilters(){page=1;loadCatalog();}
+function selectGenre(g){
+  currentGenre=(currentGenre===g)?"":g;
+  document.querySelectorAll(".chip").forEach(c=>c.classList.toggle("active",c.dataset.g===currentGenre));
+  page=1;loadCatalog();
+}
+function changePage(d){page+=d;loadCatalog();}
+
+function loadCatalog(){
+  var grid=document.getElementById("catalogGrid");
+  grid.innerHTML='<div class="loading">Cargando catálogo...</div>';
+  var params={action:"catalog",page:page,per_page:24};
+  var q=document.getElementById("searchInput").value.trim();
+  if(q)params.q=q;
+  if(currentGenre)params.genre=currentGenre;
+  var year=document.getElementById("yearFilter").value;
+  if(year)params.year=year;
+  var cat=document.getElementById("catFilter").value;
+  if(cat)params.category=cat;
+  apiGet(params).then(function(d){
+    var movies=(d.movies||[]).map(withProgress);
+    if(!movies.length){grid.innerHTML='<div class="empty">📭 No hay películas que coincidan<br><small style="color:rgba(0,255,65,.2)">Probá otra búsqueda o quitá filtros</small></div>';return;}
+    grid.innerHTML=movies.map(movieCard).join("");
+    var pager=document.getElementById("pager");
+    if((d.page||1)&&d.movies&&d.movies.length>=24){pager.style.display="flex";totalPages=d.page+1;}
+    else{pager.style.display="none";}
+    document.getElementById("pageInfo").textContent="Página "+page;
+  }).catch(function(){grid.innerHTML='<div class="empty">⚠ Error al cargar. <br><small>¿El servidor /api/videohub está activo?</small></div>';});
+}
+
+function movieCard(m){
+  var src=m.poster?'<img src="'+esc(m.poster)+'" loading="lazy" onerror="this.outerHTML=`<div class=noimg>🎬</div>`">':'<div class="noimg">🎬</div>';
+  var badge=(m._prog&&m._prog>0&&m._prog<95)?'<div class="badge">▶ '+m._prog+'%</div>':'';
+  var prog=(m._prog&&m._prog>0&&m._prog<95)?'<div class="prog"><span style="width:'+m._prog+'%"></span></div>':'';
+  return '<div class="movie-card" onclick="openMovie('+m.id+')">'+src+badge+
+    '<div class="info"><div class="title">'+esc(m.title)+'</div>'+
+    '<div class="meta"><span>'+(m.year||'')+'</span>'+(m.duration?'<span>'+m.duration+' min</span>':'')+'</div></div>'+prog+'</div>';
+}
+
+// ─── FILTROS (géneros, categorías, años) ───
+function loadFilters(){
+  apiGet({action:"genres"}).then(function(d){
+    var row=document.getElementById("genreRow");
+    var genres=(d.genres||[]).map(g=>g.name).filter(Boolean);
+    row.innerHTML='<button class="chip'+(currentGenre===""?" active":"")+'" data-g="" onclick="selectGenre(\'\')">Todos</button>'+
+      genres.map(g=>'<button class="chip" data-g="'+esc(g)+'" onclick="selectGenre(\''+esc(g).replace(/'/g,"\\'")+'\')">'+esc(g)+'</button>').join("");
+  });
+  apiGet({action:"categories"}).then(function(d){
+    var sel=document.getElementById("catFilter");
+    var cats=(d.categories||[]).map(c=>c.name).filter(Boolean);
+    sel.innerHTML='<option value="">Categoría: Todas</option>'+cats.map(c=>'<option value="'+esc(c)+'">'+esc(c)+'</option>').join("");
+  });
+  var ySel=document.getElementById("yearFilter");
+  var y=new Date().getFullYear();var opts='<option value="">Año: Todos</option>';
+  for(var i=y;i>=1900;i--)opts+='<option value="'+i+'">'+i+'</option>';
+  ySel.innerHTML=opts;
+}
+
+// ─── CONTINUAR VIENDO / HISTORIAL / FAVORITOS ───
+function loadContinue(){
+  var el=document.getElementById("continueList");
+  apiGet({action:"continue_watching",usuario_id:USER}).then(function(d){
+    var movies=(d.movies||[]).map(withProgress);
+    if(!movies.length){el.innerHTML='<div class="empty">⏯ Nada en progreso.<br><small>Reproducí una película y continuará acá</small></div>';return;}
+    el.innerHTML=movies.map(hItem).join("");
+  });
+}
+function loadHistory(){
+  var el=document.getElementById("historyList");
+  apiGet({action:"history",usuario_id:USER}).then(function(d){
+    var movies=(d.movies||[]).map(withProgress);
+    if(!movies.length){el.innerHTML='<div class="empty">📭 Historial vacío</div>';return;}
+    el.innerHTML=movies.map(hItem).join("");
+  });
+}
+function loadFavs(){
+  var el=document.getElementById("favsGrid");
+  apiGet({action:"favorites",usuario_id:USER}).then(function(d){
+    var movies=(d.movies||[]).map(withProgress);
+    if(!movies.length){el.innerHTML='<div class="empty">❤ Todavía no tenés favoritos.<br><small>Usá el botón ❤ en cualquier película</small></div>';return;}
+    el.innerHTML=movies.map(movieCard).join("");
+  });
+}
+function withProgress(m){
+  if(m.movie_history&&m.movie_history.length){m._prog=m.movie_history[0].progress||0;m._last=m.movie_history[0].last_watched;}
+  return m;
+}
+function hItem(m){
+  var thumb=m.poster?'<img src="'+esc(m.poster)+'" loading="lazy">':'<div class="noimg">🎬</div>';
+  var prog=m._prog||0;
+  return '<div class="hitem">'+thumb+'<div class="info"><div class="t">'+esc(m.title)+'</div>'+
+    '<div class="bar"><span style="width:'+prog+'%"></span></div>'+
+    '<div class="meta">'+prog+'% · '+(m._last?relTime(m._last):'')+'</div></div>'+
+    '<button onclick="openMovie('+m.id+')">▶ Ver</button></div>';
+}
+function relTime(d){var s=Math.floor((new Date()-new Date(d))/1000),m=Math.floor(s/60),h=Math.floor(m/60),dd=Math.floor(h/24);if(dd>30)return new Date(d).toLocaleDateString();if(dd>0)return "hace "+dd+"d";if(h>0)return "hace "+h+"h";if(m>0)return "hace "+m+"m";return "ahora";}
+
+// ─── DETALLE ───
+function openMovie(id){
+  apiGet({action:"movie",id:id,usuario_id:USER}).then(function(d){
+    if(!d.movie){alert("Película no encontrada");return;}
+    loadedDetail=d;
+    var m=d.movie;
+    var back=m.backdrop?'<img class="modal-backdrop" src="'+esc(m.backdrop)+'" onerror="this.outerHTML=`<div class=modal-noback>🎬</div>`">':'<div class="modal-noback">🎬</div>';
+    var genres=(m.genres||[]).map(g=>'<span class="g">'+esc(g)+'</span>').join("");
+    var srcInfo=d.sources.filter(s=>s.authorized&&s.active).length
+      ?'<div class="src-line">✅ <b>'+d.sources.filter(s=>s.authorized&&s.active).length+'</b> fuente(s) autorizada(s) para reproducir</div>'
+      :'<div class="src-line">🔒 Sin fuentes autorizadas para reproducción</div>';
+    var playBtn='<button class="btn play" onclick="playMovie()">▶ Reproducir</button>';
+    document.getElementById("modalBody").innerHTML=
+      '<div class="modal-title">'+esc(m.title)+'</div>'+
+      '<div class="modal-meta">'+
+        '<span class="badge">📅 '+(m.year||"—")+'</span>'+
+        (m.duration?'<span class="badge">⏱ '+m.duration+' min</span>':'')+
+        (m.rating?'<span class="badge rating">★ '+m.rating+'</span>':'')+
+        (m.category?'<span class="badge">🏷 '+esc(m.category)+'</span>':'')+
+      '</div>'+
+      '<div class="modal-genres">'+genres+'</div>'+
+      '<div class="modal-desc">'+(esc(m.description)||'<i style="opacity:.4">Sin descripción.</i>')+'</div>'+
+      '<div class="modal-btns">'+playBtn+'<button class="btn fav'+(d.favorite?' active':'')+'" id="favBtn" onclick="toggleFav('+m.id+')">'+(d.favorite?'❤ Favorito':'🤍 Favorito')+'</button></div>'+
+      srcInfo+
+      '<div id="playerSlot"></div>';
+    document.getElementById("modalBackdrop").innerHTML=back;
+    document.getElementById("modalOverlay").classList.add("open");
+    document.body.style.overflow="hidden";
+  });
+}
+function closeModal(){
+  document.getElementById("modalOverlay").classList.remove("open");
+  document.body.style.overflow="";
+  if(hlsInst){try{hlsInst.destroy();}catch(e){}hlsInst=null;}
+  loadedDetail=null;
+}
+function toggleFav(mid){
+  apiPost("fav_toggle",{usuario_id:USER,movie_id:mid}).then(function(d){
+    var b=document.getElementById("favBtn");
+    if(d.favorite){b.classList.add("active");b.textContent="❤ Favorito";}
+    else{b.classList.remove("active");b.textContent="🤍 Favorito";}
+  });
+}
+
+// ─── REPRODUCTOR (SOLO FUENTES AUTORIZADAS) ───
+function playMovie(){
+  var mid=loadedDetail.movie.id;
+  var slot=document.getElementById("playerSlot");
+  apiGet({action:"sources",id:mid}).then(function(d){
+    var srcs=d.authorized||[];
+    if(!srcs.length){
+      slot.innerHTML='<div class="no-source"><span class="big">🚫</span>Reproducción no disponible actualmente.<br><small style="color:rgba(0,255,65,.3)">No hay una fuente autorizada y activa para esta película.</small></div>';
+      return;
+    }
+    var src=srcs[0];
+    var wrap=document.createElement("div");
+    wrap.className="player-wrap";
+    slot.innerHTML="";slot.appendChild(wrap);
+    if(src.type==="mp4"){
+      var v=document.createElement("video");v.controls=true;v.src=src.playback_url;
+      v.preload="metadata";wrap.appendChild(v);attachProgress(v,src);
+    }else if(src.type==="hls"){
+      var v2=document.createElement("video");v2.controls=true;v2.preload="metadata";
+      wrap.appendChild(v2);
+      if(window.Hls&&Hls.isSupported()){hlsInst=new Hls();hlsInst.loadSource(src.playback_url);hlsInst.attachMedia(v2);}
+      else if(v2.canPlayType("application/vnd.apple.mpegurl")){v2.src=src.playback_url;}
+      else{wrap.innerHTML='<div class="no-source"><span class="big">⚠</span>Tu navegador no soporta HLS.</div>';return;}
+      attachProgress(v2,src);
+    }else{
+      var f=document.createElement("iframe");f.src=src.playback_url;f.allow="autoplay; fullscreen; encrypted-media";f.allowFullscreen=true;
+      wrap.appendChild(f);
+    }
+    slot.innerHTML+='<div class="src-line">🎞 <b>'+esc(src.provider)+'</b> · '+esc(src.type)+' · '+esc(src.license||"licencia autorizada")+'</div>';
+    // guardar al iniciar (historial)
+    apiPost("save_progress",{usuario_id:USER,movie_id:mid,progress:0,seconds_watched:0});
+  });
+}
+function attachProgress(video,src){
+  var mid=loadedDetail.movie.id;
+  video.addEventListener("timeupdate",function(){
+    if(!video.duration)return;
+    var pct=Math.round((video.currentTime/video.duration)*100);
+    clearTimeout(saveTimer);
+    saveTimer=setTimeout(function(){
+      apiPost("save_progress",{usuario_id:USER,movie_id:mid,progress:pct,seconds_watched:video.currentTime});
+    },4000);
+  });
+  video.addEventListener("ended",function(){
+    apiPost("save_progress",{usuario_id:USER,movie_id:mid,progress:95,seconds_watched:video.duration||0});
+  });
+}
+
+// ─── ADMIN LINK (rol) ───
+function checkAdmin(){
+  try{
+    fetch(SB+"/rest/v1/rangos?select=rango&usuario_nombre=eq."+encodeURIComponent(USER)+"&limit=1",{headers:{"apikey":KEY,"Authorization":"Bearer "+KEY}})
+    .then(r=>r.json()).then(function(d){
+      var rol=d&&d[0]?d[0].rango:"";
+      if(["admin","root","owner","super_admin"].indexOf(rol)>=0)document.getElementById("adminBtn").style.display="inline-block";
+    }).catch(function(){});
+  }catch(e){}
+}
+
+loadFilters();
+loadCatalog();
+checkAdmin();
+</script>
+<script src="https://cdn.jsdelivr.net/npm/hls.js@1/dist/hls.min.js"></script>
+<script src="/errores.js" defer></script>
+<script src="/update_check.js" defer></script>
+</body>
+</html>

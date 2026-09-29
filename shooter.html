@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<title>🚀 Space Shooter · ZonaHack</title>
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/icon_96.png" type="image/png">
+<meta name="theme-color" content="#00ff41">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:radial-gradient(circle at 20% 10%,rgba(0,255,65,.05),transparent 50%),radial-gradient(circle at 80% 90%,rgba(0,229,255,.05),transparent 50%),#07090e;color:#d7e2ef;font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh}
+.wrap{max-width:900px;margin:0 auto;padding:14px}
+.hdr{display:flex;align-items:center;gap:10px;padding-bottom:10px;border-bottom:1px solid rgba(0,255,65,.2)}
+.hdr .logo{font-size:1.5em}
+.hdr h1{font-size:1em;letter-spacing:2px;font-family:'Courier New',monospace;color:#00ff41;text-shadow:0 0 12px rgba(0,255,65,.4)}
+.hdr span{font-size:.56em;color:#6d7f93;letter-spacing:1px}
+.hdr a{margin-left:auto;color:#00ff41;text-decoration:none;font-size:.7em;border:1px solid rgba(0,255,65,.25);padding:5px 10px;border-radius:8px}
+.hero{text-align:center;padding:14px;border:1px solid rgba(0,255,65,.14);border-radius:16px;margin:12px 0;background:rgba(0,20,0,.3)}
+.hero .big{font-size:2em}
+.hero h2{color:#00ff41;letter-spacing:2px;font-size:1em;margin:6px 0;text-shadow:0 0 14px rgba(0,255,65,.5)}
+.hero p{font-size:.6em;color:#6d7f93}
+.badge{display:inline-block;margin-top:6px;background:rgba(0,255,65,.08);border:1px solid rgba(0,255,65,.25);color:#00ff41;font-size:.56em;padding:3px 10px;border-radius:16px;letter-spacing:1px}
+.main{display:grid;grid-template-columns:1fr 240px;gap:12px}
+@media(max-width:700px){.main{grid-template-columns:1fr}}
+.gamebox{background:rgba(13,17,23,.9);border:1px solid rgba(0,255,65,.15);border-radius:16px;padding:14px;text-align:center}
+#canva{width:100%;max-width:420px;aspect-ratio:1;background:radial-gradient(circle at 50% 20%,#0a1220,#05070d 70%);border:1px solid rgba(0,255,65,.25);border-radius:12px;display:block;margin:0 auto;touch-action:none}
+.hud{display:flex;justify-content:space-between;align-items:center;margin:10px auto;max-width:420px;font-size:.72em;color:#6d7f93;letter-spacing:1px}
+.hud b{color:#00ff41}
+.hud .vidas{color:#ff4d4d;letter-spacing:2px}
+.controls{display:flex;gap:6px;justify-content:center;margin-top:10px;flex-wrap:wrap}
+.controls button{background:#0a0d12;border:1px solid rgba(0,255,65,.3);color:#00ff41;border-radius:10px;padding:12px 16px;font-size:.8em;cursor:pointer;font-family:inherit;min-width:52px}
+.controls button:hover{background:rgba(0,255,65,.1)}
+.nick{display:flex;gap:8px;align-items:center;justify-content:center;margin:10px 0;flex-wrap:wrap}
+.nick input{background:#0a0d12;border:1px solid rgba(0,255,65,.25);border-radius:8px;color:#fff;padding:8px 12px;font-size:.76em;outline:none;font-family:inherit;max-width:180px}
+.nick input:focus{border-color:#00ff41}
+.rank{background:rgba(13,17,23,.9);border:1px solid rgba(0,255,65,.15);border-radius:16px;padding:14px}
+.rank .rt{font-size:.72em;color:#f1c40f;letter-spacing:1px;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.rank .rt .dot{width:8px;height:8px;border-radius:50%;background:#00ff41;animation:rt 1.4s infinite}
+@keyframes rt{0%,100%{opacity:.2}50%{opacity:1}}
+.rank .row{display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:8px;font-size:.68em;margin-bottom:4px;background:rgba(0,255,65,.03)}
+.rank .row:nth-child(2){background:rgba(241,196,15,.08)}
+.rank .row:nth-child(3){background:rgba(200,200,200,.06)}
+.rank .row:nth-child(4){background:rgba(180,120,60,.05)}
+.rank .pos{color:#f1c40f;font-weight:800;width:22px}
+.rank .who{flex:1;color:#d7e2ef;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rank .pts{color:#00ff41;font-weight:800}
+.rank .empty{color:#6d7f93;font-size:.66em;text-align:center;padding:16px}
+.foot{text-align:center;font-size:.56em;color:#6d7f93;letter-spacing:1px;margin-top:16px;padding-bottom:18px}
+.over{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;text-align:center;font-family:'Courier New',monospace}
+.over .box{background:#0a0d12;border:1px solid #00ff41;border-radius:18px;padding:30px;max-width:380px;width:100%}
+.over h2{color:#ff4d4d;font-size:1.4em;letter-spacing:2px;margin-bottom:8px}
+.over .s{font-size:2.4em;color:#00ff41;margin:8px 0}
+.over button{background:linear-gradient(135deg,#00ff41,#00e5ff);color:#03140a;border:none;border-radius:10px;padding:13px 26px;font-weight:800;font-size:.8em;cursor:pointer;font-family:inherit;margin-top:10px}
+.toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#0a0d12;border:1px solid #00ff41;color:#00ff41;padding:10px 18px;border-radius:12px;font-size:.66em;z-index:99;display:none;max-width:90vw;text-align:center}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="hdr">
+    <div class="logo">🚀</div>
+    <div><h1>SPACE SHOOTER</h1><span>PUNTUACIÓN PÚBLICA · FIREBASE · TIEMPO REAL</span></div>
+    <a href="/">←</a>
+  </div>
+
+  <div class="hero">
+    <div class="big">🚀</div>
+    <h2>DEFENDÉ LA GALAXIA</h2>
+    <p>Movete con las flechas (o arrastrá) y dispará con ESPACIO (o clic). Sin registrarte.</p>
+    <span class="badge">🌐 PÚBLICO PARA TODOS · PUNTAJES EN FIREBASE</span>
+  </div>
+
+  <div class="main">
+    <div class="gamebox">
+      <canvas id="canva" width="420" height="420"></canvas>
+      <div class="hud"><span>PUNTOS <b id="score">0</b></span><span>NIVEL <b id="level">1</b></span><span class="vidas" id="vidas">❤️❤️❤️</span><span id="fbStatus" style="color:#f1c40f">📡 conectando...</span></div>
+      <div class="nick">
+        <input id="nick" placeholder="Tu nombre (para el ranking)" maxlength="16">
+        <button onclick="iniciar()" style="background:linear-gradient(135deg,#00ff41,#00e5ff);color:#03140a;border:none;border-radius:8px;padding:9px 16px;font-weight:800;font-size:.72em;cursor:pointer;font-family:inherit">🚀 JUGAR</button>
+      </div>
+      <div class="controls">
+        <button onclick="mover(-1)">◀</button><button onclick="disparar()">🔫</button><button onclick="mover(1)">▶</button>
+      </div>
+    </div>
+    <div class="rank">
+      <div class="rt"><span class="dot"></span> RANKING PÚBLICO · EN VIVO</div>
+      <div id="ranking"><div class="empty">Cargando puntajes...</div></div>
+      <div style="margin-top:10px;border-top:1px solid rgba(0,255,65,.12);padding-top:8px">
+        <button onclick="adminFirebase()" style="background:#0a0d12;border:1px solid rgba(241,196,15,.35);color:#f1c40f;border-radius:8px;padding:8px 12px;font-size:.62em;cursor:pointer;font-family:inherit;width:100%">🔑 ADMIN FIREBASE</button>
+        <div id="adminPanel" style="display:none;margin-top:8px"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">ZONAHACK · SPACE SHOOTER · PUNTAJES EN FIREBASE · 🚀</div>
+</div>
+
+<div class="over" id="over">
+  <div class="box">
+    <h2>💥 GAME OVER</h2>
+    <div class="s" id="overScore">0</div>
+    <div id="overMsg" style="color:#6d7f93;font-size:.72em;font-family:'Segoe UI',sans-serif;margin-bottom:6px">Guardando puntaje...</div>
+    <button onclick="location.reload()">↻ JUGAR DE NUEVO</button>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="/firebase_zh.js"></script>
+<script>
+/* ═══ SPACE SHOOTER — público, puntajes en Firebase ═══ */
+var cv=document.getElementById("canva"),ctx=cv.getContext("2d");
+var W=cv.width,H=cv.height;
+var nave, balas, enemigos, teclas, puntos, vidas, nivel, running, timer, best=(parseInt(localStorage.getItem("zh_shooter_best")||"0"));
+var nombre=(localStorage.getItem("zh_shooter_nick")||"");
+function $(i){return document.getElementById(i);}
+function toast(m){var t=$("toast");t.textContent=m;t.style.display="block";clearTimeout(t._x);t._x=setTimeout(function(){t.style.display="none";},2600);}
+$("nick").value=nombre; $("best").textContent=best;
+
+function iniciar(){
+  nombre=($("nick").value.trim()||("Piloto-"+Math.floor(100+Math.random()*900))).slice(0,16);
+  $("nick").value=nombre; localStorage.setItem("zh_shooter_nick",nombre);
+  $("over").style.display="none";
+  nave={x:W/2,y:H-40,ancho:30};
+  balas=[]; enemigos=[]; teclas={};
+  puntos=0; vidas=3; nivel=1; running=true;
+  $("score").textContent=0; $("level").textContent=1; $("vidas").textContent="❤️❤️❤️";
+  if(timer)clearInterval(timer);
+  timer=setInterval(paso,30);
+}
+function mover(d){ nave.x+=d*24; nave.x=Math.max(15,Math.min(W-15,nave.x)); }
+function disparar(){
+  if(!running)return;
+  balas.push({x:nave.x,y:nave.y-18,r:3,vel:8});
+}
+document.addEventListener("keydown",function(e){
+  if(e.key==="ArrowLeft"||e.key==="a"||e.key==="A")teclas.l=true;
+  if(e.key==="ArrowRight"||e.key==="d"||e.key==="D")teclas.r=true;
+  if(e.key===" ") { e.preventDefault(); disparar(); }
+  if(e.key==="Enter")iniciar();
+});
+document.addEventListener("keyup",function(e){
+  if(e.key==="ArrowLeft"||e.key==="a"||e.key==="A")teclas.l=false;
+  if(e.key==="ArrowRight"||e.key==="d"||e.key==="D")teclas.r=false;
+});
+cv.addEventListener("touchstart",function(e){ var t=e.touches[0]; nave.x=t.clientX-cv.getBoundingClientRect().left; disparar(); },{passive:true});
+cv.addEventListener("touchmove",function(e){ e.preventDefault(); var t=e.touches[0]; nave.x=t.clientX-cv.getBoundingClientRect().left; },{passive:false});
+cv.addEventListener("mousemove",function(e){ var r=cv.getBoundingClientRect(); nave.x=(e.clientX-r.left)*W/r.width; });
+cv.addEventListener("mousedown",function(){ disparar(); });
+
+function paso(){
+  if(teclas.l) nave.x-=6;
+  if(teclas.r) nave.x+=6;
+  nave.x=Math.max(15,Math.min(W-15,nave.x));
+  // balas
+  for(var i=balas.length-1;i>=0;i--){ balas[i].y-=balas[i].vel; if(balas[i].y<-10)balas.splice(i,1); }
+  // enemigos
+  if(Math.random()<0.02+nivel*0.004) enemigos.push({x:10+Math.random()*(W-20),y:-14,r:10,vel:1+nivel*0.4,sh:Math.random()<0.5?1:-1,sw:Math.random()*2});
+  for(var j=enemigos.length-1;j>=0;j--){
+    var e=enemigos[j];
+    e.y+=e.vel; e.x+=e.sw*e.sh;
+    if(e.x<8||e.x>W-8) e.sh*=-1;
+    if(e.y>H+14) enemigos.splice(j,1);
+  }
+  // colisiones bala-enemigo
+  for(var b=balas.length-1;b>=0;b--){
+    for(var q=enemigos.length-1;q>=0;q--){
+      var e=enemigos[q];
+      var dx=balas[b].x-e.x, dy=balas[b].y-e.y;
+      if(Math.sqrt(dx*dx+dy*dy)<e.r+balas[b].r+2){ balas.splice(b,1); enemigos.splice(q,1); puntos+=10; $("score").textContent=puntos; break; }
+    }
+  }
+  // colision enemigo-nave o pasa
+  for(var k=enemigos.length-1;k>=0;k--){
+    var en=enemigos[k];
+    var dx2=en.x-nave.x, dy2=en.y-nave.y;
+    if(Math.sqrt(dx2*dx2+dy2*dy2)<en.r+18 || en.y>H+8){
+      enemigos.splice(k,1);
+      vidas--; $("vidas").textContent="❤️".repeat(Math.max(0,vidas));
+      if(vidas<=0){ gameOver(); return; }
+    }
+  }
+  // nivel cada 50 pts
+  var nuevoNivel=Math.floor(puntos/50)+1;
+  if(nuevoNivel!==nivel){ nivel=nuevoNivel; $("level").textContent=nivel; }
+  dibujar();
+}
+function dibujar(){
+  ctx.fillStyle="#05070d"; ctx.fillRect(0,0,W,H);
+  // estrellas
+  ctx.fillStyle="rgba(255,255,255,.35)";
+  for(var i=0;i<40;i++){ ctx.fillRect((i*37)%W,((i*53)%H),2,2); }
+  // balas
+  ctx.fillStyle="#00e5ff";
+  for(var b=0;b<balas.length;b++){ ctx.fillRect(balas[b].x-1.5,balas[b].y-6,3,12); }
+  // enemigos
+  for(var e=0;e<enemigos.length;e++){
+    var en=enemigos[e];
+    ctx.fillStyle="#ff4d4d";
+    ctx.beginPath(); ctx.arc(en.x,en.y,en.r,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle="#ffd166";
+    ctx.fillRect(en.x-2,en.y-2,4,4);
+  }
+  // nave
+  ctx.fillStyle="#00ff41";
+  ctx.beginPath();
+  ctx.moveTo(nave.x,nave.y-18); ctx.lineTo(nave.x-15,nave.y+12); ctx.lineTo(nave.x,nave.y+6); ctx.lineTo(nave.x+15,nave.y+12);
+  ctx.closePath(); ctx.fill();
+  ctx.fillStyle="#00e5ff"; ctx.fillRect(nave.x-4,nave.y-12,8,8);
+}
+function gameOver(){
+  running=false; clearInterval(timer); timer=null;
+  $("overScore").textContent=puntos;
+  $("over").style.display="flex";
+  if(puntos>best){ best=puntos; localStorage.setItem("zh_shooter_best",String(best)); }
+  guardar(puntos);
+}
+/* ═══ PUNTAJES EN FIREBASE (público) ═══ */
+function guardar(s){
+  var msg=$("overMsg");
+  ZHFirebase.push("shooter_scores",{u:nombre,s:s,ts:Date.now()})
+    .then(function(){ msg.textContent="✅ Puntaje guardado ("+s+" pts)."; toast("🏆 Puntaje guardado en Firebase"); refrescar(); })
+    .catch(function(){ msg.textContent="⚠ No se pudo guardar el puntaje."; });
+}
+var watch=null;
+function refrescar(){
+  ZHFirebase.get("shooter_scores").then(function(d){
+    var list=Object.keys(d||{}).map(function(k){return {u:d[k].u||"?",s:d[k].s||0,ts:d[k].ts||0};});
+    list.sort(function(a,b){return b.s-a.s;});
+    renderRank(list.slice(0,10));
+  }).catch(function(){});
+}
+function renderRank(list){
+  var el=$("ranking");
+  if(!list.length){ el.innerHTML='<div class="empty">Todavía no hay puntajes. ¡Sé el primero!</div>'; return; }
+  el.innerHTML=list.map(function(r,i){
+    return '<div class="row"><span class="pos">'+(i+1)+'</span><span class="who">'+esc(r.u)+'</span><span class="pts">'+r.s+'</span></div>';
+  }).join("");
+}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+/* ═══ ADMIN FIREBASE (solo dueño) ═══ */
+var ADMIN_CLAVE="wRZpEvefFSAguHde", adminOk=false;
+function adminFirebase(){
+  if(adminOk){ renderAdmin(); return; }
+  var clave=prompt("👑 Clave de ADMIN FIREBASE:");
+  if(clave===ADMIN_CLAVE){ adminOk=true; renderAdmin(); toast("🔑 Modo ADMIN activado"); }
+  else toast("❌ Clave incorrecta");
+}
+function renderAdmin(){
+  var p=$("adminPanel"); p.style.display="block";
+  p.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><b style="font-size:.62em;color:#f1c40f">👑 ADMIN FIREBASE</b>'+
+    '<button onclick="vaciarScores()" style="background:rgba(255,77,77,.15);border:1px solid rgba(255,77,77,.4);color:#ff6b6b;border-radius:6px;padding:5px 10px;font-size:.58em;cursor:pointer;font-family:inherit">🗑 Vaciar</button></div>'+
+    '<div id="adminList" style="font-size:.62em">Cargando...</div>';
+  ZHFirebase.get("shooter_scores").then(function(d){
+    var ids=Object.keys(d||{});
+    if(!ids.length){ $("adminList").innerHTML='<div style="color:#6d7f93">Sin puntajes.</div>'; return; }
+    $("adminList").innerHTML=ids.map(function(id){
+      var r=d[id];
+      return '<div style="display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.05)">'+
+        '<span style="flex:1;color:#d7e2ef">'+esc(r.u||"?")+' · <b style="color:#00ff41">'+esc(String(r.s||0))+'</b></span>'+
+        '<button onclick="borrarScore(\''+esc(String(id).replace(/'/g,"\\'"))+'\')" style="background:none;border:1px solid rgba(255,77,77,.35);color:#ff6b6b;border-radius:5px;padding:2px 6px;font-size:.56em;cursor:pointer;font-family:inherit">✕</button></div>';
+    }).join("");
+  }).catch(function(){ $("adminList").innerHTML='<div style="color:#ff6b6b">Error leyendo Firebase.</div>'; });
+}
+function borrarScore(id){
+  if(!confirm("¿Borrar ese puntaje?")) return;
+  ZHFirebase.remove("shooter_scores/"+id).then(function(){ toast("🗑 Borrado"); renderAdmin(); refrescar(); }).catch(function(){ toast("Error"); });
+}
+function vaciarScores(){
+  if(!confirm("⚠ ¿VACIAR todo el ranking?")) return;
+  ZHFirebase.remove("shooter_scores").then(function(){ toast("🗑 Ranking vaciado"); renderAdmin(); refrescar(); }).catch(function(){ toast("Error"); });
+}
+window.adminFirebase=adminFirebase;
+window.iniciar=iniciar;
+
+/* Firebase init + ranking en vivo */
+ZHFirebase.init(function(){
+  if(ZHFirebase.ready){ $("fbStatus").textContent="🟢 firebase OK"; $("fbStatus").style.color="#00ff41"; refrescar(); watch=ZHFirebase.on("shooter_scores",function(){ refrescar(); }); }
+  else{ $("fbStatus").textContent="🔴 firebase sin conexión"; $("fbStatus").style.color="#ff6b6b"; }
+});
+iniciar();
+</script>
+</body>
+</html>

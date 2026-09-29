@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>ZonaHack - Zona Divertida</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:sans-serif;background:#080c24;color:#e8e8e8;padding:10px;max-width:900px;margin:0 auto;text-align:center;min-height:100vh}
+h1{color:#f1c40f;font-size:1.3em;margin:8px 0}
+.sub{color:#888;font-size:.7em;margin-bottom:8px}
+.back{color:#667eea;text-decoration:none;font-size:.78em;display:block;margin-bottom:8px}
+.card{background:#111639;border-radius:10px;padding:15px;margin:8px 0;border:1px solid rgba(255,255,255,.03);cursor:pointer}
+.card:active{transform:scale(.98)}
+.card .ico{font-size:2em;margin-bottom:4px}
+.card .nom{font-size:.9em;font-weight:bold}
+.card .desc{font-size:.7em;color:#888;margin-top:2px}
+h2{color:#667eea;font-size:1em;margin:12px 0 6px;text-align:left}
+.btn{border:none;border-radius:8px;padding:10px 14px;color:white;font-weight:600;font-size:.8em;cursor:pointer;background:#667eea;margin:4px}
+.btn:active{transform:scale(.95)}
+#resultado{background:#0f1430;border-radius:8px;padding:14px;margin:10px 0;font-size:.85em;min-height:60px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,.05)}
+#resultado.big{font-size:1em}
+.emoji-row{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:8px 0}
+.emoji-btn{font-size:1.4em;background:#111639;border:1px solid rgba(255,255,255,.05);border-radius:8px;padding:8px;cursor:pointer}
+.emoji-btn:active{transform:scale(1.1)}
+video{width:100%;max-width:400px;border-radius:8px;margin:8px 0;background:#000}
+.frase{font-size:.85em;font-style:italic;color:#ddd;line-height:1.5}
+.autor{font-size:.7em;color:#888;margin-top:4px}
+.pill{display:inline-block;background:#111639;border:1px solid rgba(255,255,255,.05);border-radius:20px;padding:4px 10px;font-size:.7em;margin:3px;color:#aaa}
+.pill b{color:#f1c40f}
+.section{text-align:left}
+</style>
+</head>
+<body>
+<h1>🎉 Zona Divertida</h1>
+<p class="sub">Memes, frases, excusas y cosas para reírse — todo gratis</p>
+<a class="back" href="/">&larr; Volver</a>
+
+<!-- MEMES -->
+<div class="section">
+<h2>😂 Meme del día</h2>
+<div class="card" onclick="nuevoMeme()">
+  <div class="ico">🖼️</div>
+  <div class="nom">Generador de memes</div>
+  <div class="desc">Tocá para cambiar de meme</div>
+</div>
+<div id="memeBox" class="card" style="cursor:default">
+  <div id="memeTxt" class="frase">Cuando por fin compiló el código a la primera...</div>
+  <div class="autor" id="memeAutor">— Meme random</div>
+</div>
+</div>
+
+<!-- FRASES -->
+<div class="section">
+<h2>💬 Frases para reír</h2>
+<div class="card" onclick="nuevaFrase()">
+  <div class="ico">🗣️</div>
+  <div class="nom">Frase random</div>
+  <div class="desc">Tocá para otra frase</div>
+</div>
+<div id="fraseBox" class="card" style="cursor:default">
+  <div id="fraseTxt" class="frase">La vida es como andar en bicicleta: si no avanzás, te caés.</div>
+  <div class="autor" id="fraseAutor">— Proverbio random</div>
+</div>
+</div>
+
+<!-- EXCUSAS -->
+<div class="section">
+<h2>🫣 Generador de excusas</h2>
+<div class="card" onclick="nuevaExcusa()">
+  <div class="ico">🛡️</div>
+  <div class="nom">Excusa para todo</div>
+  <div class="desc">No te llega? Excusáte con estilo</div>
+</div>
+<div id="excusaBox" class="card" style="cursor:default">
+  <div id="excusaTxt" class="frase">Se me durmió el gato encima del teclado.</div>
+</div>
+</div>
+
+<!-- JUGUETES -->
+<div class="section">
+<h2>🎮 Mini-juegos y juguetes</h2>
+<a class="card" href="/juegos.html">
+  <div class="ico">🎮</div>
+  <div class="nom">Juegos clásicos</div>
+  <div class="desc">Tetris, Snake, Pong y más</div>
+</a>
+<a class="card" href="/juego.html">
+  <div class="ico">🪙</div>
+  <div class="nom">Atrapamonedas</div>
+  <div class="desc">Atrapá monedas, evitá bombas</div>
+</a>
+<a class="card" href="/nes.html">
+  <div class="ico">🕹️</div>
+  <div class="nom">NES Emulator</div>
+  <div class="desc">Cargá tus propios ROMs</div>
+</a>
+<a class="card" href="/nasa.html">
+  <div class="ico">🚀</div>
+  <div class="nom">Cohete NASA</div>
+  <div class="desc">Juego de cohete realista</div>
+</a>
+</div>
+
+<!-- SONIDOS/EMOJIS -->
+<div class="section">
+<h2>🔊 Botón de emojis random</h2>
+<div class="emoji-row" id="emojiRow"></div>
+<div id="resultado" style="font-size:3em">🙂</div>
+</div>
+
+<!-- VIDEOS -->
+<div class="section">
+<h2>📹 Videos graciosos</h2>
+<div class="card" onclick="cambiarVideo()">
+  <div class="ico">🎬</div>
+  <div class="nom">Cambiar video</div>
+  <div class="desc">Videos random de YouTube embebidos</div>
+</div>
+<div id="videoBox" style="text-align:center">
+<iframe id="ytFrame" width="100%" height="220" style="max-width:420px;border-radius:8px;border:none" src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=0" allowfullscreen></iframe>
+</div>
+</div>
+
+<div style="margin-top:14px;padding:10px;background:#0f1430;border-radius:8px;font-size:.65em;color:#555">
+  💡 Todo lo de esta página es con fines de entretenimiento. Divertite responsable.
+</div>
+
+<script>
+var MEMES = [
+  ["Cuando por fin compiló el código a la primera...", "Meme random"],
+  ["Yo: solo veo un capítulo más. 3 AM:", "La vida real"],
+  ["Cuando el profe dice 'es una preguntita rápida'", "Estudiantes"],
+  ["Mi yo del lunes vs mi yo del viernes", "Weekend"],
+  ["El wifi se cae 1 segundo y ya estoy reiniciando todo", "GonzaTech"],
+  ["Cuando decís 'no duermo, estudio' pero te dormiste en la primera clase", "Vida de estudiante"],
+  ["La batería al 1% pero seguís scrolleando", "Todos"],
+  ["Me despierto, toco el celular, '5 minutos más' = 2 horas", "Realidad"]
+];
+var FRASES = [
+  ["La vida es como andar en bicicleta: si no avanzás, te caés.", "Proverbio random"],
+  ["Trabajo en equipo: yo hago todo, el equipo mira.", "Sabiduría popular"],
+  ["El que madruga encuentra el wifi más rápido.", "Gonza"],
+  ["Estoy a dieta... de dormir.", "Vida sana"],
+  ["No soy vago, soy eficiente con mi energía.", "Filosofía"],
+  ["La procrastinación es como una tarjeta de crédito: es linda hasta que llega la cuenta.", "Proverbio"],
+  ["Mi nivel de 'lo hago mañana' es impresionante.", "Realidad"],
+  ["Los lunes existen para que los viernes valgan la pena.", "Optimista"]
+];
+var EXCUSAS = [
+  "Se me durmió el gato encima del teclado.",
+  "El wifi estaba de paro.",
+  "Mi perro se comió la tarea.",
+  "Estaba ayudando a un anciano a cruzar la calle... en otro país.",
+  "Me quedé dormido y soñé que ya la había hecho.",
+  "La impresora no imprimía y el escáner tampoco.",
+  "Un alien me secuestró y me devolvió tarde.",
+  "Se me olvidó la contraseña de la contraseña.",
+  "El celular se actualizó solo y perdió el dato.",
+  "Estaba meditando y perdí la noción del tiempo."
+];
+var VIDEOS = [
+  "dQw4w9WgXcQ", "jNQXAC9IVRw", "kJQP7kiw5Fk", "fJ9rUzIMcZQ",
+  "9bZkp7q19f0", "OPf0YbXqDm0", "RgKAFK5djSk", "kXYiU_JCYtU"
+];
+var EMOJIS = ['😂','🤣','😅','🙃','😜','🤪','😎','🤡','👾','🎮','🍕','🌮','🐸','🦄','🤖','👽','💀','🎈','🍿','🎤'];
+var iMeme=0, iFrase=0, iExcusa=0, iVideo=0;
+
+function nuevoMeme(){ iMeme=(iMeme+1)%MEMES.length; document.getElementById('memeTxt').textContent=MEMES[iMeme][0]; document.getElementById('memeAutor').textContent='— '+MEMES[iMeme][1]; }
+function nuevaFrase(){ iFrase=(iFrase+1)%FRASES.length; document.getElementById('fraseTxt').textContent=FRASES[iFrase][0]; document.getElementById('fraseAutor').textContent='— '+FRASES[iFrase][1]; }
+function nuevaExcusa(){ iExcusa=(iExcusa+1)%EXCUSAS.length; document.getElementById('excusaTxt').textContent=EXCUSAS[iExcusa]; }
+function cambiarVideo(){ iVideo=(iVideo+1)%VIDEOS.length; document.getElementById('ytFrame').src='https://www.youtube.com/embed/'+VIDEOS[iVideo]+'?autoplay=0'; }
+
+// emojis random
+var emojiRow = document.getElementById('emojiRow');
+EMOJIS.forEach(function(e){
+  var b = document.createElement('button');
+  b.className='emoji-btn';
+  b.textContent=e;
+  b.onclick=function(){ document.getElementById('resultado').textContent=e; };
+  emojiRow.appendChild(b);
+});
+</script>
+</body>
+</html>

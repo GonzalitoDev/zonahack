@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>🎞 CineClásico - Películas Viejas</title>
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/icon_96.png" type="image/png">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Courier New',Courier,monospace;background:#0a0a0a;color:#c8d6e5;min-height:100vh}
+body::before{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(241,196,15,.012) 2px,rgba(241,196,15,.012) 4px),radial-gradient(circle at 20% 50%,rgba(241,196,15,.03) 0,transparent 50%);pointer-events:none;z-index:99998}
+::-webkit-scrollbar{width:6px;background:#0a0a0a}
+::-webkit-scrollbar-thumb{background:rgba(241,196,15,.15);border-radius:3px}
+.header{background:#0a0a0a;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(241,196,15,.12);position:sticky;top:0;z-index:100}
+.header h1{font-size:1.1em;color:#f1c40f;text-shadow:0 0 8px rgba(241,196,15,.25)}
+.header .sub{font-size:.6em;color:rgba(241,196,15,.5);letter-spacing:1px;margin-top:2px}
+.back-btn{color:#f1c40f;text-decoration:none;font-size:.85em;padding:6px 10px;border-radius:4px;border:1px solid rgba(241,196,15,.18);transition:.2s}
+.back-btn:hover{box-shadow:0 0 8px rgba(241,196,15,.15)}
+.container{max-width:1200px;margin:0 auto;padding:12px}
+.hero{background:#0d0d0d;border:1px solid rgba(241,196,15,.1);border-radius:4px;padding:16px 20px;margin-bottom:14px}
+.hero h2{font-size:1.15em;color:#f1c40f;text-shadow:0 0 6px rgba(241,196,15,.15)}
+.hero p{color:rgba(241,196,15,.6);font-size:.76em;margin-top:4px;line-height:1.5}
+.tabs{display:flex;gap:4px;margin-bottom:12px;flex-wrap:wrap}
+.tab{padding:8px 12px;border:1px solid rgba(241,196,15,.1);background:rgba(241,196,15,.02);color:#f1c40f;border-radius:4px;font-size:.68em;cursor:pointer;transition:.2s;opacity:.6;font-family:'Courier New',monospace}
+.tab:hover{opacity:1;border-color:rgba(241,196,15,.3)}
+.tab.active{background:rgba(241,196,15,.08);border-color:#f1c40f;opacity:1;font-weight:bold;text-shadow:0 0 6px rgba(241,196,15,.15)}
+.search-box{display:flex;gap:6px;margin-bottom:10px}
+.search-box input{flex:1;padding:9px 12px;border:1px solid rgba(241,196,15,.18);border-radius:4px;background:#0a0a0a;color:#f1c40f;font-size:.82em;outline:none;font-family:'Courier New',monospace}
+.search-box input:focus{border-color:#f1c40f;box-shadow:0 0 8px rgba(241,196,15,.08)}
+.search-box input::placeholder{color:rgba(241,196,15,.25)}
+.search-box button{padding:9px 16px;border:1px solid #f1c40f;border-radius:4px;background:rgba(241,196,15,.08);color:#f1c40f;cursor:pointer;font-size:.75em;font-family:'Courier New',monospace;transition:.2s}
+.search-box button:hover{background:rgba(241,196,15,.15);box-shadow:0 0 10px rgba(241,196,15,.1)}
+.sort-row{display:flex;gap:6px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
+.sort-row select{padding:6px 8px;border:1px solid rgba(241,196,15,.15);border-radius:4px;background:#0a0a0a;color:#f1c40f;font-size:.68em;font-family:'Courier New',monospace;outline:none}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
+.movie-card{border-radius:4px;overflow:hidden;background:#0d0d0d;cursor:pointer;transition:transform .2s;border:1px solid rgba(241,196,15,.07);position:relative}
+.movie-card:hover{transform:translateY(-3px);border-color:rgba(241,196,15,.25);box-shadow:0 0 12px rgba(241,196,15,.08)}
+.movie-card img{width:100%;aspect-ratio:3/4;object-fit:cover;display:block;background:#0a0a0a}
+.movie-card .noimg{width:100%;aspect-ratio:3/4;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#221b05,#0a0d0f);color:rgba(241,196,15,.3);font-size:2em}
+.movie-card .info{padding:7px}
+.movie-card .title{font-size:.68em;color:#c8d6e5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.3;min-height:1.9em}
+.movie-card .meta{font-size:.6em;color:rgba(241,196,15,.6);margin-top:3px;display:flex;gap:5px;flex-wrap:wrap}
+.movie-card .badge{position:absolute;top:5px;left:5px;font-size:.55em;padding:2px 6px;border-radius:3px;background:rgba(0,0,0,.75);color:#f1c40f;border:1px solid rgba(241,196,15,.25)}
+.loading{text-align:center;padding:40px;color:rgba(241,196,15,.4);font-size:.82em;font-family:'Courier New',monospace;grid-column:1/-1}
+.loading::after{content:'';display:block;width:20px;height:20px;margin:10px auto;border:1px solid rgba(241,196,15,.1);border-top-color:#f1c40f;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty{text-align:center;padding:45px 10px;color:rgba(241,196,15,.35);font-size:.78em;grid-column:1/-1}
+/* MODAL */
+.modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.9);z-index:200;overflow-y:auto;padding:20px}
+.modal-overlay.open{display:block}
+.modal{background:#0d0d0d;border:1px solid rgba(241,196,15,.15);border-radius:6px;max-width:780px;margin:20px auto;overflow:hidden;animation:slideUp .3s;position:relative}
+@keyframes slideUp{from{transform:translateY(40px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-poster{width:100%;aspect-ratio:3/2;object-fit:cover;background:#0a0a0a;display:block}
+.modal-noposter{width:100%;aspect-ratio:3/2;background:linear-gradient(180deg,#221b05,#0a0d0f);display:flex;align-items:center;justify-content:center;color:rgba(241,196,15,.2);font-size:3.5em}
+.modal-body{padding:16px}
+.modal-title{font-size:1.1em;color:#f1c40f;margin-bottom:2px;text-shadow:0 0 6px rgba(241,196,15,.1)}
+.modal-close{position:absolute;top:10px;right:10px;background:rgba(0,0,0,.7);border:1px solid rgba(241,196,15,.25);color:#f1c40f;font-size:1.1em;cursor:pointer;padding:2px 10px;border-radius:4px;z-index:5}
+.modal-meta{display:flex;gap:8px;flex-wrap:wrap;font-size:.72em;margin:8px 0}
+.modal-meta .badge{padding:3px 8px;border-radius:3px;border:1px solid rgba(241,196,15,.15);color:#f1c40f}
+.modal-desc{font-size:.75em;color:rgba(200,214,229,.65);line-height:1.6;margin-bottom:12px;max-height:90px;overflow-y:auto}
+.modal-btns{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.btn{padding:9px 16px;border-radius:4px;border:1px solid rgba(241,196,15,.25);background:rgba(241,196,15,.07);color:#f1c40f;cursor:pointer;font-size:.72em;font-family:'Courier New',monospace;transition:.2s}
+.btn:hover{background:rgba(241,196,15,.15);box-shadow:0 0 10px rgba(241,196,15,.08)}
+.btn.play{border-color:#f1c40f;background:rgba(241,196,15,.12)}
+.src-line{font-size:.62em;color:rgba(241,196,15,.5);border-top:1px solid rgba(241,196,15,.08);padding-top:8px;line-height:1.7}
+.src-line b{color:#f1c40f}
+/* PLAYER */
+.player-wrap{margin-top:10px;background:#000;border:1px solid rgba(241,196,15,.2);border-radius:4px;overflow:hidden}
+.player-wrap iframe{width:100%;height:440px;border:0;display:block}
+.no-source{text-align:center;padding:28px 12px;color:rgba(241,196,15,.5);font-size:.78em;border:1px dashed rgba(241,196,15,.2);border-radius:4px;margin-top:10px}
+.no-source .big{font-size:1.6em;color:rgba(241,196,15,.3);display:block;margin-bottom:8px}
+.note{text-align:center;color:rgba(241,196,15,.3);font-size:.6em;margin-top:16px;line-height:1.7;border-top:1px solid rgba(241,196,15,.06);padding-top:12px}
+@media(min-width:768px){.grid{grid-template-columns:repeat(auto-fill,minmax(155px,1fr))}}
+@media(max-width:480px){.container{padding:6px}.grid{grid-template-columns:repeat(3,1fr);gap:5px}.modal-overlay{padding:8px}.modal{margin:8px auto}.player-wrap iframe{height:220px}}
+</style>
+</head>
+<body>
+<div class="header">
+  <a href="/" class="back-btn">← Volver</a>
+  <div style="text-align:center">
+    <h1>🎞 CineClásico</h1>
+    <div class="sub">PELÍCULAS VIEJAS · DOMINIO PÚBLICO</div>
+  </div>
+  <div style="width:60px"></div>
+</div>
+<div class="container">
+  <div class="hero">
+    <h2>🎞 Las películas de la época de oro</h2>
+    <p>Clásicos, cine mudo, TV antigua y cortometrajes de dominio público / licencia CC. Reproducción mediante el embed oficial de Archive.org.</p>
+  </div>
+
+  <div class="tabs" id="catTabs"></div>
+
+  <div class="search-box">
+    <input id="searchInput" placeholder="Buscar película vieja..." onkeydown="if(event.key==='Enter')buscar()">
+    <button onclick="buscar()">Buscar</button>
+  </div>
+  <div class="sort-row">
+    <select id="sortSel" onchange="cargar()">
+      <option value="old">Más viejas primero</option>
+      <option value="new">Más nuevas primero</option>
+      <option value="pop">Más populares</option>
+    </select>
+    <span style="font-size:.6em;color:rgba(241,196,15,.4)">Fuente: Archive.org · solo contenido con reproducción autorizada</span>
+  </div>
+
+  <div class="grid" id="grid"><div class="loading">Cargando películas viejas...</div></div>
+  <div class="note">Zona de películas viejas con reproducción legal. No descargamos archivos, no buscamos enlaces ocultos y no evadimos DRM ni paywalls.</div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)cerrar()">
+  <div class="modal" id="modal">
+    <button class="modal-close" onclick="cerrar()">✕</button>
+    <div id="modalPoster"></div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+var API="/api/cineclasico";
+var currentCat="feature_films";
+var moviesCache=[];
+function esc(s){return (s||"").replace(/[&<>"']/g,z=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[z]);}
+function apiGet(p){return fetch(API+"?"+new URLSearchParams(p)).then(r=>r.json().catch(()=>({})));}
+
+function cargarCategorias(){
+  apiGet({action:"categories"}).then(function(d){
+    var cats=d.categories||[];
+    var tabs='<button class="tab'+(currentCat==="feature_films"?" active":"")+'" onclick="setCat(\'feature_films\')">🎬 Cine Clasico</button>'+
+      cats.map(function(c){
+        return '<button class="tab'+(currentCat===c.id?" active":"")+'" onclick="setCat(\''+c.id+'\')">'+esc(c.name)+'</button>';
+      }).join("");
+    document.getElementById("catTabs").innerHTML=tabs;
+  });
+}
+function setCat(id){currentCat=id;cargarCategorias();cargar();}
+function buscar(){cargar();}
+function cargar(){
+  var grid=document.getElementById("grid");
+  grid.innerHTML='<div class="loading">Cargando películas viejas...</div>';
+  var p={action:"list",cat:currentCat,sort:document.getElementById("sortSel").value,limit:24};
+  var q=document.getElementById("searchInput").value.trim();
+  if(q)p.q=q;
+  apiGet(p).then(function(d){
+    moviesCache=d.movies||[];
+    var ms=moviesCache;
+    if(!ms.length){grid.innerHTML='<div class="empty">📭 No se encontraron películas<br><small style="color:rgba(241,196,15,.25)">Probá con otra búsqueda o categoría</small></div>';return;}
+    grid.innerHTML=ms.map(card).join("");
+  }).catch(function(){grid.innerHTML='<div class="empty">⚠ Error al cargar. ¿Está activo el servidor?</div>';});
+}
+function card(m,i){
+  var img=m.poster?'<img src="'+esc(m.poster)+'" loading="lazy" onerror="this.outerHTML=`<div class=noimg>🎞</div>`">':'<div class="noimg">🎞</div>';
+  return '<div class="movie-card" onclick="abrir('+i+')">'+img+
+    '<div class="info"><div class="title">'+esc(m.title)+'</div>'+
+    '<div class="meta"><span>'+(m.year||"—")+'</span></div></div></div>';
+}
+function abrir(i){
+  var m=moviesCache[i];
+  if(!m)return;
+  currentIdx=i;
+  var poster=m.poster?'<img class="modal-poster" src="'+esc(m.poster)+'" onerror="this.outerHTML=`<div class=modal-noposter>🎞</div>`">':'<div class="modal-noposter">🎞</div>';
+  document.getElementById("modalPoster").innerHTML=poster;
+  document.getElementById("modalBody").innerHTML=
+    '<div class="modal-title">'+esc(m.title)+'</div>'+
+    '<div class="modal-meta">'+
+      '<span class="badge">📅 '+(m.year||"—")+'</span>'+
+      '<span class="badge">🏷 '+esc(m.category||"Clasico")+'</span>'+
+    '</div>'+
+    '<div class="modal-desc">'+(esc(m.description)||'<i style="opacity:.4">Sin descripción disponible.</i>')+'</div>'+
+    '<div class="modal-btns"><button class="btn play" onclick="reproducir()">▶ Reproducir</button>'+
+    '<button class="btn" onclick="window.open(\''+esc(m.official_url)+'\',\'_blank\')">ℹ Ficha oficial</button></div>'+
+    '<div class="src-line">🎞 <b>'+esc(m.source||"archive")+'</b> · embed oficial · '+esc(m.license)+'</div>'+
+    '<div id="playerSlot"></div>';
+  document.getElementById("modalOverlay").classList.add("open");
+  document.body.style.overflow="hidden";
+}
+var currentIdx=null;
+// Resuelve el archivo de video reproducibible del item (API oficial de Archive.org)
+function pickVideo(m){
+  return fetch("https://archive.org/metadata/"+encodeURIComponent(m.id),{headers:{"User-Agent":"Mozilla/5.0"}})
+    .then(function(r){return r.json().catch(function(){return null;});})
+    .then(function(d){
+      if(!d||!d.files||!d.files.length)return {none:true};
+      var cands=[];
+      d.files.forEach(function(f){
+        var nm=f.name||"";
+        if(nm.indexOf("_archive.torrent")>=0)return;
+        var fmt=(f.format||"")+"";
+        if(fmt.indexOf("512Kb MPEG4")>=0)cands.push({p:5,name:nm});
+        else if(fmt.indexOf("MPEG4")>=0)cands.push({p:4,name:nm});
+        else if(fmt.indexOf("h.264")>=0)cands.push({p:3,name:nm});
+        else if(/\.mp4$/i.test(nm))cands.push({p:2,name:nm});
+        else if(/\.webm$/i.test(nm))cands.push({p:1,name:nm});
+        else if(/\.ogv$/i.test(nm))cands.push({p:1,name:nm});
+      });
+      if(!cands.length)return {embed:true};
+      cands.sort(function(a,b){return b.p-a.p;});
+      var name=cands[0].name;
+      var encoded=name.split("/").map(function(part){return encodeURIComponent(part);}).join("/");
+      return {video:"https://archive.org/download/"+encodeURIComponent(m.id)+"/"+encoded};
+    }).catch(function(){return {embed:true};});
+}
+function reproducir(){
+  var slot=document.getElementById("playerSlot");
+  var m=moviesCache[currentIdx];
+  if(!m)return;
+  slot.innerHTML='<div class="loading">Preparando reproducción...</div>';
+  pickVideo(m).then(function(res){
+    if(res.video){
+      slot.innerHTML='<div class="player-wrap"><video src="'+esc(res.video)+'" controls preload="metadata" autoplay style="width:100%;display:block;max-height:440px;background:#000"></video></div>'+
+        '<div class="src-line">▶ Reproduciendo MP4 directo (dominio público/CC) · fuente: Archive.org</div>';
+    }else if(res.embed){
+      slot.innerHTML='<div class="player-wrap"><iframe src="'+esc(m.embed)+'" allow="autoplay; fullscreen; encrypted-media"></iframe></div>'+
+        '<div class="src-line">▶ Reproductor oficial de Archive.org (embed autorizado)</div>';
+    }else{
+      slot.innerHTML='<div class="no-source"><span class="big">🚫</span>Reproducción no disponible actualmente.<br><small style="color:rgba(241,196,15,.35)">Este item no tiene un archivo de video reproducibible. Podés ver su ficha oficial.</small></div>';
+    }
+  });
+}
+function cerrar(){
+  document.getElementById("modalOverlay").classList.remove("open");
+  document.getElementById("playerSlot").innerHTML="";
+  document.body.style.overflow="";
+}
+cargarCategorias();
+cargar();
+</script>
+<script src="/errores.js" defer></script>
+<script src="/update_check.js" defer></script>
+</body>
+</html>

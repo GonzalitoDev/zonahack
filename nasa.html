@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>🚀 NASA Rocket Sim</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#000;color:#cfe;font-family:'Segoe UI',system-ui,sans-serif;overflow:hidden;height:100vh}
+#c{position:fixed;inset:0;display:block}
+/* HUD */
+.hud{position:fixed;top:0;left:0;right:0;padding:10px 14px;display:flex;justify-content:space-between;align-items:flex-start;pointer-events:none;z-index:5;flex-wrap:wrap;gap:8px}
+.brand{font-family:'Courier New',monospace;font-weight:900;font-size:15px;letter-spacing:2px;color:#00e5ff;text-shadow:0 0 12px rgba(0,229,255,.5)}
+.brand span{color:#ff5a5a}
+.hud .mis{font-size:9px;color:#667;letter-spacing:1px;margin-top:2px}
+.tel{background:rgba(0,10,20,.55);border:1px solid rgba(0,229,255,.2);border-radius:12px;padding:10px 14px;font-family:'Courier New',monospace;backdrop-filter:blur(6px);min-width:180px}
+.tel .row{display:flex;justify-content:space-between;font-size:12px;margin:2px 0;letter-spacing:1px}
+.tel .row b{color:#fff;font-weight:700}
+.tel .row .g{color:#00e5ff}
+.tel .row .alt{color:#ffcc00}
+.tel .row .vel{color:#ff5a5a}
+.tel .row .fue{color:#2ee6a8}
+.controls{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);display:flex;gap:10px;align-items:center;z-index:5;flex-wrap:wrap;justify-content:center}
+.cbtn{background:rgba(0,229,255,.1);border:1px solid rgba(0,229,255,.35);color:#dff;border-radius:10px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;letter-spacing:1px;transition:.2s;pointer-events:auto}
+.cbtn:hover{background:rgba(0,229,255,.2)}
+.cbtn.red{background:rgba(255,90,90,.12);border-color:rgba(255,90,90,.4);color:#ff9a8f}
+.cbtn.green{background:rgba(46,230,168,.12);border-color:rgba(46,230,168,.4);color:#a7ffd9}
+.thr-wrap{display:flex;align-items:center;gap:8px;background:rgba(0,10,20,.55);border:1px solid rgba(0,229,255,.2);border-radius:12px;padding:8px 14px;backdrop-filter:blur(6px);pointer-events:auto}
+.thr-wrap label{font-family:'Courier New',monospace;font-size:10px;color:#00e5ff}
+input[type=range]{width:140px;accent-color:#00e5ff}
+.thr-val{font-family:'Courier New',monospace;font-size:15px;font-weight:900;color:#fff;min-width:42px;text-align:center}
+/* Overlays */
+.overlay{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,5,.85);z-index:20;text-align:center;padding:20px}
+.overlay .big{font-size:44px;margin-bottom:8px}
+.overlay h1{font-size:26px;color:#fff;letter-spacing:2px;font-family:'Courier New',monospace}
+.overlay h1 em{color:#00e5ff;font-style:normal}
+.overlay p{color:#889;font-size:13px;margin-top:10px;max-width:420px;line-height:1.6}
+.count{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:15;font-family:'Courier New',monospace;
+  font-size:120px;font-weight:900;color:#ffcc00;text-shadow:0 0 40px rgba(255,204,0,.6);pointer-events:none}
+.count.show{display:flex}
+.flash{position:fixed;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:10}
+.flash.on{opacity:.9;transition:opacity 1s}
+.banner{position:fixed;top:45%;left:0;right:0;text-align:center;z-index:8;pointer-events:none;font-family:'Courier New',monospace;
+  font-size:30px;font-weight:900;letter-spacing:3px;text-shadow:0 0 30px currentColor;display:none}
+.banner.show{display:block}
+.milestone{position:fixed;left:14px;bottom:120px;z-index:5;font-family:'Courier New',monospace;font-size:11px;color:#00e5ff;
+  background:rgba(0,10,20,.5);border:1px solid rgba(0,229,255,.2);border-radius:10px;padding:8px 12px;max-height:150px;overflow-y:auto;width:190px}
+.milestone .m{color:#88a;letter-spacing:.5px;margin:2px 0}
+.hint{position:fixed;bottom:14px;right:14px;z-index:4;font-size:10px;color:#556;font-family:'Courier New',monospace;letter-spacing:1px}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+
+<div class="hud">
+  <div>
+    <div class="brand">🚀 NASA <span>ROCKET</span> SIM</div>
+    <div class="mis">MISIÓN: LLEGAR A 100 KM (LÍNEA DE KÁRMÁN)</div>
+  </div>
+  <div class="tel" id="tel">
+    <div class="row"><span>T+</span><b id="tT">0.0s</b></div>
+    <div class="row"><span>ALTITUD</span><b class="alt" id="tAlt">0 km</b></div>
+    <div class="row"><span>VELOCIDAD</span><b class="vel" id="tVel">0 m/s</b></div>
+    <div class="row"><span>ACELERACIÓN</span><b class="g" id="tAcc">0 g</b></div>
+    <div class="row"><span>COMBUSTIBLE</span><b class="fue" id="tFue">100%</b></div>
+    <div class="row"><span>EMPUJE</span><b id="tThr">0%</b></div>
+  </div>
+</div>
+
+<div class="milestone" id="miles"></div>
+
+<div class="banner" id="banner"></div>
+
+<div class="controls">
+  <div class="thr-wrap">
+    <label>EMPUJE</label>
+    <input type="range" id="thr" min="0" max="100" value="0">
+    <span class="thr-val" id="thrVal">0%</span>
+  </div>
+  <button class="cbtn" id="btnIgn" onclick="iniciar()">🔥 DESPEGUE</button>
+  <button class="cbtn green" id="btnSon" onclick="toggleSon()">🔊</button>
+  <button class="cbtn red" onclick="reiniciar()">↺</button>
+</div>
+
+<div class="hint">↑/↓ o slider: empuje · 2 s de retardo físico</div>
+
+<div class="count" id="count"></div>
+<div class="flash" id="flash"></div>
+
+<!-- START -->
+<div class="overlay" id="start">
+  <div class="big">🚀</div>
+  <h1>NASA <em>ROCKET SIM</em></h1>
+  <p>Controlá el empuje del cohete para llegar a la <b style="color:#ffcc00">Línea de Kármán (100 km)</b> con física realista:<br>
+  gravedad que baja con la altitud, arrastre atmosférico, masa que se reduce con el combustible y separación de etapas.<br><br>
+  <b style="color:#00e5ff">Consejo:</b> arrancá fuerte (100%), reducí a ~70% en la atmósfera densa y subí de nuevo arriba. Si te quedás sin combustible antes de los 100 km… volvés a la Tierra. 🫡</p>
+  <button class="cbtn" style="margin-top:18px;font-size:15px" onclick="iniciar()">🚀 LANZAR MISIÓN</button>
+</div>
+
+<script>
+var c=document.getElementById('c'),ctx=c.getContext('2d');
+var W,H; function resize(){W=c.width=innerWidth;H=c.height=innerHeight;} resize(); addEventListener('resize',resize);
+function $(id){return document.getElementById(id);}
+
+/* ─── FÍSICA REALISTA ─── */
+var g0=9.81, R=6371000, Hscale=8500; // gravedad, radio Tierra, altura escala atmósfera
+var rho0=1.225, Cd=0.3, A=10.5;        // densidad, coeficiente, área frontal (m²)
+
+var stages=[
+  {dry:120000, fuel:480000, thrust:12000000, isp:300, name:"ETAPA 1"},
+  {dry:50000, fuel:150000, thrust:3000000, isp:340, name:"ETAPA 2"}
+];
+var PAYLOAD=30000;
+
+var sim={
+  running:false, t:0,
+  stage:0, throttle:0,
+  mass:0, fuel:0,
+  alt:0, vel:0, velPrev:0, gNow:g0,
+  done:false, resultado:""
+};
+function masaTotal(){
+  var m=PAYLOAD;
+  for(var i=sim.stage;i<stages.length;i++)m+=stages[i].dry+stages[i].fuel;
+  return m;
+}
+function resetSim(){
+  sim={running:false,t:0,stage:0,throttle:0,mass:masaTotal(),fuel:stages[0].fuel,alt:0,vel:0,velPrev:0,gNow:g0,done:false,resultado:""};
+  $('thr').value=0;$('thrVal').textContent='0%';
+  miles=[];$('miles').innerHTML='';
+  $('banner').className='banner';$('banner').style.display='none';
+}
+function step(dt){
+  if(!sim.running||sim.done)return;
+  var st=stages[sim.stage];
+  var thrust=st.thrust*(sim.throttle/100);
+  var mfr=st.thrust/(st.isp*g0)*(sim.throttle/100); // kg/s
+  // gravedad según altitud
+  sim.gNow=g0*Math.pow(R/(R+sim.alt),2);
+  // densidad según altitud
+  var rho=rho0*Math.exp(-sim.alt/Hscale);
+  // arrastre (se opone a la velocidad)
+  var drag=0.5*rho*sim.vel*Math.abs(sim.vel)*Cd*A;
+  var a=(thrust - sim.mass*sim.gNow - drag*Math.sign(sim.vel||0))/sim.mass;
+  // en la base: si el empuje no supera el peso, queda apoyado
+  if(sim.alt<=0 && sim.vel<=0 && thrust<=sim.mass*sim.gNow){ a=0; sim.vel=0; }
+  sim.vel+=a*dt;
+  sim.alt+=sim.vel*dt;
+  if(sim.alt<0){ sim.alt=0; if(sim.vel<0) sim.vel=0; }
+  sim.t+=dt;
+  // consumir combustible
+  var quemado=mfr*dt;
+  if(quemado>sim.fuel)quemado=sim.fuel;
+  sim.fuel-=quemado; sim.mass-=quemado;
+  // separación de etapa
+  if(sim.fuel<=0 && sim.stage<stages.length-1){
+    sim.stage++; sim.fuel=stages[sim.stage].fuel; sim.mass=masaTotal();
+    milestone("🛰 "+stages[sim.stage].name+" a "+fmt(sim.alt)+" km");
+    if(sim.alt<60000){ sim.vel=Math.max(sim.vel,100); }
+  }
+  // fin de misión
+  if(sim.alt>=100000 && sim.vel>0){ sim.done=true; exito(); return; }
+  if(sim.fuel<=0 && sim.stage>=stages.length-1 && sim.throttle<=0){
+    if(sim.alt>=100000){ sim.done=true; exito(); }
+    else { sim.done=true; fallo("SIN COMBUSTIBLE"); }
+    return;
+  }
+  // aterrizó / cayó
+  if(sim.alt<=0 && sim.vel<=0 && sim.t>1 && !sim.done){
+    sim.done=true;
+    fallo(sim.alt>=100000?"":"CAYÓ A LA TIERRA");
+    return;
+  }
+  sim.velPrev=sim.vel;
+  telemetria();
+  checkMilestones();
+}
+
+function exito(){ $('banner').textContent="🛰 ¡ÓRBITA ALCANZADA! · 100 KM"; $('banner').style.color="#2ee6a8"; $('banner').className='banner show'; milestone("✅ MISIÓN EXITOSA a "+fmt(sim.alt)+" km"); }
+function fallo(r){ $('banner').textContent="⚠ "+r; $('banner').style.color="#ff5a5a"; $('banner').className='banner show'; milestone("❌ "+r+" · "+fmt(sim.alt)+" km"); }
+
+var miles=[]; var hitos=[10,20,50,80,100];
+function checkMilestones(){
+  hitos.forEach(function(k){
+    if(sim.alt>=k*1000 && miles.indexOf(k)<0){ miles.push(k); milestone("▲ "+k+" km alcanzados"); }
+  });
+}
+function milestone(msg){
+  var el=$('miles'); var d=document.createElement('div'); d.className='m'; d.textContent=msg; el.insertBefore(d,el.firstChild);
+  while(el.children.length>8)el.removeChild(el.lastChild);
+}
+
+function telemetria(){
+  $('tT').textContent=sim.t.toFixed(1)+'s';
+  $('tAlt').textContent=fmt(sim.alt)+' km';
+  $('tVel').textContent=fmt(sim.vel)+' m/s';
+  var acc=(sim.vel-sim.velPrev)/0.05; // aprox g
+  $('tAcc').textContent=acc.toFixed(1)+' g';
+  var pct=Math.round(sim.fuel/stages[sim.stage].fuel*100);
+  $('tFue').textContent=Math.max(0,pct)+'%';
+  $('tThr').textContent=Math.round(sim.throttle)+'%';
+}
+function fmt(x){ return x>=10000?(x/1000).toFixed(1):Math.round(x); }
+
+/* ─── RENDER ─── */
+var cam=0, zoom=1;
+function render(){
+  ctx.fillStyle='#00020a';ctx.fillRect(0,0,W,H);
+  // estrellas
+  if(!render.stars){render.stars=[];for(var i=0;i<160;i++)render.stars.push({x:Math.random(),y:Math.random(),r:Math.random()*1.4+0.3});}
+  ctx.fillStyle='#fff';
+  render.stars.forEach(function(s){ctx.globalAlpha=0.4+Math.random()*0.3;ctx.beginPath();ctx.arc(s.x*W,s.y*H,s.r,0,7);ctx.fill();});ctx.globalAlpha=1;
+  // Tierra
+  var scale=40; // px por km
+  var groundY=H-(sim.alt*scale);
+  // atmósfera
+  var grad=ctx.createLinearGradient(0,groundY,0,0);
+  grad.addColorStop(0,'rgba(0,120,255,.35)');
+  grad.addColorStop(0.35,'rgba(0,60,160,.18)');
+  grad.addColorStop(1,'rgba(0,10,40,0)');
+  ctx.fillStyle=grad;ctx.fillRect(0,0,W,groundY);
+  // Tierra
+  var tg=ctx.createLinearGradient(0,groundY,0,H);
+  tg.addColorStop(0,'#1a3a6a');tg.addColorStop(1,'#0a1428');
+  ctx.fillStyle=tg;ctx.fillRect(0,groundY,W,H-groundY);
+  ctx.strokeStyle='rgba(0,200,255,.4)';ctx.beginPath();ctx.moveTo(0,groundY);ctx.lineTo(W,groundY);ctx.stroke();
+  // línea de Kármán (100km)
+  var karm=H-(100000/1000*scale);
+  if(karm>0){ctx.strokeStyle='rgba(255,204,0,.25)';ctx.setLineDash([6,6]);ctx.beginPath();ctx.moveTo(0,karm);ctx.lineTo(W,karm);ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle='rgba(255,204,0,.5)';ctx.font='10px Courier New';ctx.fillText('KÁRMÁN · 100 KM',8,karm-6);}
+  // Cohete
+  var rw=16*zoom, rh=46*zoom;
+  var rx=W/2, ry=Math.min(groundY-rh, H*0.55);
+  drawRocket(rx,ry,rw,rh);
+  // estela / fuego
+  if(sim.throttle>0 && sim.running && sim.alt>=0){
+    var fl=20+sim.throttle*0.5;
+    var fg=ctx.createLinearGradient(0,ry+rh,0,ry+rh+fl);
+    fg.addColorStop(0,'#fff');fg.addColorStop(.3,'#ffcc00');fg.addColorStop(1,'rgba(255,60,0,0)');
+    ctx.fillStyle=fg;
+    ctx.beginPath();ctx.moveTo(rx-rw*0.28,ry+rh);ctx.lineTo(rx+rw*0.28,ry+rh);ctx.lineTo(rx,ry+rh+fl);ctx.closePath();ctx.fill();
+  }
+}
+function drawRocket(x,y,w,h){
+  // cuerpo
+  ctx.fillStyle='#e8f0f8';
+  ctx.fillRect(x-w/2,y,w,h*0.7);
+  ctx.fillStyle='#ff5a5a'; // punta
+  ctx.beginPath();ctx.moveTo(x-w/2,y);ctx.lineTo(x+w/2,y);ctx.lineTo(x,y-h*0.4);ctx.closePath();ctx.fill();
+  // franja
+  ctx.fillStyle='#1a4f8a';ctx.fillRect(x-w/2,y+h*0.5,w,h*0.16);
+  // ventana
+  ctx.fillStyle='#00e5ff';ctx.beginPath();ctx.arc(x,y+h*0.25,w*0.22,0,7);ctx.fill();
+  // aletas
+  ctx.fillStyle='#c03040';
+  ctx.beginPath();ctx.moveTo(x-w/2,y+h*0.8);ctx.lineTo(x-w/2-w*0.5,y+h);ctx.lineTo(x-w/2,y+h);ctx.closePath();ctx.fill();
+  ctx.beginPath();ctx.moveTo(x+w/2,y+h*0.8);ctx.lineTo(x+w/2+w*0.5,y+h);ctx.lineTo(x+w/2,y+h);ctx.closePath();ctx.fill();
+}
+
+/* ─── LOOP ─── */
+var last=0;
+function loop(ts){
+  var dt=Math.min(0.05,(ts-last)/1000||0.016);last=ts;
+  if(sim.running)step(dt);
+  render();
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+
+/* ─── CONTROL ─── */
+$('thr').addEventListener('input',function(){ sim.throttle=+this.value; $('thrVal').textContent=Math.round(sim.throttle)+'%'; });
+addEventListener('keydown',function(e){
+  if(e.key==='ArrowUp'){ sim.throttle=Math.min(100,sim.throttle+10);$('thr').value=sim.throttle;$('thrVal').textContent=Math.round(sim.throttle)+'%'; }
+  if(e.key==='ArrowDown'){ sim.throttle=Math.max(0,sim.throttle-10);$('thr').value=sim.throttle;$('thrVal').textContent=Math.round(sim.throttle)+'%'; }
+});
+
+/* ─── LANZAMIENTO ─── */
+function iniciar(){
+  $('start').style.display='none';
+  resetSim();
+  var count=$('count'),n=3;
+  count.className='count show';count.textContent=n;
+  var int=setInterval(function(){
+    n--;
+    if(n>0){count.textContent=n;}
+    else{
+      clearInterval(int);count.className='count';
+      var fl=$('flash');fl.className='flash on';setTimeout(function(){fl.className='flash';},1000);
+      sim.running=true;sim.throttle=100;$('thr').value=100;$('thrVal').textContent='100%';
+      milestone("🚀 DESPEGUE · EMPUJE 100%");
+    }
+  },1000);
+}
+function reiniciar(){ resetSim(); $('start').style.display='flex'; }
+/* sonido (opcional) */
+var actx=null,osc=null,gain=null;
+function toggleSon(){
+  if(actx){actx.close();actx=null;$('btnSon').textContent='🔊';return;}
+  try{
+    actx=new (window.AudioContext||window.webkitAudioContext)();
+    osc=actx.createOscillator();gain=actx.createGain();
+    osc.type='sawtooth';osc.frequency.value=60;gain.gain.value=0;
+    osc.connect(gain);gain.connect(actx.destination);osc.start();
+    $('btnSon').textContent='🔇';
+    setInterval(function(){
+      if(sim.running&&sim.throttle>0){ osc.frequency.value=50+sim.throttle*0.9; gain.gain.value=Math.min(0.12,sim.throttle/100*0.12); }
+      else gain.gain.value=0;
+    },120);
+  }catch(e){}
+}
+</script>
+</body>
+</html>

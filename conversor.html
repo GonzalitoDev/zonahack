@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>🎬 Conversor MP4 Pro - ZonaHack</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0a;color:#c8d6e5;font-family:'Courier New',monospace;min-height:100vh}
+.header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid rgba(46,204,113,.1);background:#050505;position:sticky;top:0;z-index:100}
+.header h1{color:#2ecc71;font-size:.85em;letter-spacing:1px}
+.back{color:#2ecc71;text-decoration:none;font-size:.65em;padding:4px 8px;border:1px solid rgba(46,204,113,.15);border-radius:3px}
+.container{max-width:620px;margin:0 auto;padding:14px}
+.card{background:#0d0d0d;border:1px solid rgba(46,204,113,.08);border-radius:4px;padding:20px;margin-bottom:10px}
+.card h2{color:#2ecc71;font-size:.75em;letter-spacing:1px;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.upload-zone{border:2px dashed rgba(46,204,113,.2);border-radius:6px;padding:30px;text-align:center;cursor:pointer;transition:.2s;background:rgba(46,204,113,.02)}
+.upload-zone:hover{border-color:rgba(46,204,113,.4);background:rgba(46,204,113,.04)}
+.upload-zone .ico{font-size:3em;margin-bottom:8px}
+.upload-zone .txt{font-size:.7em;color:rgba(46,204,113,.5)}
+.upload-zone .sub{font-size:.55em;color:rgba(46,204,113,.25);margin-top:4px}
+.settings{display:flex;flex-direction:column;gap:10px;margin-top:12px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.row label{font-size:.6em;color:rgba(46,204,113,.5);letter-spacing:1px;min-width:60px}
+.row select,.row input{padding:6px 8px;border:1px solid rgba(46,204,113,.15);border-radius:2px;background:#0a0a0a;color:#2ecc71;font-size:.62em;font-family:'Courier New',monospace;flex:1}
+.row input[type=range]{padding:0}
+.btn{padding:13px;border:1px solid rgba(46,204,113,.2);border-radius:3px;background:rgba(46,204,113,.08);color:#2ecc71;font-weight:bold;font-size:.72em;cursor:pointer;font-family:'Courier New',monospace;letter-spacing:1px;width:100%;margin:4px 0;transition:.2s}
+.btn:hover{border-color:#2ecc71;background:rgba(46,204,113,.15)}
+.btn:disabled{opacity:.3;cursor:wait}
+.btn-secondary{background:transparent;color:#3498db;border-color:rgba(52,152,219,.2)}
+.btn-secondary:hover{border-color:#3498db}
+.progress-wrap{margin:10px 0;display:none}
+.progress-bar{height:8px;background:#111;border-radius:4px;overflow:hidden;margin:4px 0}
+.progress-bar div{height:100%;background:linear-gradient(90deg,#2ecc71,#27ae60);border-radius:4px;transition:.2s;width:0%}
+.progress-text{font-size:.55em;color:rgba(46,204,113,.4);text-align:center;margin-top:2px}
+.status{text-align:center;font-size:.6em;color:rgba(46,204,113,.4);margin:8px 0;min-height:16px;letter-spacing:1px}
+.info-box{border:1px solid rgba(46,204,113,.06);border-radius:3px;padding:10px;margin-top:10px;font-size:.55em;color:rgba(46,204,113,.3);line-height:1.6;letter-spacing:.5px}
+.info-box b{color:#2ecc71}
+#previewVideo{max-width:100%;max-height:200px;display:none;margin:8px auto;border:1px solid rgba(46,204,113,.1);border-radius:3px}
+#fileInfo{display:none;font-size:.62em;color:rgba(46,204,113,.5);margin-top:6px;text-align:center}
+.engine-ind{display:inline-block;padding:2px 6px;border-radius:2px;font-size:.5em;margin-left:6px}
+.engine-ff{background:rgba(46,204,113,.15);color:#2ecc71;border:1px solid rgba(46,204,113,.3)}
+.engine-mr{background:rgba(52,152,219,.15);color:#3498db;border:1px solid rgba(52,152,219,.3)}
+@media(max-width:480px){.settings{flex-direction:column}}
+</style>
+</head>
+<body>
+<div class="header">
+  <a href="/" class="back">←</a>
+  <h1>🎬 CONVERSOR MP4 PRO</h1>
+  <span style="font-size:.5em;color:rgba(46,204,113,.2)">100% Seguro</span>
+</div>
+<div class="container">
+  <div class="card">
+    <h2>⬆ SUBIR VIDEO</h2>
+    <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+      <div class="ico">🎬</div>
+      <div class="txt">Click para seleccionar video</div>
+      <div class="sub">.mp4, .webm, .mkv, .avi, .mov, .ogg</div>
+      <div class="sub" style="font-size:.8em;margin-top:2px;color:#2ecc71">🔒 NUNCA se sube a internet. Se procesa en TU navegador.</div>
+    </div>
+    <input type="file" id="fileInput" accept="video/*" onchange="cargarVideo(event)" style="display:none">
+    <video id="previewVideo" controls></video>
+    <div id="fileInfo"></div>
+  </div>
+
+  <div class="card" id="settingsCard" style="display:none">
+    <h2>⚙ CONFIGURACION</h2>
+    <div class="settings">
+      <div class="row">
+        <label>Formato:</label>
+        <select id="fmtOut">
+          <option value="mp4">MP4 (H.264) - universal</option>
+          <option value="webm">WebM (VP9)</option>
+          <option value="gif">GIF animado</option>
+        </select>
+      </div>
+      <div class="row">
+        <label>Calidad:</label>
+        <select id="quality">
+          <option value="ultra">Ultra (4K-ready)</option>
+          <option value="high">Alta (1080p)</option>
+          <option value="medium" selected>Media (720p)</option>
+          <option value="low">Baja (480p)</option>
+          <option value="minimal">Minima (360p)</option>
+        </select>
+      </div>
+      <div class="row">
+        <label>Velocidad:</label>
+        <input type="range" id="speed" min="1" max="4" value="1" oninput="document.getElementById('speedVal').textContent=this.value+'x'">
+        <span id="speedVal" style="font-size:.6em;color:#2ecc71">1x</span>
+      </div>
+      <div class="row">
+        <label>Audio:</label>
+        <select id="audioBitrate">
+          <option value="192">192kbps (Alta)</option>
+          <option value="128">128kbps</option>
+          <option value="96" selected>96kbps</option>
+          <option value="64">64kbps</option>
+          <option value="0">Sin audio (solo video)</option>
+        </select>
+      </div>
+      <div class="row">
+        <label>Recortar:</label>
+        <input type="number" id="trimStart" value="0" min="0" style="flex:.5" placeholder="Desde (seg)">
+        <input type="number" id="trimEnd" value="0" min="0" style="flex:.5" placeholder="Hasta (seg, 0=todo)">
+      </div>
+    </div>
+    <button class="btn" id="btnConvert" onclick="iniciarConversion()">🔄 CONVERTIR AHORA</button>
+    <div class="progress-wrap" id="progressWrap">
+      <div class="progress-bar"><div id="progressFill"></div></div>
+      <div class="progress-text" id="progressText">Preparando...</div>
+    </div>
+    <div class="status" id="convStatus"></div>
+  </div>
+
+  <div class="card" id="resultCard" style="display:none">
+    <h2>✅ CONVERSION COMPLETA</h2>
+    <button class="btn" id="btnDownload" onclick="descargar()">📥 DESCARGAR</button>
+    <div class="status" id="resultInfo"></div>
+    <button class="btn btn-secondary" onclick="limpiarTodo()">🔄 Convertir otro video</button>
+  </div>
+
+  <div class="info-box">
+    <b>🔒 100% SEGURO:</b> El video NUNCA sale de tu computadora. Todo se procesa localmente.<br>
+    <b>⚙ Motor:</b> Usa FFmpeg (WebAssembly) para conversion real de MP4. Si no carga, usa el modo captura.<br>
+    <b>📋 Formatos:</b> .mp4, .webm, .mkv, .avi, .mov, .ogg → MP4 / WebM / GIF<br>
+    <b>⚡ Convertir GIF:</b> Elegí "GIF animado" para crear un GIF desde el video.<br>
+    <b>🚀 Velocidad:</b> Con FFmpeg es MUCHO mas rapido que el modo captura (no es tiempo real).
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.js"></script>
+<script>
+var videoFile=null;
+var videoBlob=null;
+var videoDuration=0;
+var ffmpeg=null;
+var usingFFmpeg=false;
+
+function cargarVideo(e){
+  var f=e.target.files[0];
+  if(!f)return;
+  videoFile=f;
+  var url=URL.createObjectURL(f);
+  var vid=document.getElementById("previewVideo");
+  vid.src=url;vid.style.display="block";
+  vid.onloadedmetadata=function(){
+    videoDuration=vid.duration;
+    document.getElementById("fileInfo").style.display="block";
+    document.getElementById("fileInfo").innerHTML="📁 "+f.name+" | ⏱ "+fmtTime(vid.duration)+" | 📦 "+fmtSize(f.size);
+    document.getElementById("settingsCard").style.display="block";
+    document.getElementById("convStatus").textContent="Cargando motor FFmpeg...";
+    cargarFFmpeg();
+  };
+}
+
+function fmtTime(s){s=Math.floor(s||0);var m=Math.floor(s/60);var ss=s%60;return m+":"+(ss<10?"0":"")+ss;}
+function fmtSize(b){return b>1e9?(b/1e9).toFixed(1)+" GB":b>1e6?(b/1e6).toFixed(1)+" MB":b>1e3?(b/1e3).toFixed(0)+" KB":b+" B";}
+
+function cargarFFmpeg(){
+  try{
+    if(typeof FFmpegWASM!=="undefined"){
+      ffmpeg=FFmpegWASM.createFFmpeg({log:false});
+      ffmpeg.setProgress(function(p){
+        document.getElementById("progressFill").style.width=Math.round(p.ratio*100)+"%";
+        document.getElementById("progressText").textContent="Convirtiendo: "+Math.round(p.ratio*100)+"%";
+      });
+      ffmpeg.load().then(function(){
+        usingFFmpeg=true;
+        document.getElementById("convStatus").innerHTML="✅ Motor FFmpeg listo <span class='engine-ind engine-ff'>FFmpeg RAPIDO</span>";
+      }).catch(function(){
+        usingFFmpeg=false;
+        document.getElementById("convStatus").innerHTML="⚠ FFmpeg no cargo, usare el modo captura <span class='engine-ind engine-mr'>CAPTURA</span>";
+      });
+    }
+  }catch(e){
+    usingFFmpeg=false;
+    document.getElementById("convStatus").textContent="⚠ Usando modo captura (FFmpeg no disponible)";
+  }
+}
+
+function iniciarConversion(){
+  if(!videoFile){alert("Selecciona un video primero");return;}
+  var btn=document.getElementById("btnConvert");btn.disabled=true;btn.textContent="⏳ Convirtiendo...";
+  document.getElementById("progressWrap").style.display="block";
+  document.getElementById("resultCard").style.display="none";
+  document.getElementById("progressFill").style.width="0%";
+
+  if(usingFFmpeg && ffmpeg){
+    convertirConFFmpeg(btn);
+  }else{
+    convertirConCapture(btn);
+  }
+}
+
+// ─── MODO FFMPEG (RAPIDO) ────────────
+function convertirConFFmpeg(btn){
+  var fmt=document.getElementById("fmtOut").value;
+  var q=document.getElementById("quality").value;
+  var spd=parseInt(document.getElementById("speed").value);
+  var audioBr=parseInt(document.getElementById("audioBitrate").value);
+  var trimStart=parseFloat(document.getElementById("trimStart").value)||0;
+  var trimEnd=parseFloat(document.getElementById("trimEnd").value)||0;
+  document.getElementById("convStatus").textContent="⚙ Configurando FFmpeg...";
+
+  var inputName="input"+videoFile.name.substring(videoFile.name.lastIndexOf("."))||".mp4";
+  var outputName="output."+(fmt==="mp4"?"mp4":fmt==="webm"?"webm":"gif");
+  var crf=q==="ultra"?15:q==="high"?18:q==="medium"?23:q==="low"?28:32;
+  var scale=q==="ultra"?-2:q==="high"?"1920:-2":q==="medium"?"1280:-2":q==="low"?"854:-2":"640:-2";
+
+  var vf="scale="+scale;
+  if(spd>1)vf+=",setpts="+(1/spd)+"*PTS";
+
+  document.getElementById("convStatus").textContent="📤 Cargando video a FFmpeg...";
+
+  (async function(){
+    try{
+      var data=await fileToUint8Array(videoFile);
+      ffmpeg.FS("writeFile",inputName,data);
+      var args=[];
+      if(trimEnd>trimStart){args.push("-ss",String(trimStart),"-to",String(trimEnd));}
+      args.push("-i",inputName);
+      if(spd>1)args.push("-filter:v",vf);
+      else args.push("-vf",vf);
+      if(fmt==="gif"){
+        args.push("-f","gif","-r","15","-loop","0",outputName);
+      }else if(fmt==="webm"){
+        args.push("-c:v","libvpx-vp9","-b:v","2M");
+        if(audioBr>0)args.push("-c:a","libopus","-b:a",String(audioBr)+"k");
+        else args.push("-an");
+        args.push(outputName);
+      }else{
+        args.push("-c:v","libx264","-crf",String(crf),"-preset","veryfast");
+        if(audioBr>0)args.push("-c:a","aac","-b:a",String(audioBr)+"k");
+        else args.push("-an");
+        args.push("-movflags","+faststart",outputName);
+      }
+      await ffmpeg.run.apply(ffmpeg,args);
+      var out=ffmpeg.FS("readFile",outputName);
+      videoBlob=new Blob([out.buffer],{type:fmt==="mp4"?"video/mp4":fmt==="webm"?"video/webm":"image/gif"});
+      finalizar(btn);
+    }catch(e){
+      document.getElementById("convStatus").textContent="❌ Error FFmpeg: "+e.message;
+      btn.disabled=false;btn.textContent="🔄 CONVERTIR AHORA";
+    }
+  })();
+}
+
+function fileToUint8Array(file){
+  return new Promise(function(res,rej){
+    var fr=new FileReader();
+    fr.onload=function(){res(new Uint8Array(fr.result));};
+    fr.onerror=rej;
+    fr.readAsArrayBuffer(file);
+  });
+}
+
+// ─── MODO CAPTURA (FALLBACK) ─────────
+function convertirConCapture(btn){
+  var vid=document.getElementById("previewVideo");
+  document.getElementById("convStatus").textContent="🎬 Usando modo captura (tiempo real)...";
+  try{
+    var stream=vid.captureStream?vid.captureStream():null;
+    if(!stream){alert("Tu navegador no soporta captura. Usa Chrome/Edge.");btn.disabled=false;btn.textContent="🔄 CONVERTIR AHORA";return;}
+    var audioTracks=stream.getAudioTracks();
+    if(!audioTracks.length){
+      try{
+        var audioCtx=new AudioContext();
+        var source=audioCtx.createMediaElementSource(vid);
+        var dest=audioCtx.createMediaStreamDestination();
+        source.connect(dest);source.connect(audioCtx.destination);
+        dest.stream.getAudioTracks().forEach(function(t){stream.addTrack(t);});
+      }catch(e){}
+    }
+    var opts={mimeType:document.getElementById("fmtOut").value==="mp4"?"video/webm":"video/webm",videoBitsPerSecond:2.5e6};
+    var audioBr=parseInt(document.getElementById("audioBitrate").value);
+    if(audioBr>0)opts.audioBitsPerSecond=audioBr*1000;
+    var recorder=new MediaRecorder(stream,opts);
+    var chunks=[];
+    var spd=parseInt(document.getElementById("speed").value)||1;
+    var startTime=Date.now();
+    var realDur=videoDuration/spd;
+    recorder.ondataavailable=function(e){if(e.data.size>0)chunks.push(e.data);};
+    recorder.onstop=function(){
+      videoBlob=new Blob(chunks,{type:"video/webm"});
+      finalizar(btn);
+      vid.pause();
+    };
+    recorder.start(500);
+    vid.currentTime=0;vid.playbackRate=spd;vid.play();
+    var prog=setInterval(function(){
+      var pct=Math.min(99,((Date.now()-startTime)/1000)/realDur*100);
+      document.getElementById("progressFill").style.width=pct+"%";
+      document.getElementById("progressText").textContent=pct.toFixed(0)+"% (tiempo real)";
+      if(pct>=99||vid.ended){clearInterval(prog);recorder.stop();}
+    },500);
+  }catch(e){document.getElementById("convStatus").textContent="❌ Error: "+e.message;btn.disabled=false;btn.textContent="🔄 CONVERTIR AHORA";}
+}
+
+function finalizar(btn){
+  btn.disabled=false;btn.textContent="🔄 CONVERTIR AHORA";
+  document.getElementById("progressWrap").style.display="none";
+  document.getElementById("resultCard").style.display="block";
+  document.getElementById("resultInfo").textContent="Archivo: "+(videoFile?videoFile.name.replace(/\.[^.]+$/,""):"video")+" | "+fmtSize(videoBlob.size);
+  document.getElementById("convStatus").textContent="✅ Listo para descargar";
+}
+
+function descargar(){
+  if(!videoBlob)return;
+  var ext=document.getElementById("fmtOut").value==="gif"?"gif":document.getElementById("fmtOut").value;
+  var url=URL.createObjectURL(videoBlob);
+  var a=document.createElement("a");
+  a.href=url;a.download=(videoFile?videoFile.name.replace(/\.[^.]+$/,""):"video")+"."+ext;
+  a.click();URL.revokeObjectURL(url);
+}
+
+function limpiarTodo(){
+  videoFile=null;videoBlob=null;
+  document.getElementById("fileInput").value="";
+  document.getElementById("previewVideo").style.display="none";
+  document.getElementById("settingsCard").style.display="none";
+  document.getElementById("resultCard").style.display="none";
+  document.getElementById("fileInfo").style.display="none";
+  document.getElementById("convStatus").textContent="";
+}
+</script>
+<script src="/errores.js" defer></script>
+<script src="/update_check.js" defer></script>
+</body>
+</html>

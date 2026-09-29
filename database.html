@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<title>🗄️ Zona Base de Datos · ZonaHack</title>
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/icon_96.png" type="image/png">
+<meta name="theme-color" content="#00ff41">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:radial-gradient(circle at 15% 10%,rgba(0,255,65,.05),transparent 50%),radial-gradient(circle at 85% 85%,rgba(0,229,255,.05),transparent 50%),#06080d;color:#d7e2ef;font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh}
+#matrix{position:fixed;inset:0;z-index:0;opacity:.09;pointer-events:none}
+.wrap{position:relative;z-index:2;max-width:1020px;margin:0 auto;padding:14px}
+.hdr{display:flex;align-items:center;gap:10px;padding-bottom:10px;border-bottom:1px solid rgba(0,255,65,.2)}
+.hdr .logo{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;background:linear-gradient(135deg,rgba(0,255,65,.2),rgba(0,229,255,.2));border:1px solid rgba(0,255,65,.35)}
+.ttl{flex:1}
+.ttl h1{font-size:1em;letter-spacing:2px;font-family:'Courier New',monospace;color:#fff}
+.ttl span{font-size:.58em;color:#6d7f93;letter-spacing:1px}
+.hdr .live{display:inline-flex;align-items:center;gap:6px;font-size:.6em;color:#00ff41;border:1px solid rgba(0,255,65,.3);border-radius:16px;padding:4px 12px;letter-spacing:1px}
+.live .dot{width:8px;height:8px;border-radius:50%;background:#00ff41;animation:rt 1.4s infinite}
+@keyframes rt{0%,100%{opacity:.2}50%{opacity:1}}
+.back{color:#00ff41;text-decoration:none;font-size:.7em;padding:6px 10px;border:1px solid rgba(0,255,65,.25);border-radius:8px}
+.hero{text-align:center;padding:16px;border:1px solid rgba(0,255,65,.14);border-radius:16px;margin:12px 0;background:rgba(0,20,0,.3)}
+.hero .big{font-size:2.2em}
+.hero h2{color:#00ff41;letter-spacing:2px;font-size:1em;margin:6px 0;text-shadow:0 0 16px rgba(0,255,65,.5)}
+.hero p{font-size:.62em;color:#6d7f93;line-height:1.7}
+.stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin:12px 0}
+.stat{background:rgba(13,17,23,.9);border:1px solid rgba(0,255,65,.15);border-radius:14px;padding:12px;text-align:center;transition:.15s;position:relative;overflow:hidden}
+.stat:hover{border-color:rgba(0,255,65,.4);transform:translateY(-2px)}
+.stat .ic{font-size:1.4em}
+.stat .num{font-size:1.7em;font-weight:800;color:#00ff41;font-family:'Courier New',monospace;text-shadow:0 0 12px rgba(0,255,65,.4)}
+.stat .lb{font-size:.56em;color:#6d7f93;letter-spacing:1px;margin-top:3px;text-transform:uppercase}
+.stat.flash{animation:flashC .6s}
+@keyframes flashC{0%{background:rgba(0,255,65,.25)}100%{background:rgba(13,17,23,.9)}}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+.chip{padding:8px 13px;border-radius:18px;border:1px solid rgba(0,255,65,.2);background:rgba(0,255,65,.04);color:rgba(0,255,65,.7);font-size:.64em;cursor:pointer;transition:.15s;font-family:inherit;display:flex;align-items:center;gap:5px}
+.chip:hover{color:#00ff41;border-color:#00ff41}
+.chip.on{background:rgba(0,255,65,.15);border-color:#00ff41;color:#00ff41;font-weight:700}
+.toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:6px 0 10px}
+.toolbar input{flex:1;min-width:180px;background:#0a0d12;border:1px solid rgba(0,255,65,.2);border-radius:10px;color:#fff;padding:11px 14px;font-size:.78em;outline:none;font-family:inherit}
+.toolbar input:focus{border-color:#00ff41}
+.toolbar button{background:linear-gradient(135deg,#00ff41,#00e5ff);color:#03140a;border:none;border-radius:10px;padding:11px 18px;font-weight:800;font-size:.72em;cursor:pointer;font-family:inherit}
+.toolbar button.sec{background:#0a0d12;border:1px solid rgba(0,255,65,.25);color:#00ff41;font-weight:600}
+.rec{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}
+.rcard{background:rgba(13,17,23,.92);border:1px solid rgba(0,255,65,.12);border-radius:12px;padding:12px;font-size:.66em;line-height:1.7;animation:fadeIn .25s both;overflow:hidden}
+@keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.rcard.new{background:rgba(0,255,65,.1);border-color:#00ff41;animation:newFlash 1.4s}
+@keyframes newFlash{0%{background:rgba(0,255,65,.3)}100%{background:rgba(13,17,23,.92)}}
+.rcard .k{color:#6d7f93;display:inline-block;min-width:90px}
+.rcard .v{color:#d7e2ef;word-break:break-word}
+.rcard .v.hl{color:#00ff41;font-weight:700}
+.rcard .rid{font-size:.55em;color:rgba(0,255,65,.5);margin-bottom:5px;letter-spacing:1px}
+.rcard .vid{font-size:.55em;color:#6d7f93;margin-bottom:5px;font-family:monospace}
+.empty{background:rgba(13,17,23,.8);border:1px solid rgba(0,255,65,.12);border-radius:14px;padding:36px;text-align:center;color:#6d7f93;font-size:.7em}
+.spin{width:30px;height:30px;border:3px solid rgba(0,255,65,.15);border-top-color:#00ff41;border-radius:50%;animation:sp .8s linear infinite;margin:24px auto}
+@keyframes sp{100%{transform:rotate(360deg)}}
+.cmdbar{margin-top:12px;background:rgba(13,17,23,.9);border:1px solid rgba(0,255,65,.15);border-radius:12px;padding:12px;font-family:'Courier New',monospace;font-size:.66em;color:#00ff41;line-height:1.9}
+.cmdbar .prompt{color:#00ff41}
+.cmdbar .hl{color:#f1c40f}
+.footer{margin-top:20px;text-align:center;font-size:.58em;color:#6d7f93;letter-spacing:1px;padding-bottom:20px}
+.toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#0a0d12;border:1px solid #00ff41;color:#00ff41;padding:10px 18px;border-radius:12px;font-size:.68em;z-index:99;display:none;max-width:90vw;text-align:center}
+</style>
+</head>
+<body>
+<canvas id="matrix"></canvas>
+
+<div class="wrap">
+  <div class="hdr">
+    <div class="logo">🗄️</div>
+    <div class="ttl"><h1>ZONA BASE DE DATOS</h1><span>SUPABASE · EN VIVO</span></div>
+    <span class="live"><span class="dot"></span>LIVE</span>
+    <a href="/" class="back">←</a>
+  </div>
+
+  <div class="hero">
+    <div class="big">🗄️</div>
+    <h2>SU BASE DE DATOS, PERO GENIAL</h2>
+    <p>Explorá las tablas de ZonaHack en tiempo real: contadores en vivo, registros al instante y búsqueda.</p>
+  </div>
+
+  <div class="stats" id="stats"></div>
+
+  <div class="chips" id="chips"></div>
+
+  <div class="toolbar">
+    <input id="busq" placeholder="🔎 Buscar en esta tabla..." onkeydown="if(event.key==='Enter')cargarTabla()">
+    <button onclick="cargarTabla()">⟳ Actualizar</button>
+    <button class="sec" onclick="cargarTabla(true)">⬇ Últimos 60</button>
+  </div>
+
+  <div id="registros"><div class="spin"></div></div>
+
+  <div class="cmdbar">
+    <span class="prompt">zonahack@db:~$</span> <span id="cmdLine">select * from videos limit 30;</span><br>
+    <span style="color:#6d7f93">▸ tabla activa: <span id="tablaAct" class="hl">videos</span> · registros: <b id="tablaCount" style="color:#00ff41">0</b> · streaming realtime activo</span>
+  </div>
+
+  <div class="footer">ZONAHACK · ZONA BASE DE DATOS · SUPABASE REALTIME</div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ═══ ZONA BASE DE DATOS — Supabase realtime ═══ */
+var KEY="sb_publishable_3VvBUD5Bdu3Uaq59fJ99MQ_XDCtujUU";
+var API="https://xfwolaurpeofysnymqle.supabase.co/rest/v1";
+var WS="wss://xfwolaurpeofysnymqle.supabase.co/realtime/v1/websocket?apikey="+KEY+"&vsn=1.0.0";
+var H={"apikey":KEY,"Authorization":"Bearer "+KEY,"Content-Type":"application/json"};
+var TABLAS=[
+  {t:"videos", icon:"🎬", lb:"Videos", cols:["id","titulo","categoria","url"]},
+  {t:"chat_mensajes", icon:"💬", lb:"Chat", cols:["id","usuario","mensaje"]},
+  {t:"rangos", icon:"👑", lb:"Rangos", cols:["usuario_nombre","rango","color"]},
+  {t:"anuncios", icon:"📢", lb:"Anuncios", cols:["id","titulo","tipo","activo"]},
+  {t:"mantenimiento", icon:"🛠", lb:"Mantenimiento", cols:["id","activo","mensaje"]},
+  {t:"progreso", icon:"⏯️", lb:"Progreso", cols:["id","usuario_nombre","video_id","progreso"]},
+];
+var activa="videos", ws=null, registrosActuales=[];
+
+function $(i){return document.getElementById(i);}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function toast(m){var t=$("toast");t.textContent=m;t.style.display="block";clearTimeout(t._x);t._x=setTimeout(function(){t.style.display="none";},2600);}
+function contar(tabla){
+  return fetch(API+"/"+tabla+"?select=id",{headers:Object.assign({},H,{Prefer:"count=exact",Range:"0-0"})})
+    .then(function(r){ var cr=r.headers.get("content-range")||""; var m=cr.match(/\/(\d+)$/); return m?parseInt(m[1]):0; })
+    .catch(function(){ return 0; });
+}
+function renderStats(){
+  var el=$("stats");
+  el.innerHTML=TABLAS.map(function(t){
+    return '<div class="stat" id="stat_'+t.t+'"><div class="ic">'+t.icon+'</div><div class="num" id="num_'+t.t+'">…</div><div class="lb">'+t.lb+'</div></div>';
+  }).join("");
+  TABLAS.forEach(function(t){
+    contar(t.t).then(function(n){
+      var num=$("num_"+t.t); if(num) animarNum(num,n);
+    });
+  });
+}
+function animarNum(el,total){
+  var act=0, paso=Math.max(1,Math.round(total/40));
+  var iv=setInterval(function(){
+    act+=paso; if(act>=total){act=total;clearInterval(iv);}
+    el.textContent=act;
+  },24);
+}
+function renderChips(){
+  $("chips").innerHTML=TABLAS.map(function(t){
+    return '<button class="chip'+(t.t===activa?' on':'')+'" onclick="setTabla(\''+t.t+'\')">'+t.icon+' '+t.lb+'</button>';
+  }).join("");
+}
+function setTabla(t){
+  activa=t;
+  renderChips();
+  cargarTabla();
+  conectar(); // rejoin realtime
+}
+function cargarTabla(limit60){
+  var tb=TABLAS.find(function(x){return x.t===activa;});
+  var lim=limit60?60:30;
+  var el=$("registros");
+  el.innerHTML='<div class="spin"></div>';
+  fetch(API+"/"+activa+"?select=*&order=id.desc&limit="+lim,{headers:H})
+    .then(function(r){return r.json();}).then(function(d){
+      registrosActuales=d||[];
+      renderRegistros();
+      contar(activa).then(function(n){ var c=$("tablaCount"); if(c)c.textContent=n; });
+    }).catch(function(){ el.innerHTML='<div class="empty">Error al leer la tabla '+esc(activa)+'.</div>'; });
+}
+function renderRegistros(){
+  var el=$("registros");
+  var q=($("busq").value||"").toLowerCase();
+  var list=registrosActuales;
+  if(q) list=list.filter(function(r){ return JSON.stringify(r).toLowerCase().indexOf(q)>=0; });
+  if(!list.length){ el.innerHTML='<div class="empty">🗄️ Sin registros'+(q?' para "'+esc(q)+'"':'')+'.</div>'; return; }
+  var tb=TABLAS.find(function(x){return x.t===activa;});
+  el.innerHTML=list.map(function(r){
+    var html='<div class="rcard"><div class="rid">🆔 '+esc(r.id||"-")+'</div>';
+    tb.cols.forEach(function(c){
+      var v=r[c];
+      var hl = c==="id"||(typeof v==="boolean");
+      var vv = typeof v==="boolean"?(v?"<span style='color:#00ff41'>true</span>":"<span style='color:#ff6b6b'>false</span>")
+             : (v==null?"—":esc(String(v)));
+      if(c==="color"&&typeof v==="string"&&v.indexOf("#")===0) vv='<span style="color:'+esc(v)+'">● '+esc(v)+'</span>';
+      html+='<div><span class="k">'+c+'</span><span class="v'+(hl?' hl':'')+'">'+vv+'</span></div>';
+    });
+    html+='</div>';
+    return html;
+  }).join("");
+  $("tablaAct").textContent=activa;
+  $("cmdLine").textContent="select * from "+activa+" limit "+(list.length>30?"60":"30")+";";
+}
+function conectar(){
+  try{ if(ws)ws.close(); }catch(e){}
+  try{
+    ws=new WebSocket(WS);
+    ws.onopen=function(){
+      ws.send(JSON.stringify({topic:"realtime:"+activa,event:"phx_join",payload:{config:{postgres_changes:[{event:"INSERT",schema:"public",table:activa}]}},ref:"1"}));
+      setInterval(function(){ try{ws.send(JSON.stringify({topic:"phoenix",event:"heartbeat",payload:{},ref:"0"}));}catch(e){} },8000);
+    };
+    ws.onmessage=function(e){
+      try{
+        var m=JSON.parse(e.data);
+        if(m.event!=="postgres_changes")return;
+        var d=m.payload&&m.payload.data;
+        if(d&&d.type==="INSERT"&&d.record){
+          // flash de la tarjeta de la tabla
+          var st=$("stat_"+activa); if(st){st.classList.remove("flash");void st.offsetWidth;st.classList.add("flash");}
+          contar(activa).then(function(n){ var num=$("num_"+activa); if(num)num.textContent=n; var c=$("tablaCount"); if(c)c.textContent=n; });
+          // insertar al inicio con flash
+          registrosActuales.unshift(d.record);
+          registrosActuales=registrosActuales.slice(0,60);
+          var el=$("registros");
+          if(!($("busq").value)){
+            var tb=TABLAS.find(function(x){return x.t===activa;});
+            var r=d.record;
+            var html='<div class="rcard new"><div class="rid">🆔 '+esc(r.id||"-")+'</div>';
+            tb.cols.forEach(function(c){
+              var v=r[c];
+              var vv=typeof v==="boolean"?(v?"<span style='color:#00ff41'>true</span>":"<span style='color:#ff6b6b'>false</span>"):(v==null?"—":esc(String(v)));
+              if(c==="color"&&typeof v==="string"&&v.indexOf("#")===0) vv='<span style="color:'+esc(v)+'">● '+esc(v)+'</span>';
+              html+='<div><span class="k">'+c+'</span><span class="v">'+vv+'</span></div>';
+            });
+            html+='</div>';
+            el.innerHTML=html+el.innerHTML;
+            toast("⚡ Nuevo registro en "+activa+" 🆔 "+(r.id||""));
+          }else{ renderRegistros(); }
+        }
+      }catch(err){}
+    };
+    ws.onclose=function(){ setTimeout(conectar,5000); };
+  }catch(e){ setTimeout(conectar,5000); }
+}
+
+/* matrix bg */
+var cv=$("matrix"),ctx=cv.getContext("2d"),cols,drop;
+var glyph="01アイウエオカキクケコ#$%";
+function size(){cv.width=innerWidth;cv.height=innerHeight;cols=Math.floor(cv.width/14);drop=Array(cols).fill(0);}
+size();addEventListener("resize",size);
+setInterval(function(){
+  ctx.fillStyle="rgba(6,8,13,.12)";ctx.fillRect(0,0,cv.width,cv.height);
+  ctx.fillStyle="#00ff41";ctx.font="13px monospace";
+  for(var i=0;i<drop.length;i++){
+    ctx.fillText(glyph[Math.floor(Math.random()*glyph.length)],i*14,drop[i]*14);
+    if(drop[i]*14>cv.height&&Math.random()>.975)drop[i]=0;
+    drop[i]++;
+  }
+},50);
+
+renderStats();
+renderChips();
+cargarTabla();
+conectar();
+</script>
+</body>
+</html>

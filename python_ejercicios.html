@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<title>🐍 Ejercicios Python · ZonaHack</title>
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/icon_96.png" type="image/png">
+<meta name="theme-color" content="#00ff41">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:radial-gradient(circle at 20% 10%,rgba(0,255,65,.05),transparent 50%),radial-gradient(circle at 85% 85%,rgba(0,229,255,.05),transparent 50%),#07090e;color:#d7e2ef;font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh}
+.wrap{max-width:1020px;margin:0 auto;padding:14px}
+.hdr{display:flex;align-items:center;gap:10px;padding-bottom:10px;border-bottom:1px solid rgba(0,255,65,.2)}
+.hdr .logo{font-size:1.6em}
+.hdr h1{font-size:1em;letter-spacing:2px;font-family:'Courier New',monospace;color:#00ff41;text-shadow:0 0 12px rgba(0,255,65,.4)}
+.hdr span{font-size:.56em;color:#6d7f93;letter-spacing:1px}
+.hdr a{margin-left:auto;color:#00ff41;text-decoration:none;font-size:.7em;border:1px solid rgba(0,255,65,.25);padding:5px 10px;border-radius:8px}
+.hero{text-align:center;padding:14px;border:1px solid rgba(0,255,65,.14);border-radius:16px;margin:12px 0;background:rgba(0,20,0,.3)}
+.hero .big{font-size:2em}
+.hero h2{color:#00ff41;letter-spacing:2px;font-size:1em;margin:6px 0;text-shadow:0 0 14px rgba(0,255,65,.5)}
+.hero p{font-size:.6em;color:#6d7f93}
+.badge{display:inline-block;margin-top:6px;background:rgba(0,255,65,.08);border:1px solid rgba(0,255,65,.25);color:#00ff41;font-size:.56em;padding:3px 10px;border-radius:16px;letter-spacing:1px}
+.stats{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0;font-size:.64em;color:#6d7f93}
+.stats b{color:#00ff41}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.chip{padding:7px 13px;border-radius:18px;border:1px solid rgba(0,255,65,.2);background:rgba(0,255,65,.04);color:rgba(0,255,65,.7);font-size:.62em;cursor:pointer;font-family:inherit}
+.chip.on{background:rgba(0,255,65,.15);border-color:#00ff41;color:#00ff41;font-weight:700}
+.main{display:grid;grid-template-columns:260px 1fr;gap:12px}
+@media(max-width:760px){.main{grid-template-columns:1fr}}
+.list{display:flex;flex-direction:column;gap:6px;max-height:70vh;overflow-y:auto;padding-right:4px}
+.list::-webkit-scrollbar{width:5px}
+.list::-webkit-scrollbar-thumb{background:#1c2531;border-radius:3px}
+.ej{background:rgba(13,17,23,.9);border:1px solid rgba(0,255,65,.12);border-radius:10px;padding:10px 12px;cursor:pointer;font-size:.66em;transition:.15s}
+.ej:hover{border-color:#00ff41}
+.ej.on{background:rgba(0,255,65,.12);border-color:#00ff41}
+.ej.done{border-color:rgba(0,255,65,.5)}
+.ej .n{color:#f1c40f;font-weight:800;margin-right:4px}
+.ej .cat{display:block;font-size:.52em;color:#6d7f93;margin-top:2px}
+.ej .chk{float:right;color:#00ff41}
+.ej .chk.no{color:#6d7f93}
+.card{background:rgba(13,17,23,.92);border:1px solid rgba(0,255,65,.15);border-radius:16px;padding:14px}
+.card .ct{font-size:.84em;color:#fff;font-weight:800;margin-bottom:6px;letter-spacing:1px}
+.card .diff{display:inline-block;font-size:.54em;padding:2px 8px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.diff.facil{color:#00ff41;border:1px solid rgba(0,255,65,.4)}
+.diff.medio{color:#f1c40f;border:1px solid rgba(241,196,15,.4)}
+.diff.dificil{color:#ff4d4d;border:1px solid rgba(255,77,77,.4)}
+.card .cd{font-size:.66em;color:#6d7f93;line-height:1.7;margin-bottom:10px}
+.card textarea{width:100%;min-height:190px;background:#060a06;border:1px solid rgba(0,255,65,.25);border-radius:10px;color:#00ff41;font-family:'Courier New',monospace;font-size:.78em;line-height:1.6;padding:12px;outline:none;resize:vertical;white-space:pre}
+.card textarea:focus{border-color:#00ff41}
+.btns{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.btns button{background:linear-gradient(135deg,#00ff41,#00e5ff);color:#03140a;border:none;border-radius:10px;padding:11px 18px;font-weight:800;font-size:.72em;cursor:pointer;font-family:inherit}
+.btns button.sec{background:#0a0d12;border:1px solid rgba(0,255,65,.3);color:#00ff41;font-weight:600}
+#out{margin-top:12px;background:#060a06;border:1px solid rgba(0,255,65,.2);border-radius:10px;padding:12px;font-family:'Courier New',monospace;font-size:.72em;line-height:1.7;white-space:pre-wrap;min-height:60px;color:#00ff41}
+#out.pass{border-color:#00ff41;background:rgba(0,255,65,.06)}
+#out.fail{border-color:#ff4d4d;color:#ff8a8a}
+#out.err{border-color:#f1c40f;color:#ffd166}
+.foot{text-align:center;font-size:.56em;color:#6d7f93;letter-spacing:1px;margin-top:16px;padding-bottom:20px}
+.toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#0a0d12;border:1px solid #00ff41;color:#00ff41;padding:10px 18px;border-radius:12px;font-size:.66em;z-index:99;display:none;max-width:90vw;text-align:center}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="hdr">
+    <div class="logo">🐍</div>
+    <div><h1>EJERCICIOS PYTHON</h1><span>PRACTICÁ CÓDIGO · EJECUTADO EN EL VPS · EN VIVO</span></div>
+    <a href="/teoria_python.html" style="color:#00e5ff;text-decoration:none;font-size:.66em;border:1px solid rgba(0,229,255,.3);padding:5px 10px;border-radius:8px">📘 Teoría →</a>
+    <a href="/">←</a>
+  </div>
+
+  <div class="hero">
+    <div class="big">🐍</div>
+    <h2>APRENDÉ PYTHON HACIENDO</h2>
+    <p>Escribí tu código, ejecutalo de verdad y aprobá cada ejercicio. 28 ejercicios · 3 dificultades.</p>
+    <span class="badge">⚡ EJECUTOR REAL EN EL VPS · 🐍 PYTHON</span>
+  </div>
+
+  <div class="stats">
+    <span>✅ Aprobados: <b id="doneCount">0</b>/28</span>
+    <span>🔥 Racha: <b id="streak">0</b></span>
+    <span>🏅 XP: <b id="xp">0</b></span>
+  </div>
+
+  <div class="chips" id="chips">
+    <button class="chip on" onclick="setFiltro('Todos')">Todos</button>
+    <button class="chip" onclick="setFiltro('Fácil')">⭐ Fácil</button>
+    <button class="chip" onclick="setFiltro('Medio')">⭐⭐ Medio</button>
+    <button class="chip" onclick="setFiltro('Difícil')">⭐⭐⭐ Difícil</button>
+  </div>
+
+  <div class="main">
+    <div class="list" id="list"></div>
+    <div class="card">
+      <div class="ct" id="titulo">Ejercicio</div>
+      <div class="cd" id="desc"></div>
+      <textarea id="editor" spellcheck="false"></textarea>
+      <div class="btns">
+        <button onclick="correr()">⚡ EJECUTAR</button>
+        <button class="sec" onclick="reiniciar()">↻ Reiniciar</button>
+        <button class="sec" onclick="siguiente()">Siguiente ➜</button>
+      </div>
+      <div id="out">Escribí tu solución y tocá EJECUTAR.</div>
+    </div>
+  </div>
+
+  <div class="foot">ZONAHACK · EJERCICIOS PYTHON · 🐍</div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ═══ EJERCICIOS PYTHON — 28 ejercicios ═══ */
+var API_BASE = location.hostname.indexOf("5fae371f") >= 0 ? "" : "https://5fae371f-39e5-4c16-9b04-658e273c947c.clouding.host";
+var EJERCICIOS = [
+  // ═══ BÁSICOS ═══
+  {n:"Hola Mundo", d:"Imprimí exactamente: Hola, ZonaHack!", p:"print()", diff:"Fácil", cat:"Básico",
+   c:"s='Hola, ZonaHack!'\nprint(s)\nif s=='Hola, ZonaHack!':\n    print('__PASS__')\nelse:\n    print('No coincide')"},
+  {n:"Suma", d:"Completá suma(a,b) que devuelve a+b.", p:"def suma(a, b):\n    # tu código\n    return 0", diff:"Fácil", cat:"Básico",
+   c:"r1=suma(2,3); r2=suma(-1,1); r3=suma(0,0)\nif r1==5 and r2==0 and r3==0:\n    print('__PASS__')\nelse:\n    print('r1',r1,'r2',r2,'r3',r3)"},
+  {n:"Par o impar", d:"Completá es_par(n) → True si n es par.", p:"def es_par(n):\n    # tu código\n    return False", diff:"Fácil", cat:"Básico",
+   c:"if es_par(4) and es_par(0) and not es_par(3):\n    print('__PASS__')\nelse:\n    print('falló')"},
+  {n:"Factorial", d:"Completá factorial(n) → n! (factorial(5)=120).", p:"def factorial(n):\n    # tu código\n    return 1", diff:"Fácil", cat:"Básico",
+   c:"if factorial(5)==120 and factorial(0)==1 and factorial(3)==6:\n    print('__PASS__')\nelse:\n    print('factorial(5)=',factorial(5))"},
+  {n:"Fibonacci", d:"Completá fib(n) → n-ésimo Fibonacci (fib(0)=0, fib(1)=1).", p:"def fib(n):\n    # tu código\n    return n", diff:"Fácil", cat:"Básico",
+   c:"if fib(0)==0 and fib(1)==1 and fib(10)==55:\n    print('__PASS__')\nelse:\n    print('fib(10)=',fib(10))"},
+  {n:"Invertir string", d:"Completá invertir(s) → el string al revés.", p:"def invertir(s):\n    # tu código\n    return s", diff:"Fácil", cat:"String",
+   c:"if invertir('hola')=='aloh' and invertir('abc')=='cba':\n    print('__PASS__')\nelse:\n    print(invertir('hola'))"},
+  {n:"Contar vocales", d:"Completá contar_vocales(s) → cuántas a,e,i,o,u (sin importar mayúsculas).", p:"def contar_vocales(s):\n    # tu código\n    return 0", diff:"Fácil", cat:"String",
+   c:"if contar_vocales('Hola Mundo')==4 and contar_vocales('aeiou')==5:\n    print('__PASS__')\nelse:\n    print(contar_vocales('Hola Mundo'))"},
+  {n:"Número primo", d:"Completá es_primo(n) → True si n es primo (n>1, sin divisores).", p:"def es_primo(n):\n    # tu código\n    return False", diff:"Fácil", cat:"Básico",
+   c:"if es_primo(7) and es_primo(2) and not es_primo(1) and not es_primo(9):\n    print('__PASS__')\nelse:\n    print('falló')"},
+  {n:"FizzBuzz", d:"Completá fizzbuzz(n): imprime 1..n, 'Fizz' si múltiplo de 3, 'Buzz' si de 5, 'FizzBuzz' si de ambos.", p:"def fizzbuzz(n):\n    # tu código\n    pass", diff:"Fácil", cat:"Básico",
+   c:"fizzbuzz(15)\nprint('__PASS__' if True else '')"},
+  {n:"Ordenar lista", d:"Completá ordenar(lista) → la lista ordenada de menor a mayor.", p:"def ordenar(lista):\n    # tu código\n    return lista", diff:"Fácil", cat:"Listas",
+   c:"if ordenar([3,1,2])==[1,2,3] and ordenar([5,4])==[4,5]:\n    print('__PASS__')\nelse:\n    print(ordenar([3,1,2]))"},
+  // ═══ LISTAS ═══
+  {n:"Máximo de lista", d:"Completá maximo(lista) → el número más grande (sin usar max()).", p:"def maximo(lista):\n    # tu código\n    return 0", diff:"Medio", cat:"Listas",
+   c:"if maximo([3,9,2,7])==9 and maximo([-1,-5,-2])==-1:\n    print('__PASS__')\nelse:\n    print(maximo([3,9,2,7]))"},
+  {n:"Sumar lista", d:"Completá sumar_lista(lista) → la suma de todos los elementos.", p:"def sumar_lista(lista):\n    # tu código\n    return 0", diff:"Medio", cat:"Listas",
+   c:"if sumar_lista([1,2,3,4])==10 and sumar_lista([-1,1])==0:\n    print('__PASS__')\nelse:\n    print(sumar_lista([1,2,3,4]))"},
+  {n:"Promedio", d:"Completá promedio(lista) → el promedio (la lista no está vacía).", p:"def promedio(lista):\n    # tu código\n    return 0", diff:"Medio", cat:"Listas",
+   c:"if abs(promedio([2,4,6])-4)<0.01 and abs(promedio([1,1])-1)<0.01:\n    print('__PASS__')\nelse:\n    print(promedio([2,4,6]))"},
+  {n:"Contar ocurrencias", d:"Completá contar(lista, x) → cuántas veces aparece x en la lista.", p:"def contar(lista, x):\n    # tu código\n    return 0", diff:"Medio", cat:"Listas",
+   c:"if contar([1,2,2,3,2],2)==3 and contar(['a','b'],'z')==0:\n    print('__PASS__')\nelse:\n    print(contar([1,2,2,3,2],2))"},
+  {n:"Sin duplicados", d:"Completá sin_duplicados(lista) → la lista sin repetidos, manteniendo el orden.", p:"def sin_duplicados(lista):\n    # tu código\n    return lista", diff:"Medio", cat:"Listas",
+   c:"if sin_duplicados([1,2,2,3])==[1,2,3] and sin_duplicados([1,1,1])==[1]:\n    print('__PASS__')\nelse:\n    print(sin_duplicados([1,2,2,3]))"},
+  {n:"Invertir lista", d:"Completá invertir_lista(lista) → la lista al revés.", p:"def invertir_lista(lista):\n    # tu código\n    return lista", diff:"Medio", cat:"Listas",
+   c:"if invertir_lista([1,2,3])==[3,2,1] and invertir_lista([])==[]:\n    print('__PASS__')\nelse:\n    print(invertir_lista([1,2,3]))"},
+  // ═══ STRINGS ═══
+  {n:"Contar palabras", d:"Completá contar_palabras(s) → cuántas palabras tiene el texto.", p:"def contar_palabras(s):\n    # tu código\n    return 0", diff:"Medio", cat:"String",
+   c:"if contar_palabras('hola mundo python')==3 and contar_palabras('   uno  dos  ')==2:\n    print('__PASS__')\nelse:\n    print(contar_palabras('hola mundo python'))"},
+  {n:"Palíndromo", d:"Completá es_palindromo(s) → True si se lee igual al derecho y al revés.", p:"def es_palindromo(s):\n    # tu código\n    return False", diff:"Medio", cat:"String",
+   c:"if es_palindromo('neuquen') and es_palindromo('ana') and not es_palindromo('hola'):\n    print('__PASS__')\nelse:\n    print('falló')"},
+  {n:"Capitalizar", d:"Completá capitalizar(s) → con la primera letra en mayúscula.", p:"def capitalizar(s):\n    # tu código\n    return s", diff:"Medio", cat:"String",
+   c:"if capitalizar('hola')=='Hola' and capitalizar('python')=='Python':\n    print('__PASS__')\nelse:\n    print(capitalizar('hola'))"},
+  {n:"Quitar espacios", d:"Completá quitar_espacios(s) → sin ningún espacio.", p:"def quitar_espacios(s):\n    # tu código\n    return s", diff:"Medio", cat:"String",
+   c:"if quitar_espacios('h o l a')=='hola' and quitar_espacios('a b  c')=='abc':\n    print('__PASS__')\nelse:\n    print(quitar_espacios('h o l a'))"},
+  // ═══ DICTS ═══
+  {n:"Sumar valores", d:"Completá sumar_valores(d) → suma los valores del diccionario.", p:"def sumar_valores(d):\n    # tu código\n    return 0", diff:"Medio", cat:"Dicts",
+   c:"if sumar_valores({'a':1,'b':2,'c':3})==6 and sumar_valores({})==0:\n    print('__PASS__')\nelse:\n    print(sumar_valores({'a':1,'b':2,'c':3}))"},
+  {n:"Frecuencias", d:"Completá frecuencias(texto) → dict con la cantidad de cada letra.", p:"def frecuencias(texto):\n    # tu código\n    return {}", diff:"Medio", cat:"Dicts",
+   c:"f=frecuencias('abbc')\nif f.get('a')==1 and f.get('b')==2 and f.get('c')==1:\n    print('__PASS__')\nelse:\n    print(f)"},
+  {n:"Obtener con default", d:"Completá obtener(d, clave, default) → d[clave] si existe, si no default.", p:"def obtener(d, clave, default):\n    # tu código\n    return default", diff:"Medio", cat:"Dicts",
+   c:"if obtener({'a':1},'a',0)==1 and obtener({'a':1},'b',0)==0:\n    print('__PASS__')\nelse:\n    print('falló')"},
+  // ═══ AVANZADOS ═══
+  {n:"Potencia", d:"Completá potencia(base, exp) → base^exp SIN usar ** ni pow().", p:"def potencia(base, exp):\n    # tu código\n    return 1", diff:"Difícil", cat:"Avanzado",
+   c:"if potencia(2,3)==8 and potencia(3,2)==9 and potencia(5,0)==1:\n    print('__PASS__')\nelse:\n    print(potencia(2,3))"},
+  {n:"Anagrama", d:"Completá es_anagrama(a, b) → True si usan las mismas letras.", p:"def es_anagrama(a, b):\n    # tu código\n    return False", diff:"Difícil", cat:"Avanzado",
+   c:"if es_anagrama('roma','amor') and es_anagrama('listen','silent') and not es_anagrama('hola','mundo'):\n    print('__PASS__')\nelse:\n    print('falló')"},
+  {n:"Suma de rango", d:"Completá suma_rango(a, b) → la suma de todos los enteros de a a b inclusive.", p:"def suma_rango(a, b):\n    # tu código\n    return 0", diff:"Difícil", cat:"Avanzado",
+   c:"if suma_rango(1,5)==15 and suma_rango(5,5)==5:\n    print('__PASS__')\nelse:\n    print(suma_rango(1,5))"},
+  {n:"Rectángulo (clase)", d:"Creá la clase Rectangulo con __init__(ancho, alto) y método area() que devuelve ancho*alto.", p:"class Rectangulo:\n    def __init__(self, ancho, alto):\n        # tu código\n        pass\n    def area(self):\n        # tu código\n        return 0", diff:"Difícil", cat:"Clases",
+   c:"r=Rectangulo(3,4); r2=Rectangulo(5,2)\nif r.area()==12 and r2.area()==10:\n    print('__PASS__')\nelse:\n    print(r.area(), r2.area())"},
+  {n:"Contador (clase)", d:"Creá la clase Contador con __init__(), método incrementar() y atributo valor que empieza en 0.", p:"class Contador:\n    def __init__(self):\n        # tu código\n        pass\n    def incrementar(self):\n        # tu código\n        pass", diff:"Difícil", cat:"Clases",
+   c:"c=Contador(); c.incrementar(); c.incrementar()\nif c.valor==2:\n    print('__PASS__')\nelse:\n    print('valor',c.valor)"},
+  {n:"Persona (clase)", d:"Creá la clase Persona con __init__(nombre) y método saludar() que devuelve 'Hola, soy ' + nombre.", p:"class Persona:\n    def __init__(self, nombre):\n        # tu código\n        pass\n    def saludar(self):\n        # tu código\n        return ''", diff:"Difícil", cat:"Clases",
+   c:"p=Persona('Gonza')\nif p.saludar()=='Hola, soy Gonza':\n    print('__PASS__')\nelse:\n    print(p.saludar())"},
+];
+var filtro = "Todos";
+var actual = 0;
+var hechos = {}; try{ hechos=JSON.parse(localStorage.getItem("zh_py_done")||"{}"); }catch(e){}
+var xp = 0; try{ xp=parseInt(localStorage.getItem("zh_py_xp")||"0"); }catch(e){}
+function $(i){return document.getElementById(i);}
+function toast(m){var t=$("toast");t.textContent=m;t.style.display="block";clearTimeout(t._x);t._x=setTimeout(function(){t.style.display="none";},2600);}
+function visible(i){ return filtro==="Todos" || EJERCICIOS[i].diff===filtro; }
+function indicesVisibles(){ var r=[]; for(var i=0;i<EJERCICIOS.length;i++) if(visible(i)) r.push(i); return r; }
+function renderLista(){
+  var ids=indicesVisibles();
+  $("list").innerHTML=ids.map(function(i){
+    var e=EJERCICIOS[i];
+    return '<div class="ej'+(i===actual?' on':'')+(hechos[i]?' done':'')+'" onclick="elegir('+i+')">'+
+      '<span class="n">'+(i+1)+'</span> '+e.n+
+      '<span class="chk'+(hechos[i]?'':' no')+'">'+(hechos[i]?'✅':'•')+'</span>'+
+      '<span class="cat">'+(e.diff==="Difícil"?"⭐⭐⭐":e.diff==="Medio"?"⭐⭐":"⭐")+' · '+e.cat+'</span></div>';
+  }).join("");
+  var d=Object.keys(hechos).length;
+  $("doneCount").textContent=d;
+  $("xp").textContent=xp;
+}
+function setFiltro(f){
+  filtro=f;
+  document.querySelectorAll("#chips .chip").forEach(function(c){ c.classList.toggle("on", c.textContent.replace(/[⭐]/g,"").trim()===f || c.textContent.trim()===f); });
+  var ids=indicesVisibles();
+  if(ids.indexOf(actual)<0) actual=ids[0]!==undefined?ids[0]:0;
+  renderLista(); mostrar();
+}
+function elegir(i){ actual=i; renderLista(); mostrar(); }
+function mostrar(){
+  var e=EJERCICIOS[actual];
+  $("titulo").textContent=(actual+1)+". "+e.n+' <span class="diff '+(e.diff==="Difícil"?"dificil":e.diff==="Medio"?"medio":"facil")+'">'+(e.diff==="Difícil"?"⭐⭐⭐":e.diff==="Medio"?"⭐⭐":"⭐")+'</span>';
+  $("desc").textContent=e.d;
+  if(!$("editor").value || $("editor").dataset.ej!==String(actual)){ $("editor").value=e.p; $("editor").dataset.ej=String(actual); }
+  $("out").className=""; $("out").textContent="Escribí tu solución y tocá EJECUTAR.";
+}
+function correr(){
+  var e=EJERCICIOS[actual];
+  var out=$("out");
+  out.className=""; out.textContent="⚡ Ejecutando en el VPS...";
+  fetch(API_BASE+"/api/python",{method:"POST",headers:{"Content-Type":"text/plain;charset=UTF-8"},body:JSON.stringify({codigo:$("editor").value, check:e.c})})
+  .then(function(r){return r.json();}).then(function(d){
+    if(!d.ok){ out.className="err"; out.textContent="Error: "+(d.error||"?"); return; }
+    var txt=(d.output||"")+(d.error||"");
+    if(d.passed){
+      out.className="pass";
+      out.textContent=txt+"\n\n✅ ¡EJERCICIO APROBADO!";
+      if(!hechos[actual]){ hechos[actual]=1; localStorage.setItem("zh_py_done",JSON.stringify(hechos)); xp+=10; localStorage.setItem("zh_py_xp",String(xp)); renderLista(); toast("🏅 +10 XP"); }
+    } else {
+      out.className=(d.error&&!d.output)?"err":"fail";
+      out.textContent=(txt||"(sin salida)")+"\n\n❌ Aún no. Revisá tu código.";
+    }
+  }).catch(function(){ out.className="err"; out.textContent="Error de conexión con el VPS."; });
+}
+function reiniciar(){ $("editor").value=EJERCICIOS[actual].p; $("out").className=""; $("out").textContent="Plantilla restaurada."; }
+function siguiente(){
+  var ids=indicesVisibles();
+  var pos=ids.indexOf(actual);
+  actual=ids[(pos+1)%ids.length];
+  renderLista(); mostrar();
+}
+renderLista();
+mostrar();
+</script>
+</body>
+</html>

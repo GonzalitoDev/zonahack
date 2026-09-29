@@ -1,0 +1,42 @@
+# Node
+node_modules/
+
+# Secretos / variables de entorno
+.env
+.env.*
+!.env.example
+sapo-bot/.env
+api_keys.json
+asistente_keys.json
+push_config.json
+owner_config.json
+admins_config.json
+bot2_config.json
+thor_config.json
+aviso_config.json
+npm_config.json
+limites_tokens.json
+plan.json
+plan_aplicado.json
+*.key
+*.pem
+
+# Bases de datos
+*.db
+*.sqlite
+*.sqlite3
+
+# Backend / lógica del servidor (no se sube)
+*.py
+__pycache__/
+
+# Binarios
+*.exe
+*.apk
+*.zip
+*.blockmap
+*.msi
+
+# Backups / temporales
+*.bak*
+*.tmp

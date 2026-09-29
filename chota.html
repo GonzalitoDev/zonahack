@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>🪄 Chota App</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0a0510;--card:rgba(255,255,255,.03);--border:rgba(255,0,153,.16);--border2:rgba(255,0,153,.35);
+  --text:#f0e6ee;--muted:rgba(240,230,238,.5);--accent:#ff3d81;--accent2:#a83dff;--gold:#f1c40f}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;overflow:hidden}
+.bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.orb{position:absolute;border-radius:50%;filter:blur(100px);opacity:.5;animation:flotar 18s ease-in-out infinite}
+.orb1{width:480px;height:480px;background:radial-gradient(circle,rgba(255,61,129,.4),transparent 70%);top:-180px;right:-120px}
+.orb2{width:520px;height:520px;background:radial-gradient(circle,rgba(168,61,255,.35),transparent 70%);bottom:-220px;left:-160px;animation-delay:-7s}
+.orb3{width:300px;height:300px;background:radial-gradient(circle,rgba(0,229,255,.2),transparent 70%);top:40%;left:55%;animation-delay:-3s}
+@keyframes flotar{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(24px,-18px) scale(1.08)}}
+.bg::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(255,61,129,.02) 3px,rgba(255,61,129,.02) 4px)}
+.wrap{position:relative;z-index:1;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;gap:10px}
+.ico{font-size:70px;filter:drop-shadow(0 0 24px rgba(255,61,129,.5));animation:bounce 2s ease-in-out infinite}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+h1{font-size:2em;font-weight:900;letter-spacing:2px;font-family:'Courier New',monospace;
+  background:linear-gradient(90deg,#ff3d81,#a83dff,#00e5ff,#ff3d81);background-size:300%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:brillo 5s linear infinite}
+@keyframes brillo{to{background-position:300%}}
+.tag{color:var(--muted);font-size:.75em;letter-spacing:1px}
+.sub{color:var(--muted);font-size:.68em;max-width:340px;line-height:1.6;margin-top:4px}
+.btn{display:inline-flex;align-items:center;gap:10px;margin-top:18px;padding:16px 30px;border:none;border-radius:16px;text-decoration:none;
+  background:linear-gradient(135deg,#ff3d81,#a83dff);color:#fff;font-weight:900;font-size:1.05em;letter-spacing:1px;cursor:pointer;transition:.25s;
+  box-shadow:0 8px 30px rgba(255,61,129,.35)}
+.btn:hover{transform:translateY(-3px);box-shadow:0 14px 40px rgba(255,61,129,.5)}
+.btn:active{transform:scale(.96)}
+.btn .apk{font-size:.55em;background:rgba(255,255,255,.2);padding:2px 8px;border-radius:10px;letter-spacing:2px}
+.size{color:var(--muted);font-size:.6em;margin-top:8px;letter-spacing:1px}
+.mini{display:flex;gap:8px;margin-top:18px;flex-wrap:wrap;justify-content:center}
+.mini .w{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 16px;min-width:120px;cursor:pointer;transition:.2s}
+.mini .w:hover{border-color:var(--border2);transform:translateY(-2px)}
+.mini .w b{display:block;font-size:1.4em;color:#fff;font-family:'Courier New',monospace}
+.mini .w span{font-size:.58em;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+.big{display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:22px;padding:20px;border:2px dashed var(--border2);border-radius:16px;width:100%;max-width:360px;background:rgba(255,61,129,.04)}
+.big .bigbtn{padding:18px 34px;border:none;border-radius:16px;font-weight:900;font-size:1.2em;cursor:pointer;letter-spacing:1px;font-family:'Courier New',monospace;
+  background:linear-gradient(135deg,#ff3d81,#ffb300);color:#2a0000;box-shadow:0 0 30px rgba(255,61,129,.4);transition:.2s}
+.big .bigbtn:hover{transform:scale(1.05);box-shadow:0 0 40px rgba(255,61,129,.6)}
+.big .bigbtn:active{transform:scale(.92)}
+.big .bigout{font-size:.8em;color:#ffd7a8;min-height:22px;font-family:'Courier New',monospace}
+.shake{animation:shak .4s}
+@keyframes shak{0%,100%{transform:translate(0)}20%{transform:translate(-6px,2px) rotate(-1deg)}40%{transform:translate(6px,-2px)}60%{transform:translate(-4px,2px)}80%{transform:translate(4px,-2px)}}
+.footer{position:fixed;bottom:14px;left:0;right:0;text-align:center;font-size:.55em;color:var(--muted);letter-spacing:2px;z-index:2}
+.confeti{position:fixed;top:-20px;z-index:50;width:10px;height:16px;border-radius:3px;animation:caer linear forwards}
+@keyframes caer{to{transform:translateY(110vh) rotate(720deg);opacity:.2}}
+/* CHOTA COINS */
+.coins{width:100%;max-width:400px;margin-top:22px;text-align:center}
+.coins .hdr{display:flex;align-items:center;justify-content:space-between;gap:10px;background:rgba(255,61,129,.06);border:1px solid var(--border);border-radius:14px;padding:12px 16px}
+.coins .bal{font-size:1.5em;font-weight:900;color:#ffb300;font-family:'Courier New',monospace;text-shadow:0 0 12px rgba(255,179,0,.4)}
+.coins .ganar{padding:8px 16px;border:none;border-radius:10px;background:linear-gradient(135deg,#ffb300,#ff3d81);color:#2a0000;font-weight:800;cursor:pointer;font-family:'Courier New',monospace;font-size:.8em}
+.coins .ganar:hover{box-shadow:0 0 16px rgba(255,179,0,.4)}
+.coins .tienda{display:grid;grid-template-columns:repeat(auto-fill,minmax(108px,1fr));gap:8px;margin-top:12px}
+.coins .item{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px;cursor:pointer;transition:.2s}
+.coins .item:hover{border-color:var(--border2);transform:translateY(-2px)}
+.coins .item .e{font-size:1.6em}
+.coins .item .n{font-size:.64em;color:#fff;font-weight:700;margin-top:4px;min-height:2.4em;line-height:1.2}
+.coins .item .p{font-size:.6em;color:#ffb300;font-family:'Courier New',monospace;margin-top:3px}
+.coins .res{margin-top:12px;padding:10px 14px;border-radius:12px;background:rgba(255,61,129,.06);border:1px solid var(--border);font-size:.72em;min-height:40px;display:flex;align-items:center;justify-content:center;color:#ffd7a8;line-height:1.5}
+</style>
+</head>
+<body>
+<div class="bg"><div class="orb orb1"></div><div class="orb orb2"></div><div class="orb orb3"></div></div>
+
+<div class="wrap">
+  <div class="ico">🪄</div>
+  <h1>CHOTA APP</h1>
+  <div class="tag">LA MINI APP MÁS CHOTA</div>
+  <div class="sub">Una web app chiquita pero con onda: widgets, sonidos y un botón para bajar el .apk.</div>
+
+  <a class="btn" href="/ZonaHack.apk" download>⬇ DESCARGAR <span class="apk">.APK</span></a>
+  <div class="size">Android 7+ · ~3 MB · instalación directa</div>
+
+  <div class="big">
+    <button class="bigbtn" onclick="poronga()">🕳️ PORONGA</button>
+    <div class="bigout" id="bigOut">APRETÁ Y MIRÁ QUE PASA</div>
+  </div>
+
+  <div class="mini">
+    <div class="w" onclick="chiste()"><b id="mChiste">😆</b><span>Chiste</span></div>
+    <div class="w" onclick="beep()"><b>🔊</b><span>Sonido</span></div>
+    <div class="w" onclick="contar()"><b id="mCont">0</b><span>Contador</span></div>
+    <div class="w" onclick="color()"><b id="mColor">🎨</b><span>Color</span></div>
+    <div class="w" onclick="confeti()"><b>🎉</b><span>Confeti</span></div>
+  </div>
+
+  <div class="coins">
+    <div class="hdr"><span style="font-size:.8em;color:var(--muted)">🪙 CHOTA COINS</span><span class="bal" id="bal">100</span><button class="ganar" onclick="ganarCoins()">🎲 +</button></div>
+    <div class="tienda" id="tienda"></div>
+    <div class="res" id="res">Comprá cosas chotas que no sirven para nada 👇</div>
+  </div>
+</div>
+
+<div class="footer">CHOTA APP · HECHA POR GONZA · NO ES GRANDE, ES CHOTA</div>
+
+<script>
+var CHISTES=[
+ "¿Qué le dijo un byte a otro? → Juntémonos, un 0 me falta",
+ "¿Por qué los programadores odian la oscuridad? → Porque no hay luz... ni /on",
+ "Mi novia me dejó por una IA. Le dije: eso no va a funcionar. Me contestó: aprendo rápido",
+ "¿Cuál es el colmo de un hacker? → Que le hackeen el juego de la oca",
+ "Un código se cae y otro lo pregunta: ¿qué pasó? → El otro dice: se me cayó el stack",
+ "¿Por qué los hackers se visten de negro? → Para pasar desapercibidos en el modo incógnito",
+ "Algoritmo: palabra usada por los programadores cuando no quieren explicar qué hicieron",
+ "Le dije a mi ex que era como una tabla en SQL... se fue y no me dio el ON DELETE CASCADE",
+ "¿Qué hace un CSS en un bar? → Se posiciona solo",
+ "El Wi-Fi de mi casa es como mi vida: se cae y no me preguntan por qué"
+];
+var PORONGAS=[
+ "ESTO ES UNA PORONGA CON PATAS",
+ "LA CHOTA APP DOMINA EL MUNDO",
+ "SI ESTO ANDA, ES POR GONZA",
+ "SOY UNA APP CHOTA PERO ANDO",
+ "MÁS CHOTO QUE VENIR CON LAS MANOS EN LOS BOLSILLOS",
+ "PORONGA DETECTADA 🕳️",
+ "ESTO ES COMO MI EX: NO ANDA PERO IGUAL LO MIRÁS",
+ "LA APP MÁS PORONGA DE INTERNET (PERO TE RÍES)",
+ "GLITCH DIVERTIDO ACTIVADO",
+ "NO ES UN BUG, ES UNA FUNCIÓN CHOTA"
+];
+var CHOTAS=["CHOTA","MUY CHOTA","CHOTÍSIMA","LA MÁS CHOTA","TREMENDA CHOTA","CHOTA TOTAL","ULTRA CHOTA","RE CHOTA","PORONGUÍSIMA","CHOTA PREMIUM"];
+function poronga(){
+  document.getElementById("bigOut").textContent=PORONGAS[Math.floor(Math.random()*PORONGAS.length)];
+  document.querySelector(".wrap").classList.add("shake");
+  setTimeout(function(){document.querySelector(".wrap").classList.remove("shake");},500);
+  beep(); beep2();
+}
+function beep2(){ try{var c=new (window.AudioContext||window.webkitAudioContext)();var o=c.createOscillator(),g=c.createGain();o.type='sawtooth';o.frequency.setValueAtTime(300,c.currentTime);o.frequency.linearRampToValueAtTime(900,c.currentTime+0.4);g.gain.setValueAtTime(0.2,c.currentTime);g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+0.5);o.connect(g);g.connect(c.destination);o.start();o.stop(c.currentTime+0.5);}catch(e){} }
+function chiste(){ document.getElementById("mChiste").textContent=CHISTES[Math.floor(Math.random()*CHISTES.length)]; }
+function beep(){ try{var c=new (window.AudioContext||window.webkitAudioContext)();var o=c.createOscillator(),g=c.createGain();o.type='sine';o.frequency.value=880;g.gain.setValueAtTime(0.2,c.currentTime);g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+0.3);o.connect(g);g.connect(c.destination);o.start();o.stop(c.currentTime+0.3);}catch(e){} }
+var cont=0;
+function contar(){ cont++; document.getElementById("mCont").textContent=cont+" "+CHOTAS[Math.floor(Math.random()*CHOTAS.length)]; }
+var cc=0;
+function color(){ cc++; document.body.style.background=cc%2?"#120a1e":"#0a0510"; document.getElementById("mColor").textContent=cc%2?"🌙":"🌞"; }
+function confeti(){
+  var cols=["#ff3d81","#a83dff","#00e5ff","#ffb300","#2ee6a8","#fff"];
+  for(var i=0;i<40;i++){
+    var c=document.createElement("div"); c.className="confeti";
+    c.style.left=Math.random()*100+"vw"; c.style.background=cols[Math.floor(Math.random()*cols.length)];
+    c.style.animationDuration=(2+Math.random()*2.5)+"s"; c.style.width=(6+Math.random()*8)+"px";
+    document.body.appendChild(c); setTimeout(function(el){try{el.remove();}catch(e){}},5000);
+  }
+}
+/* ─── CHOTA COINS: monedas para comprar cosas malas sin sentido ─── */
+function $(id){return document.getElementById(id);}
+var TIENDA=[
+  {e:"😂",n:"Un chiste malo",p:10,f:function(){return CHISTES[Math.floor(Math.random()*CHISTES.length)];}},
+  {e:"🕳️",n:"Una poronga virtual",p:50,f:function(){return "Ahí la tenés. No funciona. Gracias por comprar.";}},
+  {e:"🐛",n:"Un bug gratis",p:30,f:function(){return "Bug entregado. Ahora todo se ve con glitches (imaginate).";}},
+  {e:"☕",n:"Un café inexistente",p:40,f:function(){return "Esperá... no, no existe. Igual te lo cobré.";}},
+  {e:"👻",n:"Un abrazo fantasma",p:60,f:function(){return "Sentís un escalofrío. No era un abrazo.";}},
+  {e:"🏆",n:"El trofeo de cartón",p:500,f:function(){return "🏆 Acá está tu premio: un trofeo de cartón. Se moja con la lluvia.";}},
+  {e:"⏰",n:"Un segundo de fama",p:1000,f:function(){return "⭐ Boom. Ese fue tu segundo de fama. Ya pasó.";}},
+  {e:"🪙",n:"Nada (pero te cobra)",p:5,f:function(){return "Gracias por comprar nada. Vuelvas prontos.";}},
+  {e:"📦",n:"Una caja misteriosa",p:77,f:function(){return "La caja contiene... otra caja. Y está vacía.";}},
+  {e:"🧠",n:"Una idea mala",p:25,f:function(){return "Idea: ponerle monedas a una app chota. Ya estás adentro.";}},
+  {e:"🚽",n:"Un inodoro de oro",p:999,f:function(){return "Un inodoro de oro... pero no funciona. Exactamente como el real.";}},
+  {e:"🎁",n:"Un regalo sin abrir",p:13,f:function(){return "Es un regalo. No lo abras. Es mejor así.";}}
+];
+var coins=parseInt(localStorage.getItem("chota_coins")||"100",10);
+function guardar(){ localStorage.setItem("chota_coins",coins); $("bal").textContent=coins; }
+function ganarCoins(){ coins+=Math.floor(Math.random()*40)+1; if(Math.random()<0.15) coins-=20; if(coins<0) coins=0; guardar(); $("res").textContent="🎲 Ganaste (o perdiste) monedas. Ahora: "+coins; }
+function renderTienda(){ $("tienda").innerHTML=TIENDA.map(function(it,i){ return '<div class="item" onclick="comprar('+i+')"><div class="e">'+it.e+'</div><div class="n">'+it.n+'</div><div class="p">🪙 '+it.p+'</div></div>'; }).join(""); }
+function comprar(i){ var it=TIENDA[i]; if(coins<it.p){ $("res").textContent="🚫 Te faltan "+(it.p-coins)+" monedas. Ganá más (apretá 🎲)."; return; } coins-=it.p; guardar(); $("res").textContent=it.e+" "+it.n+": "+it.f(); }
+renderTienda();
+</script>
+</body>
+</html>

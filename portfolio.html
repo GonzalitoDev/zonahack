@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Gonzalo · Desarrollador de Software</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#fafafa;--card:#ffffff;--border:#e6e8ee;--text:#1a1f2e;--muted:#5b6474;--accent:#5b5bd6;--accent2:#7a5cff;--soft:#f1f2f7}
+html{scroll-behavior:smooth}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+.container{max-width:980px;margin:0 auto;padding:0 22px}
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(250,250,250,.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+nav .inner{max-width:980px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between}
+.brand{font-weight:800;letter-spacing:.5px;color:var(--text)}
+.brand span{color:var(--accent)}
+.nav-links{display:flex;gap:22px;font-size:.85em}
+.nav-links a{color:var(--muted);font-weight:600}
+.nav-links a:hover{color:var(--accent);text-decoration:none}
+.burger{display:none;background:none;border:none;font-size:1.5em;cursor:pointer;color:var(--text)}
+/* HERO */
+.hero{background:linear-gradient(135deg,#161a3a,#3a2d7a 60%,#5b5bd6);color:#fff;padding:130px 0 70px;text-align:center}
+.hero .avatar{width:110px;height:110px;border-radius:50%;margin:0 auto 18px;display:flex;align-items:center;justify-content:center;
+  font-size:44px;background:rgba(255,255,255,.12);border:2px solid rgba(255,255,255,.35);box-shadow:0 0 40px rgba(122,92,255,.4)}
+.hero h1{font-size:2.4em;font-weight:900;letter-spacing:.5px}
+.hero .rol{font-size:1.15em;color:#c9c3f7;margin-top:8px;font-weight:600}
+.hero .loc{margin-top:8px;font-size:.9em;color:#a9a3e8}
+.hero .cta{display:flex;gap:12px;justify-content:center;margin-top:28px;flex-wrap:wrap}
+.btn{padding:13px 26px;border-radius:12px;font-weight:700;font-size:.9em;display:inline-block;transition:.2s;cursor:pointer}
+.btn.solid{background:#fff;color:#2a1f66}
+.btn.solid:hover{box-shadow:0 8px 26px rgba(0,0,0,.25);text-decoration:none;transform:translateY(-2px)}
+.btn.ghost{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.3);color:#fff}
+.btn.ghost:hover{background:rgba(255,255,255,.16);text-decoration:none}
+/* SECTIONS */
+section{padding:70px 0}
+section h2{font-size:1.7em;font-weight:800;margin-bottom:8px}
+section .sec-sub{color:var(--muted);font-size:.95em;margin-bottom:30px;max-width:640px}
+/* SOBRE MI */
+.about-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:30px;align-items:start}
+.about p{color:#333b4d;margin-bottom:12px}
+.fact{background:var(--soft);border:1px solid var(--border);border-radius:14px;padding:20px}
+.fact h3{font-size:.9em;margin-bottom:12px;color:var(--accent)}
+.fact .row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px dashed var(--border);font-size:.88em}
+.fact .row:last-child{border-bottom:none}
+.fact .row b{color:var(--text)}
+/* TECNOLOGÍAS */
+.tech{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}
+.tech .t{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;text-align:center;transition:.2s}
+.tech .t:hover{border-color:var(--accent);transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.06)}
+.tech .t .i{font-size:30px}
+.tech .t .n{font-weight:700;margin-top:8px}
+.tech .t .lvl{font-size:.72em;color:var(--muted);margin-top:2px}
+/* PROYECTOS */
+.proj{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:26px;margin-bottom:20px;transition:.2s}
+.proj:hover{border-color:var(--accent);box-shadow:0 12px 34px rgba(0,0,0,.07)}
+.proj .head{display:flex;align-items:center;gap:14px;margin-bottom:6px}
+.proj .head .em{font-size:34px}
+.proj h3{font-size:1.15em;font-weight:800}
+.proj .rol{font-size:.78em;color:var(--accent);font-weight:700;margin-bottom:10px}
+.proj .prob{font-size:.95em;color:#333b4d;margin-bottom:10px}
+.proj .tags{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0}
+.proj .tag{padding:5px 12px;border-radius:20px;background:var(--soft);border:1px solid var(--border);font-size:.74em;font-weight:600;color:#3a4260}
+.proj .hecho{background:#f6f7ff;border:1px solid #e2e3ff;border-radius:12px;padding:12px 16px;font-size:.88em;color:#333b4d}
+.proj .hecho b{color:var(--accent)}
+.proj .links{margin-top:14px;display:flex;gap:10px;flex-wrap:wrap}
+.proj .link{font-size:.82em;font-weight:700}
+/* IA */
+.ai{background:var(--soft);border:1px solid var(--border);border-radius:18px;padding:26px}
+.ai p{color:#333b4d;margin-bottom:10px;font-size:.96em}
+.ai ul{margin:12px 0 0 18px;color:#333b4d}
+.ai li{margin-bottom:8px}
+/* GITHUB */
+.gh{background:linear-gradient(135deg,#161a3a,#3a2d7a);color:#fff;border-radius:18px;padding:30px;text-align:center}
+.gh h3{font-size:1.2em;margin-bottom:8px}
+.gh p{color:#c9c3f7;margin-bottom:16px}
+/* CONTACTO */
+.contact{display:grid;grid-template-columns:1fr 1fr;gap:30px}
+.contact .info p{color:#333b4d;margin-bottom:10px}
+.contact form{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:22px}
+.contact label{font-size:.82em;font-weight:700;color:var(--muted);display:block;margin:10px 0 4px}
+.contact input,.contact textarea{width:100%;padding:11px 13px;border:1px solid var(--border);border-radius:10px;font-size:.9em;font-family:inherit;outline:none;transition:.2s;background:#fff}
+.contact input:focus,.contact textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(91,91,214,.12)}
+.contact textarea{min-height:110px;resize:vertical}
+.contact button{margin-top:14px}
+footer{text-align:center;padding:26px;color:var(--muted);font-size:.82em;border-top:1px solid var(--border)}
+/* reveal */
+.reveal{opacity:0;transform:translateY(20px);transition:opacity .6s,transform .6s}
+.reveal.show{opacity:1;transform:none}
+@media(max-width:760px){
+  .about-grid,.contact{grid-template-columns:1fr}
+  .hero{padding:110px 0 50px}
+  .hero h1{font-size:1.8em}
+  .nav-links{display:none;position:absolute;top:100%;left:0;right:0;background:#fff;flex-direction:column;padding:14px 22px;border-bottom:1px solid var(--border)}
+  .nav-links.open{display:flex}
+  .burger{display:block}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="inner">
+    <div class="brand">GONZA<span>.</span>DEV</div>
+    <div class="nav-links" id="navLinks">
+      <a href="#inicio">Inicio</a>
+      <a href="#sobre">Sobre mí</a>
+      <a href="#tecnologias">Tecnologías</a>
+      <a href="#proyectos">Proyectos</a>
+      <a href="#ia">IA</a>
+      <a href="#github">GitHub</a>
+      <a href="#contacto">Contacto</a>
+    </div>
+    <button class="burger" onclick="document.getElementById('navLinks').classList.toggle('open')">☰</button>
+  </div>
+</nav>
+
+<header class="hero" id="inicio">
+  <div class="container">
+    <div class="avatar">🧑‍💻</div>
+    <h1>Gonzalo</h1>
+    <div class="rol">Desarrollador de Software</div>
+    <div class="loc">📍 Buenos Aires, Argentina · 21 años · Analista de Sistemas</div>
+    <div class="cta">
+      <a class="btn solid" href="#proyectos">Ver proyectos</a>
+      <a class="btn ghost" href="#contacto">Contactarme</a>
+    </div>
+  </div>
+</header>
+
+<section id="sobre">
+  <div class="container">
+    <h2>Sobre mí</h2>
+    <p class="sec-sub">Una presentación breve y honesta.</p>
+    <div class="about-grid">
+      <div class="about">
+        <p>Soy <b>Gonzalo</b>, tengo 21 años y vivo en Argentina. Actualmente me estoy formando como <b>Analista de Sistemas</b> y desarrollo aplicaciones web de forma autodidacta.</p>
+        <p>Me gusta construir proyectos reales de punta a punta: desde la interfaz hasta la base de datos y el despliegue. Disfruto resolver problemas y aprender tecnologías nuevas mientras las uso en proyectos concretos.</p>
+        <p>Para acelerar mi desarrollo, integro <b>herramientas de inteligencia artificial</b> como asistente de código: me ayudan a escribir y revisar código, refactorizar, encontrar errores y aprender buenas prácticas. Siempre reviso y entiendo cada línea antes de incluirla.</p>
+      </div>
+      <div class="fact">
+        <h3>📌 Ficha</h3>
+        <div class="row"><span>Nombre</span><b>Gonzalo</b></div>
+        <div class="row"><span>Edad</span><b>21</b></div>
+        <div class="row"><span>Ubicación</span><b>Argentina</b></div>
+        <div class="row"><span>Formación</span><b>Analista de Sistemas</b></div>
+        <div class="row"><span>Enfoque</span><b>Desarrollo web</b></div>
+        <div class="row"><span>Idioma</span><b>Español</b></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="tecnologias" style="background:#fff;border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+  <div class="container">
+    <h2>Tecnologías</h2>
+    <p class="sec-sub">Tecnologías que conozco y uso en mis proyectos.</p>
+    <div class="tech">
+      <div class="t reveal"><div class="i">🐍</div><div class="n">Python</div><div class="lvl">Backend y scripts</div></div>
+      <div class="t reveal"><div class="i">🌐</div><div class="n">HTML</div><div class="lvl">Estructura</div></div>
+      <div class="t reveal"><div class="i">🎨</div><div class="n">CSS</div><div class="lvl">Diseño y responsive</div></div>
+      <div class="t reveal"><div class="i">⚡</div><div class="n">JavaScript</div><div class="lvl">Interactividad</div></div>
+      <div class="t reveal"><div class="i">⚛️</div><div class="n">React</div><div class="lvl">Interfaces</div></div>
+      <div class="t reveal"><div class="i">🗄️</div><div class="n">Supabase</div><div class="lvl">Base de datos y realtime</div></div>
+    </div>
+  </div>
+</section>
+
+<section id="proyectos">
+  <div class="container">
+    <h2>Proyectos</h2>
+    <p class="sec-sub">Proyectos que desarrollé yo mismo, de punta a punta.</p>
+
+    <div class="proj reveal">
+      <div class="head"><span class="em">🎬</span><h3>ZonaHack · Plataforma de entretenimiento</h3></div>
+      <div class="rol">Desarrollo completo · Web + apps</div>
+      <p class="prob"><b>Qué problema resuelve:</b> centralizar el acceso a contenido de video (películas, series, dibujitos y música) en una sola plataforma propia, con reproductor integrado, catálogo organizado por categorías y funciones de usuario.</p>
+      <div class="tags"><span class="tag">HTML</span><span class="tag">CSS</span><span class="tag">JavaScript</span><span class="tag">Python</span><span class="tag">Supabase</span><span class="tag">Vercel</span></div>
+      <div class="hecho"><b>Qué hice yo:</b> diseñé y desarrollé toda la plataforma: interfaz responsive y temas, reproductor de video con varias fuentes de reproducción y auto-fallback, catálogo con búsqueda y filtros, sistema de usuarios y sesión, chat en tiempo real, sistema de monedas, panel de administración, y versiones de la app para Android y escritorio (Electron).</div>
+      <div class="links"><a class="link" href="#contacto">Solicitar demo →</a></div>
+    </div>
+
+    <div class="proj reveal">
+      <div class="head"><span class="em">🤖</span><h3>Asistente de IA integrado</h3></div>
+      <div class="rol">Full stack · Integración con API de IA</div>
+      <p class="prob"><b>Qué problema resuelve:</b> integrar un asistente conversacional (basado en API de IA gratuita) dentro de una aplicación, con historial de chat y configuración de clave.</p>
+      <div class="tags"><span class="tag">JavaScript</span><span class="tag">Python</span><span class="tag">API REST</span></div>
+      <div class="hecho"><b>Qué hice yo:</b> implementé el chat con la API, el manejo de contexto/historial, el panel de configuración y el manejo de errores y límites de la API.</div>
+      <div class="links"><a class="link" href="#contacto">Más información →</a></div>
+    </div>
+
+    <div class="proj reveal">
+      <div class="head"><span class="em">📱</span><h3>Aplicaciones Android y de escritorio</h3></div>
+      <div class="rol">Desarrollo de apps</div>
+      <p class="prob"><b>Qué problema resuelve:</b> llevar una aplicación web a plataformas nativas: una app Android (WebView conectada a la base de datos) y una app de escritorio en Electron para Windows.</p>
+      <div class="tags"><span class="tag">Android</span><span class="tag">WebView</span><span class="tag">Electron</span><span class="tag">Supabase</span></div>
+      <div class="hecho"><b>Qué hice yo:</b> armé el proyecto Android desde cero (interfaz embebida, conexión a la base de datos, auto-actualización de la APK) y la app de escritorio (ventana, splash, atajos y notificaciones).</div>
+      <div class="links"><a class="link" href="#contacto">Más información →</a></div>
+    </div>
+  </div>
+</section>
+
+<section id="ia" style="background:#fff;border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+  <div class="container">
+    <h2>Experiencia con Inteligencia Artificial</h2>
+    <p class="sec-sub">Cómo uso la IA en mi flujo de trabajo, con honestidad.</p>
+    <div class="ai reveal">
+      <p>Integro herramientas de IA (asistentes de código y chat) como <b>apoyo en mi desarrollo</b>, nunca como reemplazo de mi lógica ni de mi conocimiento. La uso para:</p>
+      <ul>
+        <li>Generar y refactorizar código base de forma más rápida.</li>
+        <li>Encontrar y corregir errores o bugs.</li>
+        <li>Explorar buenas prácticas y arquitectura.</li>
+        <li>Escribir y documentar secciones repetitivas.</li>
+      </ul>
+      <p style="margin-top:14px">Siempre reviso, entiendo y valido todo el código que integro: la responsabilidad final y el criterio son míos. También desarrollo integraciones con <b>APIs de IA</b> dentro de mis aplicaciones (asistentes conversacionales, etc.).</p>
+    </div>
+  </div>
+</section>
+
+<section id="github">
+  <div class="container">
+    <div class="gh reveal">
+      <h3>🐙 GitHub</h3>
+      <p>Voy subiendo mis proyectos a medida que los dejo listos para compartir. Por ahora mi perfil sigue creciendo.</p>
+      <a class="btn solid" href="https://github.com/" target="_blank" rel="noopener">Ver mi GitHub →</a>
+      <p style="margin-top:12px;font-size:.8em;color:#a9a3e8">(Reemplazá el enlace con tu usuario real de GitHub cuando lo tengas)</p>
+    </div>
+  </div>
+</section>
+
+<section id="contacto">
+  <div class="container">
+    <h2>Contacto</h2>
+    <p class="sec-sub">¿Tenés una propuesta laboral o querés conocerme mejor? Escribime.</p>
+    <div class="contact">
+      <div class="info">
+        <p>📧 <b>Email:</b> <a href="mailto:tucorreo@email.com">tucorreo@email.com</a></p>
+        <p>📍 <b>Ubicación:</b> Argentina</p>
+        <p>💼 <b>Disponibilidad:</b> abierto a oportunidades de desarrollo web</p>
+        <p style="margin-top:16px;font-size:.85em;color:var(--muted)">También podés escribirme por el formulario, me llega directo a mi email.</p>
+      </div>
+      <form onsubmit="enviarMail(event)">
+        <label>Nombre</label>
+        <input id="cNom" placeholder="Tu nombre" required>
+        <label>Email</label>
+        <input id="cMail" type="email" placeholder="tu@email.com" required>
+        <label>Mensaje</label>
+        <textarea id="cMsg" placeholder="Contame de la oportunidad…" required></textarea>
+        <button class="btn solid" type="submit">Enviar mensaje</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<footer>© <span id="anio"></span> Gonzalo · Desarrollador de Software · Portfolio hecho a mano con HTML, CSS y JavaScript</footer>
+
+<script>
+// año automático
+document.getElementById('anio').textContent = new Date().getFullYear();
+
+// animaciones al hacer scroll
+var revs = document.querySelectorAll('.reveal');
+var io = new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('show'); io.unobserve(e.target);} }); }, {threshold:.12});
+revs.forEach(function(r){ io.observe(r); });
+
+// formulario → abre el cliente de email
+function enviarMail(e){
+  e.preventDefault();
+  var n=document.getElementById('cNom').value, m=document.getElementById('cMail').value, t=document.getElementById('cMsg').value;
+  var link='mailto:tucorreo@email.com?subject=Contacto desde el portfolio&body='+encodeURIComponent('Hola Gonzalo, soy '+n+' ('+m+').\n\n'+t);
+  window.location.href=link;
+}
+
+// cerrar menú móvil al tocar un link
+document.querySelectorAll('#navLinks a').forEach(function(a){ a.addEventListener('click',function(){ document.getElementById('navLinks').classList.remove('open'); }); });
+</script>
+</body>
+</html>

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>💎 Premium Demos - ZonaHack</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#020202;color:#d4af37;font-family:'Courier New',monospace;min-height:100vh}
+.header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid rgba(212,175,55,.1);background:#000;position:sticky;top:0;z-index:100}
+.header h1{color:#d4af37;font-size:.85em;letter-spacing:2px;text-shadow:0 0 15px rgba(212,175,55,.2)}
+.back{color:#d4af37;text-decoration:none;font-size:.65em;padding:4px 8px;border:1px solid rgba(212,175,55,.15);border-radius:3px}
+.container{max-width:1100px;margin:0 auto;padding:12px}
+.hero{background:linear-gradient(180deg,#0d0a00,#020202);border:1px solid rgba(212,175,55,.12);border-radius:4px;padding:16px;margin-bottom:10px;text-align:center}
+.hero h2{color:#d4af37;font-size:.95em;letter-spacing:2px;text-shadow:0 0 20px rgba(212,175,55,.15)}
+.hero p{color:rgba(212,175,55,.35);font-size:.62em;margin-top:4px}
+.badges{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:10px 0}
+.badges span{padding:4px 10px;border:1px solid rgba(212,175,55,.15);border-radius:3px;font-size:.55em;letter-spacing:1px}
+.badge-dv{border-color:rgba(0,255,200,.3);color:#00ffc8}
+.badge-da{border-color:rgba(100,180,255,.3);color:#64b4ff}
+.badge-4k{border-color:rgba(212,175,55,.3);color:#d4af37}
+.badge-imax{border-color:rgba(255,100,50,.3);color:#ff6432}
+.cats{display:flex;gap:3px;flex-wrap:wrap;margin-bottom:8px}
+.cats button{padding:5px 10px;border:1px solid rgba(212,175,55,.1);border-radius:2px;background:rgba(0,0,0,.3);color:rgba(212,175,55,.4);font-size:.58em;cursor:pointer;font-family:'Courier New',monospace;transition:.2s}
+.cats button:hover,.cats button.active{color:#d4af37;border-color:rgba(212,175,55,.3);background:rgba(212,175,55,.05)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px}
+.card{border:1px solid rgba(212,175,55,.06);border-radius:3px;overflow:hidden;cursor:pointer;background:#050505;transition:all .2s}
+.card:hover{border-color:rgba(212,175,55,.2);box-shadow:0 0 20px rgba(212,175,55,.06)}
+.card img{width:100%;aspect-ratio:16/9;object-fit:cover;background:#000}
+.card .inf{padding:6px}
+.card .t{font-size:.62em;color:rgba(212,175,55,.6);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card .tag{display:inline-block;margin-top:3px;padding:1px 5px;border-radius:2px;font-size:.5em;letter-spacing:1px}
+.status{text-align:center;font-size:.6em;color:rgba(212,175,55,.3);margin:6px 0}
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:#000;z-index:999;display:none;flex-direction:column}
+.modal-overlay.show{display:flex}
+.modal-overlay .m-top{display:flex;align-items:center;padding:8px 12px;background:#000;border-bottom:1px solid rgba(212,175,55,.1)}
+.modal-overlay button{background:none;border:none;color:#d4af37;font-size:1.2em;cursor:pointer}
+.modal-overlay .m-title{flex:1;font-size:.65em;color:rgba(212,175,55,.5);padding:0 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.modal-overlay iframe{flex:1;border:none}
+.spin{width:20px;height:20px;border:2px solid rgba(212,175,55,.1);border-top-color:#d4af37;border-radius:50%;animation:spin .7s linear infinite;margin:10px auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media(max-width:480px){.grid{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="header">
+  <a href="/" class="back">←</a>
+  <h1>💎 PREMIUM DEMOS</h1>
+  <div style="width:40px"></div>
+</div>
+<div class="container">
+  <div class="hero">
+    <h2>💎 EXPERIENCIA PREMIUM</h2>
+    <p>Dolby Vision · Dolby Atmos · IMAX Enhanced · 4K HDR · Calibración de TVs</p>
+    <div class="badges">
+      <span class="badge-dv">✦ Dolby Vision</span>
+      <span class="badge-da">✦ Dolby Atmos</span>
+      <span class="badge-4k">✦ 4K HDR</span>
+      <span class="badge-imax">✦ IMAX Enhanced</span>
+    </div>
+  </div>
+  <div class="cats" id="catBtns">
+    <button class="active" onclick="cargar('',this)">💎 TODO</button>
+    <button onclick="cargar('Dolby Vision',this)">✦ Dolby Vision</button>
+    <button onclick="cargar('Dolby Atmos',this)">🔊 Dolby Atmos</button>
+    <button onclick="cargar('4K HDR',this)">📺 4K HDR</button>
+    <button onclick="cargar('OLED',this)">⬛ OLED Test</button>
+    <button onclick="cargar('IMAX',this)">🎬 IMAX</button>
+    <button onclick="cargar('Calibracion',this)">📐 Calibración</button>
+    <button onclick="cargar('Nature',this)">🌿 Naturaleza 4K</button>
+  </div>
+  <div class="status" id="st">Cargando demos premium...</div>
+  <div class="grid" id="grid"></div>
+</div>
+<div class="modal-overlay" id="playerModal">
+  <div class="m-top">
+    <button onclick="cerrar()">←</button>
+    <span class="m-title" id="playerTitle"></span>
+  </div>
+  <iframe id="playerIframe" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>
+</div>
+
+<script>
+var SB="https://xfwolaurpeofysnymqle.supabase.co";
+var KEY="sb_publishable_3VvBUD5Bdu3Uaq59fJ99MQ_XDCtujUU";
+var todos=[];
+function esc(s){return (s||"").replace(/[&<>]/g,function(z){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[z];});}
+
+function cargar(filtro,btn){
+  document.querySelectorAll("#catBtns button").forEach(function(b){b.classList.remove("active");});
+  if(btn)btn.classList.add("active");
+  document.getElementById("st").textContent="Cargando...";
+  document.getElementById("grid").innerHTML='<div class="spin"></div>';
+  var xhr=new XMLHttpRequest();
+  xhr.open("GET",SB+"/rest/v1/videos?select=id,titulo,url,thumbnail,categoria&categoria=eq.Premium&order=created_at.desc&limit=60",true);
+  xhr.setRequestHeader("apikey",KEY);
+  xhr.setRequestHeader("Authorization","Bearer "+KEY);
+  xhr.onload=function(){
+    try{
+      todos=JSON.parse(xhr.responseText)||[];
+      var list=todos;
+      if(filtro){
+        var f=filtro.toLowerCase();
+        list=todos.filter(function(v){return (v.titulo||"").toLowerCase().indexOf(f)>=0;});
+      }
+      document.getElementById("st").textContent=list.length+" demos premium";
+      var h="";
+      list.forEach(function(v,i){
+        var tags=[];
+        var t=(v.titulo||"").toLowerCase();
+        if(t.indexOf("dolby vision")>=0||t.indexOf("hdr")>=0)tags.push('<span class="badge-dv" style="font-size:.7em">✦ DV</span>');
+        if(t.indexOf("dolby atmos")>=0||t.indexOf("surround")>=0)tags.push('<span class="badge-da" style="font-size:.7em">🔊 DA</span>');
+        if(t.indexOf("4k")>=0||t.indexOf("8k")>=0||t.indexOf("uhd")>=0)tags.push('<span class="badge-4k" style="font-size:.7em">📺 4K</span>');
+        if(t.indexOf("imax")>=0)tags.push('<span class="badge-imax" style="font-size:.7em">🎬 IMAX</span>');
+        if(t.indexOf("oled")>=0||t.indexOf("black")>=0)tags.push('<span style="font-size:.7em;color:#888">⬛ OLED</span>');
+        var idx=todos.indexOf(v);
+        h+='<div class="card" onclick="ver('+idx+')">';
+        if(v.thumbnail)h+='<img src="'+v.thumbnail+'" loading="lazy">';
+        else h+='<div style="aspect-ratio:16/9;background:#000;display:flex;align-items:center;justify-content:center;font-size:2em;opacity:.1">💎</div>';
+        h+='<div class="inf"><div class="t">'+esc((v.titulo||"").slice(0,65))+'</div><div class="tag">'+tags.join(" ")+'</div></div></div>';
+      });
+      document.getElementById("grid").innerHTML=h||'<div style="text-align:center;padding:30px;color:rgba(212,175,55,.2);grid-column:1/-1">Sin demos en esta categoria</div>';
+    }catch(e){}
+  };
+  xhr.send();
+}
+
+function ver(idx){
+  var v=todos[idx];if(!v)return;
+  document.getElementById("playerTitle").textContent=v.titulo||"Premium Demo";
+  document.getElementById("playerIframe").src="https://www.youtube-nocookie.com/embed/"+v.url+"?autoplay=1&rel=0";
+  document.getElementById("playerModal").classList.add("show");
+}
+function cerrar(){
+  document.getElementById("playerIframe").src="";
+  document.getElementById("playerModal").classList.remove("show");
+}
+
+cargar();
+</script>
+<script src="/errores.js" defer></script>
+<script src="/update_check.js" defer></script>
+</body>
+</html>

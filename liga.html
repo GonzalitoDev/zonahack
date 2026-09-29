@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>💘 Liga de Robots · ZonaHack</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#100714;--card:rgba(26,14,32,.92);--border:#3a2244;--text:#f5e8f2;--muted:#b78fb0;--pink:#ff5ec4;--rose:#ff8fc0;--purple:#b44dff}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+.bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.orb{position:absolute;border-radius:50%;filter:blur(90px);opacity:.35;animation:flotar 18s ease-in-out infinite}
+.orb1{width:460px;height:460px;background:radial-gradient(circle,rgba(255,94,196,.2),transparent 70%);top:-170px;right:-120px}
+.orb2{width:500px;height:500px;background:radial-gradient(circle,rgba(180,77,255,.18),transparent 70%);bottom:-200px;left:-160px;animation-delay:-7s}
+@keyframes flotar{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(20px,-14px) scale(1.08)}}
+.wrap{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;min-height:0}
+.header{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border);background:rgba(16,7,20,.92);backdrop-filter:blur(10px)}
+.logo{width:40px;height:40px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px;background:linear-gradient(135deg,rgba(255,94,196,.3),rgba(180,77,255,.3));border:1px solid rgba(255,94,196,.5)}
+.ttl{flex:1;min-width:0}
+.ttl h1{font-size:.95em;letter-spacing:2px;font-weight:900;font-family:'Courier New',monospace;color:#fff;background:linear-gradient(90deg,#ff5ec4,#b44dff,#ff5ec4);background-size:200%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:brillo 4s linear infinite}
+@keyframes brillo{to{background-position:200%}}
+.ttl span{font-size:.6em;color:var(--muted)}
+.back{color:var(--pink);text-decoration:none;font-size:.7em;padding:6px 10px;border:1px solid var(--border);border-radius:8px}
+.chicas{display:flex;gap:10px;padding:12px 14px;overflow-x:auto;border-bottom:1px solid var(--border);background:rgba(16,7,20,.5);scrollbar-width:none}
+.chica{flex-shrink:0;width:92px;text-align:center;cursor:pointer;border:1px solid var(--border);border-radius:14px;padding:10px 6px;background:var(--card);transition:.15s}
+.chica:hover,.chica.on{border-color:var(--pink);background:rgba(255,94,196,.08)}
+.chica .emo{font-size:1.9em}
+.chica .nm{font-size:.66em;font-weight:800;margin-top:4px}
+.chica .per{font-size:.52em;color:var(--muted)}
+.info{font-size:.6em;color:var(--muted);padding:5px 14px;min-height:14px}
+.msgs{flex:1;overflow-y:auto;padding:16px 14px;display:flex;flex-direction:column;gap:10px;-webkit-overflow-scrolling:touch}
+.msg{max-width:82%;padding:10px 14px;border-radius:16px;font-size:.8em;line-height:1.6;word-break:break-word;animation:fadeIn .3s;white-space:pre-wrap}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.msg.bot{align-self:flex-start;background:var(--card);border:1px solid var(--border);border-top-left-radius:4px}
+.msg.user{align-self:flex-end;background:linear-gradient(135deg,rgba(255,94,196,.18),rgba(180,77,255,.18));border:1px solid rgba(255,94,196,.3);border-top-right-radius:4px}
+.msg .who{font-size:.58em;font-weight:800;letter-spacing:.5px;margin-bottom:4px}
+.msg.bot .who{color:var(--pink)}
+.msg.user .who{color:var(--muted);text-align:right}
+.typing{display:inline-block;width:8px;height:8px;background:var(--pink);border-radius:50%;margin-right:4px;animation:tp 1s infinite}
+@keyframes tp{0%,100%{opacity:.2}50%{opacity:1}}
+.input-bar{display:flex;gap:8px;padding:10px 14px;padding-bottom:calc(10px + env(safe-area-inset-bottom));border-top:1px solid var(--border);background:rgba(16,7,20,.95)}
+.input-bar input{flex:1;background:var(--card);border:1px solid var(--border);border-radius:14px;color:var(--text);padding:12px 14px;font-size:.82em;outline:none;font-family:inherit}
+.input-bar input:focus{border-color:var(--pink)}
+.input-bar button{background:linear-gradient(135deg,#ff5ec4,#b44dff);color:#fff;border:none;border-radius:14px;padding:12px 18px;font-weight:800;font-size:.75em;cursor:pointer;font-family:inherit}
+.aviso{text-align:center;font-size:.55em;color:var(--muted);padding:4px}
+</style>
+</head>
+<body>
+<div class="bg"><div class="orb orb1"></div><div class="orb orb2"></div></div>
+
+<div class="wrap">
+  <div class="header">
+    <div class="logo">💘</div>
+    <div class="ttl"><h1>LIGA DE  ROBOTS</h1><span>robotas que scrappearon cosas de amor 💖</span></div>
+    <a href="/" class="back">←</a>
+  </div>
+
+  <div class="chicas" id="chicas"></div>
+  <div class="info" id="info">
+    <span id="corazonesTxt">❤️❤️❤️❤️❤️🤍🤍🤍🤍🤍</span> · <span id="nivelTxt">🤝 Conocidos</span> · <span id="infoTxt">elegí una chica 💘</span>
+  </div>
+  <div class="aviso">Entretenimiento ficticio · los robots no son personas reales</div>
+
+  <div class="msgs" id="msgs"><div class="msg bot"><div class="who">💘 LIGA</div>¡Hola! Elegí arriba con quién querés hablar. Son robots que scrapean frases de amor y responden con su personalidad 😉</div></div>
+
+  <div class="input-bar">
+    <input id="inp" placeholder="Escribile algo..." onkeydown="if(event.key==='Enter')enviar()">
+    <button onclick="enviar()">ENVIAR 💌</button>
+  </div>
+  <div class="aviso">Entretenimiento ficticio · los robots no son personas reales</div>
+</div>
+
+<script>
+var USER=localStorage.getItem('vh_usuario')||'anon';
+var CHICAS=[
+  {id:'valentina',emo:'💖',nom:'Valentina',per:'dulce y romántica',intro:'¡Hola! Soy Valentina 😊 Soy de las que creen en el amor a primera vista. Contame de vos...',frases:['Sonreís y se me olvida todo lo demás','Me encanta como pensás las cosas','Eres mi pensamiento favorito del día','Cuándo es que nos tomamos un café?','Con vos hasta un mensaje de texto se siente especial 💕','No sé qué tenés, pero me alegrás el día entero','Cada vez que hablamos se me acelera un poquito el corazón','Sos de esas personas lindas que no se encuentran seguido']},
+  {id:'luna',emo:'🌙',nom:'Luna',per:'soñadora y misteriosa',intro:'Hola... soy Luna 🌙 Me gusta mirar las estrellas y pensar en historias. Tenés algo de misterio, ¿no?',frases:['La luna llena me recuerda a tu mirada','Hay algo en vos que no puedo explicar','Me gusta tu forma de ser, es real','Quizás el destino nos tenía preparado esto','A veces pienso que las cosas lindas llegan sin avisar, como vos','Contigo el silencio también se siente cómodo 🌙','Hay una conexión rara entre nosotros, ¿la sentís vos también?','Guardo tus mensajes como quien guarda estrellas']},
+  {id:'camila',emo:'🔥',nom:'Camila',per:'picante y directa',intro:'Ey, ¿qué onda? Soy Camila 😏 No ando con vueltas: si me caés bien, lo digo. Y me caés bien.',frases:['Ay, me hiciste reír de verdad','No sabés cómo me alegro de que me escribas','Ese mensaje me llegó directo al corazón','Para qué te voy a mentir: te estaba esperando','Te lo digo sin vueltas: me tenés pensando en vos','Me gusta esto que estamos armando, ¿a vos no?','Cada charla con vos se siente mejor que la anterior','No es común que alguien me guste tan rápido, pero acá estamos']},
+  {id:'sofia',emo:'🌸',nom:'Sofía',per:'cariñosa y tímida',intro:'Hola... hola 🙈 Soy Sofía. Perdón si soy tímida, es que me pongo nerviosa con estas cosas. ¿Vos cómo estás?',frases:['Me pone feliz recibir tus mensajes','Sos tan amable conmigo...','Nunca le conté esto a nadie, pero contigo fluye','Tu voz (o texto jaja) me tranquiliza','Con vos se me pasan los nervios, es raro pero lindo 🌸','Sos de las pocas personas con las que me siento yo misma','Cada mensaje tuyo me saca una sonrisita boba','Gracias por tenerme paciencia, de verdad']},
+];
+var actual=CHICAS[0];
+var pool=[];  // frases scrapeadas
+var nombre='';
+function $(id){return document.getElementById(id);}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function addHTML(html,quien){
+  var box=$("msgs");var d=document.createElement("div");d.className="msg "+(quien==='user'?'user':'bot');
+  d.innerHTML='<div class="who">'+(quien==='user'?'🧑 TÚ':'<span id="nomAct">'+esc(actual.emo)+' '+esc(actual.nom)+'</span>')+'</div>'+html;
+  box.appendChild(d);box.scrollTop=box.scrollHeight;return d;
+}
+// Evita repetir la misma frase 2 veces seguidas (mismo texto entre las ultimas 5 elegidas)
+var _ultimosAleatorios=[];
+function aleatorio(arr){
+  if(!arr||!arr.length)return '';
+  if(arr.length===1)return arr[0];
+  var opciones=arr.filter(function(x){return _ultimosAleatorios.indexOf(x)<0;});
+  if(!opciones.length)opciones=arr;
+  var elegido=opciones[Math.floor(Math.random()*opciones.length)];
+  _ultimosAleatorios.push(elegido);
+  if(_ultimosAleatorios.length>5)_ultimosAleatorios.shift();
+  return elegido;
+}
+
+// ─── CARGAR FRASES DE AMOR (scrapeadas) ───
+function cargarAmor(){
+  fetch('/api/amor?n=15').then(function(r){return r.json();}).then(function(d){
+    if(d&&d.frases) pool=d.frases;
+  }).catch(function(){});
+}
+
+// ─── SELECCIÓN DE CHICA ───
+function renderChicas(){
+  var el=$("chicas");
+  el.innerHTML=CHICAS.map(function(c){
+    return '<div class="chica'+(c.id===actual.id?' on':'')+'" onclick="elegir(\''+c.id+'\')"><div class="emo">'+c.emo+'</div><div class="nm">'+c.nom+'</div><div class="per">'+c.per+'</div></div>';
+  }).join('');
+}
+function elegir(id){
+  var c=CHICAS.find(function(x){return x.id===id;});
+  if(!c)return;
+  actual=c;
+  renderChicas();
+  pintarEstado();
+  var e=estado();
+  $("infoTxt").textContent=c.nom+" ("+c.per+")"+(e.nombre?' · hablás con '+e.nombre:'');
+  addHTML(esc(c.intro),'bot');
+}
+
+// ─── ESTADO DE RELACIÓN (memoria en localStorage) ───
+var NIVELES=["🤝 Conocidos","😊 Amigos","😉 Coqueteando","💖 Enamorada","💍 Novia"];
+function estado(){
+  try{
+    var s=JSON.parse(localStorage.getItem('liga_'+actual.id))||{};
+    return {
+      cor:Math.max(0,Math.min(100,Number(s.cor)||0)),
+      nombre:s.nombre||'',
+      rec:s.rec||[],
+      intereses:s.intereses||[],
+      trabajo:s.trabajo||'',
+      estudio:s.estudio||'',
+      mascota:s.mascota||''
+    };
+  }catch(e){ return {cor:0,nombre:'',rec:[],intereses:[],trabajo:'',estudio:'',mascota:''}; }
+}
+function guardarEst(s){ try{ localStorage.setItem('liga_'+actual.id, JSON.stringify(s)); }catch(e){} }
+function nivel(cor){ return cor>=80?4:cor>=60?3:cor>=40?2:cor>=20?1:0; }
+function pintarEstado(){
+  var e=estado(), cor=e.cor, llenos=Math.round(cor/10), hearts='';
+  for(var i=0;i<10;i++) hearts += i<llenos?'❤️':'🤍';
+  $("corazonesTxt").textContent=hearts;
+  $("nivelTxt").textContent=NIVELES[nivel(cor)];
+}
+function apodo(nv){
+  return nv>=4?aleatorio(['mi amor','bebé','cariño','mi vida']):nv>=3?aleatorio(['amor','cielo','corazón']):'';
+}
+
+// ─── MEMORIA: la chica va aprendiendo cosas de vos a medida que hablan ───
+function extraerIntereses(m,e){
+  var aprendido=[];
+  var mGusta=m.match(/me gusta[n]?\s+(?:el|la|los|las)?\s*([a-záéíóúñü ]{3,25})/i);
+  if(mGusta){
+    var interes=mGusta[1].trim().split(/[,.!?]| y | pero | pero /)[0].trim();
+    if(interes&&interes.length>=3&&interes.length<25){
+      e.intereses=e.intereses||[];
+      if(e.intereses.indexOf(interes)<0){ e.intereses.push(interes); if(e.intereses.length>8)e.intereses.shift(); aprendido.push('te gusta '+interes); }
+    }
+  }
+  var mTrabajo=m.match(/trabajo (?:de |en |como )?([a-záéíóúñü ]{3,25})/i);
+  if(mTrabajo){
+    var trab=mTrabajo[1].trim().split(/[,.!?]/)[0].trim();
+    if(trab&&trab!==e.trabajo){ e.trabajo=trab; aprendido.push('trabajás de '+trab); }
+  }
+  var mEstudio=m.match(/estudio\s+([a-záéíóúñü ]{3,25})/i);
+  if(mEstudio){
+    var est=mEstudio[1].trim().split(/[,.!?]/)[0].trim();
+    if(est&&est!==e.estudio){ e.estudio=est; aprendido.push('estudiás '+est); }
+  }
+  var mMascota=m.match(/tengo un[a]?\s+(perro|gato|conejo|hámster|hamster|pájaro|pajaro|tortuga|pez|peces)/i);
+  if(mMascota){
+    var masc=mMascota[1].toLowerCase();
+    if(masc!==e.mascota){ e.mascota=masc; aprendido.push('tenés un '+masc); }
+  }
+  return aprendido;
+}
+function fraseConMemoria(e){
+  var opciones=[];
+  if(e.intereses&&e.intereses.length) opciones.push('Me acordé que te gusta '+aleatorio(e.intereses)+'... contame más de eso 💭');
+  if(e.trabajo) opciones.push('¿Cómo te fue hoy en lo de '+e.trabajo+'? Espero que bien 💕');
+  if(e.estudio) opciones.push('¿Cómo vas con '+e.estudio+'? No te canses mucho estudiando');
+  if(e.mascota) opciones.push('¿Cómo está tu '+e.mascota+'? Mandale un beso de mi parte 🐾');
+  return opciones.length?aleatorio(opciones):null;
+}
+
+// ─── MOTOR DE RESPUESTA (sin APIs) ───
+function responder(m){
+  var t=m.toLowerCase();
+  var e=estado(), nv=nivel(e.cor), ap=apodo(nv);
+  var res={texto:'',delta:0};
+  // aprender datos nuevos del usuario (intereses, trabajo, estudio, mascota)
+  var aprendido=extraerIntereses(m,e);
+  if(aprendido.length){
+    guardarEst(e);
+    res.texto='¡Uy, anotado! 📝 '+aprendido.join(', ')+'. Contame más 💕';
+    res.delta=4;
+    return res;
+  }
+  // grosero -> baja corazones
+  if(/estúpida|estupida|fea|boba|tonta|idiota|odio/.test(t)){
+    res.delta=-8;
+    res.texto=aleatorio(['Ay, eso me dolió 😢','¿Por qué me hablás así? Me pongo triste...','No me gusta que me digas eso 😔']);
+    return res;
+  }
+  // +amor según el mensaje
+  if(/hola|buenas|hey/.test(t)&&t.length<30) res.delta=2;
+  if(/te quiero|te amo|me gustas|sos hermosa|linda|bonita|preciosa|mi amor|novia/.test(t)) res.delta=10;
+  if(/gracias|sos increíble|increible|me encanta hablar|me caés bien|divina/.test(t)) res.delta=6;
+  if(/cómo estás|como estas|contame|cómo fue tu día|que tal/.test(t)) res.delta=4;
+
+  var f=actual.frases;
+  // ── NOVIA (nivel 4): comportamientos de novia real ──
+  if(nv>=4 && Math.random()<0.3){
+    var memo4=Math.random()<0.4?fraseConMemoria(e):null;
+    res.texto=memo4||aleatorio([
+      '¿En qué pensabas? Decime de verdad 😌',
+      'Te extrañé hoy, aunque sea poco tiempo 😔💕',
+      'Soñé con vos anoche... no te cuento más jaja',
+      '¿Ya comiste? Vos cuidate, ¿eh? 😊',
+      'Ayer vi algo y me acordé de vos 💭',
+      '¿Cuándo me llevás a dar una vuelta? 👀',
+      'Si otra chica te escribe, me pongo celosa 😤 jaja',
+      'Estuve pensando en nosotros... qué lindo se siente 💞',
+      'Dale, hoy es tu día: yo te mimo 💕',
+      '¿Qué música te gusta escuchar cuando estás triste? Quiero saber',
+    ]);
+    if(!memo4&&Math.random()<0.5) res.texto+=" "+ap;
+    return res;
+  }
+  // ── ENAMORADA (nivel 3): más cariñosa ──
+  if(nv>=3 && Math.random()<0.25){
+    var memo3=Math.random()<0.35?fraseConMemoria(e):null;
+    res.texto=memo3||aleatorio(['Me estoy acostumbrando a que me escribas... y no quiero dejar de hacerlo 😳','Sabés que me pongo contenta cuando aparece tu mensaje, ¿no? 💕','A veces me quedo pensando en lo que me dijiste ayer','Tengo una cosita que contarte... después 😉','Con vos se me hace fácil ser yo misma, gracias por eso','No te lo digo siempre, pero me gusta mucho esto que tenemos','Sos de las cosas lindas que me pasaron últimamente','Cuando no me escribís un rato ya te empiezo a extrañar un poco']);
+    res.texto+=" "+ap;
+    return res;
+  }
+  // ── CARIÑO TEMPRANO (nivel 0-2): calidez suave, sin apurar las cosas ──
+  if(nv<3 && Math.random()<0.16){
+    res.texto=aleatorio(['Che, me está gustando esto de hablar con vos 😊','Sos buena onda, se nota','Me sacaste una sonrisa con eso, ¿eh?','Qué lindo charlar con alguien así de genuino','Me gusta cómo va esto entre nosotros, vamos con calma pero bien','Tenés algo simpático, no sé qué es pero me gusta']);
+    return res;
+  }
+  if(/novia|salir conmigo|que seas mi novia|pololear|formalizar|seamos/.test(t)){
+    if(nv>=3){ res.delta=8; res.texto=aleatorio(['¿Y vos creés que todavía no lo soy? Jaja, sí, soy tuya 😊💍','Dale, pero me tenés que prometer que no me vas a romper el corazón 💕','Ay... ¿en serio me lo preguntás? Sí ❤️']); }
+    else res.texto=aleatorio(['Uy, tan rápido? Dejame conocerte un poquito más 😊','Todavía no, pero... seguí así y fijate qué pasa 😉']);
+    return res;
+  }
+  if(/otra chica|otra mina|otra mujer|me gusta otra|vi a alguien/.test(t)){
+    res.delta=-5;
+    res.texto=aleatorio(['¿¿Qué?? 😳 Contame bien eso...','Me quedé sin palabras. ¿En serio?','Ah... bueno. Espero que te haga feliz (no) 😔']);
+    return res;
+  }
+  if(/hola|buenas|hey|buen día|buenos dias|qué tal/.test(t)&&t.length<30) res.texto=aleatorio(['¡Hola! 😊 Me alegra verte','Hey, justo pensaba en vos','Holaaa, ¿cómo va tu día?','¡Qué lindo que me escribas! 💕','Hola hola, te estaba esperando','Justo justo apareciste, qué bueno']);
+  else if(/cómo estás|como estas|como andas|que tal estas/.test(t)) res.texto=aleatorio(['Estoy bien, mejor ahora que me escribiste 😌','Bien... un poco aburrida, hasta que llegó tu mensaje','¿Yo? Ahora mucho mejor 😉','Re bien, más contenta desde que apareciste','Tranqui, pero con ganas de hablar con vos']);
+  else if(/me llamo|soy |mi nombre/.test(t)&&t.length<50){
+    var n=(m.match(/me llamo\s+([a-záéíóúñü]+)/i)||m.match(/soy\s+([a-záéíóúñü]+)/i)||[])[1];
+    if(n){ var st=estado(); st.nombre=n.charAt(0).toUpperCase()+n.slice(1); guardarEst(st); res.delta=5; res.texto='Un placer, '+st.nombre+' 💕 Me gusta tu nombre.'; }
+    else res.texto='¿Cómo te llamás? Quiero saberlo 😊';
+  }
+  else if(/hermosa|linda|bonita|preciosa|te quiero|te amo|me gustas|sos hermosa|divina/.test(t)) res.texto=aleatorio(f.concat(['Ay, me hiciste sonrojar 🙈','No digas esas cosas que me emocionás 😳','¿En serio? Sos muy dulce conmigo...','Basta, me vas a hacer enamorar más rápido de lo que pensás 💕','Cada vez que decís cosas así se me llena el pecho de algo lindo']));
+  else if(/triste|mal|cansado|deprimido|solo|me siento/.test(t)) res.texto=aleatorio(['Venite para acá, te abrazo fuerte 🤗','Todo va a estar bien, te prometo','Estoy para vos, contame qué pasó...','No estás solo/a, contá conmigo para lo que sea 💕','Mandame un mensaje cuando quieras, aunque sea para desahogarte']);
+  else if(/qué haces|que haces|en que andas/.test(t)) res.texto=aleatorio(['Nada, pensando en algo... no te digo en qué 😏','Escuchando música y soñando despierta','Mirando la luna, como siempre','Acá, esperando que me escribas justo vos','Nada interesante hasta que apareciste vos']);
+  else if(/de dónde sos|de donde sos|cuantos años|tu edad/.test(t)) res.texto=aleatorio(['Soy de acá, de la red jaja ¿y vos?','Eso es secreto 😏','Digamos que tengo la edad perfecta para enamorarme']);
+  else if(/cita|salir|tomar algo|café|verse|salgamos/.test(t)) res.texto=aleatorio(['Me encantaría 😍 Contame cuándo','¿Y a dónde me llevarías? 👀','Dale, pero me debés una buena charla','Hace tiempo que tenía ganas de que me invitaras 💕','Sí, obvio que sí. Elegí el lugar y ahí estoy']);
+  else if(/beso|abraz|te extraño/.test(t)) res.texto=aleatorio(['Te mando un beso enorme 💋','Ay... me derretí 🫠','Yo también te extraño un poquito... o mucho','Un abrazo bien fuerte para vos también 🤗','Me encantaría que fuera de verdad ese abrazo']);
+  else if(/música|musica|canción|cancion/.test(t)) res.texto=aleatorio(['Me gusta la música romántica, me pone así 🎶','Dale, poné algo y bailamos (mentalmente)','Con esta canción me acordé de vos']);
+  else if(/adiós|chau|hasta luego|me voy|bye/.test(t)) res.texto=aleatorio(['¿Ya te vas? Bueno... te espero 💕','Chau, cuidate. Que sueñes conmigo 😉','Volvé pronto, ¿sí?','Dale, andá tranquilo/a. Te voy a estar pensando 💭','Bueno... pero prometeme que volvés pronto']);
+  else if(/comida favorita|qué te gusta comer|que te gusta comer|plato favorito|te gusta cocinar/.test(t)) res.texto=aleatorio(['Me encanta todo lo dulce, soy fan de los postres 🍰','La verdad que no cocino tan bien jaja ¿vos me cocinarías algo?','Cualquier comida rica compartida con alguien lindo sabe mejor 😊']);
+  else if(/viajar|viaje|conocer un lugar|vacaciones/.test(t)) res.texto=aleatorio(['Me encantaría viajar a algún lugar con playa 🏖️','Sueño con conocer un montón de lugares... ¿me llevás? 👀','Viajar con la persona correcta hace todo mejor']);
+  else if(/tenés mascota|tenes mascota|tienes perro|tienes gato|tenés perro|tenés gato/.test(t)) res.texto=(e.mascota?aleatorio(['Sí, tengo mi '+e.mascota+', ya te conté 😊 ¿te acordás?','¡Obvio! Mi '+e.mascota+' es mi compañero de vida 🐾']):aleatorio(['Todavía no, pero me encantaría tener una mascota algún día 🐶','No tengo, pero amo a los animales']));
+  else if(/deporte favorito|te gusta el futbol|te gusta el fútbol|hacés ejercicio|haces ejercicio/.test(t)) res.texto=aleatorio(['No soy muy deportista, pero me gusta caminar y despejarme 🚶‍♀️','El deporte no es lo mío jaja, prefiero una buena charla','A veces hago un poco de ejercicio, ¿vos sos de los que entrenan?']);
+  else if(/serie favorita|película favorita|pelicula favorita|qué estás viendo|que estas viendo/.test(t)) res.texto=aleatorio(['Me encantan las películas románticas, obvio 😍','Estoy re enganchada con una serie ahora, después te cuento','¿Vos qué estás mirando? Contame para verla también']);
+  else if(/qué tiempo hace|que tiempo hace|como esta el clima|cómo está el clima|hace frio|hace frío|hace calor/.test(t)) res.texto=aleatorio(['Acá está lindo el clima, ¿y allá?','Con este clima dan ganas de quedarse charlando toda la tarde ☕','No sé cómo está el clima, pero con vos siempre hace calorcito 😏']);
+  else {
+    res.texto = pool.length ? aleatorio(pool) : aleatorio(f);
+    res.delta = 2;
+  }
+  if(nv>=3 && ap && Math.random()<0.5) res.texto += " "+ap;
+  return res;
+}
+
+// ─── ENVIAR (con cola: SIEMPRE responde) ───
+var cola=[];
+var ocupado=false;
+function procesar(){
+  if(ocupado) return;
+  var m=cola.shift();
+  if(m===undefined) return;
+  ocupado=true;
+  var d=addHTML('<span class="typing"></span><span class="typing"></span><span class="typing"></span>','bot');
+  setTimeout(function(){
+    try{
+      d.remove();
+      var r=responder(m);
+      addHTML(esc(r.texto),'bot');
+      if(r.delta!==0){
+        var e=estado(), antes=nivel(e.cor);
+        e.cor=Math.max(0,Math.min(100,e.cor+r.delta));
+        guardarEst(e);
+        pintarEstado();
+        var ahora=nivel(e.cor);
+        if(ahora>antes){
+          var msj=ahora===4?'💍 ¡SE VOLVIERON NOVIOS! '+actual.nom+' te quiere 💕':ahora===3?'💖 '+actual.nom+' se enamoró de vos 💘':ahora===2?'😉 ¡Están coqueteando!':'😊 ¡Subieron sus corazones!';
+          addHTML(esc(msj),'bot');
+        }
+      }
+    }catch(err){}
+    finally{
+      ocupado=false;
+      procesar();
+    }
+  },700+Math.random()*900);
+}
+function enviar(){
+  var m=$("inp").value.trim();
+  if(!m)return;
+  $("inp").value="";
+  addHTML(esc(m),'user');
+  cola.push(m);
+  procesar();
+}
+
+renderChicas();
+cargarAmor();
+pintarEstado();
+addHTML(esc(actual.intro),'bot');
+</script>
+<script src="/logger_zh.js?v=2026"></script>
+</body>
+</html>

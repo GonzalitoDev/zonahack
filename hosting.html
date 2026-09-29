@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>📡 ZonaHack Hosting · Panel VPS</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#060907;--card:rgba(255,255,255,.03);--border:rgba(0,255,65,.10);--border2:rgba(0,255,65,.18);
+  --text:#d6e4dc;--muted:rgba(214,228,220,.45);--accent:#00ff41;--cyan:#00c8ff;--gold:#f1c40f;--green2:#2ecc71;--red:#e74c3c}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh}
+.bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:.5;animation:flotar 16s ease-in-out infinite}
+.orb1{width:460px;height:460px;background:radial-gradient(circle,rgba(0,255,65,.2),transparent 70%);top:-180px;right:-120px}
+.orb2{width:500px;height:500px;background:radial-gradient(circle,rgba(0,200,255,.12),transparent 70%);bottom:-200px;left:-160px;animation-delay:-6s}
+@keyframes flotar{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(20px,-14px) scale(1.08)}}
+.header{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border);
+  background:rgba(6,9,7,.88);backdrop-filter:blur(10px);position:sticky;top:0;z-index:100}
+.logo{width:40px;height:40px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  font-size:20px;background:linear-gradient(135deg,rgba(0,255,65,.22),rgba(0,200,255,.15));border:1px solid var(--border2)}
+.ttl{flex:1;min-width:0}
+.ttl h1{font-size:.95em;color:var(--accent);letter-spacing:1.5px;font-family:'Courier New',monospace;
+  text-shadow:0 0 10px rgba(0,255,65,.25);white-space:nowrap}
+.ttl span{font-size:.6em;color:var(--gold);letter-spacing:2px}
+.back{color:var(--accent);text-decoration:none;font-size:.7em;padding:6px 10px;border:1px solid var(--border2);border-radius:8px}
+.container{max-width:900px;margin:0 auto;padding:16px 14px 40px;position:relative;z-index:1}
+.hero{text-align:center;padding:20px 12px 8px}
+.hero .big{font-size:48px;filter:drop-shadow(0 0 20px rgba(0,255,65,.3))}
+.hero h2{font-size:1.5em;font-weight:900;margin-top:6px;color:#fff;letter-spacing:1px;font-family:'Courier New',monospace;
+  background:linear-gradient(90deg,#fff,#00ff41,#00c8ff,#fff);background-size:300%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:brillo 6s linear infinite}
+@keyframes brillo{to{background-position:300%}}
+.hero p{color:var(--muted);font-size:.72em;margin-top:5px}
+.badge{display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:4px 12px;border-radius:20px;
+  font-size:.62em;letter-spacing:1.2px;font-weight:700;color:var(--green2);border:1px solid rgba(46,204,113,.35);background:rgba(46,204,113,.08)}
+.pulse{width:7px;height:7px;border-radius:50%;background:var(--green2);box-shadow:0 0 9px var(--green2);animation:pulse 1.4s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+/* DASHBOARD */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin:14px 0}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px;text-align:center}
+.stat b{display:block;font-size:1.3em;color:#fff;font-family:'Courier New',monospace}
+.stat span{font-size:.56em;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+/* WIZARD STEPS */
+.steps{display:flex;gap:6px;margin:14px 0 10px}
+.step-dot{flex:1;padding:8px;text-align:center;border:1px solid var(--border);border-radius:10px;font-size:.62em;
+  color:var(--muted);letter-spacing:1px}
+.step-dot.on{border-color:var(--accent);color:var(--accent);font-weight:700;background:rgba(0,255,65,.08)}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:14px}
+.card h3{font-size:.82em;color:var(--accent);margin-bottom:12px;letter-spacing:1px;display:flex;align-items:center;gap:8px}
+.tpl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.tpl{background:rgba(0,0,0,.35);border:1px solid var(--border);border-radius:12px;padding:14px;cursor:pointer;transition:.2s;text-align:center}
+.tpl:hover{border-color:var(--accent);transform:translateY(-2px)}
+.tpl .t-ico{font-size:1.8em}
+.tpl .t-nom{font-size:.7em;color:#fff;font-weight:700;margin-top:6px}
+.tpl .t-desc{font-size:.56em;color:var(--muted);margin-top:3px;line-height:1.4}
+.tpl.on{border-color:var(--accent);box-shadow:0 0 16px rgba(0,255,65,.15);background:rgba(0,255,65,.06)}
+label{font-size:.64em;color:var(--muted);display:block;margin:10px 0 3px;letter-spacing:.5px}
+input,textarea,select{width:100%;background:rgba(0,0,0,.4);border:1px solid var(--border2);border-radius:10px;color:var(--text);
+  padding:10px 12px;font-size:.78em;outline:none;font-family:inherit}
+input:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 12px rgba(0,255,65,.12)}
+textarea{min-height:170px;font-family:'Courier New',monospace;font-size:.72em;resize:vertical;line-height:1.5}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.btn{background:linear-gradient(135deg,#00ff41,#00c73a);color:#03140a;border:none;border-radius:10px;padding:11px 18px;
+  font-weight:800;font-size:.74em;cursor:pointer;font-family:inherit;transition:.2s;letter-spacing:.5px}
+.btn:hover{box-shadow:0 0 18px rgba(0,255,65,.35)}
+.btn:active{transform:scale(.97)}
+.btn.ghost{background:rgba(0,255,65,.08);color:var(--accent);border:1px solid var(--border2)}
+.btn.cyan{background:linear-gradient(135deg,#00c8ff,#0096d6);color:#03140a}
+.btn.danger{background:rgba(231,76,60,.12);color:var(--red);border:1px solid rgba(231,76,60,.3)}
+.btn.small{padding:7px 12px;font-size:.66em}
+.monospace{font-family:'Courier New',monospace}
+.url-prev{font-size:.7em;color:var(--green2);word-break:break-all;margin-top:6px}
+iframe#preview{width:100%;height:240px;border:1px solid var(--border);border-radius:10px;background:#fff;margin-top:10px}
+/* TERMINAL */
+.term{background:#050b06;border:1px solid var(--border2);border-radius:14px;overflow:hidden;font-family:'Courier New',monospace}
+.term-hdr{display:flex;align-items:center;gap:6px;padding:8px 12px;background:#0a120c;border-bottom:1px solid var(--border)}
+.term-dot{width:10px;height:10px;border-radius:50%}
+.term-body{height:220px;overflow-y:auto;padding:10px 12px;font-size:.68em;line-height:1.7;color:#9fffc4}
+.term-body .cmd{color:#00ff41;font-weight:700}
+.term-body .out{color:#c8e6d5}
+.term-body .err{color:#ff7a6e}
+.term-in{display:flex;align-items:center;gap:8px;padding:8px 12px;border-top:1px solid var(--border)}
+.term-in .prompt{color:var(--accent);font-weight:700}
+.term-in input{flex:1;background:none;border:none;color:#9fffc4;font-size:.72em;padding:4px;font-family:'Courier New',monospace}
+.term-in input:focus{outline:none}
+/* LISTA Y DATOS */
+.site{display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid var(--border);border-radius:12px;margin-bottom:8px;transition:.2s;flex-wrap:wrap}
+.site:hover{border-color:var(--border2)}
+.site .s-nom{font-size:.78em;color:#fff;font-weight:700;flex:1;min-width:0}
+.site .s-link{font-size:.6em;color:var(--cyan);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:240px}
+.site .s-vis{font-size:.6em;color:var(--gold);white-space:nowrap}
+.reg{display:flex;gap:8px;margin-bottom:8px}
+.reg input{flex:1}
+.dato{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--border);border-radius:8px;margin-bottom:5px;font-size:.72em}
+.dato .k{color:var(--accent);font-weight:700}
+.dato .v{color:var(--text);flex:1;word-break:break-all}
+.empty{text-align:center;color:var(--muted);padding:30px 16px;font-size:.75em}
+.status{text-align:center;font-size:.66em;color:var(--gold);margin:8px 0;min-height:14px}
+.status.ok{color:var(--green2)}
+.status.err{color:var(--red)}
+.hidden{display:none}
+.footer{text-align:center;margin-top:24px;font-size:.6em;color:var(--gold);letter-spacing:1px}
+</style>
+</head>
+<body>
+<div class="bg"><div class="orb orb1"></div><div class="orb orb2"></div></div>
+
+<div class="header">
+  <div class="logo">📡</div>
+  <div class="ttl">
+    <h1>ZONAHACK HOSTING</h1>
+    <span>PANEL VPS · PLANTILLAS · 24/7</span>
+  </div>
+  <a href="/" class="back">←</a>
+</div>
+
+<div class="container">
+  <div class="hero">
+    <div class="big">🖥️</div>
+    <h2>TU VPS DE PÁGINAS</h2>
+    <p>Creá tu página con plantillas en 1 clic, con dominio propio y base de datos</p>
+    <span class="badge"><span class="pulse"></span> ONLINE 24/7</span>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div class="stats">
+    <div class="stat"><b id="sPages">0</b><span>Mis páginas</span></div>
+    <div class="stat"><b id="sVis">0</b><span>Visitas</span></div>
+    <div class="stat"><b id="sData">0</b><span>Registros DB</span></div>
+    <div class="stat"><b id="sUp">—</b><span>Uptime</span></div>
+  </div>
+
+  <!-- PASOS -->
+  <div class="steps">
+    <div class="step-dot on" id="step1">1 · Plantilla</div>
+    <div class="step-dot" id="step2">2 · Editar</div>
+    <div class="step-dot" id="step3">3 · Publicar</div>
+  </div>
+
+  <!-- PASO 1: PLANTILLAS -->
+  <div class="card" id="card1">
+    <h3>🧩 Elegí una plantilla</h3>
+    <div class="tpl-grid" id="tplGrid"></div>
+  </div>
+
+  <!-- PASO 2: EDITAR -->
+  <div class="card hidden" id="card2">
+    <h3>✏️ Configurá tu página</h3>
+    <div class="row" style="gap:10px">
+      <div style="flex:1;min-width:150px">
+        <label>Nombre de la página</label>
+        <input id="pNombre" placeholder="Mi página" maxlength="40">
+      </div>
+      <div style="flex:1;min-width:150px">
+        <label>Tu link (<span class="monospace">/host/<b id="slugPrev">mi-pagina</b></span>)</label>
+        <div class="row">
+          <input id="pSlug" class="monospace" placeholder="mi-pagina" maxlength="30" style="flex:1">
+          <button class="btn ghost small" onclick="autoSlug()">✨</button>
+        </div>
+      </div>
+    </div>
+    <label>HTML (podés editarlo como quieras)</label>
+    <textarea id="pHtml"></textarea>
+    <div class="row" style="margin-top:10px">
+      <button class="btn cyan" onclick="previewPagina()">👁 Vista previa</button>
+      <button class="btn" onclick="irPublicar()">➡ Publicar</button>
+      <button class="btn ghost" onclick="volverPlantillas()">← Plantillas</button>
+      <input type="hidden" id="pId" value="">
+    </div>
+    <iframe id="preview" class="hidden"></iframe>
+  </div>
+
+  <!-- PASO 3: PUBLICAR -->
+  <div class="card hidden" id="card3">
+    <h3>🚀 Publicar</h3>
+    <div id="resumen" style="font-size:.74em;color:var(--muted);line-height:2;margin-bottom:10px"></div>
+    <div class="row">
+      <button class="btn" onclick="guardarPagina()">💾 PUBLICAR AHORA</button>
+      <button class="btn ghost" onclick="volverEditar()">← Volver</button>
+    </div>
+    <div class="url-prev" id="urlFinal"></div>
+    <div class="status" id="status"></div>
+  </div>
+
+  <!-- TERMINAL VPS -->
+  <div class="card">
+    <h3>🖥️ Consola del VPS</h3>
+    <div class="term">
+      <div class="term-hdr"><span class="term-dot" style="background:#ff5f57"></span><span class="term-dot" style="background:#febc2e"></span><span class="term-dot" style="background:#28c840"></span><span style="margin-left:10px;font-size:.62em;color:var(--muted)">zh-hosting:~$</span></div>
+      <div class="term-body" id="termBody">
+        <div class="out">Bienvenido a ZonaHack Hosting 🖥️</div>
+        <div class="out">Escribí <span class="cmd">help</span> para ver los comandos.</div>
+      </div>
+      <div class="term-in"><span class="prompt">➜</span><input id="termIn" placeholder="escribí un comando…" autocomplete="off"></div>
+    </div>
+  </div>
+
+  <!-- MIS PÁGINAS -->
+  <div class="card">
+    <h3>🗄️ Mis páginas</h3>
+    <div id="lista"></div>
+  </div>
+
+  <!-- BASE DE DATOS -->
+  <div class="card">
+    <h3>🗃️ Base de datos de una página</h3>
+    <div class="row">
+      <select id="dSlug" style="flex:1"></select>
+    </div>
+    <div class="reg" style="margin-top:10px">
+      <input id="dClave" class="monospace" placeholder="clave (ej: mensaje)">
+      <input id="dValor" placeholder="valor">
+      <button class="btn small" onclick="guardarDato()">💾 Guardar</button>
+    </div>
+    <div id="datos" style="margin-top:8px"></div>
+    <div class="status" id="dStatus"></div>
+  </div>
+
+  <!-- DOMINIO -->
+  <div class="card" style="border-color:rgba(0,200,255,.25)">
+    <h3 style="color:#00c8ff">🌐 Tu propio dominio gratis</h3>
+    <div style="font-size:.7em;color:var(--muted);line-height:1.8">
+      Cada página ya funciona en <b style="color:#fff">/host/tu-slug</b>. Para un <b style="color:#fff">dominio propio</b> (<b style="color:#00c8ff">tuslug.tudominio.com</b>):<br>
+      1️⃣ Conseguí un dominio gratis (.tk / .ml / .cf / .ga) o usá uno tuyo.<br>
+      2️⃣ En <b style="color:#fff">Vercel → tu proyecto → Domains</b> agregá <code class="monospace" style="color:#00c8ff">*.tudominio.com</code>.<br>
+      3️⃣ Apuntá el DNS al target de Vercel.<br>
+      Listo: cada página queda en <b style="color:#00c8ff">tuslug.tudominio.com</b> automáticamente, 24/7. 🎉
+    </div>
+  </div>
+
+  <div class="footer">ZONAHACK · HOSTING 24/7 · PANEL VPS · HECHA POR GONZA</div>
+</div>
+
+<script>
+var SB="https://xfwolaurpeofysnymqle.supabase.co";
+var KEY="sb_publishable_3VvBUD5Bdu3Uaq59fJ99MQ_XDCtujUU";
+var H={"apikey":KEY,"Authorization":"Bearer "+KEY};
+var USER=localStorage.getItem('vh_usuario')||'anon';
+var tplSel=null;
+function $(id){return document.getElementById(id);}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+
+/* ─── PLANTILLAS ─── */
+var PLANTILLAS=[
+{ico:'🏠',nom:'Personal',desc:'Presentación simple y elegante',html:'<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Mi página</title><style>body{margin:0;font-family:system-ui;background:#0b0f19;color:#e8eefb;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px}h1{font-size:2.4em;margin:0 0 8px}a{color:#00e5ff}button{background:#00e5ff;border:0;border-radius:8px;padding:10px 20px;font-weight:700;cursor:pointer}</style></head><body><h1>👋 Hola, soy tu página</h1><p>Esta página la creaste en <b>ZonaHack Hosting</b> en 1 minuto.</p><a href="#"><button>Mi botón</button></a></body></html>'},
+{ico:'🔗',nom:'Linktree',desc:'Todos tus links en una página',html:'<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Mis links</title><style>body{margin:0;font-family:system-ui;background:linear-gradient(160deg,#1a1035,#0b0f19);color:#fff;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:40px 20px}.avatar{width:90px;height:90px;border-radius:50%;background:#2a2060;display:flex;align-items:center;justify-content:center;font-size:40px;margin-bottom:12px}h1{font-size:1.3em;margin:0 0 4px}p{color:#aab;margin:0 0 24px}.link{width:100%;max-width:360px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:14px;margin:6px 0;text-align:center;color:#fff;text-decoration:none;font-weight:600;display:block}</style></head><body><div class="avatar">👤</div><h1>@tunombre</h1><p>Todo lo mío, en un solo lugar</p><a class="link" href="#">🌐 Mi web</a><a class="link" href="#">📸 Instagram</a><a class="link" href="#">▶ YouTube</a><a class="link" href="#">💬 Contacto</a></body></html>'},
+{ico:'📰',nom:'Blog',desc:'Mini blog con tus notas',html:'<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Mi blog</title><style>body{margin:0;font-family:system-ui;background:#f7f7f7;color:#222;max-width:640px;margin:0 auto;padding:20px}h1{border-bottom:3px solid #00e5ff;padding-bottom:8px}.post{background:#fff;border-radius:10px;padding:14px;margin:12px 0;box-shadow:0 1px 4px rgba(0,0,0,.08)}.post h2{margin:0 0 4px;font-size:1.1em}.post time{color:#888;font-size:.8em}</style></head><body><h1>📝 Mi blog</h1><div class="post"><h2>Primer post 🎉</h2><time>Hoy</time><p>Escribí tu primera entrada. Podés editar esta página cuando quieras.</p></div><div class="post"><h2>En construcción</h2><time>Ayer</time><p>Este blog vive en ZonaHack Hosting, online 24/7.</p></div></body></html>'},
+{ico:'💼',nom:'Portafolio',desc:'Muestrá tu trabajo',html:'<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Portafolio</title><style>body{margin:0;font-family:system-ui;background:#0d1117;color:#e8eefb;padding:30px 20px;max-width:800px;margin:0 auto}h1{font-size:2em}.proj{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:16px;margin:12px 0}.proj h3{margin:0 0 4px;color:#00e5ff}</style></head><body><h1>💼 Hola, soy [Tu nombre]</h1><p>Desarrollo [lo que hago]. Acá algunos proyectos:</p><div class="proj"><h3>Proyecto 1</h3><p>Descripción breve.</p></div><div class="proj"><h3>Proyecto 2</h3><p>Descripción breve.</p></div></body></html>'},
+{ico:'🛒',nom:'Tienda',desc:'Mini tienda simple',html:'<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Mi tienda</title><style>body{margin:0;font-family:system-ui;background:#f7f7f7;color:#222;padding:20px;max-width:700px;margin:0 auto}h1{text-align:center}.prod{background:#fff;border-radius:10px;padding:14px;margin:10px 0;display:flex;align-items:center;gap:12px;box-shadow:0 1px 4px rgba(0,0,0,.08)}.prod .precio{margin-left:auto;color:#00c73a;font-weight:800}button{background:#00c73a;color:#fff;border:0;border-radius:6px;padding:6px 12px;cursor:pointer}</style></head><body><h1>🛒 Mi tienda</h1><div class="prod"><span>📦 Producto 1</span><span class="precio">$10</span><button>Comprar</button></div><div class="prod"><span>📦 Producto 2</span><span class="precio">$15</span><button>Comprar</button></div></body></html>'},
+{ico:'⏳',nom:'Próximamente',desc:'Landing para un lanzamiento',html:'<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Próximamente</title><style>body{margin:0;font-family:system-ui;background:#05070c;color:#fff;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px}.logo{font-size:50px}h1{font-size:2em;margin:8px 0}input{border:1px solid #333;background:#0d0d0d;color:#fff;border-radius:8px;padding:10px;width:240px}button{background:#00ff41;color:#000;border:0;border-radius:8px;padding:10px 18px;font-weight:800;margin-top:8px;cursor:pointer}</style></head><body><div class="logo">🚀</div><h1>PRÓXIMAMENTE</h1><p>Dejá tu email para avisarte</p><input placeholder="tu@email.com"><br><button>AVISAME</button></body></html>'},
+{ico:'📄',nom:'CV',desc:'Currículum moderno',html:'<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>CV</title><style>body{margin:0;font-family:system-ui;background:#f5f5f5;color:#222;padding:30px 16px;max-width:600px;margin:0 auto}h1{margin:0} .tit{color:#00c8ff;font-weight:600}.sec{margin-top:18px}.sec h3{border-bottom:2px solid #00c8ff;padding-bottom:4px}.item{margin:8px 0}</style></head><body><h1>Tu Nombre</h1><div class="tit">Tu profesión</div><div class="sec"><h3>Experiencia</h3><div class="item"><b>Puesto</b> · Empresa<br><span style="color:#777">Descripción breve.</span></div></div><div class="sec"><h3>Educación</h3><div class="item">Carrera · Institución</div></div></body></html>'},
+{ico:'🎮',nom:'Gamer',desc:'Estilo gaming con neon',html:'<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Gamer</title><style>body{margin:0;font-family:system-ui;background:#0a0010;color:#fff;text-align:center;padding:40px 20px}h1{color:#ff00cc;text-shadow:0 0 20px #ff00cc}button{background:linear-gradient(90deg,#ff00cc,#00e5ff);border:0;border-radius:8px;padding:12px 24px;font-weight:800;cursor:pointer;margin:6px}</style></head><body><h1>🎮 ZONA GAMER</h1><p>Streaming · Clips · Gameplays</p><button>TWITCH</button><button>YOUTUBE</button></body></html>'}
+];
+
+function renderPlantillas(){
+  $('tplGrid').innerHTML=PLANTILLAS.map(function(t,i){
+    return '<div class="tpl'+(tplSel===i?' on':'')+'" data-i="'+i+'"><div class="t-ico">'+t.ico+'</div><div class="t-nom">'+esc(t.nom)+'</div><div class="t-desc">'+esc(t.desc)+'</div></div>';
+  }).join('');
+  [].forEach.call($('tplGrid').querySelectorAll('.tpl'),function(el){
+    el.addEventListener('click',function(){
+      tplSel=parseInt(el.getAttribute('data-i'),10);
+      renderPlantillas();
+      elegir(iSel());
+    });
+  });
+}
+function iSel(){ return tplSel===null?0:tplSel; }
+function elegir(i){
+  var t=PLANTILLAS[i];
+  $('pNombre').value=t.nom;
+  autoSlug();
+  $('pHtml').value=t.html;
+  irEditar();
+}
+function autoSlug(){
+  var n=$('pNombre').value.trim().toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,30);
+  $('pSlug').value=n; $('slugPrev').textContent=n||'mi-pagina';
+}
+function slugValido(){
+  var s=$('pSlug').value.trim().toLowerCase().replace(/[^a-z0-9-]/g,'').replace(/^-+|-+$/g,'').slice(0,30);
+  $('pSlug').value=s; $('slugPrev').textContent=s||'mi-pagina'; return s;
+}
+/* ─── PASOS ─── */
+function paso(n){
+  $('card1').classList.toggle('hidden',n!==1);
+  $('card2').classList.toggle('hidden',n!==2);
+  $('card3').classList.toggle('hidden',n!==3);
+  $('step1').classList.toggle('on',n===1);
+  $('step2').classList.toggle('on',n===2);
+  $('step3').classList.toggle('on',n===3);
+}
+function irEditar(){ paso(2); }
+function irPublicar(){
+  var slug=slugValido();
+  $('resumen').innerHTML='📄 <b style="color:#fff">'+esc($('pNombre').value||'Sin nombre')+'</b><br>🔗 <b style="color:#00c8ff">/host/'+esc(slug||'mi-pagina')+'</b><br>🧩 Plantilla: <b style="color:#fff">'+esc(PLANTILLAS[iSel()].nom)+'</b>';
+  paso(3);
+}
+function volverPlantillas(){ paso(1); }
+function volverEditar(){ paso(2); }
+function previewPagina(){
+  var f=$('preview'); f.classList.remove('hidden'); f.srcdoc=$('pHtml').value||'<h1 style="font-family:Arial;text-align:center;color:#333;padding:40px">Sin contenido</h1>';
+}
+/* ─── GUARDAR ─── */
+function status(msg,tipo){ var e=$('status'); e.textContent=msg; e.className='status '+(tipo||''); }
+function guardarPagina(){
+  var nombre=$('pNombre').value.trim();
+  var slug=slugValido();
+  var html=$('pHtml').value;
+  if(!slug){status('Ingresá un slug','err');return;}
+  var id=$('pId').value;
+  var data={slug:slug,nombre:nombre,html:html,autor:USER,activo:true};
+  var ok=function(){
+    status('✅ Publicada online: /host/'+slug,'ok');
+    $('urlFinal').textContent='https://offlinevideoplayer.vercel.app/host/'+slug+'  (online 24/7)';
+    cargarLista(); cargarSlugs(); cargarDashboard();
+    term('🟢 Página "'+slug+'" publicada. Online 24/7.');
+  };
+  if(id){ fetch(SB+"/rest/v1/hosting_pages?id=eq."+id,{method:'PATCH',headers:Object.assign({},H,{'Content-Type':'application/json','Prefer':'return=minimal'}),body:JSON.stringify(data)}).then(ok).catch(function(){status('Error (¿corriste sql_hosting.sql?)','err');}); }
+  else { fetch(SB+"/rest/v1/hosting_pages",{method:'POST',headers:Object.assign({},H,{'Content-Type':'application/json','Prefer':'return=minimal'}),body:JSON.stringify(data)}).then(ok).catch(function(){status('Error (¿corriste sql_hosting.sql?)','err');}); }
+}
+/* ─── LISTA ─── */
+function cargarLista(){
+  fetch(SB+"/rest/v1/hosting_pages?select=id,slug,nombre,visitas,activo&autor=eq."+encodeURIComponent(USER)+"&order=created_at.desc&limit=50",{headers:H})
+  .then(function(r){return r.json();}).then(function(d){
+    var el=$('lista');
+    if(!d||!d.length){el.innerHTML='<div class="empty">Aún no publicaste ninguna página. Arriba elegí una plantilla 🧩</div>';return;}
+    el.innerHTML=d.map(function(p){
+      return '<div class="site"><div class="s-nom">'+esc(p.nombre||p.slug)+'</div>'+
+        '<div class="s-link">/host/'+esc(p.slug)+'</div>'+
+        '<div class="s-vis">👁 '+(p.visitas||0)+'</div>'+
+        '<a class="btn ghost small" href="/host/'+esc(p.slug)+'" target="_blank">Abrir</a>'+
+        '<button class="btn ghost small" onclick="editar('+p.id+')">✏️</button>'+
+        '<button class="btn danger small" onclick="borrar('+p.id+')">🗑</button></div>';
+    }).join('');
+  }).catch(function(){ $('lista').innerHTML='<div class="empty">Error al cargar</div>'; });
+}
+function editar(id){
+  fetch(SB+"/rest/v1/hosting_pages?select=id,slug,nombre,html&id=eq."+id+"&limit=1",{headers:H})
+  .then(function(r){return r.json();}).then(function(d){
+    if(!d||!d[0])return; var p=d[0];
+    $('pId').value=p.id;$('pNombre').value=p.nombre||'';$('pSlug').value=p.slug||'';$('pHtml').value=p.html||'';
+    paso(2); status('✏️ Editando: /host/'+p.slug);
+  });
+}
+function borrar(id){ if(!confirm('¿Borrar esta página?'))return; fetch(SB+"/rest/v1/hosting_pages?id=eq."+id,{method:'DELETE',headers:H}).then(function(){cargarLista();cargarDashboard();}); }
+/* ─── DB ─── */
+function cargarSlugs(){
+  fetch(SB+"/rest/v1/hosting_pages?select=slug&activo=eq.true&order=created_at.desc&limit=100",{headers:H})
+  .then(function(r){return r.json();}).then(function(d){
+    var sel=$('dSlug');
+    sel.innerHTML='<option value="">Seleccioná una página…</option>'+(d||[]).map(function(p){return '<option value="'+esc(p.slug)+'">'+esc(p.slug)+'</option>';}).join('');
+    if(d&&d.length){ sel.value=d[0].slug; cargarDatos(d[0].slug); }
+  });
+}
+function cargarDatos(slug){
+  if(!slug){ $('datos').innerHTML=''; return; }
+  fetch(SB+"/rest/v1/hosting_data?select=clave,valor,created_at&slug=eq."+slug+"&order=created_at.desc&limit=100",{headers:H})
+  .then(function(r){return r.json();}).then(function(d){
+    if(!d||!d.length){$('datos').innerHTML='<div class="empty">Sin registros. Agregá clave y valor.</div>';return;}
+    $('datos').innerHTML=d.map(function(r){return '<div class="dato"><span class="k">'+esc(r.clave)+'</span><span class="v">'+esc(r.valor)+'</span></div>';}).join('');
+  });
+}
+function guardarDato(){
+  var slug=$('dSlug').value; var clave=$('dClave').value.trim(); var valor=$('dValor').value.trim();
+  if(!slug||!clave){$('dStatus').textContent='Elegí página y poné clave';return;}
+  fetch(SB+"/rest/v1/hosting_data",{method:'POST',headers:Object.assign({},H,{'Content-Type':'application/json','Prefer':'return=minimal'}),body:JSON.stringify({slug:slug,clave:clave,valor:valor})})
+  .then(function(){ $('dStatus').textContent='✅ Registro guardado en '+slug; $('dClave').value='';$('dValor').value='';cargarDatos(slug);cargarDashboard(); })
+  .catch(function(){ $('dStatus').textContent='Error (¿corriste sql_hosting.sql?)'; });
+}
+/* ─── DASHBOARD ─── */
+function cargarDashboard(){
+  var inicio=sessionStorage.getItem('zh_host_up')||Date.now();
+  sessionStorage.setItem('zh_host_up',inicio);
+  $('sUp').textContent=Math.floor((Date.now()-parseInt(inicio,10))/60000)+' min';
+  fetch(SB+"/rest/v1/hosting_pages?select=visitas&autor=eq."+encodeURIComponent(USER)+"&limit=100",{headers:H})
+  .then(function(r){return r.json();}).then(function(p){
+    $('sPages').textContent=(p||[]).length;
+    $('sVis').textContent=(p||[]).reduce(function(a,b){return a+(b.visitas||0);},0);
+    fetch(SB+"/rest/v1/hosting_data?select=id&limit=1000",{headers:H}).then(function(r){return r.json();}).then(function(d){ $('sData').textContent=(d||[]).length; }).catch(function(){});
+  }).catch(function(){});
+}
+/* ─── TERMINAL ─── */
+var tOut=0;
+function term(msg,cls){
+  var b=$('termBody');
+  var d=document.createElement('div'); d.className=cls||'out'; d.textContent=msg;
+  b.appendChild(d); b.scrollTop=b.scrollHeight;
+}
+function comando(cmd){
+  term('$ '+cmd,'cmd');
+  var c=(cmd||'').trim().toLowerCase();
+  if(!c) return;
+  if(c==='help'||c==='ayuda'){ term('Comandos: help · status · visitas · mi-url · plantillas · nueva · dominio · cls'); }
+  else if(c==='status'){ term('🟢 Online 24/7 · Uptime: '+$('sUp').textContent+' · Páginas: '+$('sPages').textContent+' · Registros DB: '+$('sData').textContent); }
+  else if(c==='visitas'){ term('👁 Total visitas: '+$('sVis').textContent); }
+  else if(c==='mi-url'){ term('🔗 Tu página actual: /host/'+($('pSlug').value||'mi-pagina')); }
+  else if(c==='plantillas'){ term('🧩 Plantillas: '+PLANTILLAS.map(function(t){return t.ico+' '+t.nom;}).join(' · ')); }
+  else if(c==='nueva'){ $('pId').value='';$('pNombre').value='';$('pSlug').value='';$('pHtml').value='';paso(1);term('✨ Listo para crear una nueva página. Elegí plantilla.'); }
+  else if(c==='dominio'){ term('🌐 Dominio propio: agregá *.tudominio.com en Vercel → cada página = tuslug.tudominio.com'); }
+  else if(c==='cls'){ $('termBody').innerHTML=''; }
+  else { term('Comando no reconocido. Escribí help.','err'); }
+}
+$('termIn').addEventListener('keydown',function(e){ if(e.key==='Enter'){ comando($('termIn').value); $('termIn').value=''; } });
+$('pSlug').addEventListener('input',slugValido);
+$('dSlug').addEventListener('change',function(){cargarDatos(this.value);});
+renderPlantillas();
+cargarLista();
+cargarSlugs();
+cargarDashboard();
+</script>
+</body>
+</html>

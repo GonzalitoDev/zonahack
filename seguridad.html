@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Seguridad y Defensa · ZonaHack</title>
+<style>
+:root{--bg:#0a0e14;--card:#12181f;--border:#232c36;--txt:#dbe6e0;--dim:#8a99a3;--acc:#5ee6c9;--green:#3fb950;--yellow:#d29922;--orange:#f0883e;--red:#f85149;--purple:#b98ee6}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--txt);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;padding:20px}
+.container{max-width:1000px;margin:0 auto}
+h1{font-size:26px;color:var(--acc);letter-spacing:1px;margin-bottom:4px}
+.sub{color:var(--dim);font-size:13px;margin-bottom:20px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:16px}
+.card h2{font-size:15px;color:var(--acc);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+label{font-size:12px;color:var(--dim);display:block;margin-bottom:4px}
+input[type=text],input[type=password]{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--txt);padding:10px 12px;border-radius:8px;font-size:14px;outline:none;margin-bottom:10px}
+input:focus{border-color:var(--acc)}
+.btn{background:var(--acc);color:#04251c;border:none;padding:10px 18px;border-radius:8px;font-weight:700;cursor:pointer;font-size:14px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn.ghost{background:transparent;border:1px solid var(--border);color:var(--txt)}
+.gauge{display:flex;align-items:center;gap:14px;margin-bottom:8px}
+.ring{width:90px;height:90px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;flex-shrink:0}
+.ring b{color:#fff;text-shadow:0 0 6px rgba(0,0,0,.5)}
+.finding{border:1px solid var(--border);border-radius:8px;padding:8px 12px;margin-bottom:6px;font-size:13px;display:flex;gap:10px;align-items:flex-start}
+.sev{font-size:10px;font-weight:800;padding:2px 8px;border-radius:10px;white-space:nowrap;flex-shrink:0;margin-top:1px}
+.critica{background:rgba(248,81,73,.15);color:var(--red);border:1px solid var(--red)}
+.alta{background:rgba(240,136,62,.15);color:var(--orange);border:1px solid var(--orange)}
+.media{background:rgba(210,153,34,.15);color:var(--yellow);border:1px solid var(--yellow)}
+.baja{background:rgba(63,185,80,.15);color:var(--green);border:1px solid var(--green)}
+.meta{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.chip{background:var(--bg);border:1px solid var(--border);padding:4px 10px;border-radius:14px;font-size:12px;color:var(--dim)}
+.chip b{color:var(--txt)}
+#pwbar{height:12px;background:var(--bg);border:1px solid var(--border);border-radius:6px;overflow:hidden;margin:6px 0}
+#pwfill{height:100%;width:0%;transition:width .2s,background .2s}
+#pwmsg{font-size:13px;font-weight:700}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:700px){.grid2{grid-template-columns:1fr}}
+.checklist li{list-style:none;padding:8px 0;border-bottom:1px solid #1a2129;font-size:13px;display:flex;gap:8px;align-items:flex-start}
+.checklist li:last-child{border-bottom:none}
+.checklist .ok{color:var(--green);flex-shrink:0}
+.checklist .lvl{font-size:10px;font-weight:700;padding:1px 7px;border-radius:8px;margin-left:auto;flex-shrink:0}
+.tab{display:inline-flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--border);color:var(--txt);padding:9px 16px;border-radius:8px;font-size:13px;cursor:pointer;margin-right:6px;margin-bottom:8px}
+.tab.on{background:var(--acc);color:#04251c;border-color:var(--acc);font-weight:700}
+.panel{display:none}
+.panel.on{display:block}
+.spin{color:var(--acc);padding:20px;text-align:center;font-size:14px}
+.err{color:var(--red);font-size:13px;padding:8px}
+pre{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;font-size:12px;overflow:auto;max-height:260px;color:#a5d6ff;white-space:pre-wrap;word-break:break-word}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>🛡️ SEGURIDAD Y DEFENSA</h1>
+  <div class="sub">Sector de ciberdefensa · escáner pasivo de sitios, fortaleza de contraseñas y checklist de hardening</div>
+
+  <div class="tabs">
+    <button class="tab on" onclick="cambiar('scan',this)">🔍 Escáner pasivo</button>
+    <button class="tab" onclick="cambiar('recon',this)">🕵️ Reconocimiento</button>
+    <button class="tab" onclick="cambiar('pw',this)">🔑 Fortaleza de contraseña</button>
+    <button class="tab" onclick="cambiar('check',this)">📋 Checklist de defensa</button>
+  </div>
+
+  <!-- ESCANER -->
+  <div id="panel-scan" class="panel on">
+    <div class="card">
+      <h2>🔍 Escáner pasivo de sitios</h2>
+      <label>URL del objetivo (solo análisis pasivo / hacker ético)</label>
+      <input type="text" id="scanUrl" placeholder="https://tu-sitio.com" onkeydown="if(event.key==='Enter')escanear()">
+      <button class="btn" id="btnScan" onclick="escanear()">Escanear</button>
+      <div id="scanResult"></div>
+    </div>
+  </div>
+
+  <!-- RECON -->
+  <div id="panel-recon" class="panel">
+    <div class="card">
+      <h2>🕵️ Reconocimiento de metadatos</h2>
+      <label>URL (extrae título, metadatos, tecnologías y enlaces)</label>
+      <input type="text" id="reconUrl" placeholder="https://ejemplo.com" onkeydown="if(event.key==='Enter')recon()">
+      <button class="btn ghost" onclick="recon()">Reconocer</button>
+      <div id="reconResult"></div>
+    </div>
+  </div>
+
+  <!-- PASSWORD -->
+  <div id="panel-pw" class="panel">
+    <div class="card">
+      <h2>🔑 Fortaleza de contraseña</h2>
+      <label>Escribí una contraseña para medir su fortaleza (todo local, no se envía)</label>
+      <input type="text" id="pwInput" oninput="medirPw()" placeholder="Probá una contraseña...">
+      <div id="pwbar"><div id="pwfill"></div></div>
+      <div id="pwmsg" style="color:var(--dim)">Escribí para evaluar</div>
+    </div>
+  </div>
+
+  <!-- CHECKLIST -->
+  <div id="panel-check" class="panel">
+    <div class="card">
+      <h2>📋 Checklist de defensa</h2>
+      <ul class="checklist" id="checklist"></ul>
+    </div>
+  </div>
+</div>
+
+<script>
+var API_SCAN = "/api/scanner";
+function $(id){return document.getElementById(id);}
+function esc(s){return (s||"").replace(/[&<>"']/g,function(m){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m];});}
+function cambiar(nombre, btn){
+  document.querySelectorAll(".tab").forEach(function(t){t.classList.remove("on");});
+  document.querySelectorAll(".panel").forEach(function(p){p.classList.remove("on");});
+  if(btn) btn.classList.add("on");
+  $("panel-"+nombre).classList.add("on");
+}
+function colorScore(s){ if(s>=80)return "#3fb950"; if(s>=60)return "#d29922"; if(s>=40)return "#f0883e"; return "#f85149"; }
+function findingHTML(f){
+  var sev = (f.sev||"baja").toLowerCase();
+  return '<div class="finding"><span class="sev '+sev+'">'+(sev==="critica"?"CRÍTICA":sev.toUpperCase())+'</span><div><b>'+esc(f.tipo)+'</b><br><span style="color:var(--dim)">'+esc(f.desc)+'</span></div></div>';
+}
+function escanear(){
+  var url=$("scanUrl").value.trim();
+  if(!url) return;
+  $("btnScan").disabled=true;
+  $("scanResult").innerHTML='<div class="spin">Escaneando (análisis pasivo)...</div>';
+  fetch(API_SCAN+"?url="+encodeURIComponent(url)).then(function(r){return r.json();}).then(function(d){
+    $("btnScan").disabled=false;
+    if(!d || d.score===undefined){ $("scanResult").innerHTML='<div class="err">'+esc((d&&d.error)||"Sin respuesta")+'</div>'; return; }
+    var score=d.score;
+    $("scanResult").innerHTML =
+      '<div class="gauge"><div class="ring" style="background:conic-gradient('+colorScore(score)+' '+score*3.6+'deg, #1a2229 0deg)"><b>'+score+'</b></div>'+
+      '<div><div style="font-weight:800;font-size:16px;color:'+colorScore(score)+'">'+(score>=80?"BUENO":score>=60?"REGULAR":score>=40?"DÉBIL":"CRÍTICO")+'</div>'+
+      '<div style="color:var(--dim);font-size:12px">'+esc(d.host||url)+' · '+(d.nivel||"")+'</div></div></div>'+
+      '<div class="meta">'+
+      '<span class="chip">🌐 IP <b>'+esc(d.ip||"-")+'</b></span>'+
+      '<span class="chip">🖥️ Servidor <b>'+esc(d.server||"-")+'</b></span>'+
+      '<span class="chip">🔒 TLS <b>'+esc(d.tls_version||"-")+'</b></span>'+
+      (d.cert?'<span class="chip">📜 Cert <b>'+esc(d.cert)+'</b></span>':'')+
+      (d.tecnologias&&d.tecnologias.length?'<span class="chip">🧰 '+(d.tecnologias||[]).map(function(t){return esc(t);}).join(", ")+'</span>':'')+
+      '</div>'+
+      '<div id="findings"></div>'+
+      '<div style="margin-top:10px"><button class="btn ghost" onclick="detalleScan(this)">Ver detalle completo</button><pre id="detalleScan" style="display:none">'+esc(JSON.stringify(d,null,2))+'</pre></div>';
+    var f=(d.findings||[]);
+    $("findings").innerHTML = f.length ? f.map(findingHTML).join("") : '<div style="color:var(--green);font-size:13px">✅ Sin hallazgos significativos (se revisaron: '+esc((d.checks_realizados||[]).join(", "))+')</div>';
+  }).catch(function(e){ $("btnScan").disabled=false; $("scanResult").innerHTML='<div class="err">Error de red</div>'; });
+}
+function detalleScan(btn){ var pre=$( "detalleScan"); pre.style.display = pre.style.display==="none"?"block":"none"; }
+function recon(){
+  var url=$("reconUrl").value.trim();
+  if(!url) return;
+  $("reconResult").innerHTML='<div class="spin">Recolectando metadatos...</div>';
+  fetch(API_SCAN+"?url="+encodeURIComponent(url)+"&mode=recon").then(function(r){return r.json();}).then(function(d){
+    var pre='<pre>'+esc(JSON.stringify(d,null,2))+'</pre>';
+    $("reconResult").innerHTML=pre;
+  }).catch(function(){ $("reconResult").innerHTML='<div class="err">Error de red</div>'; });
+}
+function medirPw(){
+  var p=$("pwInput").value, s=0;
+  if(!p){ $("pwfill").style.width="0%"; $("pwmsg").textContent="Escribí para evaluar"; $("pwmsg").style.color="var(--dim)"; return; }
+  if(p.length>=8)s+=25;
+  if(p.length>=12)s+=10;
+  if(/[A-Z]/.test(p)&&/[a-z]/.test(p))s+=20;
+  if(/\d/.test(p))s+=15;
+  if(/[^A-Za-z0-9]/.test(p))s+=20;
+  if(p.length>=16)s+=10;
+  s=Math.min(s,100);
+  var color=s>=80?"#3fb950":s>=60?"#d29922":s>=40?"#f0883e":"#f85149";
+  var txt=s>=80?"Muy fuerte 🛡️":s>=60?"Fuerte ✅":s>=40?"Media ⚠️":"Débil ❌";
+  $("pwfill").style.width=s+"%";
+  $("pwfill").style.background=color;
+  $("pwmsg").textContent=txt+" · "+s+"/100";
+  $("pwmsg").style.color=color;
+}
+var CHECKLIST=[
+  ["Activar 2FA en todas las cuentas importantes", "alta"],
+  ["Usar contraseñas únicas y un gestor de contraseñas", "alta"],
+  ["Mantener el sistema y las apps actualizadas", "alta"],
+  ["Firewall activado + reglas por defecto bloquean todo lo entrante", "alta"],
+  ["Hacer backups automáticos (regla 3-2-1)", "media"],
+  ["HTTPS obligatorio con HSTS (Strict-Transport-Security)", "media"],
+  ["Proteger el panel admin con 2FA y acceso por IP/whitelist", "alta"],
+  ["Auditar puertos abiertos (solo exponer lo necesario)", "media"],
+  ["No abrir enlaces ni adjuntos sospechosos (phishing)", "media"],
+  ["Cifrar el disco (Full Disk Encryption)", "media"],
+  ["Limitar permisos: usuario sin privilegios para el día a día", "media"],
+  ["Cerrar sesiones de cuentas que no usás", "baja"],
+  ["Usar VPN/red privada al estar en redes públicas", "baja"],
+  ["Monitorear logs de acceso y autenticación", "alta"],
+  ["Desactivar servicios que no usás (superficie de ataque)", "media"]
+];
+(function(){
+  $("checklist").innerHTML=CHECKLIST.map(function(c){
+    return '<li><span class="ok">✔</span><span>'+esc(c[0])+'</span><span class="lvl" style="color:var(--yellow);border:1px solid var(--yellow)">'+esc(c[1])+'</span></li>';
+  }).join("");
+})();
+</script>
+</body>
+</html>

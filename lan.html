@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>🌐 ZONA LAN — Control remoto</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#050905;color:#c8d6e5;font-family:'Courier New',monospace;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:12px;text-align:center}
+.card{max-width:400px;width:100%}
+h1{color:#00ff41;font-size:1.1em;letter-spacing:2px;text-shadow:0 0 12px rgba(0,255,65,.3)}
+.sub{font-size:.68em;color:rgba(200,214,229,.5);margin:6px 0 16px;letter-spacing:.5px}
+input{padding:12px;border:1px solid rgba(0,255,65,.2);border-radius:8px;background:#0a0a0a;color:#00ff41;font-size:1em;text-align:center;letter-spacing:3px;outline:none;width:100%;font-family:'Courier New',monospace}
+.btn{padding:13px;border:1px solid #00ff41;border-radius:8px;background:rgba(0,255,65,.08);color:#00ff41;font-weight:700;font-size:.8em;cursor:pointer;font-family:'Courier New',monospace;letter-spacing:1px;margin-top:10px;width:100%}
+.btn:hover{background:rgba(0,255,65,.15)}
+#status{font-size:.62em;color:rgba(200,214,229,.4);margin-top:12px;min-height:16px}
+#remote{display:none}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#00ff41;box-shadow:0 0 8px #00ff41;margin-right:4px;animation:pulse 1.5s infinite}
+@keyframes pulse{50%{opacity:.4}}
+.code{font-size:1.8em;color:#f1c40f;letter-spacing:6px;margin:8px 0}
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:14px}
+.pad button{padding:18px 8px;border:1px solid rgba(0,255,65,.15);border-radius:10px;background:rgba(0,255,65,.05);color:#00ff41;font-size:.7em;cursor:pointer;font-family:'Courier New',monospace;touch-action:manipulation;user-select:none}
+.pad button:active{background:rgba(0,255,65,.2)}
+.pad .empty{visibility:hidden}
+.big{padding:24px 8px!important;font-size:.9em!important;border-radius:50%!important;border-color:rgba(0,255,65,.3)!important}
+.row{display:flex;gap:6px;margin-top:8px}
+.row button{flex:1;padding:13px 6px;border:1px solid rgba(0,255,65,.15);border-radius:10px;background:rgba(0,255,65,.05);color:#00ff41;font-size:.66em;cursor:pointer;font-family:'Courier New',monospace;touch-action:manipulation}
+.row button:active{background:rgba(0,255,65,.2)}
+.sec{font-size:.62em;color:rgba(200,214,229,.45);margin:14px 0 4px;letter-spacing:2px;border-bottom:1px solid rgba(0,255,65,.08);padding-bottom:4px;text-align:left}
+.turbo{background:rgba(241,196,15,.12)!important;border-color:rgba(241,196,15,.4)!important;color:#f1c40f!important}
+#osTxt{padding:10px;border:1px solid rgba(0,255,65,.2);border-radius:8px;background:#0a0a0a;color:#00ff41;font-size:.9em;width:100%;font-family:'Courier New',monospace;outline:none}
+a{color:#00ff41;font-size:.62em;display:block;margin-top:10px}
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>🌐 ZONA LAN</h1>
+  <div class="sub">CONTROL REMOTO</div>
+
+  <div id="join">
+    <input id="code" placeholder="CÓDIGO DE SALA" maxlength="8" onkeydown="if(event.key==='Enter')conectar()">
+    <button class="btn" onclick="conectar()">🔌 CONECTAR</button>
+  </div>
+
+  <div id="remote">
+    <div style="font-size:.62em;color:rgba(200,214,229,.4)"><span class="dot"></span> Conectado a sala <b style="color:#f1c40f" id="rcode"></b></div>
+    <div style="font-size:.6em;color:rgba(0,255,65,.5)" id="rmode"></div>
+
+    <div id="padPlayer" style="display:none">
+      <div class="sec">📺 REPRODUCTOR</div>
+      <div class="pad" style="grid-template-columns:repeat(3,1fr)">
+        <button onclick="env('player',{action:'toggle'})">⏯ Play/Pausa</button>
+        <button id="pVolUp">🔊 +</button>
+        <button id="pVolDown">🔉 -</button>
+        <button id="pSeekB">⏪ -10s</button>
+        <button class="big" onclick="env('player',{action:'toggle'})">⏯</button>
+        <button id="pSeekF">⏩ +10s</button>
+        <button onclick="env('player',{action:'mute'})">🔇 Silencio</button>
+        <button onclick="env('player',{action:'next'})">⏭ Siguiente</button>
+        <button onclick="env('player',{action:'cine'})">🎬 Cine</button>
+        <button onclick="env('player',{action:'speed'})">⏱ Velocidad</button>
+        <button onclick="env('player',{action:'fs'})">⛶ Fullscreen</button>
+        <button onclick="env('player',{action:'close'})" style="color:#e74c3c">✕ Cerrar</button>
+      </div>
+      <div style="font-size:.55em;color:rgba(200,214,229,.3);margin-top:5px">🔊/⏪/⏩ se repiten mientras mantenés presionado</div>
+    </div>
+
+    <div id="padGame" style="display:none">
+      <div class="sec">🏎️ MANDO JUEGO (AUTO AL PISO)</div>
+      <div class="pad">
+        <button class="empty"></button><button onpointerdown="gState('up',1)" onpointerup="gState('up',0)" onpointerleave="gState('up',0)">⬆️</button><button class="empty"></button>
+        <button onpointerdown="gState('left',1)" onpointerup="gState('left',0)" onpointerleave="gState('left',0)">⬅️</button>
+        <button class="empty"></button>
+        <button onpointerdown="gState('right',1)" onpointerup="gState('right',0)" onpointerleave="gState('right',0)">➡️</button>
+        <button class="empty"></button><button class="turbo" onpointerdown="gState('turbo',1)" onpointerup="gState('turbo',0)" onpointerleave="gState('turbo',0)">💨 TURBO</button>
+      </div>
+      <div style="font-size:.58em;color:rgba(200,214,229,.3);margin-top:6px">Mantené presionado · Up acelera</div>
+    </div>
+
+    <div id="padOs" style="display:none">
+      <div class="sec">🖥️ ZONA OS</div>
+      <input id="osTxt" placeholder="Escribí un comando de teclado..." onkeydown="if(event.key==='Enter')osType()">
+      <div class="row">
+        <button onclick="osType()">⌨️ Escribir</button>
+        <button onclick="env('os',{action:'home'})">🏠 Home</button>
+        <button onclick="env('os',{action:'refresh'})">🔄 Refresh</button>
+        <button onclick="env('os',{action:'fs'})">⛶ FS</button>
+      </div>
+      <div class="pad" style="margin-top:8px">
+        <button class="empty"></button><button id="osUp">⬆️</button><button class="empty"></button>
+        <button id="osLeft">⬅️</button><button class="empty"></button><button id="osRight">➡️</button>
+        <button class="empty"></button><button id="osDown">⬇️</button><button class="empty"></button>
+      </div>
+      <div class="row">
+        <button id="osEnter">⏎ Enter</button>
+        <button id="osEsc">⎋ Esc</button>
+      </div>
+      <div style="font-size:.55em;color:rgba(200,214,229,.3);margin-top:5px">Las teclas se repiten mientras mantenés presionado</div>
+    </div>
+  </div>
+
+  <div id="status"></div>
+  <a href="/">← Volver al inicio</a>
+</div>
+
+<script>
+var SB="https://xfwolaurpeofysnymqle.supabase.co/rest/v1";
+var KEY="sb_publishable_3VvBUD5Bdu3Uaq59fJ99MQ_XDCtujUU";
+var H={"apikey":KEY,"Authorization":"Bearer "+KEY,"Content-Type":"application/json","Prefer":"return=minimal"};
+var room="";
+var mode="player";
+var envTimer=null;
+var g={left:0,right:0,up:0,turbo:0};
+
+function esc(s){return (s||"").replace(/[&<>"]/g,function(m){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m];});}
+
+function conectar(){
+  var c=document.getElementById("code").value.trim().toUpperCase();
+  if(!c){document.getElementById("status").textContent="Ingresá el código de sala";return;}
+  document.getElementById("status").textContent="Conectando...";
+  fetch(SB+"/lan_rooms?select=code,mode&code=eq."+encodeURIComponent(c)+"&limit=1",{headers:H})
+  .then(function(r){return r.json();})
+  .then(function(d){
+    if(!d||!d.length){document.getElementById("status").textContent="❌ Sala no encontrada";return;}
+    room=c;mode=d[0].mode||"player";
+    document.getElementById("join").style.display="none";
+    document.getElementById("remote").style.display="block";
+    document.getElementById("rcode").textContent=room;
+    document.getElementById("rmode").textContent="Control: "+(mode==="player"?"📺 Reproductor":mode==="game"?"🏎️ Juego":"🖥️ Zona OS");
+    document.getElementById("padPlayer").style.display=mode==="player"?"":"none";
+    document.getElementById("padGame").style.display=mode==="game"?"":"none";
+    document.getElementById("padOs").style.display=mode==="os"?"":"none";
+    document.getElementById("status").textContent="✅ Conectado. Usá el control.";
+    // confirmar con un ping
+    env("ping",{});
+    if(mode==="game"){clearInterval(envTimer);envTimer=setInterval(enviarEstado,100);}
+  })
+  .catch(function(){document.getElementById("status").textContent="❌ Error de conexión";});
+}
+
+function env(cmd,data){
+  if(!room)return;
+  fetch(SB+"/lan_commands",{method:"POST",headers:H,body:JSON.stringify({room:room,cmd:cmd,data:JSON.stringify(data||{})})}).catch(function(){});
+}
+
+function gState(k,v){g[k]=v;enviarEstado();}
+function enviarEstado(){
+  if(!room)return;
+  var s={left:g.left,right:g.right,acel:g.up?1:0,turbo:g.turbo};
+  fetch(SB+"/lan_commands",{method:"POST",headers:H,body:JSON.stringify({room:room,cmd:"game",data:JSON.stringify(s)})}).catch(function(){});
+}
+function osType(){
+  var t=document.getElementById("osTxt").value;
+  if(t)env("os",{action:"type",keys:t});
+  document.getElementById("osTxt").value="";
+}
+
+// ─── MANTENER PRESIONADO (repetición) ───
+function hold(id, fn, intervalo){
+  var t=null;
+  var el=document.getElementById(id);
+  if(!el)return;
+  el.addEventListener("pointerdown",function(e){e.preventDefault();fn();t=setInterval(fn,intervalo||160);});
+  el.addEventListener("pointerup",function(){if(t){clearInterval(t);t=null;}});
+  el.addEventListener("pointerleave",function(){if(t){clearInterval(t);t=null;}});
+  el.addEventListener("pointercancel",function(){if(t){clearInterval(t);t=null;}});
+}
+// Reproductor: botones con repetición
+hold("pVolUp",function(){env("player",{action:"vol+10"});});
+hold("pVolDown",function(){env("player",{action:"vol-10"});});
+hold("pSeekF",function(){env("player",{action:"seek+10"});});
+hold("pSeekB",function(){env("player",{action:"seek-10"});});
+
+// Zona OS: botones de teclado
+hold("osEnter",function(){env("os",{action:"key",keys:"Enter"});});
+hold("osEsc",function(){env("os",{action:"key",keys:"Escape"});});
+hold("osUp",function(){env("os",{action:"key",keys:"ArrowUp"});});
+hold("osDown",function(){env("os",{action:"key",keys:"ArrowDown"});});
+hold("osLeft",function(){env("os",{action:"key",keys:"ArrowLeft"});});
+hold("osRight",function(){env("os",{action:"key",keys:"ArrowRight"});});
+</script>
+</body>
+</html>

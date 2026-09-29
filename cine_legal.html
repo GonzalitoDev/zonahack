@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<title>🍿 Cine Legal · Retransmisión · ZonaHack</title>
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/icon_96.png" type="image/png">
+<meta name="theme-color" content="#ffb64c">
+<meta name="description" content="Cine Legal de ZonaHack: retransmisión y búsqueda scrapeando en muchas plataformas legales (Archive.org, YouTube, Vimeo, Dailymotion, Wikimedia Commons y más).">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--dor:#ffb64c;--dor2:#ffd98a;--cian:#00e5ff;--fondo:#07090c;--panel:#0e1217;--borde:rgba(255,255,255,.08);--txt:#d7e2ef;--sub:#6d7f93}
+body{background:var(--fondo);color:var(--txt);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;z-index:-1;background:
+ radial-gradient(600px 300px at 15% 0%,rgba(255,182,76,.10),transparent 60%),
+ radial-gradient(600px 300px at 85% 10%,rgba(0,229,255,.07),transparent 60%),
+ radial-gradient(800px 500px at 50% 100%,rgba(255,182,76,.04),transparent 60%)}
+.wrap{max-width:1040px;margin:0 auto;padding:14px 14px 0}
+.hdr{display:flex;align-items:center;gap:12px;padding:14px 18px;border:1px solid var(--borde);border-radius:18px;background:rgba(14,18,23,.7);backdrop-filter:blur(12px);box-shadow:0 8px 30px rgba(0,0,0,.35)}
+.hdr .logo{font-size:2em;filter:drop-shadow(0 0 14px rgba(255,182,76,.6));animation:flot 3s ease-in-out infinite}
+@keyframes flot{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+.hdr h1{font-size:1.05em;letter-spacing:3px;font-family:'Courier New',monospace;background:linear-gradient(90deg,var(--dor),var(--cian));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hdr span{font-size:.6em;color:var(--sub);letter-spacing:1px;display:block;margin-top:2px}
+.hdr a{margin-left:auto;color:var(--dor);text-decoration:none;font-size:.72em;border:1px solid rgba(255,182,76,.35);padding:7px 14px;border-radius:10px;transition:.2s}
+.hdr a:hover{background:rgba(255,182,76,.12);box-shadow:0 0 18px rgba(255,182,76,.25)}
+.hero{text-align:center;padding:26px 18px;margin:14px 0;border-radius:20px;border:1px solid var(--borde);background:linear-gradient(160deg,rgba(255,182,76,.08),rgba(0,229,255,.05) 60%),rgba(10,12,16,.6);position:relative;overflow:hidden}
+.hero::after{content:"🍿🎬";position:absolute;font-size:60px;opacity:.05;top:-8px;right:8px;transform:rotate(12deg)}
+.hero .big{font-size:2.4em;animation:flot 3s ease-in-out infinite}
+.hero h2{font-size:1.15em;letter-spacing:4px;margin:8px 0 6px;background:linear-gradient(90deg,#fff,var(--dor2));-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:800}
+.hero p{font-size:.68em;color:var(--sub);max-width:600px;margin:0 auto;line-height:1.6}
+.badge{display:inline-flex;align-items:center;gap:6px;margin-top:12px;background:rgba(255,182,76,.08);border:1px solid rgba(255,182,76,.3);color:var(--dor2);font-size:.6em;padding:6px 14px;border-radius:20px;letter-spacing:1px}
+.badge .punto{width:8px;height:8px;border-radius:50%;background:#00ff41;box-shadow:0 0 10px #00ff41;animation:late 1.4s infinite}
+@keyframes late{0%,100%{opacity:1}50%{opacity:.35}}
+.aviso{display:flex;align-items:center;gap:8px;background:rgba(0,255,65,.06);border:1px solid rgba(0,255,65,.25);color:#8fffb0;border-radius:14px;padding:12px 16px;font-size:.64em;line-height:1.6;margin:0 0 14px}
+.aviso b{color:#00ff41}
+/* fuentes del scraper */
+.fuentes{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-bottom:14px}
+.fsrc{padding:11px 10px;border:1px solid var(--borde);border-radius:13px;background:rgba(14,18,23,.55);cursor:pointer;transition:.18s;text-align:center}
+.fsrc:hover{transform:translateY(-2px)}
+.fsrc.on{border-color:var(--dor);box-shadow:0 0 16px rgba(255,182,76,.2);background:rgba(255,182,76,.07)}
+.fsrc .e{font-size:1.5em;display:block}
+.fsrc b{font-size:.62em;display:block;margin-top:5px;color:#fff;letter-spacing:.5px}
+.fsrc small{font-size:.52em;color:var(--sub);display:block;margin-top:2px}
+.fsrc .cnt{display:inline-block;margin-top:4px;font-size:.5em;background:rgba(255,182,76,.12);color:var(--dor2);padding:1px 8px;border-radius:10px}
+/* busqueda */
+.searchrow{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.searchrow input{flex:1;min-width:200px;background:rgba(10,12,16,.8);border:1px solid rgba(255,182,76,.22);border-radius:14px;color:#fff;padding:15px 18px;font-size:.84em;outline:none;font-family:inherit;transition:.2s;box-shadow:inset 0 2px 8px rgba(0,0,0,.4)}
+.searchrow input:focus{border-color:var(--dor);box-shadow:0 0 0 3px rgba(255,182,76,.15)}
+.searchrow button{background:linear-gradient(135deg,var(--dor),var(--cian));color:#03140a;border:none;border-radius:14px;padding:15px 26px;font-weight:800;font-size:.76em;cursor:pointer;font-family:inherit;letter-spacing:.5px;transition:.2s;box-shadow:0 6px 22px rgba(255,182,76,.35)}
+.searchrow button:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(0,229,255,.35)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:12px}
+.peli{background:var(--panel);border:1px solid var(--borde);border-radius:16px;overflow:hidden;cursor:pointer;transition:.2s;animation:fadeIn .35s both}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.peli:hover{transform:translateY(-5px);border-color:rgba(255,182,76,.45);box-shadow:0 14px 34px rgba(0,0,0,.55),0 0 22px rgba(255,182,76,.15)}
+.peli .th{position:relative;aspect-ratio:16/9;background:linear-gradient(160deg,#1c1310,#0d1130);overflow:hidden}
+.peli .th img{width:100%;height:100%;object-fit:cover;display:block}
+.peli .th .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:2.4em;background:linear-gradient(160deg,#1c1310,#0d1130)}
+.peli .th .playov{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0);opacity:0;transition:.2s}
+.peli:hover .th .playov{opacity:1;background:rgba(0,0,0,.5)}
+.peli .th .playov span{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--dor),var(--cian));color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 0 24px rgba(255,182,76,.6)}
+.peli .bd{padding:10px 12px}
+.peli .t{font-size:.7em;color:#fff;font-weight:600;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.8em}
+.peli .ch{font-size:.55em;color:var(--sub);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fch{display:inline-flex;align-items:center;gap:4px;font-size:.52em;margin-top:5px;padding:2px 8px;border-radius:10px;color:#fff}
+.sitios{margin-bottom:14px}
+.sitios h3{font-size:.72em;color:var(--dor2);letter-spacing:2px;margin-bottom:8px;font-family:'Courier New',monospace}
+.sitgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.site{padding:11px 12px;border:1px solid var(--borde);border-radius:13px;background:rgba(14,18,23,.55);cursor:pointer;transition:.18s;display:flex;align-items:center;gap:8px}
+.site:hover{transform:translateY(-2px);border-color:rgba(0,229,255,.4);box-shadow:0 0 14px rgba(0,229,255,.15)}
+.site .e{font-size:1.4em}
+.site b{font-size:.62em;color:#fff;display:block}
+.site small{font-size:.5em;color:var(--sub)}
+.spin{width:38px;height:38px;border:3px solid rgba(255,182,76,.15);border-top-color:var(--dor);border-radius:50%;animation:sp .8s linear infinite;margin:36px auto}
+@keyframes sp{100%{transform:rotate(360deg)}}
+.empty{background:var(--panel);border:1px solid var(--borde);border-radius:16px;padding:40px 20px;text-align:center;color:var(--sub);font-size:.72em;line-height:1.7}
+.empty b{color:#fff}
+.foot{margin-top:20px;border:1px solid var(--borde);border-radius:16px;background:rgba(14,18,23,.6);padding:20px;font-size:.64em;color:var(--sub);line-height:1.7}
+.foot h4{color:var(--dor2);letter-spacing:2px;font-size:.9em;margin-bottom:8px;font-family:'Courier New',monospace}
+.foot .leg{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.foot p{margin:0 0 6px}
+.foot .bot{margin-top:14px;border-top:1px dashed var(--borde);padding-top:12px;text-align:center}
+.foot a{color:var(--dor);text-decoration:none}
+#player{display:none;position:fixed;inset:0;z-index:100;background:#05070a;flex-direction:column}
+#player .ph{display:flex;align-items:center;gap:8px;padding:10px 14px;background:rgba(10,12,16,.95);border-bottom:1px solid rgba(255,182,76,.35);flex-wrap:wrap;backdrop-filter:blur(10px)}
+#player .ph b{flex:1;font-size:.74em;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
+#player .ph button{background:#0a0a0a;border:1px solid rgba(255,182,76,.4);color:var(--dor2);border-radius:10px;padding:9px 14px;font-size:.66em;cursor:pointer;font-family:inherit;transition:.15s}
+#player .ph button:hover{background:rgba(255,182,76,.12)}
+#player .ph button.verde{color:#00ff41;border-color:rgba(0,255,65,.4)}
+#player .ph button.verde:hover{background:rgba(0,255,65,.1)}
+#player iframe{flex:1;border:none;background:#fff}
+#player video{flex:1;width:100%;background:#000}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:rgba(10,12,16,.95);border:1px solid var(--dor);color:var(--dor2);padding:11px 20px;border-radius:14px;font-size:.68em;z-index:99;display:none;max-width:90vw;text-align:center;box-shadow:0 8px 30px rgba(0,0,0,.5)}
+@media(max-width:640px){.foot .leg{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hdr">
+    <div class="logo">🍿</div>
+    <div><h1>CINE LEGAL</h1><span>RETRANSMISIÓN · SCRAPPER DE PLATAFORMAS LEGALES</span></div>
+    <a href="/">← Volver</a>
+  </div>
+
+  <div class="hero">
+    <div class="big">🍿</div>
+    <h2>PELIS Y VIDEOS LEGALES · TRANSMITIDOS ACÁ</h2>
+    <p>Buscá y mirá sin salir de ZonaHack. El buscador <b>scrapea en 10+ plataformas legales a la vez</b> (dominio público, Creative Commons y bibliotecas libres) y te lo retransmite al toque.</p>
+    <span class="badge"><span class="punto"></span> 100% FUENTES LEGALES · SCRAPPER ACTIVO</span>
+  </div>
+
+  <div class="aviso">⚖️ <span><b>Todo el contenido de esta zona es legal</b>: dominio público, Creative Commons o publicado por sus autores en plataformas libres (Archive.org, Wikimedia Commons, Vimeo, Dailymotion, YouTube, Pexels, Pixabay, Mixkit, OK.ru, Rutube). ZonaHack no sube ni almacena archivos: solo busca (scrapea) y retransmite.</span></div>
+
+  <div class="sitios">
+    <h3>🗂️ SITIOS LEGALES · RETRANSMITIDOS</h3>
+    <div class="sitgrid" id="sitGrid"></div>
+  </div>
+
+  <div class="sitios">
+    <h3>🔎 FUENTES DEL SCRAPPER</h3>
+    <div class="fuentes" id="fuentes"></div>
+  </div>
+
+  <div class="searchrow">
+    <input id="q" placeholder="🍿 Buscar en todas las plataformas (ej: terminator, cine mudo, dune)..." onkeydown="if(event.key==='Enter')buscar()">
+    <button onclick="buscar()">🔍 Scrapear</button>
+  </div>
+
+  <div id="grid" class="grid"><div class="empty">🍿 Escribí una búsqueda arriba. El scraper consulta <b>todas las plataformas legales a la vez</b>.</div></div>
+
+  <div class="foot">
+    <h4>⚖️ AVISO LEGAL</h4>
+    <div class="leg">
+      <p><b>Cine Legal</b> solo consulta (scrapea) e integra contenido de <b>plataformas legales y bibliotecas libres</b>: películas de dominio público y Creative Commons de Archive.org, videos libres de Wikimedia Commons, Pexels, Pixabay y Mixkit, y videos públicos de YouTube, Vimeo, Dailymotion, OK.ru y Rutube.</p>
+      <p><b>ZonaHack no sube, no almacena ni distribuye</b> ningún archivo. Todo el contenido pertenece a sus autores y se reproduce desde los servidores oficiales de cada plataforma.</p>
+      <p>Si sos titular de derechos y encontrás contenido que no debería estar enlazado, <a href="#" onclick="return false">contactanos</a> y lo retiramos de inmediato.</p>
+      <p>El resto de las zonas (Cine Cuevana, Anime, Deepweb...) son <b>retransmisiones de terceros</b> e independientes de esta sección. 🍿⚖️</p>
+    </div>
+    <div class="bot">🍿 ZONAHACK · CINE LEGAL · SCRAPPER MULTIFUENTE · 2026</div>
+  </div>
+</div>
+
+<div id="player">
+  <div class="ph"><b id="pTitle">Cargando...</b>
+    <button class="verde" onclick="exterior()">🌐 Fuente</button>
+    <button onclick="cerrarP()">✕ Cerrar</button>
+  </div>
+  <iframe id="pFrame" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-downloads allow-presentation"></iframe>
+  <video id="pVideo" controls playsinline></video>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ═══ CINE LEGAL — retransmisión + scraper multifuente ═══ */
+var API = location.hostname.indexOf("20dd2740") >= 0 ? "https://offlinevideoplayer.vercel.app/api/search" : "/api/search";
+var PROXY = location.hostname.indexOf("20dd2740") >= 0 ? "https://offlinevideoplayer.vercel.app/api/proxy?url=" : "/api/proxy?url=";
+var FUENTES = {
+  youtube:["🟥","YouTube"], archive:["🏛️","Archive.org"], vimeo:["🔵","Vimeo"],
+  dailymotion:["🔷","Dailymotion"], commons:["🟣","Wikimedia"], pexels:["📷","Pexels"],
+  pixabay:["🖼️","Pixabay"], mixkit:["🎬","Mixkit"], okru:["🟠","OK.ru"], rutube:["🔵","Rutube"]
+};
+var SITIOS = [
+  ["🏛️","Archive.org","Pelis dominio público / CC","https://archive.org/details/moviesandfilms"],
+  ["🟥","YouTube","Canales oficiales","https://www.youtube.com/"],
+  ["🔵","Vimeo","Videos de creadores","https://vimeo.com/"],
+  ["🔷","Dailymotion","Videos públicos","https://www.dailymotion.com/"],
+  ["🟣","Wikimedia Commons","Biblioteca libre","https://commons.wikimedia.org/wiki/Category:Videos"],
+  ["📷","Pexels","Stock gratuito","https://www.pexels.com/search/videos/"],
+  ["🖼️","Pixabay","Stock gratuito","https://pixabay.com/videos/"],
+  ["🎬","Mixkit","Stock gratuito","https://mixkit.co/free-stock-video/"],
+  ["🟠","OK.ru","Videos públicos","https://ok.ru/video"],
+  ["🔵","Rutube","Videos públicos","https://rutube.ru/"]
+];
+var seleccionadas = null; // null = todas
+var resultados = [], filtros = {};
+function $(i){return document.getElementById(i);}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function toast(m){var t=$("toast");t.textContent=m;t.style.display="block";clearTimeout(t._x);t._x=setTimeout(function(){t.style.display="none";},2600);}
+function iniciarSitios(){
+  $("sitGrid").innerHTML = SITIOS.map(function(s,i){
+    return '<div class="site" onclick="verSitio('+i+')"><span class="e">'+s[0]+'</span><span><b>'+esc(s[1])+'</b><small>'+esc(s[2])+'</small></span></div>';
+  }).join("");
+}
+function verSitio(i){
+  var s = SITIOS[i];
+  $("pTitle").textContent = s[1]+" · 🍿 Retransmisión del sitio";
+  setPlayer("iframe", PROXY + encodeURIComponent(s[3]));
+}
+function iniciarFuentes(){
+  $("fuentes").innerHTML = Object.keys(FUENTES).map(function(k){
+    var e = FUENTES[k];
+    return '<div class="fsrc on" id="fs_'+k+'" onclick="toggleFuente(\''+k+'\')"><span class="e">'+e[0]+'</span><b>'+e[1]+'</b><span class="cnt">activa</span></div>';
+  }).join("");
+}
+function toggleFuente(k){
+  if(seleccionadas===null) seleccionadas = {};
+  seleccionadas[k] = !seleccionadas[k];
+  var n = Object.keys(FUENTES).filter(function(x){return seleccionadas[x];}).length;
+  if(n===0 || n===Object.keys(FUENTES).length) seleccionadas = null;
+  Object.keys(FUENTES).forEach(function(x){var on=seleccionadas===null||seleccionadas[x];var el=$("fs_"+x);el.className="fsrc"+(on?" on":"");el.querySelector(".cnt").textContent=on?"activa":"apagada";});
+}
+function buscar(){
+  var q = $("q").value.trim();
+  if(!q){ toast("Escribí qué querés buscar"); return; }
+  var grid = $("grid");
+  grid.innerHTML = '<div class="spin"></div>';
+  var fu = seleccionadas===null ? Object.keys(FUENTES).join(",") : Object.keys(FUENTES).filter(function(x){return seleccionadas[x];}).join(",");
+  fetch(API+"?q="+encodeURIComponent(q)+"&limit=60&fuentes="+encodeURIComponent(fu))
+  .then(function(r){return r.json();}).then(function(d){
+    if(d && d.bloqueada){ grid.innerHTML='<div class="empty" style="color:#f5b042">🚫 La categoría "<b>'+esc(d.categoria)+'</b>" está bloqueada por el administrador.</div>'; return; }
+    var res = (d && d.results) || [];
+    resultados = res; filtros = {};
+    if(!res.length){ grid.innerHTML='<div class="empty">🍿 Sin resultados para "<b>'+esc(q)+'</b>" en las fuentes activas.</div>'; return; }
+    res.forEach(function(r){ filtros[r.source] = (filtros[r.source]||0)+1; });
+    grid.innerHTML = res.map(function(v,i){ return card(v,i); }).join("");
+    toast("🍿 "+res.length+" resultados · "+(d.fuentes||[]).join(", "));
+  }).catch(function(){ grid.innerHTML='<div class="empty">⚠️ Error al scrapear. Reintentá en unos segundos.</div>'; });
+}
+function card(v,i){
+  var e = FUENTES[v.source]||["🎬",v.source];
+  var img = v.thumb ? '<img src="'+esc(v.thumb)+'" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'"><div class="ph" style="display:none">'+e[0]+'</div>'
+                    : '<div class="ph">'+e[0]+'</div>';
+  return '<div class="peli" onclick="ver('+i+')">'+
+    '<div class="th">'+img+'<div class="playov"><span>▶</span></div></div>'+
+    '<div class="bd"><div class="t">'+esc(v.title)+'</div>'+
+    '<div class="ch">'+esc(v.channel||"")+'</div>'+
+    '<span class="fch" style="background:'+colorFuente(v.source)+'">'+e[0]+' '+e[1]+'</span></div></div>';
+}
+function colorFuente(s){ var c={youtube:"#c4302b",archive:"#8a2be2",vimeo:"#00adef",dailymotion:"#005eff",commons:"#6b4fa1",pexels:"#00b46e",pixabay:"#22c55e",mixkit:"#f97316",okru:"#ee8208",rutube:"#e2069f"}; return c[s]||"#444"; }
+function ver(i){
+  var v = resultados[i];
+  var e = FUENTES[v.source]||["🎬",v.source];
+  $("pTitle").textContent = v.title+" · "+e[1];
+  var url = v.url;
+  if(/\.(mp4|webm|m4v|ogv|ogg)(\?.*)?$/i.test(url)){
+    setPlayer("video", url);
+  } else if(v.source==="commons"){
+    var real = url.replace("commons.wikimedia.org/wiki/File:","commons.wikimedia.org/wiki/Special:FilePath/")+"?width=900";
+    setPlayer("video", real);
+  } else if(v.source==="pexels"||v.source==="pixabay"||v.source==="mixkit"){
+    setPlayer("iframe", PROXY + encodeURIComponent(url));
+  } else {
+    setPlayer("iframe", url);
+  }
+}
+function setPlayer(tipo, src){
+  var fr = $("pFrame"), vd = $("pVideo");
+  fr.style.display = tipo==="iframe" ? "block" : "none";
+  vd.style.display = tipo==="video" ? "block" : "none";
+  if(tipo==="iframe"){ fr.src = src; vd.src = ""; }
+  else { vd.src = src; fr.src = "about:blank"; }
+  $("player").style.display = "flex";
+  document.body.style.overflow = "hidden";
+}
+function exterior(){
+  var fr = $("pFrame"), vd = $("pVideo");
+  if(vd.style.display!=="none" && vd.src) { window.open(vd.src, "_blank"); return; }
+  if(fr.src && fr.src.indexOf("about:blank")<0){
+    var d = decodeURIComponent(fr.src); var m = d.match(/url=([^&]+)/);
+    var real = m ? decodeURIComponent(m[1]) : d;
+    if(real.indexOf("http")>=0) window.open(real, "_blank");
+  }
+}
+function cerrarP(){ $("player").style.display="none"; $("pFrame").src="about:blank"; $("pVideo").src=""; document.body.style.overflow=""; }
+iniciarSitios();
+iniciarFuentes();
+</script>
+</body>
+</html>

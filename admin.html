@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>👑 ZonaHack - Admin</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0a;color:#c8d6e5;padding:10px;max-width:900px;margin:0 auto;font-family:'Courier New',monospace}
+h1{color:#00ff41;font-size:1.2em;margin:8px 0;text-align:center;text-shadow:0 0 8px rgba(0,255,65,.1)}
+.back{color:#00ff41;text-decoration:none;font-size:.72em;display:block;margin-bottom:6px}
+.card{border:1px solid rgba(0,255,65,.06);border-radius:4px;padding:12px;margin-bottom:8px;background:#0d0d0d}
+.card h2{color:#00ff41;font-size:.82em;margin-bottom:6px;border-bottom:1px solid rgba(0,255,65,.06);padding-bottom:4px}
+.tabs{display:flex;gap:3px;margin:6px 0;flex-wrap:wrap}
+.tab{padding:5px 12px;border:1px solid rgba(0,255,65,.06);border-radius:3px;background:rgba(0,255,65,.02);color:rgba(0,255,65,.5);font-size:.65em;cursor:pointer;font-family:'Courier New',monospace;transition:.2s}
+.tab:hover,.tab.active{border-color:rgba(0,255,65,.15);color:#00ff41;background:rgba(0,255,65,.05)}
+.tabc{display:none}
+.tabc.active{display:block}
+.fila{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(0,255,65,.03);font-size:.7em;align-items:center}
+.fila .lab{color:rgba(200,214,229,.4)}
+.fila .val{color:#c8d6e5}
+input,select{padding:6px 10px;border:1px solid rgba(0,255,65,.1);border-radius:3px;background:#0a0a0a;color:#c8d6e5;font-size:.7em;width:100%;margin:2px 0;outline:none;font-family:'Courier New',monospace}
+input:focus{border-color:#00ff41}
+.btn{padding:6px 14px;border:1px solid rgba(0,255,65,.12);border-radius:3px;background:rgba(0,255,65,.04);color:#00ff41;cursor:pointer;font-size:.65em;font-family:'Courier New',monospace;transition:.2s;margin:2px}
+.btn:hover{border-color:rgba(0,255,65,.25)}
+.btn-del{border-color:rgba(231,76,60,.15);color:#e74c3c}
+.btn-warn{border-color:rgba(241,196,15,.15);color:#f1c40f}
+.btn-row{display:flex;gap:4px;flex-wrap:wrap;margin:4px 0}
+.badge{padding:2px 8px;border-radius:2px;font-size:.6em;display:inline-block}
+.badge-ban{background:rgba(231,76,60,.1);color:#e74c3c;border:1px solid rgba(231,76,60,.15)}
+.badge-suspend{background:rgba(241,196,15,.1);color:#f1c40f;border:1px solid rgba(241,196,15,.15)}
+.badge-vip{background:rgba(0,255,65,.1);color:#00ff41;border:1px solid rgba(0,255,65,.15)}
+.empty{text-align:center;padding:15px;color:rgba(200,214,229,.15);font-size:.7em}
+#loginOverlay{position:fixed;top:0;left:0;right:0;bottom:0;background:#0a0a0a;z-index:9999;display:flex;align-items:center;justify-content:center}
+#loginBox{border:1px solid rgba(0,255,65,.1);border-radius:4px;padding:30px;max-width:350px;width:100%;text-align:center}
+#loginBox h2{color:#00ff41;margin-bottom:10px;font-size:1em}
+#loginBox input{margin:6px 0;text-align:center}
+#loginBox .btn{width:100%;margin-top:6px}
+#app{display:none}
+</style>
+</head>
+<body>
+<div id="loginOverlay">
+  <div id="loginBox">
+    <h2>👑 Admin Panel</h2>
+    <p style="color:rgba(200,214,229,.3);font-size:.7em;margin-bottom:10px">Ingresa la contraseña de administrador</p>
+    <input id="loginPass" type="password" placeholder="Contraseña..." onkeydown="if(event.key==='Enter')intentarLogin()">
+    <button class="btn" onclick="intentarLogin()">Ingresar</button>
+    <div id="loginError" style="color:#e74c3c;font-size:.65em;margin-top:6px;display:none"></div>
+    <a class="back" href="/" style="margin-top:12px">← Volver al inicio</a>
+  </div>
+</div>
+
+<div id="app">
+<h1>👑 Admin Panel</h1>
+<a class="back" href="/">← Volver al inicio</a>
+
+<div class="tabs">
+  <button class="tab active" onclick="mostrar('usuarios')">👥 Usuarios</button>
+  <button class="tab" onclick="mostrar('rangos')">🏅 Rangos</button>
+  <button class="tab" onclick="mostrar('baneados')">🔨 Baneados</button>
+  <button class="tab" onclick="mostrar('logs')">📋 Actividad</button>
+  <button class="tab" onclick="mostrar('db')">🗄️ Base Datos</button>
+</div>
+
+<div id="tab-usuarios" class="tabc active">
+  <div class="card">
+    <h2>👥 Buscar usuario</h2>
+    <input id="inputBuscarUser" placeholder="Nombre de usuario..." onkeydown="if(event.key==='Enter')buscarUsuario()">
+    <div class="btn-row"><button class="btn" onclick="buscarUsuario()">🔍 Buscar</button></div>
+    <div id="usuarioInfo" class="empty">Busca un usuario para ver su info</div>
+  </div>
+  <div class="card">
+    <h2>📋 Todos los usuarios</h2>
+    <div id="listaUsuarios"><p class="empty">Cargando...</p></div>
+  </div>
+</div>
+
+<div id="tab-rangos" class="tabc">
+  <div class="card">
+    <h2>🏅 Asignar rango</h2>
+    <input id="inputRangoUser" placeholder="Nombre de usuario...">
+    <div class="btn-row">
+      <button class="btn" onclick="asignarRango('fundador','#f1c40f')">👑 Fundador</button>
+      <button class="btn" onclick="asignarRango('admin','#00ff41')">⚙ Admin</button>
+      <button class="btn" onclick="asignarRango('vip','#e74c3c')">⭐ VIP</button>
+      <button class="btn" onclick="asignarRango('colaborador','#3498db')">🤝 Colaborador</button>
+      <button class="btn" onclick="asignarRango('user','#888888')">👤 User</button>
+      <button class="btn btn-del" onclick="asignarRango('baneado','#e74c3c')">🚫 Baneado</button>
+    </div>
+    <div id="rangoMsg" style="font-size:.65em;color:rgba(200,214,229,.3);margin-top:4px"></div>
+  </div>
+  <div class="card"><h2>🏅 Rangos actuales</h2><div id="listaRangos"><p class="empty">Cargando...</p></div></div>
+</div>
+
+<div id="tab-baneados" class="tabc">
+  <div class="card">
+    <h2>🔨 Banear/Suspender usuario</h2>
+    <input id="inputBanUser" placeholder="Nombre de usuario...">
+    <select id="inputBanTipo"><option value="ban">🚫 Ban permanente</option><option value="suspendido">⏳ Suspension temporal</option></select>
+    <input id="inputBanMotivo" placeholder="Motivo...">
+    <div id="banDuracion" style="display:none">
+      <select id="inputBanDuracion">
+        <option value="1">1 dia</option><option value="7">7 dias</option><option value="15">15 dias</option><option value="30">30 dias</option>
+      </select>
+    </div>
+    <div class="btn-row"><button class="btn btn-del" onclick="banearUsuario()">🔨 Ejecutar</button></div>
+    <div id="banMsg" style="font-size:.65em;color:rgba(200,214,229,.3);margin-top:4px"></div>
+  </div>
+  <div class="card"><h2>🔨 Usuarios baneados</h2><div id="listaBaneados"><p class="empty">Cargando...</p></div></div>
+</div>
+
+<div id="tab-logs" class="tabc">
+  <div class="card"><h2>📋 Actividad reciente</h2><div id="listaLogs"><p class="empty">Cargando...</p></div></div>
+</div>
+
+<div id="tab-db" class="tabc">
+  <div class="card"><h2>🗄️ Estado de la base de datos</h2><div id="dbStats"><p class="empty">Cargando...</p></div></div>
+  <div class="card">
+    <h2>⚡ Acciones de base de datos</h2>
+    <div class="btn-row">
+      <button class="btn" onclick="dbLimpiarCache()">🗑️ Limpiar cache</button>
+      <button class="btn btn-warn" onclick="if(confirm('Eliminar TODOS los logs?')){eliminarTodosLogs();}">📋 Limpiar logs</button>
+      <button class="btn btn-del" onclick="if(confirm('Esto es irreversible. Continuar?')){resetearDB();}">⚠️ Resetear DB</button>
+    </div>
+    <div id="dbActionsMsg" style="font-size:.65em;color:rgba(200,214,229,.3);margin-top:4px"></div>
+  </div>
+</div>
+</div>
+
+<script>
+// ─── NUEVO: Cargar todos los usuarios ──
+function cargarUsuarios(){
+  var div = document.getElementById("listaUsuarios");
+  if(!div) return;
+  div.innerHTML = '<p class="empty">Cargando...</p>';
+  // Obtener usuarios de logs, rangos y vip
+  Promise.all([
+    fetch(SUPABASE+"/logs?select=usuario_nombre&order=created_at.desc&limit=500",{headers:DBH}).then(function(r){return r.json();}).catch(function(){return[];}),
+    fetch(SUPABASE+"/rangos?select=usuario_nombre,rango,color",{headers:DBH}).then(function(r){return r.json();}).catch(function(){return[];}),
+    fetch(SUPABASE+"/vip?select=usuario_nombre,tipo,activo",{headers:DBH}).then(function(r){return r.json();}).catch(function(){return[];})
+  ]).then(function(datos){
+    var logs = datos[0]||[];
+    var rangos = datos[1]||[];
+    var vips = datos[2]||[];
+    
+    // Unir usuarios unicos
+    var users = {};
+    logs.forEach(function(l){var n=l.usuario_nombre||'anon'; if(!users[n]) users[n]={nombre:n,logs:0,rango:null,vip:null}; users[n].logs++; });
+    rangos.forEach(function(r){var n=r.usuario_nombre; if(n){ if(!users[n]) users[n]={nombre:n,logs:0,rango:null,vip:null}; users[n].rango=r.rango; users[n].color=r.color; } });
+    vips.forEach(function(v){var n=v.usuario_nombre; if(n&&v.activo){ if(!users[n]) users[n]={nombre:n,logs:0,rango:null,vip:null}; users[n].vip=v.tipo; } });
+    
+    var sorted = Object.keys(users).sort(function(a,b){return users[b].logs - users[a].logs;});
+    
+    if(!sorted.length){ div.innerHTML='<p class="empty">Sin usuarios</p>'; return; }
+    
+    var html = '<div style="font-size:.6em;color:rgba(200,214,229,.2);margin-bottom:4px">'+sorted.length+' usuarios registrados</div>';
+    sorted.forEach(function(n){
+      var u = users[n];
+      var col = u.color || 'rgba(200,214,229,.3)';
+      var badge = u.rango ? '<span class="badge" style="border-color:'+col+';color:'+col+'">'+esc(u.rango)+'</span>' : '';
+      var vipBadge = u.vip ? '<span class="badge badge-vip">VIP</span>' : '';
+      html += '<div class="fila"><span class="lab" style="color:'+col+'">'+esc(n)+'</span><span>'+badge+' '+vipBadge+'</span><span style="color:rgba(200,214,229,.2);font-size:.55em">'+u.logs+' act</span>';
+      html += '<span class="val"><button class="btn btn-del" style="padding:2px 6px;font-size:.55em" onclick="adminBan(\''+esc(n)+'\')">🔨</button>';
+      html += '<button class="btn" style="padding:2px 6px;font-size:.55em" onclick="adminVIP(\''+esc(n)+'\')">⭐</button>';
+      html += '<button class="btn" style="padding:2px 6px;font-size:.55em" onclick="adminUser(\''+esc(n)+'\')">👤</button></span></div>';
+    });
+    div.innerHTML = html;
+  }).catch(function(){ div.innerHTML='<p class="empty">Error al cargar usuarios</p>'; });
+}
+
+function adminBan(nom){
+  document.getElementById("inputBanUser").value = nom;
+  document.getElementById("inputBanMotivo").value = "";
+  mostrar("baneados");
+  document.getElementById("inputBanTipo").value = "ban";
+}
+
+function adminVIP(nom){
+  if(!confirm("Hacer VIP a "+nom+"?")) return;
+  fetch(SUPABASE+"/vip",{method:"POST",headers:Object.assign({},DBH,{"Prefer":"return=minimal"}),body:JSON.stringify({usuario_nombre:nom,tipo:"vip",activo:true})})
+  .then(function(){ cargarUsuarios(); })
+  .catch(function(){});
+}
+
+function adminUser(nom){
+  var r = prompt("Rango para "+nom+": (fundador, admin, vip, colaborador, user)","user");
+  if(!r) return;
+  var col = {fundador:"#f1c40f",admin:"#00ff41",vip:"#e74c3c",colaborador:"#3498db",user:"#888888",baneado:"#e74c3c"}[r]||"#888888";
+  fetch(SUPABASE+"/rangos?usuario_nombre=eq."+encodeURIComponent(nom)+"&limit=1",{headers:DBH}).then(function(r2){return r2.json();}).then(function(d){
+    if(d&&d.length>0){
+      fetch(SUPABASE+"/rangos?usuario_nombre=eq."+encodeURIComponent(nom),{method:"PATCH",headers:DBH,body:JSON.stringify({rango:r,color:col})}).then(function(){cargarUsuarios();cargarRangos();});
+    }else{
+      fetch(SUPABASE+"/rangos",{method:"POST",headers:Object.assign({},DBH,{"Prefer":"return=minimal"}),body:JSON.stringify({usuario_nombre:nom,rango:r,color:col})}).then(function(){cargarUsuarios();cargarRangos();});
+    }
+  });
+}
+</script>
+
+<script>
+var APIKEY = "sb_publishable_3VvBUD5Bdu3Uaq59fJ99MQ_XDCtujUU";
+var SUPABASE = "https://xfwolaurpeofysnymqle.supabase.co/rest/v1";
+var DBH = {"apikey":APIKEY,"Authorization":"Bearer "+APIKEY,"Content-Type":"application/json"};
+var ADMIN_PASS = "admin123";
+var ADMIN_PASS_KEY = "vh_admin_pass";
+var ATTEMPTS_KEY = "vh_admin_intentos";
+var BLOCK_KEY = "vh_admin_block";
+var MAX_ATTEMPTS = 3;
+
+function intentarLogin(){
+  var pass = document.getElementById("loginPass").value;
+  if(!pass) return;
+  var blocked = localStorage.getItem(BLOCK_KEY);
+  if(blocked && parseInt(blocked) > Date.now()){
+    document.getElementById("loginError").textContent = "Bloqueado. Espera 24h.";
+    document.getElementById("loginError").style.display = "block";
+    return;
+  }
+  fetch(SUPABASE+"/rangos?select=rango&usuario_nombre=eq.admin&limit=1",{headers:DBH})
+  .then(function(r){return r.json();}).then(function(d){
+    var dbPass = (d&&d.length>0) ? d[0].rango : ADMIN_PASS;
+    if(pass === dbPass){
+      localStorage.setItem(ADMIN_PASS_KEY, pass);
+      document.getElementById("loginOverlay").style.display = "none";
+      document.getElementById("app").style.display = "block";
+      cargarTodo();
+    }else{
+      var att = parseInt(localStorage.getItem(ATTEMPTS_KEY)||"0")+1;
+      localStorage.setItem(ATTEMPTS_KEY, att);
+      if(att >= MAX_ATTEMPTS){
+        localStorage.setItem(BLOCK_KEY, Date.now()+86400000);
+        document.getElementById("loginError").textContent = "Demasiados intentos. Bloqueado 24h.";
+      }else{
+        document.getElementById("loginError").textContent = "Contraseña incorrecta ("+att+"/"+MAX_ATTEMPTS+")";
+      }
+      document.getElementById("loginError").style.display = "block";
+    }
+  }).catch(function(){
+    if(pass === ADMIN_PASS){
+      localStorage.setItem(ADMIN_PASS_KEY, pass);
+      document.getElementById("loginOverlay").style.display = "none";
+      document.getElementById("app").style.display = "block";
+      cargarTodo();
+    }else{
+      document.getElementById("loginError").textContent = "Error de conexion";
+      document.getElementById("loginError").style.display = "block";
+    }
+  });
+}
+
+function esc(s){return (s||"").replace(/[&<>"]/g,function(m){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m];});}
+function obtenerFecha(){return new Date().toISOString();}
+
+function mostrar(id){
+  document.querySelectorAll(".tabc").forEach(function(e){e.classList.remove("active");});
+  document.getElementById("tab-"+id).classList.add("active");
+  document.querySelectorAll(".tab").forEach(function(e){e.classList.remove("active");});
+  document.querySelectorAll(".tab").forEach(function(e){
+    if(e.getAttribute("onclick")&&e.getAttribute("onclick").includes("'"+id+"'"))e.classList.add("active");
+  });
+  if(id==="rangos") cargarRangos();
+  if(id==="baneados") cargarBaneados();
+  if(id==="logs") cargarLogs();
+  if(id==="usuarios") cargarUsuarios();
+  if(id==="db") cargarDBStats();
+}
+
+// ─── USUARIOS ────────────────────────────
+function buscarUsuario(){
+  var nom = document.getElementById("inputBuscarUser").value.trim();
+  if(!nom) return;
+  var div = document.getElementById("usuarioInfo");
+  div.innerHTML = '<p class="empty">Buscando...</p>';
+  // Buscar en rangos, logs, visitas
+  Promise.all([
+    fetch(SUPABASE+"/rangos?select=rango,color&usuario_nombre=eq."+encodeURIComponent(nom)+"&limit=1",{headers:DBH}).then(function(r){return r.json();}).catch(function(){return[];}),
+    fetch(SUPABASE+"/logs?select=id&usuario_nombre=eq."+encodeURIComponent(nom)+"&limit=1",{headers:DBH}).then(function(r){return r.json();}).catch(function(){return[];}),
+    fetch(SUPABASE+"/baneados?select=tipo,motivo,activo&usuario_nombre=eq."+encodeURIComponent(nom)+"&limit=1",{headers:DBH}).then(function(r){return r.json();}).catch(function(){return[];}),
+    fetch(SUPABASE+"/vip?select=tipo,activo&usuario_nombre=eq."+encodeURIComponent(nom)+"&limit=1",{headers:DBH}).then(function(r){return r.json();}).catch(function(){return[];})
+  ]).then(function(d){
+    var rango = d[0]&&d[0].length>0 ? d[0][0] : null;
+    var activo = d[1]&&d[1].length>0 ? "Si ("+d[1].length+" registros)" : "No";
+    var baneado = d[2]&&d[2].length>0 ? d[2][0] : null;
+    var vip = d[3]&&d[3].length>0 ? d[3][0] : null;
+    var html = '<div class="fila"><span class="lab">Usuario</span><span class="val">'+esc(nom)+'</span></div>';
+    if(rango) html += '<div class="fila"><span class="lab">Rango</span><span class="val" style="color:'+rango.color+'">'+esc(rango.rango)+'</span></div>';
+    else html += '<div class="fila"><span class="lab">Rango</span><span class="val">Sin rango</span></div>';
+    if(vip) html += '<div class="fila"><span class="lab">VIP</span><span class="val" style="color:#00ff41">'+esc(vip.tipo)+'</span></div>';
+    html += '<div class="fila"><span class="lab">Actividad</span><span class="val">'+activo+'</span></div>';
+    if(baneado && baneado.activo) html += '<div class="fila"><span class="lab" style="color:#e74c3c">BANEADO</span><span class="val" style="color:#e74c3c">'+esc(baneado.tipo)+': '+esc(baneado.motivo)+'</span></div>';
+    html += '<div class="btn-row" style="margin-top:6px">';
+    html += '<button class="btn btn-del" onclick="banearUsuarioDirecto(\''+esc(nom)+'\')">🔨 Banear</button>';
+    html += '<button class="btn btn-warn" onclick="asignarRangoDirecto(\''+esc(nom)+'\',\'vip\',\'#e74c3c\')">⭐ Hacer VIP</button>';
+    html += '<button class="btn" onclick="asignarRangoDirecto(\''+esc(nom)+'\',\'admin\',\'#00ff41\')">⚙ Hacer Admin</button>';
+    html += '</div>';
+    div.innerHTML = html;
+  });
+}
+
+function banearUsuarioDirecto(nom){
+  document.getElementById("inputBanUser").value = nom;
+  document.getElementById("inputBanMotivo").value = "";
+  mostrar("baneados");
+  document.getElementById("inputBanTipo").value = "ban";
+}
+
+function asignarRangoDirecto(nom, rango, color){
+  document.getElementById("inputRangoUser").value = nom;
+  asignarRango(rango, color);
+}
+
+// ─── RANGOS ──────────────────────────────
+function asignarRango(rango, color){
+  var nom = document.getElementById("inputRangoUser").value.trim();
+  if(!nom){document.getElementById("rangoMsg").textContent="Ingresa un nombre";return;}
+  fetch(SUPABASE+"/rangos?usuario_nombre=eq."+encodeURIComponent(nom)+"&limit=1",{headers:DBH})
+  .then(function(r){return r.json();}).then(function(d){
+    if(d&&d.length>0){
+      return fetch(SUPABASE+"/rangos?usuario_nombre=eq."+encodeURIComponent(nom),{method:"PATCH",headers:DBH,body:JSON.stringify({rango:rango,color:color})});
+    }else{
+      return fetch(SUPABASE+"/rangos",{method:"POST",headers:Object.assign({},DBH,{"Prefer":"return=minimal"}),body:JSON.stringify({usuario_nombre:nom,rango:rango,color:color})});
+    }
+  }).then(function(){
+    document.getElementById("rangoMsg").innerHTML = '<span style="color:#00ff41">Rango asignado: '+rango+'</span>';
+    // Log
+    var admin = localStorage.getItem("vh_usuario")||"admin";
+    fetch(SUPABASE+"/logs",{method:"POST",headers:Object.assign({},DBH,{"Prefer":"return=minimal"}),body:JSON.stringify({usuario_nombre:admin,accion:"admin_rango",detalle:nom+" -> "+rango})}).catch(function(){});
+    cargarRangos();
+  }).catch(function(){document.getElementById("rangoMsg").textContent="Error";});
+}
+
+function cargarRangos(){
+  var div = document.getElementById("listaRangos");
+  div.innerHTML = '<p class="empty">Cargando...</p>';
+  fetch(SUPABASE+"/rangos?select=usuario_nombre,rango,color&order=usuario_nombre.asc",{headers:DBH})
+  .then(function(r){return r.json();}).then(function(d){
+    if(!d||!d.length){div.innerHTML='<p class="empty">Sin rangos</p>';return;}
+    var html="";
+    d.forEach(function(r){
+      var col = r.color||"rgba(200,214,229,.3)";
+      html += '<div class="fila"><span class="lab" style="color:'+col+'">'+esc(r.usuario_nombre||"?")+'</span><span class="val"><span class="badge" style="border-color:'+col+';color:'+col+'">'+esc(r.rango||"user")+'</span></span></div>';
+    });
+    div.innerHTML = html;
+  }).catch(function(){div.innerHTML='<p class="empty">Error</p>';});
+}
+
+// ─── BANEAR ──────────────────────────────
+document.getElementById("inputBanTipo").addEventListener("change",function(){
+  document.getElementById("banDuracion").style.display = this.value==="suspendido"?"block":"none";
+});
+
+function banearUsuario(){
+  var nom = document.getElementById("inputBanUser").value.trim();
+  var tipo = document.getElementById("inputBanTipo").value;
+  var motivo = document.getElementById("inputBanMotivo").value.trim() || "Sin motivo especificado";
+  if(!nom){document.getElementById("banMsg").textContent="Ingresa un nombre";return;}
+  var admin = localStorage.getItem("vh_usuario")||"admin";
+  var data = {usuario_nombre:nom,usuario_id:nom,tipo:tipo,motivo:motivo,admin_nombre:admin,activo:true};
+  if(tipo==="suspendido"){
+    var dias = parseInt(document.getElementById("inputBanDuracion").value) || 7;
+    data.fecha_fin = new Date(Date.now()+dias*86400000).toISOString();
+  }
+  fetch(SUPABASE+"/baneados",{method:"POST",headers:Object.assign({},DBH,{"Prefer":"return=minimal"}),body:JSON.stringify(data)})
+  .then(function(){
+    document.getElementById("banMsg").innerHTML = '<span style="color:#e74c3c">Usuario '+tipo+': '+nom+'</span>';
+    // Log
+    fetch(SUPABASE+"/logs",{method:"POST",headers:Object.assign({},DBH,{"Prefer":"return=minimal"}),body:JSON.stringify({usuario_nombre:admin,accion:"admin_"+tipo,detalle:nom+": "+motivo})}).catch(function(){});
+    // Asignar rango baneado
+    fetch(SUPABASE+"/rangos?usuario_nombre=eq."+encodeURIComponent(nom)+"&limit=1",{headers:DBH}).then(function(r){return r.json();}).then(function(d){
+      if(d&&d.length>0){
+        fetch(SUPABASE+"/rangos?usuario_nombre=eq."+encodeURIComponent(nom),{method:"PATCH",headers:DBH,body:JSON.stringify({rango:"baneado",color:"#e74c3c"})}).catch(function(){});
+      }else{
+        fetch(SUPABASE+"/rangos",{method:"POST",headers:Object.assign({},DBH,{"Prefer":"return=minimal"}),body:JSON.stringify({usuario_nombre:nom,rango:"baneado",color:"#e74c3c"})}).catch(function(){});
+      }
+    }).catch(function(){});
+    cargarBaneados();
+  }).catch(function(){document.getElementById("banMsg").textContent="Error al banear";});
+}
+
+function cargarBaneados(){
+  var div = document.getElementById("listaBaneados");
+  div.innerHTML = '<p class="empty">Cargando...</p>';
+  fetch(SUPABASE+"/baneados?select=id,usuario_nombre,tipo,motivo,activo,created_at&order=created_at.desc&limit=50",{headers:DBH})
+  .then(function(r){return r.json();}).then(function(d){
+    if(!d||!d.length){div.innerHTML='<p class="empty">Sin baneados</p>';return;}
+    var html="";
+    d.forEach(function(b){
+      var col = b.activo ? (b.tipo==="ban"?"#e74c3c":"#f1c40f") : "rgba(200,214,229,.2)";
+      var badge = b.activo ? (b.tipo==="ban"?'<span class="badge badge-ban">BAN</span>':'<span class="badge badge-suspend">SUSP</span>') : '<span style="color:rgba(200,214,229,.2)">INACTIVO</span>';
+      html += '<div class="fila"><span class="lab" style="color:'+col+'">'+esc(b.usuario_nombre||"?")+'</span><span>'+badge+'</span><span style="color:rgba(200,214,229,.3);font-size:.6em">'+esc(b.motivo||"").slice(0,30)+'</span>';
+      if(b.activo) html += '<span class="val"><button class="btn btn-del" onclick="desbanear('+b.id+',\''+esc(b.usuario_nombre||"")+'\')">Desbanear</button></span>';
+      html += '</div>';
+    });
+    div.innerHTML = html;
+  }).catch(function(){div.innerHTML='<p class="empty">Error</p>';});
+}
+
+function desbanear(id, nom){
+  if(!confirm("Desbanear a "+nom+"?")) return;
+  fetch(SUPABASE+"/baneados?id=eq."+id,{method:"PATCH",headers:DBH,body:JSON.stringify({activo:false})}).then(function(){
+    // Restaurar rango
+    fetch(SUPABASE+"/rangos?usuario_nombre=eq."+encodeURIComponent(nom),{method:"PATCH",headers:DBH,body:JSON.stringify({rango:"user",color:"#888888"})}).catch(function(){});
+    cargarBaneados();
+  }).catch(function(){});
+}
+
+// ─── LOGS ────────────────────────────────
+function cargarLogs(){
+  var div = document.getElementById("listaLogs");
+  div.innerHTML = '<p class="empty">Cargando...</p>';
+  fetch(SUPABASE+"/logs?select=id,usuario_nombre,accion,detalle,created_at&order=created_at.desc&limit=50",{headers:DBH})
+  .then(function(r){return r.json();}).then(function(d){
+    if(!d||!d.length){div.innerHTML='<p class="empty">Sin actividad</p>';return;}
+    div.innerHTML = d.map(function(l){
+      return '<div class="fila"><span class="lab" style="font-size:.6em">'+new Date(l.created_at).toLocaleString()+'</span><span style="color:#00ff41;font-size:.65em">'+esc(l.usuario_nombre||"")+'</span><span style="color:rgba(200,214,229,.4);font-size:.6em">'+esc(l.accion||"")+'</span><span style="color:rgba(200,214,229,.2);font-size:.55em">'+esc((l.detalle||"").slice(0,30))+'</span></div>';
+    }).join('');
+  }).catch(function(){div.innerHTML='<p class="empty">Error</p>';});
+}
+
+// ─── BASE DE DATOS ─────────────────────
+function cargarDBStats(){
+  var div = document.getElementById("dbStats");
+  if(!div) return;
+  div.innerHTML = '<p class="empty">Consultando tablas...</p>';
+  
+  Promise.all([
+    fetch(SUPABASE+"/logs?select=id&limit=1",{headers:DBH}).then(function(r){return r.json();}).catch(function(){return[];}),
+    fetch(SUPABASE+"/usuarios?select=id&limit=1",{headers:DBH}).then(function(r){return r.json();}).catch(function(){return[];}),
+    fetch(SUPABASE+"/videos?select=id&limit=1",{headers:DBH}).then(function(r){return r.json();}).catch(function(){return[];}),
+    fetch(SUPABASE+"/rangos?select=id&limit=1",{headers:DBH}).then(function(r){return r.json();}).catch(function(){return[];}),
+    fetch(SUPABASE+"/vip?select=id&limit=1",{headers:DBH}).then(function(r){return r.json();}).catch(function(){return[];}),
+    fetch(SUPABASE+"/baneados?select=id,activo&limit=100",{headers:DBH}).then(function(r){return r.json();}).catch(function(){return[];}),
+    fetch(SUPABASE+"/favoritos?select=id&limit=1",{headers:DBH}).then(function(r){return r.json();}).catch(function(){return[];}),
+    fetch(SUPABASE+"/chat_mensajes?select=id&limit=1",{headers:DBH}).then(function(r){return r.json();}).catch(function(){return[];}),
+    fetch(SUPABASE+"/me_gusta?select=id&limit=1",{headers:DBH}).then(function(r){return r.json();}).catch(function(){return[];}),
+    fetch(SUPABASE+"/progreso?select=id&limit=1",{headers:DBH}).then(function(r){return r.json();}).catch(function(){return[];})
+  ]).then(function(r){
+    var html = '<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:4px">';
+    var tablas = [
+      {n:"📋 Logs",d:r[0]},{n:"👥 Usuarios",d:r[1]},{n:"🎬 Videos",d:r[2]},
+      {n:"🏅 Rangos",d:r[3]},{n:"⭐ VIP",d:r[4]},{n:"🔨 Baneados",d:r[5]},
+      {n:"❤️ Favoritos",d:r[6]},{n:"💬 Chat",d:r[7]},{n:"👍 Likes",d:r[8]},{n:"📺 Progreso",d:r[9]}
+    ];
+    tablas.forEach(function(t){
+      var count = t.d ? (t.d.length || (t.d.id !== undefined ? 1 : 0)) : 0;
+      var total = t.d && t.d.length ? t.d.length : (t.d && t.d.id !== undefined ? 1 : count);
+      html += '<div style="border:1px solid rgba(0,255,65,.04);border-radius:3px;padding:6px;text-align:center"><div style="font-size:.6em;color:rgba(200,214,229,.3)">'+t.n+'</div><div style="font-size:1em;color:#00ff41;font-weight:bold">'+total+'</div></div>';
+    });
+    html += '</div>';
+    
+    // Contar baneados activos
+    var baneadosActivos = 0;
+    if(r[5] && r[5].length) r[5].forEach(function(b){if(b.activo) baneadosActivos++;});
+    html += '<div style="margin-top:6px;font-size:.6em;color:rgba(200,214,229,.2)">🔨 Baneados activos: '+baneadosActivos+'</div>';
+    
+    div.innerHTML = html;
+  }).catch(function(){ div.innerHTML='<p class="empty">Error al consultar DB</p>'; });
+}
+
+function dbLimpiarCache(){
+  document.getElementById("dbActionsMsg").innerHTML = '<span style="color:#00ff41">Cache local limpiado</span>';
+}
+
+function eliminarTodosLogs(){
+  var admin = localStorage.getItem("vh_usuario")||"admin";
+  fetch(SUPABASE+"/logs",{method:"DELETE",headers:DBH}).then(function(){
+    document.getElementById("dbActionsMsg").innerHTML = '<span style="color:#e74c3c">Todos los logs eliminados</span>';
+    cargarLogs();
+    cargarDBStats();
+    // Registrar
+    fetch(SUPABASE+"/logs",{method:"POST",headers:Object.assign({},DBH,{"Prefer":"return=minimal"}),body:JSON.stringify({usuario_nombre:admin,accion:"admin_limpia_logs",detalle:"Elimino todos los logs"})}).catch(function(){});
+  }).catch(function(){});
+}
+
+function resetearDB(){
+  document.getElementById("dbActionsMsg").innerHTML = '<span style="color:#e74c3c">⚠️ Funcion desactivada por seguridad</span>';
+}
+
+function cargarTodo(){
+  cargarRangos();
+  cargarBaneados();
+  cargarLogs();
+  cargarUsuarios();
+  cargarDBStats();
+}
+
+// Auto-login si ya esta autorizado
+if(localStorage.getItem(ADMIN_PASS_KEY)){
+  document.getElementById("loginOverlay").style.display = "none";
+  document.getElementById("app").style.display = "block";
+  cargarTodo();
+}
+</script>
+</body>
+</html>

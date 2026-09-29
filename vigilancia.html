@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<title>📡 Vigilancia Total · ZonaHack</title>
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/icon_96.png" type="image/png">
+<meta name="theme-color" content="#ff4d4d">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:radial-gradient(circle at 20% 10%,rgba(255,77,77,.05),transparent 50%),radial-gradient(circle at 85% 85%,rgba(0,255,65,.04),transparent 50%),#07090e;color:#d7e2ef;font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh}
+#matrix{position:fixed;inset:0;z-index:0;opacity:.08;pointer-events:none}
+.wrap{position:relative;z-index:2;max-width:1000px;margin:0 auto;padding:14px}
+.hdr{display:flex;align-items:center;gap:10px;padding-bottom:10px;border-bottom:1px solid rgba(255,77,77,.25)}
+.hdr .logo{font-size:1.6em;animation:pulso 1.6s infinite}
+@keyframes pulso{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+.hdr h1{font-size:1em;letter-spacing:2px;font-family:'Courier New',monospace;color:#ff4d4d;text-shadow:0 0 14px rgba(255,77,77,.5)}
+.hdr span{font-size:.56em;color:#6d7f93;letter-spacing:1px}
+.hdr .live{display:inline-flex;align-items:center;gap:6px;font-size:.6em;color:#00ff41;border:1px solid rgba(0,255,65,.3);border-radius:16px;padding:4px 12px;letter-spacing:1px}
+.live .dot{width:8px;height:8px;border-radius:50%;background:#00ff41;animation:rt 1.4s infinite}
+@keyframes rt{0%,100%{opacity:.2}50%{opacity:1}}
+.hdr a{margin-left:auto;color:#ff4d4d;text-decoration:none;font-size:.7em;border:1px solid rgba(255,77,77,.3);padding:5px 10px;border-radius:8px}
+.hero{text-align:center;padding:16px;border:1px solid rgba(255,77,77,.18);border-radius:16px;margin:12px 0;background:rgba(20,0,0,.3)}
+.hero .big{font-size:2.2em}
+.hero h2{color:#ff4d4d;letter-spacing:2px;font-size:1em;margin:6px 0;text-shadow:0 0 16px rgba(255,77,77,.5)}
+.hero p{font-size:.62em;color:#6d7f93;line-height:1.7}
+.badge{display:inline-block;margin-top:8px;background:rgba(255,77,77,.08);border:1px solid rgba(255,77,77,.3);color:#ff6b6b;font-size:.56em;padding:4px 12px;border-radius:16px;letter-spacing:1px}
+.stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin:12px 0}
+.stat{background:rgba(13,17,23,.92);border:1px solid rgba(255,77,77,.15);border-radius:14px;padding:12px;text-align:center}
+.stat .ic{font-size:1.3em}
+.stat .num{font-size:1.6em;font-weight:800;font-family:'Courier New',monospace}
+.stat .lb{font-size:.54em;color:#6d7f93;letter-spacing:1px;margin-top:3px;text-transform:uppercase}
+.stat.ok .num{color:#00ff41}
+.stat.bad .num{color:#ff4d4d}
+.sec{font-size:.72em;color:#ff4d4d;letter-spacing:1px;margin:16px 0 8px;display:flex;align-items:center;gap:8px}
+.sec::before{content:'';width:3px;height:13px;background:#ff4d4d;border-radius:2px;box-shadow:0 0 8px rgba(255,77,77,.6)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:9px}
+.item{background:rgba(13,17,23,.92);border:1px solid rgba(255,77,77,.14);border-radius:11px;padding:10px 12px;font-size:.66em;display:flex;align-items:center;gap:8px}
+.item .dot2{width:10px;height:10px;border-radius:50%;background:#333;flex-shrink:0}
+.item.ok .dot2{background:#00ff41;box-shadow:0 0 8px rgba(0,255,65,.6)}
+.item.bad .dot2{background:#ff4d4d;box-shadow:0 0 8px rgba(255,77,77,.7)}
+.item .nm{flex:1;color:#d7e2ef;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item .st{font-size:.52em;color:#6d7f93}
+.item.ok .st{color:#00ff41}
+.item.bad .st{color:#ff4d4d}
+.res{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:9px}
+.rec{background:rgba(13,17,23,.92);border:1px solid rgba(0,229,255,.15);border-radius:11px;padding:10px 12px;font-size:.66em}
+.rec .k{color:#6d7f93}
+.rec .v{color:#00e5ff;font-weight:800;font-size:1.1em}
+.bar{height:7px;background:#111;border-radius:5px;overflow:hidden;margin-top:6px}
+.bar span{display:block;height:100%;background:linear-gradient(90deg,#00ff41,#f1c40f,#ff4d4d);transition:width .5s}
+.events{display:flex;flex-direction:column;gap:7px}
+.ev{background:rgba(13,17,23,.92);border:1px solid rgba(255,77,77,.16);border-radius:10px;padding:9px 12px;font-size:.64em;line-height:1.6;animation:fadeIn .3s both}
+@keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.ev .t{color:#f1c40f;font-size:.8em}
+.empty{background:rgba(13,17,23,.85);border:1px solid rgba(255,77,77,.14);border-radius:14px;padding:30px;text-align:center;color:#6d7f93;font-size:.7em}
+.foot{text-align:center;font-size:.56em;color:#6d7f93;letter-spacing:1px;margin-top:18px;padding-bottom:20px}
+</style>
+</head>
+<body>
+<canvas id="matrix"></canvas>
+
+<div class="wrap">
+  <div class="hdr">
+    <div class="logo">📡</div>
+    <div><h1>VIGILANCIA TOTAL</h1><span>VPS · DOCKER · WEB · RECURSOS · ALERTAS</span></div>
+    <span class="live"><span class="dot"></span>LIVE</span>
+    <a href="/">←</a>
+  </div>
+
+  <div class="hero">
+    <div class="big">📡</div>
+    <h2>SISTEMA DE VIGILANCIA TOTAL</h2>
+    <p>Estado en vivo de todos los servicios, contenedores, sitios y recursos del VPS.<br>Alerta automática por Telegram + Discord + acá cuando algo falla o se recupera.</p>
+    <span class="badge">👁️ TODO BAJO CONTROL · ACTUALIZADO CADA 60 SEG</span>
+  </div>
+
+  <div class="stats" id="stats"><div class="empty">Conectando a la vigilancia...</div></div>
+
+  <div class="sec">⚙️ SERVICIOS DEL VPS</div>
+  <div class="grid" id="servicios"></div>
+
+  <div class="sec">🐳 DOCKER · CONTENEDORES</div>
+  <div class="grid" id="docker"></div>
+
+  <div class="sec">🌐 SITIOS WEB</div>
+  <div class="grid" id="web"></div>
+
+  <div class="sec">💾 RECURSOS</div>
+  <div class="res" id="recursos"></div>
+
+  <div class="sec">🚨 EVENTOS / ALERTAS</div>
+  <div class="events" id="eventos"><div class="empty">Sin alertas todavía. Si algo se cae, aparece acá y te avisa por Telegram y Discord.</div></div>
+
+  <div class="foot">ZONAHACK · VIGILANCIA TOTAL · 📡</div>
+</div>
+
+<script>
+/* ═══ VIGILANCIA TOTAL — dashboard en vivo (Supabase realtime) ═══ */
+var KEY="sb_publishable_3VvBUD5Bdu3Uaq59fJ99MQ_XDCtujUU";
+var API="https://xfwolaurpeofysnymqle.supabase.co/rest/v1";
+var WS="wss://xfwolaurpeofysnymqle.supabase.co/realtime/v1/websocket?apikey="+KEY+"&vsn=1.0.0";
+var H={"apikey":KEY,"Authorization":"Bearer "+KEY};
+function $(i){return document.getElementById(i);}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+
+function render(d){
+  if(!d||!d.servicios)return;
+  // stats
+  var serv=Object.keys(d.servicios).length, servOk=Object.values(d.servicios).filter(function(s){return s.ok;}).length;
+  var dock=d.docker||{}, conts=Object.keys(dock).filter(function(k){return k!=="corriendo";}).length;
+  var contOk=Object.keys(dock).filter(function(k){return k!=="corriendo"&&dock[k].ok;}).length;
+  var web=Object.keys(d.web||{}).length, webOk=Object.keys(d.web||{}).filter(function(k){return d.web[k].ok;}).length;
+  var rec=d.recursos||{};
+  var html=
+    '<div class="stat ok"><div class="ic">⚙️</div><div class="num">'+servOk+'/'+serv+'</div><div class="lb">Servicios</div></div>'+
+    '<div class="stat '+(contOk===conts?'ok':'bad')+'"><div class="ic">🐳</div><div class="num">'+contOk+'/'+conts+'</div><div class="lb">Docker</div></div>'+
+    '<div class="stat '+(webOk===web?'ok':'bad')+'"><div class="ic">🌐</div><div class="num">'+webOk+'/'+web+'</div><div class="lb">Sitios</div></div>'+
+    '<div class="stat ok"><div class="ic">💾</div><div class="num" style="font-size:1.1em">'+(rec.disco||"?")+'</div><div class="lb">Disco</div></div>'+
+    '<div class="stat ok"><div class="ic">🧠</div><div class="num" style="font-size:1.1em">'+esc(rec.ram||"?")+'MB</div><div class="lb">RAM</div></div>'+
+    '<div class="stat ok"><div class="ic">📈</div><div class="num" style="font-size:1.1em">'+esc(rec.load||"?")+'</div><div class="lb">Carga</div></div>'+
+    '<div class="stat ok"><div class="ic">🗂️</div><div class="num" style="font-size:1.1em">'+esc(rec.inodos||"?")+'</div><div class="lb">Inodos</div></div>'+
+    '<div class="stat ok"><div class="ic">🕒</div><div class="num" style="font-size:1.05em">'+esc(String(d.fecha||"").slice(11,19))+'</div><div class="lb">Actualizado</div></div>';
+  $("stats").innerHTML=html;
+  // servicios
+  $("servicios").innerHTML=Object.keys(d.servicios).map(function(k){
+    var s=d.servicios[k];
+    return '<div class="item '+(s.ok?'ok':'bad')+'"><span class="dot2"></span><span class="nm">'+esc(s.nom)+'</span><span class="st">'+(s.ok?"ON":"DOWN")+'</span></div>';
+  }).join("");
+  // docker
+  $("docker").innerHTML=Object.keys(dock).filter(function(k){return k!=="corriendo";}).map(function(k){
+    var c=dock[k];
+    return '<div class="item '+(c.ok?'ok':'bad')+'"><span class="dot2"></span><span class="nm">'+esc(k)+'</span><span class="st">'+(c.ok?"RUN":"DOWN")+'</span></div>';
+  }).join("")+'<div class="item ok"><span class="dot2"></span><span class="nm">Corriendo: '+(dock.corriendo||[]).length+'</span></div>';
+  // web
+  $("web").innerHTML=Object.keys(d.web).map(function(k){
+    var w=d.web[k];
+    return '<div class="item '+(w.ok?'ok':'bad')+'"><span class="dot2"></span><span class="nm">Web '+esc(k)+'</span><span class="st">'+(w.ok?"ONLINE":"DOWN")+'</span></div>';
+  }).join("");
+  // recursos con barra
+  function pct(v){ var n=parseInt(String(v||"0").replace("%","")); return isNaN(n)?0:n; }
+  $("recursos").innerHTML=
+    '<div class="rec"><span class="k">Disco</span> <span class="v">'+esc(rec.disco||"?")+'</span><div class="bar"><span style="width:'+pct(rec.disco)+'%"></span></div></div>'+
+    '<div class="rec"><span class="k">RAM usada</span> <span class="v">'+esc(rec.ram||"?")+' MB</span><div class="bar"><span style="width:'+Math.min(100,pct(rec.ram)/100*0.5)+'%"></span></div></div>'+
+    '<div class="rec"><span class="k">Inodos</span> <span class="v">'+esc(rec.inodos||"?")+'</span><div class="bar"><span style="width:'+pct(rec.inodos)+'%"></span></div></div>'+
+    '<div class="rec"><span class="k">Carga CPU</span> <span class="v">'+esc(rec.load||"?")+'</span></div>';
+  // eventos
+  var evs=d.eventos||[];
+  if(evs.length){ $("eventos").innerHTML=evs.slice(0,15).map(function(e){
+    return '<div class="ev"><span class="t">'+esc(String(e.fecha||"").slice(0,16))+'</span><br>'+esc(e.msg)+'</div>';
+  }).join(""); }
+}
+function cargar(){
+  fetch(API+"/chat_mensajes?select=mensaje&user_id=like.vig_*&order=id.desc&limit=1",{headers:H})
+  .then(function(r){return r.json();}).then(function(d){
+    if(d&&d[0]){ try{ render(JSON.parse(d[0].mensaje)); }catch(e){} }
+  }).catch(function(){});
+}
+function conectar(){
+  try{
+    var ws=new WebSocket(WS);
+    ws.onopen=function(){
+      ws.send(JSON.stringify({topic:"realtime:chat_mensajes",event:"phx_join",payload:{config:{postgres_changes:[{event:"*",schema:"public",table:"chat_mensajes"}]}},ref:"1"}));
+      setInterval(function(){ try{ws.send(JSON.stringify({topic:"phoenix",event:"heartbeat",payload:{},ref:"0"}));}catch(e){} },8000);
+    };
+    ws.onmessage=function(e){
+      try{
+        var m=JSON.parse(e.data);
+        if(m.event==="postgres_changes"){
+          var d=m.payload&&m.payload.data;
+          if(d&&d.record&&(d.record.user_id||"").indexOf("vig_")===0){
+            try{ render(JSON.parse(d.record.mensaje)); }catch(err){}
+          }
+        }
+      }catch(err){}
+    };
+    ws.onclose=function(){ setTimeout(conectar,5000); };
+  }catch(e){ setTimeout(conectar,5000); }
+}
+/* matrix */
+var cv=$("matrix"),ctx=cv.getContext("2d"),cols,drop;
+var glyph="01アイウエオカキクケコ#$%";
+function size(){cv.width=innerWidth;cv.height=innerHeight;cols=Math.floor(cv.width/14);drop=Array(cols).fill(0);}
+size();addEventListener("resize",size);
+setInterval(function(){
+  ctx.fillStyle="rgba(7,9,14,.1)";ctx.fillRect(0,0,cv.width,cv.height);
+  ctx.fillStyle="#ff4d4d";ctx.font="13px monospace";
+  for(var i=0;i<drop.length;i++){
+    ctx.fillText(glyph[Math.floor(Math.random()*glyph.length)],i*14,drop[i]*14);
+    if(drop[i]*14>cv.height&&Math.random()>.975)drop[i]=0;
+    drop[i]++;
+  }
+},50);
+
+cargar();
+setInterval(cargar, 30000); // fallback
+conectar();
+</script>
+</body>
+</html>

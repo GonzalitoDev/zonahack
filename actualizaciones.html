@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🔄 Actualizaciones | ZonaHack</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css">
+<style>
+:root{--bg:#0a0a0a;--bg2:#111;--card:#0d0f0e;--accent:#00ff41;--text:#e8f5e9;--text2:#7f8c8d;--border:#1c2b20;--font:'Courier New',monospace;}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh}
+header{background:#0d0f0e;border-bottom:1px solid var(--border);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+header h1{font-size:1.05em;color:var(--accent);text-shadow:0 0 12px rgba(0,255,65,.4);letter-spacing:1px}
+.badge{font-size:.6em;background:rgba(0,255,65,.1);border:1px solid rgba(0,255,65,.3);color:var(--accent);padding:3px 10px;border-radius:3px}
+.wrap{max-width:820px;margin:20px auto;padding:0 14px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-bottom:16px}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:12px;text-align:center}
+.stat .n{font-size:1.4em;color:var(--accent)}
+.stat .l{font-size:.62em;color:var(--text2);margin-top:3px}
+.timeline{position:relative;padding-left:24px}
+.timeline::before{content:'';position:absolute;left:8px;top:4px;bottom:4px;width:2px;background:rgba(0,255,65,.25)}
+.upd{position:relative;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:14px 16px;margin-bottom:12px}
+.upd::before{content:'';position:absolute;left:-21px;top:16px;width:10px;height:10px;border-radius:50%;background:var(--c,var(--accent));box-shadow:0 0 8px var(--c,var(--accent))}
+.upd .meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px;font-size:.68em}
+.upd .tipo{font-size:.62em;padding:2px 8px;border-radius:3px;border:1px solid var(--c,var(--accent));color:var(--c,var(--accent))}
+.upd .fecha{color:var(--text2)}
+.upd .autor{color:var(--text2)}
+.upd h3{font-size:.85em;margin-bottom:6px}
+.upd p{font-size:.7em;color:#aeb6af;line-height:1.6;white-space:pre-wrap}
+.upd .ver{color:var(--text2);font-size:.62em;border:1px dashed var(--border);padding:1px 6px;border-radius:3px}
+.upd.destacada{border-color:var(--c,var(--accent));box-shadow:0 0 14px rgba(0,255,65,.08)}
+.empty{text-align:center;color:var(--text2);font-size:.75em;padding:40px 0}
+.pulse{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--accent);animation:pulse 1.5s infinite;margin-right:6px}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+#realtimeBadge{font-size:.6em;color:var(--text2)}
+a{color:var(--accent);text-decoration:none}
+.back{font-size:.7em;color:var(--text2);border:1px solid var(--border);padding:4px 10px;border-radius:3px;transition:.2s}
+.back:hover{color:var(--accent);border-color:var(--accent)}
+</style>
+</head>
+<body>
+<header>
+  <h1><i class="fas fa-sync-alt"></i> ACTUALIZACIONES <span class="badge">LIVE</span></h1>
+  <div style="display:flex;gap:10px;align-items:center">
+    <span id="realtimeBadge"><span class="pulse"></span>conectado a BD en vivo</span>
+    <a class="back" href="/">← Volver</a>
+  </div>
+</header>
+<div class="wrap">
+  <div class="stats">
+    <div class="stat"><div class="n" id="statTotal">0</div><div class="l">Actualizaciones</div></div>
+    <div class="stat"><div class="n" id="statDest">0</div><div class="l">Destacadas</div></div>
+    <div class="stat"><div class="n" id="statFix">0</div><div class="l">Fixes</div></div>
+    <div class="stat"><div class="n" id="statNovedad">0</div><div class="l">Novedades</div></div>
+  </div>
+  <div id="timeline" class="timeline"><div class="empty">Cargando actualizaciones...</div></div>
+</div>
+
+<script>
+var SB="https://xfwolaurpeofysnymqle.supabase.co";
+var KEY="sb_publishable_3VvBUD5Bdu3Uaq59fJ99MQ_XDCtujUU";
+var H={apikey:KEY,'Authorization':'Bearer '+KEY};
+function $(i){return document.getElementById(i);}
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+var TIPOS={
+  actualizacion:{nom:'⚙️ ACTUALIZACION',col:'#00ff41'},
+  novedad:{nom:'✨ NOVEDAD',col:'#f1c40f'},
+  fix:{nom:'🔧 FIX',col:'#3498db'},
+  evento:{nom:'🎉 EVENTO',col:'#9b59b6'},
+  alerta:{nom:'⚠️ ALERTA',col:'#e74c3c'}
+};
+function tipoInfo(t){return TIPOS[t]||{nom:'📌 '+(t||'ACTUALIZACION'),col:'#00ff41'};}
+
+function render(d){
+  if(!d||!d.length){$("timeline").innerHTML='<div class="empty">Aún no hay actualizaciones. ¡Vuelve pronto!</div>';return;}
+  $("statTotal").textContent=d.length;
+  $("statDest").textContent=d.filter(x=>x.destacada).length;
+  $("statFix").textContent=d.filter(x=>x.tipo==='fix').length;
+  $("statNovedad").textContent=d.filter(x=>x.tipo==='novedad').length;
+  var h=d.map(u=>{
+    var ti=tipoInfo(u.tipo);
+    return '<div class="upd'+(u.destacada?' destacada':'')+'" style="--c:'+ti.col+'">'+
+      '<div class="meta">'+
+      '<span class="tipo">'+ti.nom+'</span>'+
+      '<span class="fecha">🕐 '+new Date(u.created_at).toLocaleString('es-AR')+'</span>'+
+      (u.version?'<span class="ver">v'+esc(u.version)+'</span>':'')+
+      (u.autor?'<span class="autor">👤 '+esc(u.autor)+'</span>':'')+
+      '</div>'+
+      '<h3>'+esc(u.titulo)+'</h3>'+
+      (u.descripcion?'<p>'+esc(u.descripcion)+'</p>':'')+
+    '</div>';
+  }).join("");
+  $("timeline").innerHTML=h;
+}
+
+function cargar(){
+  fetch(SB+"/rest/v1/actualizaciones?select=*&activo=eq.true&order=created_at.desc&limit=100",{headers:H})
+    .then(r=>r.json()).then(render).catch(()=>{$("timeline").innerHTML='<div class="empty">Error al cargar</div>';});
+}
+
+// Realtime
+function conectarRT(){
+  var ws=new WebSocket("wss://xfwolaurpeofysnymqle.supabase.co/realtime/v1/websocket?apikey="+KEY+"&vsn=1.0.0");
+  ws.onopen=function(){
+    ws.send(JSON.stringify({topic:"realtime:actualizaciones",event:"phx_join",payload:{config:{postgres_changes:[{event:"*",schema:"public",table:"actualizaciones"}]}},ref:"1"}));
+    ws.send(JSON.stringify({topic:"phoenix",event:"heartbeat",payload:{},ref:"0"}));
+  };
+  ws.onmessage=function(e){
+    try{
+      var msg=JSON.parse(e.data);
+      if(msg.event==="phx_reply"&&msg.payload&&msg.payload.status==="ok")return;
+      var ev=msg.event,rec=null;
+      if(ev==="postgres_changes"){ev=msg.payload.data.type;rec=msg.payload.data.record;}
+      else rec=msg.payload?msg.payload.record:null;
+      if((ev==="INSERT"||ev==="UPDATE"||ev==="DELETE")&&(msg.topic||"").includes("actualizaciones")){
+        cargar();
+        if(ev==="INSERT"&&rec&&rec.titulo){
+          var ti=tipoInfo(rec.tipo);
+          var bar=document.createElement("div");
+          bar.style.cssText="position:fixed;bottom:16px;right:16px;background:#111;border:1px solid "+ti.col+";color:"+ti.col+";padding:12px 18px;border-radius:6px;font-size:.75em;z-index:99;box-shadow:0 0 16px rgba(0,255,65,.15);max-width:300px";
+          bar.innerHTML="<b>🔄 "+esc(rec.titulo)+"</b><br><span style='color:#aaa;font-size:.8em'>"+(rec.descripcion||"").slice(0,60)+"</span>";
+          document.body.appendChild(bar);
+          setTimeout(()=>bar.remove(),5000);
+        }
+      }
+    }catch(err){}
+  };
+  ws.onclose=function(){setTimeout(conectarRT,4000);};
+}
+cargar();
+conectarRT();
+setInterval(cargar,60000);
+</script>
+</body>
+</html>

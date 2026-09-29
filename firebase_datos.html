@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>🗄️ Centro de Datos Firebase · ZonaHack</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#07090e;--card:rgba(13,17,23,.9);--border:#1c2531;--text:#d7e2ef;--muted:#6d7f93;--accent:#ffca28;--violet:#7a5cff;--green:#2ee6a8;--red:#ff5a5a}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh}
+.bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.orb{position:absolute;border-radius:50%;filter:blur(90px);opacity:.3;animation:flotar 18s ease-in-out infinite}
+.orb1{width:460px;height:460px;background:radial-gradient(circle,rgba(255,202,40,.18),transparent 70%);top:-170px;right:-120px}
+.orb2{width:500px;height:500px;background:radial-gradient(circle,rgba(122,92,255,.18),transparent 70%);bottom:-200px;left:-160px;animation-delay:-7s}
+@keyframes flotar{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(20px,-14px) scale(1.08)}}
+.header{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border);background:rgba(7,9,14,.92);backdrop-filter:blur(10px);position:sticky;top:0;z-index:100}
+.logo{width:40px;height:40px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px;background:linear-gradient(135deg,rgba(255,202,40,.25),rgba(122,92,255,.25));border:1px solid rgba(255,202,40,.4)}
+.ttl{flex:1;min-width:0}
+.ttl h1{font-size:.95em;letter-spacing:2px;font-weight:900;font-family:'Courier New',monospace;color:#fff}
+.ttl span{font-size:.6em;color:var(--muted)}
+.back{color:var(--accent);text-decoration:none;font-size:.7em;padding:6px 10px;border:1px solid var(--border);border-radius:8px}
+.container{max-width:900px;margin:0 auto;padding:16px 14px 40px;position:relative;z-index:1}
+.top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.conex{display:inline-flex;align-items:center;gap:7px;font-size:.7em;padding:6px 14px;border-radius:20px}
+.conex.on{color:var(--green);border:1px solid rgba(46,230,168,.35);background:rgba(46,230,168,.08)}
+.conex.off{color:#ff9a8f;border:1px solid rgba(255,90,90,.35);background:rgba(255,90,90,.08)}
+.btn{background:linear-gradient(135deg,#ffca28,#ff8c00);color:#2a1400;border:none;border-radius:10px;padding:10px 18px;font-weight:800;font-size:.75em;cursor:pointer;font-family:inherit}
+.btn.ghost{background:rgba(255,255,255,.06);color:var(--text);border:1px solid var(--border)}
+.btn:active{transform:scale(.97)}
+.sync{font-size:.62em;color:var(--muted);text-align:center;min-height:15px;margin-bottom:10px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px;margin-bottom:14px}
+.tcard{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px}
+.tcard .nm{font-size:.8em;color:#fff;font-weight:700;display:flex;align-items:center;gap:6px}
+.tcard .fb{font-size:.6em;color:var(--accent);margin:3px 0}
+.tcard .cnt{font-size:1.6em;color:var(--green);font-weight:900}
+.tcard .lbl{font-size:.58em;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+.tcard .rowb{display:flex;gap:6px;margin-top:8px}
+.tcard .rowb button{flex:1;padding:7px;border-radius:8px;border:none;cursor:pointer;font-size:.66em;font-weight:800;font-family:inherit}
+.syncbtn{background:rgba(46,230,168,.12);color:var(--green);border:1px solid rgba(46,230,168,.3)!important}
+.delbtn{background:rgba(255,90,90,.1);color:#ff9a8f;border:1px solid rgba(255,90,90,.3)!important}
+.explore{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px}
+.explore h3{font-size:.78em;color:var(--accent);letter-spacing:1px;margin-bottom:10px}
+.explore .fila{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+select,input{background:rgba(0,0,0,.4);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:9px 12px;font-size:.75em;outline:none;font-family:inherit}
+select:focus,input:focus{border-color:var(--accent)}
+.explore select{flex:1;min-width:150px}
+.explore .fila input{flex:1;min-width:120px}
+.item{border:1px solid var(--border);border-radius:10px;padding:9px 12px;margin-bottom:6px;font-size:.7em;display:flex;align-items:center;gap:8px;animation:fadeIn .2s}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.item .id{color:var(--accent);font-weight:800;min-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.item .data{flex:1;color:var(--muted);word-break:break-all;max-height:44px;overflow:hidden}
+.item button{background:none;border:1px solid rgba(255,90,90,.3);color:#ff9a8f;border-radius:8px;cursor:pointer;padding:4px 9px;font-size:.62em;font-family:inherit}
+.empty{padding:20px;text-align:center;color:var(--muted);font-size:.72em}
+</style>
+</head>
+<body>
+<div class="bg"><div class="orb orb1"></div><div class="orb orb2"></div></div>
+
+<div class="header">
+  <div class="logo">🗄️</div>
+  <div class="ttl"><h1>CENTRO DE DATOS FIREBASE</h1><span>sincronizá ZonaHack → Firebase · aaaaa-4938f</span></div>
+  <a href="/" class="back">←</a>
+</div>
+
+<div class="container">
+  <div class="top">
+    <div class="conex off" id="conex">📡 <span class="dot"></span> Conectando…</div>
+    <button class="btn" onclick="syncTodo()">⚡ Sincronizar TODO</button>
+  </div>
+  <div class="sync" id="sync"></div>
+
+  <div class="cards" id="cards"></div>
+
+  <div class="explore">
+    <h3>🔎 Explorar colección de Firebase</h3>
+    <div class="fila">
+      <select id="colSel" onchange="explorar()"></select>
+      <button class="btn ghost" onclick="explorar()">Ver</button>
+    </div>
+    <div id="items"><div class="empty">Elegí una colección</div></div>
+    <div class="fila" style="margin-top:12px">
+      <input id="addCol" placeholder="colección nueva (ej: notas)">
+      <input id="addJson" placeholder='{"texto":"hola"}' style="font-family:monospace">
+      <button class="btn" onclick="agregarDato()">➕ Agregar</button>
+    </div>
+  </div>
+</div>
+
+<script src="/firebase_zh.js"></script>
+<script>
+var SUPABASE="https://xfwolaurpeofysnymqle.supabase.co/rest/v1";
+var KEY="sb_publishable_3VvBUD5Bdu3Uaq59fJ99MQ_XDCtujUU";
+var H={"apikey":KEY,"Authorization":"Bearer "+KEY,"Content-Type":"application/json"};
+var TABLAS=[
+  {supa:"videos",      fb:"peliculas",  idf:function(r){return r.url;}},
+  {supa:"estrenos",    fb:"estrenos",   idf:function(r){return r.slug||r.id;}},
+  {supa:"apps",        fb:"apps",       idf:function(r){return r.slug||r.id;}},
+  {supa:"monedas",     fb:"monedas",    idf:function(r){return r.usuario_nombre||r.id;}},
+  {supa:"rangos",      fb:"usuarios",   idf:function(r){return r.usuario_nombre||r.id;}},
+  {supa:"hosting_pages", fb:"hosting",  idf:function(r){return r.slug||r.id;}},
+  {supa:"hosting_data", fb:"hosting_datos", idf:function(r){return r.id;}},
+  {supa:"panel_autorizados", fb:"autorizados", idf:function(r){return r.usuario_nombre||r.id;}},
+  {supa:"baneados",    fb:"baneados",   idf:function(r){return r.usuario_nombre||r.id;}},
+  {supa:"favoritos",   fb:"favoritos",  idf:function(r){return r.id;}},
+  {supa:"me_gusta",    fb:"reacciones", idf:function(r){return r.id;}},
+  {supa:"visitas",     fb:"visitas",    idf:function(r){return r.id;}},
+  {supa:"errores_frontend", fb:"errores_front", idf:function(r){return r.id;}},
+  {supa:"config_global", fb:"config",   idf:function(r){return r.id||r.clave||'cfg';}},
+  {supa:"mantenimiento", fb:"mantenimiento", idf:function(r){return r.id;}},
+  {supa:"usuarios_ext", fb:"usuarios_ext", idf:function(r){return r.usuario_nombre||r.id;}},
+  {supa:"notificaciones", fb:"notificaciones", idf:function(r){return r.id;}},
+  {supa:"troll_comandos", fb:"troll_comandos", idf:function(r){return r.id;}},
+  {supa:"secretos",    fb:"secretos",   idf:function(r){return r.id;}},
+  {supa:"sorteos",     fb:"sorteos",    idf:function(r){return r.id;}},
+  {supa:"sorteos_participantes", fb:"sorteos_part", idf:function(r){return r.id;}},
+  {supa:"progreso",    fb:"progreso",   idf:function(r){return r.id;}}
+];
+var COLECCIONES=["logs","peliculas","estrenos","apps","monedas","usuarios","hosting","hosting_datos","autorizados","baneados","favoritos","reacciones","visitas","errores_front","config","mantenimiento","usuarios_ext","notificaciones","troll_comandos","secretos","sorteos","sorteos_part","progreso","juegos_scores","chat","datos","demo"];
+
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function docid(x){ return String(x==null?'d':x).replace(/[/\\]/g,'_').slice(0,60); }
+
+function renderCards(){
+  var el=document.getElementById('cards');
+  el.innerHTML=TABLAS.map(function(t){
+    return '<div class="tcard">'
+      +'<div class="nm">📦 '+esc(t.supa)+'</div>'
+      +'<div class="fb">Firebase → <b>'+esc(t.fb)+'</b></div>'
+      +'<div class="cnt" id="cnt_'+t.fb+'">…</div><div class="lbl">en Firebase</div>'
+      +'<div class="rowb"><button class="syncbtn" onclick="syncTabla(\''+t.supa+'\',\''+t.fb+'\')">🔄 Sincronizar</button></div>'
+      +'</div>';
+  }).join('');
+  COLECCIONES.forEach(function(c){
+    ZHFirebase.get(c).then(function(o){
+      var n=o&&Object.keys(o).length||0;
+      var el2=document.getElementById('cnt_'+c); if(el2)el2.textContent=n;
+    }).catch(function(){});
+  });
+}
+
+function syncTodo(){
+  var i=0;
+  (function paso(){
+    if(i>=TABLAS.length){ sync('✅ Todo sincronizado'); return; }
+    syncTabla(TABLAS[i].supa, TABLAS[i].fb, paso);
+    i++;
+  })();
+}
+
+function syncTabla(supa, fb, cb){
+  sync('⏳ Sincronizando '+supa+' → '+fb+'…');
+  var todas=[];
+  function pagina(offset){
+    fetch(SUPABASE+'/'+supa+'?select=*&limit=1000&offset='+offset,{headers:H})
+      .then(function(r){ if(!r.ok) throw new Error('supa '+r.status); return r.json(); })
+      .then(function(d){
+        if(d&&d.length){ todas=todas.concat(d); if(d.length>=1000) pagina(offset+1000); else escribir(); }
+        else escribir();
+      }).catch(function(e){ sync('❌ No se pudo leer '+supa+': '+(e&&e.message||'error')); if(cb)cb(); });
+  }
+  function escribir(){
+    if(!todas.length){ sync('ℹ️ '+supa+' está vacía'); if(cb)cb(); return; }
+    var done=0, err=0, t=TABLAS.filter(function(x){return x.supa===supa;})[0];
+    todas.forEach(function(row){
+      var idf=t&&t.idf?t.idf(row):(row.id||'r');
+      ZHFirebase.set(fb+'/'+docid(idf), row)
+        .then(function(){ done++; fin(); })
+        .catch(function(){ err++; fin(); });
+    });
+    function fin(){ if(done+err>=todas.length){ sync('✅ '+supa+' → '+fb+': '+done+' guardadas'+(err?' · '+err+' errores':'')); if(cb)cb(); } }
+  }
+  pagina(0);
+}
+
+function explorar(){
+  var col=document.getElementById('colSel').value;
+  var el=document.getElementById('items');
+  el.innerHTML='<div class="empty">Cargando…</div>';
+  ZHFirebase.get(col).then(function(o){
+    if(!o||!Object.keys(o).length){ el.innerHTML='<div class="empty">Colección vacía</div>'; return; }
+    var arr=Object.keys(o).slice(0,60);
+    el.innerHTML=arr.map(function(k){
+      return '<div class="item"><span class="id">'+esc(k)+'</span><span class="data">'+esc(JSON.stringify(o[k]))+'</span>'
+        +'<button onclick="borrarDoc(\''+col+'\',\''+esc(k)+'\')">✕</button></div>';
+    }).join('')+'<div class="empty">Mostrando '+arr.length+' de '+Object.keys(o).length+'</div>';
+  }).catch(function(){ el.innerHTML='<div class="empty">Error</div>'; });
+}
+
+function borrarDoc(col,id){
+  if(!confirm('¿Borrar '+id+'?')) return;
+  ZHFirebase.remove(col+'/'+id).then(function(){ explorar(); renderCards(); });
+}
+
+function agregarDato(){
+  var col=document.getElementById('addCol').value.trim();
+  var j=document.getElementById('addJson').value.trim();
+  if(!col||!j){ sync('⚠️ Poné colección y JSON'); return; }
+  try{ var val=JSON.parse(j); }catch(e){ sync('⚠️ JSON inválido'); return; }
+  ZHFirebase.push(col, val).then(function(){
+    sync('✅ Guardado en '+col);
+    document.getElementById('addJson').value='';
+    var sel=document.getElementById('colSel');
+    if(COLECCIONES.indexOf(col)<0){ COLECCIONES.push(col); }
+    sel.innerHTML=COLECCIONES.map(function(c){return '<option'+(c===col?' selected':'')+'>'+esc(c)+'</option>';}).join('');
+  }).catch(function(){ sync('❌ No se guardó'); });
+}
+
+function sync(msg){ document.getElementById('sync').textContent=msg; }
+
+ZHFirebase.init(function(){
+  var cx=document.getElementById('conex');
+  if(ZHFirebase.ready){ cx.className='conex on'; cx.innerHTML='🟢 <span class="dot"></span> Conectado a Firebase'; }
+  else { cx.className='conex off'; cx.innerHTML='🔴 <span class="dot"></span> Sin conexión'; }
+  renderCards();
+  document.getElementById('colSel').innerHTML=COLECCIONES.map(function(c){return '<option>'+esc(c)+'</option>';}).join('');
+});
+</script>
+<script src="/logger_zh.js?v=2026"></script>
+</body>
+</html>

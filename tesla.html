@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>⚡ Tesla Hub</title>
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/icon_96.png" type="image/png">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Courier New',Courier,monospace;background:#0a0a0a;color:#c8d6e5;min-height:100vh}
+body::before{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(232,33,39,.012) 2px,rgba(232,33,39,.012) 4px),radial-gradient(circle at 20% 50%,rgba(232,33,39,.04) 0,transparent 50%);pointer-events:none;z-index:99998}
+::-webkit-scrollbar{width:6px;background:#0a0a0a}
+::-webkit-scrollbar-thumb{background:rgba(232,33,39,.25);border-radius:3px}
+.header{background:#0a0a0a;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(232,33,39,.18);position:sticky;top:0;z-index:100}
+.header h1{font-size:1.1em;color:#e82127;text-shadow:0 0 10px rgba(232,33,39,.35)}
+.header .sub{font-size:.6em;color:rgba(232,33,39,.5);letter-spacing:1px;margin-top:2px}
+.back-btn{color:#e82127;text-decoration:none;font-size:.85em;padding:6px 10px;border-radius:4px;border:1px solid rgba(232,33,39,.25);transition:.2s}
+.back-btn:hover{box-shadow:0 0 8px rgba(232,33,39,.2)}
+.container{max-width:900px;margin:0 auto;padding:12px}
+.hero{background:linear-gradient(180deg,rgba(232,33,39,.04),transparent);border:1px solid rgba(232,33,39,.15);border-radius:8px;padding:16px 20px;margin-bottom:14px;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.battery{text-align:center;flex-shrink:0}
+.battery .num{font-size:2.2em;font-weight:bold;color:#e82127;text-shadow:0 0 12px rgba(232,33,39,.4)}
+.battery .lbl{font-size:.6em;color:rgba(232,33,39,.5);letter-spacing:1px;margin-top:2px}
+.battery .bar{width:90px;height:8px;background:#1a1a1a;border-radius:4px;margin:6px auto 0;overflow:hidden;border:1px solid rgba(232,33,39,.2)}
+.battery .bar span{display:block;height:100%;background:linear-gradient(90deg,#e82127,#ff6b6b);border-radius:4px;transition:.4s}
+.hero-info{flex:1;min-width:200px}
+.hero-info h2{font-size:1.05em;color:#e82127}
+.hero-info .meta{font-size:.68em;color:rgba(200,214,229,.55);margin-top:4px;line-height:1.7}
+.hero-info .meta b{color:#e82127}
+.hero-info .loc{font-size:.62em;color:rgba(232,33,39,.6);margin-top:4px}
+.status-strip{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.led{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border:1px solid rgba(255,255,255,.08);border-radius:14px;font-size:.6em;color:rgba(200,214,229,.5)}
+.led .dot{width:8px;height:8px;border-radius:50%;background:#333}
+.led.on{color:#c8d6e5;border-color:rgba(232,33,39,.3)}
+.led.on .dot{background:#e82127;box-shadow:0 0 8px rgba(232,33,39,.6)}
+.grid-cat{font-size:.72em;color:#e82127;margin:14px 0 8px;letter-spacing:1px;text-transform:uppercase;display:flex;align-items:center;gap:8px}
+.grid-cat::before{content:'';width:16px;height:2px;background:#e82127;box-shadow:0 0 6px rgba(232,33,39,.6)}
+.cmd-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:6px}
+.cmd{padding:12px 8px;border:1px solid rgba(232,33,39,.12);background:rgba(232,33,39,.02);color:#c8d6e5;border-radius:6px;cursor:pointer;font-size:.66em;font-family:'Courier New',monospace;transition:.15s;text-align:center;line-height:1.4}
+.cmd:hover{border-color:#e82127;background:rgba(232,33,39,.08);box-shadow:0 0 10px rgba(232,33,39,.1);transform:translateY(-1px)}
+.cmd:active{transform:scale(.96)}
+.cmd .ic{display:block;font-size:1.5em;margin-bottom:4px}
+.cmd.big{grid-column:span 2}
+.log-card{background:#0d0d0d;border:1px solid rgba(232,33,39,.12);border-radius:6px;margin-top:14px}
+.log-card .h{font-size:.72em;color:#e82127;padding:10px 14px;border-bottom:1px solid rgba(232,33,39,.1);letter-spacing:1px;text-transform:uppercase}
+#log{padding:10px 14px;max-height:220px;overflow-y:auto;font-size:.68em;color:rgba(200,214,229,.7);line-height:1.9}
+#log .row{border-bottom:1px dashed rgba(232,33,39,.07);padding:3px 0}
+#log .row b{color:#e82127}
+.loading{text-align:center;padding:40px;color:rgba(232,33,39,.5);font-size:.8em}
+.loading::after{content:'';display:block;width:20px;height:20px;margin:10px auto;border:1px solid rgba(232,33,39,.15);border-top-color:#e82127;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.note{text-align:center;color:rgba(232,33,39,.35);font-size:.58em;margin-top:16px;line-height:1.8;border-top:1px solid rgba(232,33,39,.07);padding-top:12px}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#111;color:#e82127;border:1px solid rgba(232,33,39,.3);padding:8px 16px;border-radius:6px;font-size:.68em;font-family:'Courier New',monospace;z-index:10001;opacity:0;transition:opacity .3s;pointer-events:none;letter-spacing:.5px;max-width:90vw;text-align:center}
+.viewer3d{position:relative;background:radial-gradient(circle at 50% 30%,#16111a,#050505 70%);border:1px solid rgba(232,33,39,.2);border-radius:10px;margin-bottom:14px;overflow:hidden;height:340px;touch-action:none}
+.viewer3d canvas{display:block}
+.viewer3d .hint{position:absolute;bottom:8px;left:0;right:0;text-align:center;font-size:.55em;color:rgba(232,33,39,.45);letter-spacing:1px;pointer-events:none}
+.viewer3d .fallback{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;color:rgba(232,33,39,.5);font-size:.72em;padding:20px}
+.viewer3d .brand{position:absolute;top:10px;left:14px;font-size:.6em;color:rgba(232,33,39,.7);letter-spacing:2px;pointer-events:none;font-weight:bold}
+/* ═══ NIVELES DE CONDUCTOR ═══ */
+.niv-card{background:linear-gradient(160deg,rgba(232,33,39,.06),rgba(232,33,39,.02));border:1px solid rgba(232,33,39,.22);border-radius:8px;padding:14px 16px;margin-bottom:14px}
+.niv-top{display:flex;align-items:center;gap:14px}
+.niv-badge{width:64px;height:64px;flex-shrink:0;border-radius:50%;border:2px solid rgba(232,33,39,.4);display:flex;align-items:center;justify-content:center;font-size:1.9em;background:radial-gradient(circle at 35% 30%,#2a0d0d,#0d0d0d);box-shadow:0 0 18px rgba(232,33,39,.25);animation:nivPulse 3s ease-in-out infinite}
+@keyframes nivPulse{0%,100%{box-shadow:0 0 12px rgba(232,33,39,.2)}50%{box-shadow:0 0 26px rgba(232,33,39,.5)}}
+.niv-mid{flex:1;min-width:0}
+.niv-lvl{font-size:.62em;color:rgba(232,33,39,.55);letter-spacing:2px;text-transform:uppercase}
+.niv-name{font-size:1.25em;color:#fff;margin:2px 0 8px;text-shadow:0 0 12px rgba(232,33,39,.35)}
+.niv-track{height:10px;background:#161616;border:1px solid rgba(232,33,39,.2);border-radius:6px;overflow:hidden}
+.niv-track span{display:block;height:100%;background:linear-gradient(90deg,#e82127,#ff6b6b,#ffd166);border-radius:6px;transition:width .6s cubic-bezier(.4,0,.2,1);box-shadow:0 0 12px rgba(232,33,39,.6)}
+.niv-xprow{display:flex;justify-content:space-between;align-items:center;margin-top:6px;font-size:.58em;color:rgba(200,214,229,.55)}
+.niv-xprow b{color:#e82127}
+.niv-reset{color:rgba(232,33,39,.45);cursor:pointer;font-size:.58em;text-decoration:underline;background:none;border:none;font-family:inherit;padding:0;margin-left:8px}
+.niv-reset:hover{color:#e82127}
+.ach-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;margin-top:10px}
+.ach{display:flex;gap:8px;align-items:flex-start;border:1px solid rgba(232,33,39,.1);border-radius:6px;padding:8px;background:rgba(232,33,39,.02)}
+.ach .ae{font-size:1.3em;filter:grayscale(1);opacity:.4}
+.ach.done{border-color:rgba(232,33,39,.35);background:rgba(232,33,39,.06)}
+.ach.done .ae{filter:none;opacity:1;text-shadow:0 0 10px rgba(232,33,39,.4)}
+.ach .ab{flex:1;min-width:0}
+.ach .at{font-size:.62em;color:#c8d6e5;font-weight:bold}
+.ach .ad{font-size:.52em;color:rgba(200,214,229,.45);line-height:1.5;margin:2px 0 5px}
+.ach .abar{height:5px;background:#161616;border-radius:3px;overflow:hidden}
+.ach .abar span{display:block;height:100%;background:#e82127;border-radius:3px;transition:.4s}
+.ach.done .abar span{background:linear-gradient(90deg,#39ff88,#e82127)}
+.ach .ac{font-size:.5em;color:rgba(232,33,39,.6);margin-top:3px}
+.xpfloat{position:fixed;left:50%;top:42%;transform:translateX(-50%);color:#ffd166;font-size:.8em;font-weight:bold;font-family:'Courier New',monospace;text-shadow:0 0 12px rgba(232,33,39,.6);pointer-events:none;z-index:10002;animation:xpUp 1.1s ease-out forwards}
+@keyframes xpUp{0%{opacity:0;transform:translate(-50%,14px) scale(.8)}20%{opacity:1}100%{opacity:0;transform:translate(-50%,-46px) scale(1.15)}}
+.niv-overlay{position:fixed;inset:0;z-index:10003;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(5,5,5,.88);opacity:0;pointer-events:none;transition:opacity .3s;text-align:center}
+.niv-overlay.show{opacity:1}
+.niv-overlay .big{font-size:4.4em;animation:nivPop .5s cubic-bezier(.2,1.6,.4,1) both}
+@keyframes nivPop{0%{transform:scale(0)}100%{transform:scale(1)}}
+.niv-overlay .tit{font-size:1.5em;color:#e82127;letter-spacing:3px;text-transform:uppercase;text-shadow:0 0 20px rgba(232,33,39,.6);margin-top:12px;animation:nivPop .5s .15s cubic-bezier(.2,1.6,.4,1) both}
+.niv-overlay .sub{font-size:.7em;color:rgba(200,214,229,.7);margin-top:8px;animation:nivPop .5s .3s both}
+.confetti{position:fixed;top:-10px;z-index:10004;width:8px;height:14px;pointer-events:none;animation:cfFall linear forwards}
+@keyframes cfFall{to{transform:translateY(110vh) rotate(720deg);opacity:.2}}
+@media(max-width:480px){.viewer3d{height:230px}.cmd-grid{grid-template-columns:repeat(3,1fr)}.cmd{font-size:.6em}}
+</style>
+</head>
+<body>
+<div class="header">
+  <a href="/" class="back-btn">← Volver</a>
+  <div style="text-align:center">
+    <h1>⚡ Tesla Hub</h1>
+    <div class="sub">CENTRAL DE MANDO · SIMULACIÓN</div>
+  </div>
+  <div style="width:60px"></div>
+</div>
+<div class="container">
+  <div class="viewer3d" id="viewer3d">
+    <div class="brand">TESLA · ZONAHACK EDITION</div>
+    <div class="hint">🖱 Arrastrá para girar · el auto rota solo</div>
+    <div class="fallback" id="viewerFallback">Cargando visor 3D...</div>
+  </div>
+  <div class="hero" id="hero">
+    <div class="battery">
+      <div class="num" id="battNum">--%</div>
+      <div class="lbl">BATERÍA</div>
+      <div class="bar"><span id="battBar" style="width:0%"></span></div>
+      <div class="lbl" id="rangeNum" style="margin-top:6px">-- km</div>
+    </div>
+    <div class="hero-info" id="heroInfo">
+      <h2>Conectando al Tesla...</h2>
+      <div class="meta"></div>
+    </div>
+  </div>
+
+  <div class="status-strip" id="statusStrip">
+    <span class="led"><span class="dot"></span>Cerraduras</span>
+    <span class="led"><span class="dot"></span>Frunk</span>
+    <span class="led"><span class="dot"></span>Trunk</span>
+    <span class="led"><span class="dot"></span>Ventanas</span>
+    <span class="led"><span class="dot"></span>Luces</span>
+    <span class="led"><span class="dot"></span>Sentinela</span>
+    <span class="led"><span class="dot"></span>Dog Mode</span>
+    <span class="led"><span class="dot"></span>Camp Mode</span>
+    <span class="led"><span class="dot"></span>Cargando</span>
+  </div>
+
+  <div class="niv-card" id="nivCard">
+    <div class="niv-top">
+      <div class="niv-badge" id="nivRango">🛴</div>
+      <div class="niv-mid">
+        <div class="niv-lvl">Nivel de conductor</div>
+        <div class="niv-name" id="nivLvl">APRENDIZ</div>
+        <div class="niv-track"><span id="nivBar" style="width:0%"></span></div>
+        <div class="niv-xprow"><span><b id="nivXp">0 XP</b><button class="niv-reset" onclick="nivReset()">⟳ reiniciar</button></span><span id="nivNext"></span></div>
+      </div>
+    </div>
+    <div class="grid-cat">🏆 Logros de conductor</div>
+    <div class="ach-grid" id="nivAch"></div>
+  </div>
+
+  <div class="grid-cat">🔑 Puertas y ventanas</div>
+  <div class="cmd-grid">
+    <div class="cmd" onclick="comando('lock')"><span class="ic">🔒</span>Bloquear</div>
+    <div class="cmd" onclick="comando('unlock')"><span class="ic">🔓</span>Desbloquear</div>
+    <div class="cmd" onclick="comando('vent')"><span class="ic">🪟</span>Ventilar</div>
+    <div class="cmd" onclick="comando('close_windows')"><span class="ic">🔃</span>Cerrar ventanas</div>
+  </div>
+
+  <div class="grid-cat">🧳 Maleteros</div>
+  <div class="cmd-grid">
+    <div class="cmd" onclick="comando('frunk')"><span class="ic">🕳</span>Frunk</div>
+    <div class="cmd" onclick="comando('trunk')"><span class="ic">🧳</span>Trunk</div>
+  </div>
+
+  <div class="grid-cat">🎭 Modos divertidos</div>
+  <div class="cmd-grid">
+    <div class="cmd" onclick="comando('fart')"><span class="ic">💨</span>Fart Mode</div>
+    <div class="cmd" onclick="comando('dog_mode')"><span class="ic">🐶</span>Dog Mode</div>
+    <div class="cmd" onclick="comando('camp_mode')"><span class="ic">🏕</span>Camp Mode</div>
+    <div class="cmd" onclick="comando('summon')"><span class="ic">🧙</span>Summon</div>
+    <div class="cmd" onclick="comando('autopilot')"><span class="ic">🤖</span>Autopilot</div>
+    <div class="cmd" onclick="comando('music')"><span class="ic">🎵</span>Música</div>
+  </div>
+
+  <div class="grid-cat">🛡 Seguridad y luces</div>
+  <div class="cmd-grid">
+    <div class="cmd" onclick="comando('sentry_on')"><span class="ic">🛡</span>Sentinela ON</div>
+    <div class="cmd" onclick="comando('sentry_off')"><span class="ic">🙈</span>Sentinela OFF</div>
+    <div class="cmd" onclick="comando('lights')"><span class="ic">💡</span>Luces</div>
+    <div class="cmd" onclick="comando('honk')"><span class="ic">📢</span>Bocina</div>
+  </div>
+
+  <div class="grid-cat">🔌 Energía</div>
+  <div class="cmd-grid">
+    <div class="cmd" onclick="comando('charge_start')"><span class="ic">🔌</span>Cargar</div>
+    <div class="cmd" onclick="comando('charge_stop')"><span class="ic">🔋</span>Parar carga</div>
+    <div class="cmd" onclick="comando('status')"><span class="ic">📊</span>Estado</div>
+  </div>
+
+  <div class="log-card">
+    <div class="h">📜 Registro de comandos</div>
+    <div id="log"><div class="row">Esperando que toques algo...</div></div>
+  </div>
+
+  <div class="note">Tesla Hub es una SIMULACIÓN con fines humorísticos. No hay un Tesla real conectado.<br>
+  Cualquier parecido con un auto de 60 mil dólares es casualidad y deuda.</div>
+</div>
+<div class="toast" id="toast"></div>
+<div class="niv-overlay" id="nivOverlay">
+  <div class="big" id="nivUpRango">👑</div>
+  <div class="tit" id="nivUpTitulo">¡NIVEL!</div>
+  <div class="sub">Tu Tesla te respeta un poco más ahora.</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+var API="/api/tesla";
+var car=null;
+function esc(s){return (s||"").replace(/[&<>"']/g,z=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[z]);}
+function get(p){return fetch(API+"?"+new URLSearchParams(p)).then(r=>r.json().catch(()=>({})));}
+function toast(m){var t=document.getElementById("toast");t.textContent=m;t.style.opacity=1;clearTimeout(toast._t);toast._t=setTimeout(function(){t.style.opacity=0;},2500);}
+function log(msg){var el=document.getElementById("log");el.innerHTML='<div class="row">'+msg+'</div>'+el.innerHTML;while(el.children.length>30)el.removeChild(el.lastChild);}
+
+/* ═══ SISTEMA DE NIVELES (Conductor) ═══ */
+var RANGOS=[
+  {e:"🛴",t:"Aprendiz",x:0},
+  {e:"🚗",t:"Chofer",x:60},
+  {e:"🚙",t:"Piloto",x:150},
+  {e:"🏎️",t:"Experto",x:300},
+  {e:"🚀",t:"Leyenda",x:500},
+  {e:"⚡",t:"El Furioso",x:750},
+  {e:"👑",t:"CEO de Tesla",x:1100},
+];
+var XP_CMD={lock:10,unlock:10,vent:10,close_windows:10,frunk:12,trunk:12,honk:10,lights:10,sentry_on:12,sentry_off:12,dog_mode:14,camp_mode:14,fart:15,music:15,summon:25,autopilot:20,charge_start:20,charge_stop:20,status:8};
+var ACH_DEFS=[
+  {k:"primera",c:["unlock",1],e:"🔓",n:"Primer comando",d:"Desbloqueaste el Tesla por primera vez"},
+  {k:"aroma",c:["fart",5],e:"💨",n:"Aroma a éxito",d:"5 Fart Modes activados"},
+  {k:"funk",c:["music",3],e:"🎧",n:"Amante del funk",d:"3 canciones a todo volumen"},
+  {k:"mago",c:["summon",1],e:"🧙",n:"Summoner",d:"El auto te obedeció una vez"},
+  {k:"chispa",c:["charge",5],e:"⚡",n:"Cargador",d:"Cargaste el auto 5 veces"},
+  {k:"piloto",c:["xp",120],e:"🏎️",n:"Piloto",d:"Alcanzaste 120 XP totales"},
+];
+var NIV={ls:"zh_tesla_niv",xp:0,c:{unlock:0,fart:0,music:0,summon:0,charge:0},ach:{}};
+function nivLoad(){try{var d=JSON.parse(localStorage.getItem(NIV.ls)||"{}");NIV.xp=+d.xp||0;NIV.c=d.c||NIV.c;NIV.ach=d.ach||{};}catch(e){}}
+function nivSave(){try{localStorage.setItem(NIV.ls,JSON.stringify({xp:NIV.xp,c:NIV.c,ach:NIV.ach}));}catch(e){}}
+function rangoAct(x){var r=RANGOS[0];for(var i=0;i<RANGOS.length;i++)if(x>=RANGOS[i].x)r=RANGOS[i];return r;}
+function rangoSig(x){for(var i=0;i<RANGOS.length;i++)if(RANGOS[i].x>x)return RANGOS[i];return null;}
+function nivRender(){
+  var el=document.getElementById("nivCard");if(!el)return;
+  var ra=rangoAct(NIV.xp),ns=rangoSig(NIV.xp);
+  var pct=100,base=ra.x,sup=ra.x;
+  if(ns){base=ra.x;sup=ns.x;pct=Math.min(100,Math.round((NIV.xp-ra.x)/(ns.x-ra.x)*100));}
+  document.getElementById("nivRango").textContent=ra.e;
+  document.getElementById("nivLvl").textContent="NIVEL "+ra.t.toUpperCase();
+  document.getElementById("nivXp").textContent=NIV.xp+" XP";
+  document.getElementById("nivBar").style.width=pct+"%";
+  document.getElementById("nivNext").textContent=ns?(ns.e+" "+ns.t+": faltan "+(ns.x-NIV.xp)+" XP"):"👑 Rango máximo alcanzado";
+}
+function nivAdd(xp,cmd){
+  var old=rangoAct(NIV.xp).x;
+  NIV.xp+=xp;
+  if(NIV.c[cmd]!=null)NIV.c[cmd]++;
+  if(cmd==="unlock")NIV.c.unlock++;
+  nivSave();nivRender();nivRenderAch();nivFloat("+"+xp+" XP");nivCheckAch();
+  var now=rangoAct(NIV.xp);
+  if(now.x>old)nivLevelUp(now);
+}
+function nivFloat(t){
+  var f=document.createElement("div");f.className="xpfloat";f.textContent=t;
+  document.body.appendChild(f);
+  setTimeout(function(){f.remove();},1100);
+}
+function nivLevelUp(r){
+  var ov=document.getElementById("nivOverlay");
+  document.getElementById("nivUpRango").textContent=r.e;
+  document.getElementById("nivUpTitulo").textContent="¡NIVEL "+r.t.toUpperCase()+"!";
+  ov.classList.add("show");
+  nivConfetti();
+  toast("🎉 ¡Subiste a "+r.t+"!");
+  setTimeout(function(){ov.classList.remove("show");},3400);
+}
+function nivConfetti(){
+  var cols=["#e82127","#ff6b6b","#ffd166","#39ff88","#4dd0e1"];
+  for(var i=0;i<46;i++){
+    var p=document.createElement("div");p.className="confetti";
+    p.style.left=Math.random()*100+"vw";
+    p.style.background=cols[i%cols.length];
+    p.style.animationDuration=(1.4+Math.random()*1.4)+"s";
+    p.style.animationDelay=(Math.random()*0.5)+"s";
+    p.style.transform="rotate("+(Math.random()*360)+"deg)";
+    document.body.appendChild(p);
+    (function(el){setTimeout(function(){el.remove();},3300);})(p);
+  }
+}
+function nivRenderAch(){
+  var el=document.getElementById("nivAch");if(!el)return;
+  el.innerHTML=ACH_DEFS.map(function(a){
+    var got=!!NIV.ach[a.k];
+    var cnt=a.c[0]==="xp"?NIV.xp:(NIV.c[a.c[0]]||0);
+    var pct=Math.min(100,Math.round(cnt/a.c[1]*100));
+    return '<div class="ach'+(got?' done':'')+'">'+
+      '<div class="ae">'+(got?a.e:"🔒")+'</div>'+
+      '<div class="ab"><div class="at">'+a.n+'</div><div class="ad">'+a.d+'</div>'+
+      '<div class="abar"><span style="width:'+pct+'%"></span></div>'+
+      '<div class="ac">'+Math.min(cnt,a.c[1])+'/'+a.c[1]+'</div></div></div>';
+  }).join("");
+}
+function nivCheckAch(){
+  ACH_DEFS.forEach(function(a){
+    if(NIV.ach[a.k])return;
+    var cnt=a.c[0]==="xp"?NIV.xp:(NIV.c[a.c[0]]||0);
+    if(cnt>=a.c[1]){NIV.ach[a.k]=1;nivSave();nivFloat("🏆 Logro: "+a.n);}
+  });
+}
+function nivReset(){
+  if(!confirm("¿Reiniciar todo el progreso de nivel y logros?"))return;
+  try{localStorage.removeItem(NIV.ls);}catch(e){}
+  NIV.xp=0;NIV.c={unlock:0,fart:0,music:0,summon:0,charge:0};NIV.ach={};
+  nivRender();nivRenderAch();toast("⟳ Progreso reiniciado");
+}
+function nivInit(){nivLoad();nivCheckAch();nivRender();nivRenderAch();}
+
+/* ═══ VISOR 3D (Tesla showroom) ═══ */
+var T3D={ok:false,group:null,parts:{},anim:{hood:0,trunk:0,win:0,move:0,honk:0},dragging:false,chargePulse:0,wheelSpin:0};
+function init3D(){
+  var wrap=document.getElementById("viewer3d");
+  if(!window.THREE){document.getElementById("viewerFallback").innerHTML="⚠ El visor 3D necesita internet (Three.js).<br>El panel de control sigue funcionando.";return;}
+  var scene=new THREE.Scene();
+  var camera=new THREE.PerspectiveCamera(42,wrap.clientWidth/wrap.clientHeight,0.1,100);
+  camera.position.set(3.6,1.9,4.6);
+  camera.lookAt(0,0.4,0);
+  var renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+  renderer.setSize(wrap.clientWidth,wrap.clientHeight);
+  wrap.appendChild(renderer.domElement);
+  document.getElementById("viewerFallback").style.display="none";
+
+  scene.add(new THREE.AmbientLight(0x404060,0.7));
+  var sun=new THREE.DirectionalLight(0xffffff,1.1);sun.position.set(4,6,3);scene.add(sun);
+  var rim=new THREE.DirectionalLight(0xe82127,0.35);rim.position.set(-4,2,-3);scene.add(rim);
+
+  // plataforma
+  var disc=new THREE.Mesh(new THREE.CylinderGeometry(2.7,2.9,0.12,48),new THREE.MeshStandardMaterial({color:0x0d0d0d,metalness:0.6,roughness:0.5}));
+  disc.position.y=-0.06;scene.add(disc);
+  var ring=new THREE.Mesh(new THREE.RingGeometry(2.72,2.78,64),new THREE.MeshBasicMaterial({color:0xe82127,transparent:true,opacity:.25,side:THREE.DoubleSide}));
+  ring.rotation.x=-Math.PI/2;ring.position.y=0.02;scene.add(ring);
+
+  var car=new THREE.Group();
+  var red=new THREE.MeshStandardMaterial({color:0xe82127,metalness:.65,roughness:.28});
+  var glass=new THREE.MeshStandardMaterial({color:0x0d1015,metalness:.9,roughness:.06,transparent:true,opacity:.9});
+  var wheelM=new THREE.MeshStandardMaterial({color:0x0a0a0a,roughness:.85});
+  var hubM=new THREE.MeshStandardMaterial({color:0xc0c6cc,metalness:.9,roughness:.25});
+  var dark=new THREE.MeshStandardMaterial({color:0x1a1a1e,roughness:.7});
+
+  // carrocería base
+  var body=new THREE.Mesh(new THREE.BoxGeometry(1.9,0.4,4.6),red);body.position.y=0.38;car.add(body);
+  var nose=new THREE.Mesh(new THREE.BoxGeometry(1.72,0.2,0.5),red);nose.position.set(0,0.28,2.25);car.add(nose);
+  var tail=new THREE.Mesh(new THREE.BoxGeometry(1.78,0.26,0.45),red);tail.position.set(0,0.34,-2.28);car.add(tail);
+  var fenderF=new THREE.Mesh(new THREE.BoxGeometry(1.95,0.16,1.1),red);fenderF.position.set(0,0.42,1.4);car.add(fenderF);
+  var fenderR=new THREE.Mesh(new THREE.BoxGeometry(1.95,0.16,1.1),red);fenderR.position.set(0,0.42,-1.4);car.add(fenderR);
+
+  // cabina (vidrio)
+  var cabin=new THREE.Mesh(new THREE.BoxGeometry(1.62,0.46,2.1),glass);cabin.position.set(0,0.85,-0.15);car.add(cabin);
+  var roof=new THREE.Mesh(new THREE.BoxGeometry(1.5,0.06,1.7),glass);roof.position.set(0,1.1,-0.1);car.add(roof);
+  // pilares oscuros
+  var pillar=new THREE.Mesh(new THREE.BoxGeometry(1.64,0.4,0.1),dark);
+  pillar.position.set(0,0.85,0.85);car.add(pillar);
+  var pillar2=pillar.clone();pillar2.position.z=-1.1;car.add(pillar2);
+
+  // ventanas laterales (se mueven con ventilar)
+  var winGeo=new THREE.BoxGeometry(0.02,0.34,1.0);
+  var winL=new THREE.Mesh(winGeo,glass);winL.position.set(0.82,0.92,-0.15);car.add(winL);
+  var winR=new THREE.Mesh(winGeo.clone(),glass);winR.position.set(-0.82,0.92,-0.15);car.add(winR);
+  T3D.parts.winL=winL;T3D.parts.winR=winR;
+
+  // capó con bisagra en la trompa
+  var hoodGrp=new THREE.Group();hoodGrp.position.set(0,0.62,2.25);
+  var hood=new THREE.Mesh(new THREE.BoxGeometry(1.68,0.06,1.1),red);hood.position.set(0,-0.02,-0.55);hoodGrp.add(hood);
+  car.add(hoodGrp);T3D.parts.hood=hoodGrp;
+  // baúl con bisagra trasera
+  var trunkGrp=new THREE.Group();trunkGrp.position.set(0,0.62,-2.28);
+  var trunk=new THREE.Mesh(new THREE.BoxGeometry(1.74,0.06,0.9),red);trunk.position.set(0,-0.02,0.45);trunkGrp.add(trunk);
+  car.add(trunkGrp);T3D.parts.trunk=trunkGrp;
+
+  // ópticas
+  var headM=new THREE.MeshStandardMaterial({color:0xfff2d0,emissive:0xfff2d0,emissiveIntensity:0});
+  var tailM=new THREE.MeshStandardMaterial({color:0x330000,emissive:0xff2222,emissiveIntensity:0});
+  var headL=new THREE.Mesh(new THREE.BoxGeometry(0.34,0.1,0.06),headM);headL.position.set(0.55,0.4,2.5);car.add(headL);
+  var headR=new THREE.Mesh(new THREE.BoxGeometry(0.34,0.1,0.06),headM);headR.position.set(-0.55,0.4,2.5);car.add(headR);
+  var tailL=new THREE.Mesh(new THREE.BoxGeometry(0.42,0.08,0.06),tailM);tailL.position.set(0.62,0.42,-2.52);car.add(tailL);
+  var tailR=new THREE.Mesh(new THREE.BoxGeometry(0.42,0.08,0.06),tailM);tailR.position.set(-0.62,0.42,-2.52);car.add(tailR);
+  T3D.parts.head=[headL,headR];T3D.parts.tail=[tailL,tailR];T3D.parts.headM=headM;T3D.parts.tailM=tailM;
+
+  // alerón Performance
+  var spoiler=new THREE.Mesh(new THREE.BoxGeometry(1.7,0.05,0.32),red);spoiler.position.set(0,0.55,-2.2);car.add(spoiler);
+
+  // ruedas
+  var wheels=[];
+  [[0.92,0.36,1.45],[0.92,0.36,-1.45],[-0.92,0.36,1.45],[-0.92,0.36,-1.45]].forEach(function(p){
+    var w=new THREE.Group();
+    var tire=new THREE.Mesh(new THREE.CylinderGeometry(0.36,0.36,0.26,24),wheelM);tire.rotation.z=Math.PI/2;w.add(tire);
+    var hub=new THREE.Mesh(new THREE.CylinderGeometry(0.18,0.18,0.27,12),hubM);hub.rotation.z=Math.PI/2;w.add(hub);
+    w.position.set(p[0],p[1],p[2]);
+    car.add(w);wheels.push(w);
+  });
+  T3D.parts.wheels=wheels;
+
+  // cable de carga
+  var chargeGrp=new THREE.Group();
+  var cable=new THREE.Mesh(new THREE.CylinderGeometry(0.03,0.03,1.4,8),new THREE.MeshBasicMaterial({color:0x39ff88,transparent:true,opacity:.9}));
+  cable.position.y=0.7;chargeGrp.add(cable);
+  var bulb=new THREE.Mesh(new THREE.SphereGeometry(0.08,10,10),new THREE.MeshBasicMaterial({color:0x39ff88}));
+  bulb.position.y=1.5;chargeGrp.add(bulb);
+  chargeGrp.position.set(0.95,0.5,-0.4);chargeGrp.visible=false;car.add(chargeGrp);
+  T3D.parts.charge=chargeGrp;
+  T3D.parts.chargeLight=new THREE.PointLight(0x39ff88,0,4);
+  T3D.parts.chargeLight.position.set(0.95,1.2,-0.4);
+  scene.add(T3D.parts.chargeLight);
+
+  car.position.y=0.4;
+  scene.add(car);
+  T3D.group=car;T3D.scene=scene;T3D.camera=camera;T3D.renderer=renderer;T3D.ok=true;
+
+  // interacción: arrastrar para girar
+  var down=null;
+  function pointerStart(e){T3D.dragging=true;down={x:e.clientX||e.touches[0].clientX,y:(e.clientY||e.touches[0].clientY)};}
+  function pointerMove(e){
+    if(!down)return;
+    var x=e.clientX||e.touches[0].clientX;
+    T3D.group.rotation.y+=((x-down.x)/120);
+    down.x=x;
+  }
+  function pointerEnd(){T3D.dragging=false;down=null;}
+  wrap.addEventListener("mousedown",pointerStart);wrap.addEventListener("touchstart",pointerStart,{passive:true});
+  window.addEventListener("mousemove",pointerMove);window.addEventListener("touchmove",pointerMove,{passive:true});
+  window.addEventListener("mouseup",pointerEnd);window.addEventListener("touchend",pointerEnd);
+  wrap.addEventListener("wheel",function(e){camera.position.z=Math.max(3,Math.min(7,camera.position.z+(e.deltaY>0?0.3:-0.3)));},{passive:true});
+
+  window.addEventListener("resize",function(){
+    var w=wrap.clientWidth,h=wrap.clientHeight;
+    camera.aspect=w/h;camera.updateProjectionMatrix();
+    renderer.setSize(w,h);
+  });
+
+  animate();
+  function animate(){
+    requestAnimationFrame(animate);
+    var a=T3D.anim;
+    // giro automático (turntable)
+    if(!T3D.dragging&&a.move===0)T3D.group.rotation.y+=0.004;
+    // capó / baúl
+    T3D.parts.hood.rotation.x+=(a.hood*0.65-T3D.parts.hood.rotation.x)*0.12;
+    T3D.parts.trunk.rotation.x+=(a.trunk*0.65-T3D.parts.trunk.rotation.x)*0.12;
+    // ventanas
+    T3D.parts.winL.position.y+=(0.92-a.win*0.3-T3D.parts.winL.position.y)*0.1;
+    T3D.parts.winR.position.y+=(0.92-a.win*0.3-T3D.parts.winR.position.y)*0.1;
+    // luces
+    T3D.parts.headM.emissiveIntensity+=(a.lights?2.2:0.4*Math.sin(Date.now()/300))*0.3;
+    T3D.parts.tailM.emissiveIntensity+=(a.lights?2.5:0.5)*0.3;
+    // bocina: flash
+    if(a.honk>0){T3D.parts.headM.emissiveIntensity=2.5;a.honk-=0.02;}
+    // summon: el auto avanza y vuelve
+    var moveTarget=a.move;
+    T3D.group.position.z+=(moveTarget*2.6-T3D.group.position.z)*0.05;
+    T3D.parts.wheels.forEach(function(w){w.rotation.x+=0.06;});
+    // carga: pulso verde
+    if(T3D.parts.charge.visible){T3D.chargePulse+=0.06;var pl=1.2+0.6*Math.sin(T3D.chargePulse);T3D.parts.chargeLight.intensity=pl;}else{T3D.parts.chargeLight.intensity=0;}
+    renderer.render(scene,camera);
+  }
+}
+function react3D(cmd){
+  if(!T3D.ok)return;
+  var a=T3D.anim;
+  if(cmd==="frunk")a.hood=a.hood?0:1;
+  else if(cmd==="trunk")a.trunk=a.trunk?0:1;
+  else if(cmd==="vent")a.win=1;
+  else if(cmd==="close_windows")a.win=0;
+  else if(cmd==="lights")a.lights=!a.lights;
+  else if(cmd==="honk")a.honk=0.5;
+  else if(cmd==="summon"){a.move=a.move?0:1;}
+  else if(cmd==="lock"){a.honk=0.4;}
+  else if(cmd==="charge_start"){T3D.parts.charge.visible=true;}
+  else if(cmd==="charge_stop"){T3D.parts.charge.visible=false;}
+}
+if(document.getElementById("viewer3d")){try{init3D();}catch(e){document.getElementById("viewerFallback").innerHTML="⚠ Error del visor 3D: "+esc(e.message);}}
+
+function cargarEstado(){
+  get({action:"status"}).then(function(d){
+    if(!d.ok)return;
+    car=d.car;
+    document.getElementById("battNum").textContent=Math.round(car.battery)+"%";
+    document.getElementById("battBar").style.width=car.battery+"%";
+    document.getElementById("rangeNum").textContent=car.range+" km";
+    var info=document.getElementById("heroInfo");
+    info.querySelector("h2").textContent="⚡ "+car.model;
+    info.querySelector(".meta").innerHTML=
+      "<b>Software:</b> "+esc(car.software)+" &nbsp;·&nbsp; <b>VIN:</b> "+esc(car.vin)+"<br>"+
+      "<b>Odómetro:</b> "+car.odometer.toLocaleString("es")+" km &nbsp;·&nbsp; <b>Temp:</b> "+car.temp+"°C";
+    info.querySelector(".loc").textContent="📍 "+esc(car.location);
+    renderLEDs();
+  });
+}
+function renderLEDs(){
+  if(!car)return;
+  var leds=[
+    ["Cerraduras",car.locked],
+    ["Frunk",car.frunk],
+    ["Trunk",car.trunk],
+    ["Ventanas",Object.values(car.windows).some(v=>v>0)],
+    ["Luces",car.lights],
+    ["Sentinela",car.sentry],
+    ["Dog Mode",car.dog_mode],
+    ["Camp Mode",car.camp_mode],
+    ["Cargando",car.plugged],
+  ];
+  var els=document.getElementById("statusStrip").children;
+  for(var i=0;i<els.length&&i<leds.length;i++){els[i].classList.toggle("on",leds[i][1]);}
+}
+function comando(cmd){
+  var btns=document.querySelectorAll(".cmd");
+  get({action:"command",cmd:cmd}).then(function(d){
+    if(d.ok){
+      car=d.car;
+      react3D(cmd);
+      document.getElementById("battNum").textContent=Math.round(car.battery)+"%";
+      document.getElementById("battBar").style.width=car.battery+"%";
+      document.getElementById("rangeNum").textContent=car.range+" km";
+      renderLEDs();
+      toast(esc(d.msg));
+      log("<b>› "+cmd+"</b> · "+esc(d.msg));
+      nivAdd(XP_CMD[cmd]||10,cmd);
+    }else{
+      toast("⛔ "+(d.error||"Error"));
+    }
+  });
+}
+cargarEstado();
+nivInit();
+</script>
+<script src="/errores.js" defer></script>
+<script src="/update_check.js" defer></script>
+</body>
+</html>

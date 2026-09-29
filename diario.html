@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>📖 DIARIO - ZonaHack</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#050505;color:#c8b89a;font-family:'Courier New',monospace;min-height:100vh}
+.header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid rgba(140,120,80,.12);background:#050505;position:sticky;top:0;z-index:100}
+.header h1{color:#c0392b;font-size:.85em;letter-spacing:1px;text-shadow:0 0 10px rgba(192,57,43,.15)}
+.back{color:#c0392b;text-decoration:none;font-size:.65em;padding:4px 8px;border:1px solid rgba(140,120,80,.1);border-radius:3px}
+.back:hover{border-color:rgba(192,57,43,.3)}
+.container{max-width:760px;margin:0 auto;padding:12px}
+.crt{background:linear-gradient(180deg,#0a0808,#050505);border:1px solid rgba(140,120,80,.1);border-radius:4px;padding:14px;margin-bottom:12px}
+.crt .head{display:flex;justify-content:space-between;font-size:.58em;color:rgba(140,120,80,.35);letter-spacing:1px;border-bottom:1px dashed rgba(140,120,80,.1);padding-bottom:5px;margin-bottom:8px}
+.crt .date{font-size:.95em;color:#c8b89a;letter-spacing:2px;margin-bottom:6px}
+.crt .date b{color:#c0392b}
+.crt .time{font-size:1.6em;color:#c0392b;text-align:center;letter-spacing:4px;margin:8px 0;font-weight:bold;text-shadow:0 0 20px rgba(192,57,43,.2)}
+.crt .real{text-align:center;font-size:.55em;color:rgba(140,120,80,.3);letter-spacing:2px;margin-top:8px}
+.crt .real span{color:#c0392b}
+.scanline{pointer-events:none;position:fixed;top:0;left:0;right:0;height:2px;background:rgba(192,57,43,.06);animation:scan 7s linear infinite;z-index:50}
+@keyframes scan{0%{transform:translateY(0)}100%{transform:translateY(100vh)}}
+.filtros{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px}
+.filtros button{padding:4px 10px;border:1px solid rgba(140,120,80,.08);border-radius:2px;background:rgba(0,0,0,.3);color:rgba(200,184,154,.35);font-size:.58em;cursor:pointer;font-family:'Courier New',monospace;transition:.2s}
+.filtros button:hover,.filtros button.active{color:#c0392b;border-color:rgba(192,57,43,.2)}
+.status{text-align:center;font-size:.58em;color:rgba(140,120,80,.3);margin:6px 0;letter-spacing:1px;min-height:14px}
+.entradas{display:flex;flex-direction:column;gap:8px}
+.entrada{border-left:2px solid rgba(192,57,43,.15);background:rgba(0,0,0,.25);padding:9px 11px;border-radius:0 3px 3px 0;position:relative;animation:in .3s ease}
+@keyframes in{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+.entrada .eh{display:flex;justify-content:space-between;font-size:.55em;color:rgba(140,120,80,.4);margin-bottom:4px;letter-spacing:.5px}
+.entrada .eh b{color:#c0392b;font-weight:normal}
+.entrada .txt{font-size:.68em;color:rgba(200,184,154,.7);line-height:1.5}
+.entrada .tag{display:inline-block;padding:0 5px;font-size:.52em;border-radius:2px;margin-right:4px;border:1px solid}
+.tag-evento{border-color:rgba(140,120,80,.15);color:rgba(140,120,80,.5)}
+.tag-usuario{border-color:rgba(192,57,43,.25);color:#c0392b}
+.tag-sistema{border-color:rgba(241,196,15,.2);color:#f1c40f}
+.tag-senal{border-color:rgba(231,76,60,.4);color:#e74c3c;text-shadow:0 0 8px rgba(231,76,60,.3)}
+.int1{border-left-color:rgba(140,120,80,.1)}
+.int2{border-left-color:rgba(192,57,43,.2)}
+.int3{border-left-color:rgba(192,57,43,.4)}
+.int4{border-left-color:#c0392b}
+.int5{border-left-color:#ff0044;box-shadow:0 0 15px rgba(255,0,68,.08)}
+.glitch{color:#e74c3c;font-size:.62em;text-align:center;letter-spacing:2px;margin:10px 0;text-shadow:0 0 8px rgba(231,76,60,.2);animation:flick 3s infinite}
+@keyframes flick{0%,97%,100%{opacity:.35}98%{opacity:1}99%{opacity:.1}}
+.marca{font-size:.5em;color:rgba(140,120,80,.2);text-align:center;letter-spacing:3px;margin-top:14px}
+.bajada{display:flex;gap:8px;margin-top:10px}
+.bajada input{flex:1;background:#0a0808;border:1px solid rgba(140,120,80,.1);border-radius:3px;color:#c8b89a;padding:7px 9px;font-size:.62em;font-family:'Courier New',monospace}
+.bajada input:focus{border-color:rgba(192,57,43,.3);outline:none}
+.bajada button{background:rgba(192,57,43,.1);border:1px solid rgba(192,57,43,.25);color:#c0392b;padding:7px 14px;border-radius:3px;font-size:.62em;cursor:pointer;font-family:'Courier New',monospace}
+.bajada button:hover{background:rgba(192,57,43,.2)}
+.nota{font-size:.55em;color:rgba(140,120,80,.3);margin-top:6px;text-align:center}
+@media(max-width:480px){.crt .time{font-size:1.2em}}
+</style>
+</head>
+<body>
+<div class="scanline"></div>
+<div class="header">
+  <a href="/" class="back">←</a>
+  <h1>📖 DIARIO DE LA SEÑAL</h1>
+  <div style="width:40px"></div>
+</div>
+<div class="container">
+  <div class="crt">
+    <div class="head"><span>/// REGISTRO EN VIVO ///</span><span id="statusCrt">CONECTANDO...</span></div>
+    <div class="date">HOY ES: <b id="fechaReal">--/--/----</b></div>
+    <div class="time" id="reloj">00:00:00</div>
+    <div class="real">ESTE DIARIO SE ESCRIBE SOLO CON EVENTOS <span>REALES</span> DE LA PLATAFORMA</div>
+  </div>
+
+  <div class="filtros" id="filtros">
+    <button class="active" onclick="filtrarD('todo',this)">🔴 TODO</button>
+    <button onclick="filtrarD('evento',this)">📼 EVENTO</button>
+    <button onclick="filtrarD('usuario',this)">👁 USUARIO</button>
+    <button onclick="filtrarD('sistema',this)">⚙ SISTEMA</button>
+    <button onclick="filtrarD('senal',this)">📡 SEÑAL</button>
+  </div>
+
+  <div class="status" id="statusD">escuchando la señal...</div>
+  <div class="glitch" id="contador">◉ 0 GRABACIONES CAPTURADAS</div>
+
+  <div class="crt" style="margin-top:14px">
+    <div class="head"><span>📚 HISTORIAS DE TERROR EN ESPAÑOL</span><span id="histStatus">...</span></div>
+    <div class="filtros" id="histFiltros" style="margin:8px 0">
+      <button onclick="cargarHistorias(this)" class="active">📚 CREEPYPASTAS ES</button>
+      <button onclick="limpiarHistorias(this)">🗑 LIMPIAR</button>
+    </div>
+    <div id="historias" style="display:flex;flex-direction:column;gap:6px"></div>
+  </div>
+
+  <div class="entradas" id="entradas"></div>
+  <div class="marca">— FIN DEL REGISTRO —</div>
+
+  <div class="bajada">
+    <input id="nuevaEntrada" placeholder="escribi en el diario... (queda registrado)">
+    <button onclick="escribirDiario()">REGISTRAR</button>
+  </div>
+  <div class="nota">⚠️ todo lo que escribas queda grabado para siempre en el diario real</div>
+</div>
+
+<script>
+var SB = "https://xfwolaurpeofysnymqle.supabase.co";
+var KEY = "sb_publishable_3VvBUD5Bdu3Uaq59fJ99MQ_XDCtujUU";
+var filtroActual = "todo";
+var diarioRealtime = false;
+
+function esc(s){return (s||"").replace(/[&<>"]/g,function(m){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m];});}
+
+function fmtFecha(f){
+  if(!f) return "--/-- --:--";
+  var d = new Date(f);
+  var p = function(n){return (n<10?"0":"")+n;};
+  return p(d.getDate())+"/"+p(d.getMonth()+1)+"/"+d.getFullYear()+" "+p(d.getHours())+":"+p(d.getMinutes());
+}
+
+function fechaHumana(f){
+  if(!f) return "sin fecha";
+  var d = new Date(f);
+  var dias = ["DOMINGO","LUNES","MARTES","MIERCOLES","JUEVES","VIERNES","SABADO"];
+  var meses = ["ENERO","FEBRERO","MARZO","ABRIL","MAYO","JUNIO","JULIO","AGOSTO","SEPTIEMBRE","OCTUBRE","NOVIEMBRE","DICIEMBRE"];
+  var p = function(n){return (n<10?"0":"")+n;};
+  return dias[d.getDay()]+" "+p(d.getDate())+" DE "+meses[d.getMonth()]+" DE "+d.getFullYear();
+}
+
+function tagHtml(tipo){
+  var t = tipo || "evento";
+  return '<span class="tag tag-'+esc(t)+'">'+esc(t.toUpperCase())+'</span>';
+}
+
+function renderEntradas(lista){
+  var cont = document.getElementById("entradas");
+  cont.innerHTML = "";
+  lista.forEach(function(e){
+    if(filtroActual !== "todo" && e.tipo !== filtroActual) return;
+    var div = document.createElement("div");
+    div.className = "entrada int" + Math.min(5, Math.max(1, e.intensidad || 1));
+    var usuario = e.usuario_nombre ? ' <b>@'+esc(e.usuario_nombre)+'</b>' : "";
+    div.innerHTML = '<div class="eh"><span>'+tagHtml(e.tipo)+usuario+'</span><span>'+fmtFecha(e.fecha)+'</span></div>' +
+      '<div class="txt">'+esc(e.entrada)+'</div>';
+    cont.appendChild(div);
+  });
+}
+
+function cargarDiario(){
+  var xhr = new XMLHttpRequest();
+  xhr.open("GET", SB+"/rest/v1/diario_entradas?select=*&order=fecha.desc&limit=60", true);
+  xhr.setRequestHeader("apikey", KEY);
+  xhr.setRequestHeader("Authorization", "Bearer "+KEY);
+  xhr.onload = function(){
+    try{
+      var data = JSON.parse(xhr.responseText);
+      var en = data || [];
+      document.getElementById("contador").textContent = "◉ "+en.length+" GRABACIONES CAPTURADAS";
+      renderEntradas(en);
+      document.getElementById("statusD").textContent = en.length ? "señal capturada" : "esperando la primera señal...";
+    }catch(e){ document.getElementById("statusD").textContent = "error al leer el diario"; }
+  };
+  xhr.onerror = function(){ document.getElementById("statusD").textContent = "sin conexión"; };
+  xhr.send();
+}
+
+function escribirDiario(){
+  var inp = document.getElementById("nuevaEntrada");
+  var txt = inp.value.trim();
+  if(!txt){return;}
+  var user = localStorage.getItem("vh_user") || "anonimo";
+  var xhr = new XMLHttpRequest();
+  xhr.open("POST", SB+"/rest/v1/diario_entradas", true);
+  xhr.setRequestHeader("apikey", KEY);
+  xhr.setRequestHeader("Authorization", "Bearer "+KEY);
+  xhr.setRequestHeader("Content-Type", "application/json");
+  xhr.onload = function(){
+    inp.value = "";
+    document.getElementById("statusD").textContent = "entrada registrada en el diario";
+    cargarDiario();
+  };
+  xhr.send(JSON.stringify({entrada: txt, tipo:"usuario", usuario_nombre: user, intensidad: 3}));
+}
+
+function filtrarD(tipo, btn){
+  filtroActual = tipo;
+  document.querySelectorAll("#filtros button").forEach(function(b){b.classList.remove("active");});
+  if(btn) btn.classList.add("active");
+  cargarDiario();
+}
+
+// Real-time: el diario se escribe solo cuando pasa algo real
+var _drWS = null;
+var _drHB = null;
+var _drRecon = 2000;
+function conectarRealtime(){
+  var ws = new WebSocket("wss://xfwolaurpeofysnymqle.supabase.co/realtime/v1/websocket?apikey="+KEY+"&vsn=1.0.0");
+  ws.onopen = function(){
+    _drRecon = 2000;
+    ws.send(JSON.stringify({topic:"realtime:diario_entradas",event:"phx_join",payload:{config:{postgres_changes:[{event:"*",schema:"public",table:"diario_entradas"}]}},ref:"1"}));
+    ws.send(JSON.stringify({topic:"realtime:visitas",event:"phx_join",payload:{config:{postgres_changes:[{event:"*",schema:"public",table:"visitas"}]}},ref:"2"}));
+    ws.send(JSON.stringify({topic:"realtime:chat_mensajes",event:"phx_join",payload:{config:{postgres_changes:[{event:"*",schema:"public",table:"chat_mensajes"}]}},ref:"3"}));
+    ws.send(JSON.stringify({topic:"realtime:logs",event:"phx_join",payload:{config:{postgres_changes:[{event:"*",schema:"public",table:"logs"}]}},ref:"4"}));
+    document.getElementById("statusCrt").textContent = "/// GRABANDO ///";
+    _drHB = setInterval(function(){
+      try{ws.send(JSON.stringify({topic:"phoenix",event:"heartbeat",payload:{},ref:"0"}));}catch(e){}
+    }, 10000);
+  };
+  ws.onmessage = function(ev){
+    try{
+      var msg = JSON.parse(ev.data);
+      if(msg.event==="phx_reply" && msg.payload && msg.payload.status==="ok") return;
+      // Soportar formato v1 (postgres_changes) y v2 (record directo)
+      var rec = null;
+      if(msg.event==="postgres_changes"){
+        rec = (msg.payload && msg.payload.data && msg.payload.data.record) || null;
+      } else {
+        rec = (msg.payload && msg.payload.record) || null;
+      }
+      if(!rec) return;
+      var entrada = null, tipo = "evento", intensidad = 2;
+      if(msg.topic && msg.topic.indexOf("diario_entradas") >= 0){
+        entrada = "📖 " + (rec.entrada||"");
+        tipo = rec.tipo || "evento";
+        intensidad = rec.intensidad || 2;
+      } else if(msg.topic && msg.topic.indexOf("visitas") >= 0){
+        var p = rec.pagina || "/";
+        var u = rec.usuario_nombre || "alguien";
+        entrada = "👁 SE DETECTO UNA VISITA en "+p+(u!=="alguien"?" de @"+u:"")+" desde la IP "+ (rec.ip||"??");
+        tipo = "evento"; intensidad = 1;
+      } else if(msg.topic && msg.topic.indexOf("chat_mensajes") >= 0){
+        entrada = "💬 "+ (rec.usuario_nombre||"alguien") + " dijo: " + (rec.mensaje||"");
+        tipo = "usuario"; intensidad = 2;
+      } else if(msg.topic && msg.topic.indexOf("logs") >= 0){
+        entrada = "⚙ " + (rec.accion||rec.detalle||"accion registrada") + (rec.usuario?" por @"+rec.usuario:"");
+        tipo = "sistema"; intensidad = 2;
+      }
+      if(!entrada) return;
+      var nuevo = {
+        entrada: entrada, tipo: tipo,
+        usuario_nombre: (rec.usuario_nombre || rec.usuario || "")+"",
+        fecha: rec.created_at || new Date().toISOString(), intensidad: intensidad
+      };
+      var lista = document.getElementById("entradas");
+      var card = document.createElement("div");
+      card.className = "entrada int"+intensidad;
+      var usuario = nuevo.usuario_nombre ? ' <b>@'+esc(nuevo.usuario_nombre)+'</b>' : "";
+      card.innerHTML = '<div class="eh"><span>'+tagHtml(nuevo.tipo)+usuario+'</span><span>'+fmtFecha(nuevo.fecha)+'</span></div>' +
+        '<div class="txt">'+esc(nuevo.entrada)+'</div>';
+      lista.insertBefore(card, lista.firstChild);
+      document.getElementById("statusD").textContent = "◉ nueva señal capturada";
+      document.getElementById("contador").textContent = "◉ SEÑAL ENTRANTE";
+      setTimeout(function(){ document.getElementById("contador").textContent = "◉ GRABACIÓN ACTIVA"; }, 1500);
+    }catch(e){}
+  };
+  ws.onerror = function(){ try{ws.close();}catch(e){} };
+  ws.onclose = function(){
+    if(_drHB){clearInterval(_drHB);_drHB=null;}
+    document.getElementById("statusCrt").textContent = "SEÑAL CAÍDA";
+    setTimeout(conectarRealtime, _drRecon);
+    _drRecon = Math.min(30000, _drRecon * 1.5);
+  };
+  _drWS = ws;
+}
+
+// Reloj real
+function actualizarReloj(){
+  var now = new Date();
+  var p = function(n){return (n<10?"0":"")+n;};
+  document.getElementById("reloj").textContent = p(now.getHours())+":"+p(now.getMinutes())+":"+p(now.getSeconds());
+  document.getElementById("fechaReal").textContent = fechaHumana(now);
+}
+
+// Registrar visita real al diario al entrar
+function registrarEntradaReal(){
+  var xhr = new XMLHttpRequest();
+  xhr.open("POST", SB+"/rest/v1/diario_entradas", true);
+  xhr.setRequestHeader("apikey", KEY);
+  xhr.setRequestHeader("Authorization", "Bearer "+KEY);
+  xhr.setRequestHeader("Content-Type", "application/json");
+  var user = localStorage.getItem("vh_user") || "alguien";
+  var txt = "🔴 " + user + " ABRIÓ EL DIARIO a las " + new Date().toLocaleTimeString();
+  xhr.send(JSON.stringify({entrada: txt, tipo:"senal", usuario_nombre: user, intensidad: 5}));
+}
+
+// ─── HISTORIAS DE TERROR SCRAPPEADAS ──
+var historiasCache = [];
+
+function cargarHistorias(btn){
+  if(btn){
+    document.querySelectorAll("#histFiltros button").forEach(function(b){b.classList.remove("active");});
+    btn.classList.add("active");
+  }
+  var el = document.getElementById("historias");
+  var st = document.getElementById("histStatus");
+  el.innerHTML = '<div class="loading">Conjurando historias...</div>';
+  st.textContent = "Buscando en internet...";
+  var xhr = new XMLHttpRequest();
+  xhr.open("GET","/api/historias_terror",true);
+  xhr.timeout = 30000;
+  xhr.onload = function(){
+    try{
+      var data = JSON.parse(xhr.responseText);
+      var h = data.results || [];
+      if(!h.length){el.innerHTML='<div class="loading">Sin historias por ahora...</div>';st.textContent="sin señales";return;}
+      historiasCache = h;
+      st.textContent = h.length + " historias · " + (data.fuente||"");
+      var html = h.map(function(x,i){
+        return '<div class="entrada int3" onclick="leerHistoria('+i+')" style="cursor:pointer">'+
+          '<div class="eh"><span><b>📚</b> <span class="tag tag-senal">HISTORIA</span></span><span>'+esc(x.subreddit||"")+'</span></div>'+
+          '<div class="txt" style="font-size:.72em;color:#c0392b;margin-bottom:2px">'+esc((x.titulo||"").slice(0,80))+'</div>'+
+          '<div class="txt" style="opacity:.6">'+esc((x.texto||"").slice(0,120))+'...</div>'+
+          '</div>';
+      }).join("");
+      el.innerHTML = html;
+    }catch(e){ el.innerHTML='<div class="loading">Error al leer historias</div>'; st.textContent="error"; }
+  };
+  xhr.onerror = function(){ el.innerHTML='<div class="loading">Sin conexión</div>'; st.textContent="offline"; };
+  xhr.send();
+}
+
+function limpiarHistorias(btn){
+  document.querySelectorAll("#histFiltros button").forEach(function(b){b.classList.remove("active");});
+  if(btn)btn.classList.add("active");
+  document.getElementById("historias").innerHTML = '<div class="loading">esperando nuevas señales...</div>';
+  document.getElementById("histStatus").textContent = "...";
+}
+
+function leerHistoria(idx){
+  var h = historiasCache[idx];
+  if(!h) return;
+  var ov = document.createElement("div");
+  ov.style.cssText = "position:fixed;top:0;left:0;right:0;bottom:0;background:#050505;z-index:999;display:flex;flex-direction:column";
+  ov.innerHTML =
+    '<div style="display:flex;align-items:center;padding:5px 10px;background:#0a0808;border-bottom:1px solid rgba(140,120,80,.1)">'+
+      '<button onclick="document.body.removeChild(this.parentNode.parentNode)" style="background:none;border:none;color:#c0392b;font-size:1.2em;cursor:pointer">←</button>'+
+      '<div style="flex:1;font-size:.62em;color:#c0392b;padding:0 8px">📚 '+esc(h.titulo||'')+'</div>'+
+      '<a href="'+esc(h.url||'#')+'" target="_blank" style="font-size:.58em;color:rgba(200,184,154,.4);text-decoration:none">FUENTE ↗</a>'+
+    '</div>'+
+    '<div style="flex:1;overflow:auto;padding:18px;font-family:\'Courier New\',monospace;font-size:.8em;line-height:1.9;color:#c8b89a;max-width:680px;margin:0 auto;width:100%">'+
+      '<div style="color:#c0392b;letter-spacing:2px;font-size:.6em;margin-bottom:14px">SCRAPPED DE '+(h.subreddit==='español'?'CREEPYPASTAS.COM':esc(h.subreddit||'').toUpperCase())+'</div>'+
+      '<div style="white-space:pre-wrap">'+esc(h.texto||'')+'</div>'+
+      '<div style="margin-top:18px;font-size:.58em;color:rgba(140,120,80,.3)">— '+esc(h.autor||'anónimo')+' —</div>'+
+    '</div>';
+  document.body.appendChild(ov);
+}
+
+setInterval(actualizarReloj, 1000);
+actualizarReloj();
+cargarDiario();
+conectarRealtime();
+registrarEntradaReal();
+cargarHistorias();
+</script>
+<script src="/errores.js" defer></script>
+<script src="/update_check.js" defer></script>
+</body>
+</html>

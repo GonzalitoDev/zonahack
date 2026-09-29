@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>🧠 Psicologia - ZonaHack</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0a;color:#c8d6e5;font-family:'Courier New',monospace;min-height:100vh}
+.header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid rgba(0,255,65,.1);background:#0a0a0a;position:sticky;top:0;z-index:100}
+.header h1{color:#00ff41;font-size:1em;text-shadow:0 0 6px rgba(0,255,65,.08)}
+.back{color:#00ff41;text-decoration:none;font-size:.68em;padding:5px 10px;border:1px solid rgba(0,255,65,.1);border-radius:3px}
+.back:hover{border-color:rgba(0,255,65,.2)}
+.container{max-width:1000px;margin:0 auto;padding:10px}
+.hero{background:#0d0d0d;border:1px solid rgba(0,255,65,.06);border-radius:4px;padding:15px;margin-bottom:10px;text-align:center}
+.hero h2{color:#00ff41;font-size:.95em;text-shadow:0 0 6px rgba(0,255,65,.08)}
+.hero p{color:rgba(200,214,229,.35);font-size:.68em;margin-top:4px}
+.tabs{display:flex;gap:3px;margin-bottom:8px;flex-wrap:wrap}
+.tab{padding:5px 10px;border:1px solid rgba(0,255,65,.06);border-radius:3px;background:rgba(0,255,65,.02);color:rgba(0,255,65,.5);font-size:.62em;cursor:pointer;font-family:'Courier New',monospace;transition:.2s}
+.tab:hover,.tab.active{color:#00ff41;border-color:rgba(0,255,65,.15)}
+.tabc{display:none}
+.tabc.active{display:block}
+.cats{display:flex;gap:3px;flex-wrap:wrap;margin-bottom:8px}
+.cats button{padding:4px 10px;border:1px solid rgba(0,255,65,.06);border-radius:3px;background:rgba(0,255,65,.02);color:rgba(0,255,65,.4);font-size:.58em;cursor:pointer;font-family:'Courier New',monospace;transition:.2s}
+.cats button:hover,.cats button.active{color:#00ff41;border-color:rgba(0,255,65,.12)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:5px}
+.card{border:1px solid rgba(0,255,65,.04);border-radius:4px;overflow:hidden;cursor:pointer;background:#0d0d0d;transition:all .15s}
+.card:hover{border-color:rgba(0,255,65,.1);box-shadow:0 0 10px rgba(0,255,65,.03)}
+.card img{width:100%;aspect-ratio:16/9;object-fit:cover;background:#000}
+.card .inf{padding:6px}
+.card .t{font-size:.65em;color:rgba(200,214,229,.6);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card .c{font-size:.55em;color:rgba(200,214,229,.25);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card-book{aspect-ratio:3/4;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;padding:10px}
+.card-book .ico{font-size:2em}
+.card-book .tit{font-size:.6em;color:rgba(200,214,229,.5)}
+.card-book .aut{font-size:.5em;color:rgba(200,214,229,.2)}
+.status{text-align:center;font-size:.6em;color:rgba(200,214,229,.2);margin:6px 0;min-height:14px}
+.loading{text-align:center;padding:25px;color:rgba(200,214,229,.12);font-size:.65em}
+.loading::after{content:'';display:block;width:16px;height:16px;margin:6px auto;border:1px solid rgba(0,255,65,.08);border-top-color:#00ff41;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media(max-width:480px){.grid{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="header">
+  <a href="/" class="back">← Volver</a>
+  <h1>🧠 Psicologia</h1>
+  <div style="width:50px"></div>
+</div>
+<div class="container">
+  <div class="hero">
+    <h2>🧠 Mente & Conocimiento</h2>
+    <p>Videos y libros de psicologia, filosofia y desarrollo personal</p>
+  </div>
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('videos')">🎬 Videos</button>
+    <button class="tab" onclick="switchTab('libros')">📚 Libros</button>
+  </div>
+  <div id="tab-videos" class="tabc active">
+    <div class="cats" id="vidCats">
+      <button class="active" onclick="buscarVideo('psicologia documental completo espanol',this)">🧠 General</button>
+      <button onclick="buscarVideo('psicologia cognitiva documental espanol',this)">🧐 Cognitiva</button>
+      <button onclick="buscarVideo('psicologia clinica terapia espanol',this)">💊 Clinica</button>
+      <button onclick="buscarVideo('psicologia educativa aprendizaje espanol',this)">📖 Educativa</button>
+      <button onclick="buscarVideo('psicologia social comportamiento espanol',this)">👥 Social</button>
+      <button onclick="buscarVideo('neurociencia cerebro documental espanol',this)">🧬 Neurociencia</button>
+      <button onclick="buscarVideo('psicologia oscura persuasion mental espanol',this)">🎯 Psicologia Oscura</button>
+      <button onclick="buscarVideo('inteligencia emocional desarrollo personal espanol',this)">💚 Inteligencia Emocional</button>
+      <button onclick="buscarVideo('psicologia positiva felicidad espanol',this)">😊 Positiva</button>
+      <button onclick="buscarVideo('terapia cognitiva conductual TCC espanol',this)">🛠️ TCC</button>
+      <button onclick="buscarVideo('psicologia infantil adolescente espanol',this)">👶 Infantil</button>
+      <button onclick="buscarVideo('psicologia deportiva motivacion espanol',this)">🏃 Deportiva</button>
+      <button onclick="buscarVideo('psicologia organizacional trabajo espanol',this)">💼 Laboral</button>
+      <button onclick="buscarVideo('psicologia forense criminal espanol',this)">🔍 Forense</button>
+      <button onclick="buscarVideo('sigmund freud psicoanalisis espanol',this)">🛋️ Freud</button>
+      <button onclick="buscarVideo('carl jung psicologia analitica espanol',this)">🌙 Jung</button>
+      <button onclick="buscarVideo('viktor frankl logoterapia espanol',this)">🎯 Frankl</button>
+      <button onclick="buscarVideo('gabriel rolon psicologia espanol',this)">🎙️ Gabriel Rolon</button>
+      <button onclick="buscarVideo('gabriel rolon amor libro entrevista',this)">📖 Rolon: Amor</button>
+      <button onclick="buscarVideo('gabriel rolon palabras cruzadas',this)">🎭 Palabras Cruzadas</button>
+      <button onclick="buscarVideo('gabriel rolon emociones sentimientos',this)">💭 Rolon: Emociones</button>
+      <button onclick="buscarVideo('psicologia del amor pareja relaciones espanol',this)">💕 Amor y Pareja</button>
+      <button onclick="buscarVideo('como enamorar psicologia espanol',this)">💘 Enamoramiento</button>
+      <button onclick="buscarVideo('apego relaciones amorosas espanol',this)">🤝 Apego</button>
+    </div>
+    <div class="status" id="vidStatus">Selecciona una categoria</div>
+    <div class="grid" id="vidGrid"></div>
+    <div class="load-more" id="vidLoad" style="display:none;text-align:center;margin:8px 0">
+      <button onclick="cargarMasVideos()" style="padding:5px 16px;border:1px solid rgba(0,255,65,.1);border-radius:3px;background:rgba(0,255,65,.03);color:#00ff41;cursor:pointer;font-size:.6em;font-family:'Courier New',monospace">Cargar mas</button>
+    </div>
+  </div>
+  <div id="tab-libros" class="tabc">
+    <div class="status" style="color:rgba(200,214,229,.2)">Libros recomendados de psicologia</div>
+    <div class="grid" id="bookGrid"></div>
+  </div>
+</div>
+
+<script>
+var LIBROS = [
+  {t:"El hombre en busca de sentido",a:"Viktor Frankl",i:"🎯",c:"Existencial"},
+  {t:"Pensar rapido, pensar despacio",a:"Daniel Kahneman",i:"🧠",c:"Cognitiva"},
+  {t:"Inteligencia emocional",a:"Daniel Goleman",i:"💚",c:"Emocional"},
+  {t:"El poder del ahora",a:"Eckhart Tolle",i:"🧘",c:"Espiritual"},
+  {t:"Fluir",a:"Mihaly Csikszentmihalyi",i:"🌊",c:"Positiva"},
+  {t:"La interpretacion de los suenos",a:"Sigmund Freud",i:"🛋️",c:"Psicoanalisis"},
+  {t:"El yo y los mecanismos de defensa",a:"Anna Freud",i:"🛡️",c:"Psicoanalisis"},
+  {t:"El hombre y sus simbolos",a:"Carl Jung",i:"🌙",c:"Analitica"},
+  {t:"Mas alla del bien y del mal",a:"Friedrich Nietzsche",i:"⚡",c:"Filosofia"},
+  {t:"Asi hablo Zaratustra",a:"Friedrich Nietzsche",i:"📜",c:"Filosofia"},
+  {t:"La psicologia de la estupidez",a:"varios",i:"🤪",c:"Social"},
+  {t:"Influencia: la psicologia de la persuasion",a:"Robert Cialdini",i:"🎯",c:"Persuasion"},
+  {t:"Armas de persuasion masiva",a:"varios",i:"📺",c:"Persuasion"},
+  {t:"Psicologia de las masas",a:"Gustave Le Bon",i:"👥",c:"Social"},
+  {t:"La voluntad de poder",a:"Friedrich Nietzsche",i:"💪",c:"Filosofia"},
+  {t:"El arte de amar",a:"Erich Fromm",i:"❤️",c:"Humanista"},
+  {t:"Tener o ser",a:"Erich Fromm",i:"⚖️",c:"Humanista"},
+  {t:"La sociedad del cansancio",a:"Byung-Chul Han",i:"😩",c:"Filosofia"},
+  {t:"La agonía del Eros",a:"Byung-Chul Han",i:"💔",c:"Filosofia"},
+  {t:"Meditaciones",a:"Marco Aurelio",i:"🏛️",c:"Estoicismo"},
+  {t:"Manual de vida",a:"Epicteto",i:"📗",c:"Estoicismo"},
+  {t:"Sobre la brevedad de la vida",a:"Seneca",i:"⏳",c:"Estoicismo"},
+  {t:"El mito de Sísifo",a:"Albert Camus",i:"🪨",c:"Existencial"},
+  {t:"La náusea",a:"Jean-Paul Sartre",i:"🤢",c:"Existencial"},
+  {t:"El extranjero",a:"Albert Camus",i:"🌍",c:"Existencial"},
+  {t:"El principito",a:"Antoine de Saint-Exupéry",i:"⭐",c:"Infantil"},
+  {t:"1984",a:"George Orwell",i:"👁️",c:"Distopia"},
+  {t:"Un mundo feliz",a:"Aldous Huxley",i:"💊",c:"Distopia"},
+  {t:"Fahrenheit 451",a:"Ray Bradbury",i:"🔥",c:"Distopia"},
+  {t:"La psicologia del dinero",a:"Morgan Housel",i:"💰",c:"Financiera"},
+  {t:"Habitos atomicos",a:"James Clear",i:"🎯",c:"Autoayuda"},
+  {t:"El club de la pelea",a:"Chuck Palahniuk",i:"👊",c:"Ficcion"},
+  {t:"La rebelion de la masas",a:"Jose Ortega y Gasset",i:"🏰",c:"Filosofia"},
+  {t:"La insoportable levedad del ser",a:"Milan Kundera",i:"🦋",c:"Ficcion"},
+  {t:"El psicoanalista",a:"John Katzenbach",i:"🛋️",c:"Thriller"},
+  {t:"Mentes criminales",a:"varios",i:"🔪",c:"Forense"},
+  {t:"Perfil criminal",a:"varios",i:"🔍",c:"Forense"},
+  {t:"El cerebro del nino",a:"Daniel Siegel",i:"🧒",c:"Infantil"},
+  {t:"Disciplina sin lagrimas",a:"Daniel Siegel",i:"👶",c:"Infantil"},
+  {t:"El cuerpo lleva la cuenta",a:"Bessel van der Kolk",i:"🧬",c:"Trauma"},
+  {t:"La trampa de la felicidad",a:"Russ Harris",i:"😐",c:"ACT"},
+  {t:"Palabras cruzadas",a:"Gabriel Rolón",i:"🎙️",c:"Psicoanalisis"},
+  {t:"Historias de divan",a:"Gabriel Rolón",i:"🛋️",c:"Psicoanalisis"},
+  {t:"Encuentros",a:"Gabriel Rolón",i:"🤝",c:"Psicoanalisis"},
+  {t:"Los padecientes",a:"Gabriel Rolón",i:"💊",c:"Psicoanalisis"},
+  {t:"El duelo",a:"Gabriel Rolón",i:"💔",c:"Psicoanalisis"},
+  {t:"La felicidad",a:"Gabriel Rolón",i:"😊",c:"Psicoanalisis"},
+  {t:"El amor en los tiempos del cólera",a:"Gabriel García Márquez",i:"💕",c:"Amor"},
+  {t:"Los lenguajes del amor",a:"Gary Chapman",i:"💬",c:"Amor"},
+  {t:"El arte de amar",a:"Erich Fromm",i:"❤️",c:"Amor"},
+  {t:"Amarse a uno mismo",a:"varios",i:"💚",c:"Autoestima"},
+  {t:"Miedo a amar",a:"varios",i:"😨",c:"Amor"},
+  {t:"Como hacer amigos e influir en las personas",a:"Dale Carnegie",i:"🤝",c:"Social"},
+  {t:"Hombres son de marte, mujeres de venus",a:"John Gray",i:"♂️♀️",c:"Amor"},
+  {t:"Intimidad emocional",a:"varios",i:"🔥",c:"Amor"},
+];
+
+var vidResults = [];
+var lastVidQ = "";
+var vidVariants = ["documental","psicologia","espanol","completo","neurociencia"];
+
+function esc(s){return (s||"").replace(/[&<>"]/g,function(m){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m];});}
+
+function switchTab(id){
+  document.querySelectorAll(".tabc").forEach(function(t){t.classList.remove("active");});
+  document.getElementById("tab-"+id).classList.add("active");
+  document.querySelectorAll(".tab").forEach(function(t){t.classList.remove("active");});
+  document.querySelectorAll(".tab").forEach(function(t){
+    if(t.getAttribute("onclick")&&t.getAttribute("onclick").includes("'"+id+"'"))t.classList.add("active");
+  });
+  if(id==="libros") renderLibros();
+}
+
+function buscarVideo(q,btn){
+  if(!q) return;
+  lastVidQ = q;
+  vidResults = [];
+  document.querySelectorAll("#vidCats button").forEach(function(b){b.classList.remove("active");});
+  if(btn) btn.classList.add("active");
+  document.getElementById("vidStatus").textContent = "Buscando: "+q.slice(0,50);
+  document.getElementById("vidGrid").innerHTML = '<div class="loading">Buscando...</div>';
+  document.getElementById("vidLoad").style.display = "none";
+  var xhr = new XMLHttpRequest();
+  xhr.open("GET","/api/search?q="+encodeURIComponent(q),true);
+  xhr.timeout = 25000;
+  xhr.onload = function(){
+    try{
+      var data = JSON.parse(xhr.responseText);
+      var items = data.results || [];
+      if(!items.length){
+        document.getElementById("vidGrid").innerHTML = '<div class="loading" style="grid-column:1/-1">Sin resultados</div>';
+        document.getElementById("vidStatus").textContent = "Sin resultados";
+        return;
+      }
+      vidResults = items;
+      mostrarVideos(items);
+      document.getElementById("vidStatus").textContent = items.length + " videos";
+      document.getElementById("vidLoad").style.display = "block";
+    }catch(e){
+      document.getElementById("vidGrid").innerHTML = '<div class="loading" style="grid-column:1/-1">Error</div>';
+    }
+  };
+  xhr.onerror = function(){
+    document.getElementById("vidGrid").innerHTML = '<div class="loading" style="grid-column:1/-1">Error de conexion</div>';
+  };
+  xhr.send();
+}
+
+function mostrarVideos(items){
+  var h = "";
+  items.forEach(function(it,i){
+    if(!it.id) return;
+    h += '<div class="card" onclick="reproducirVideo('+i+')">';
+    if(it.thumb) h += '<img src="'+it.thumb+'" loading="lazy">';
+    else h += '<div style="aspect-ratio:16/9;background:#000;display:flex;align-items:center;justify-content:center;font-size:2em;opacity:.3">🧠</div>';
+    h += '<div class="inf"><div class="t">'+esc((it.title||"").slice(0,55))+'</div>';
+    if(it.channel) h += '<div class="c">'+esc(it.channel)+'</div>';
+    h += '</div></div>';
+  });
+  document.getElementById("vidGrid").innerHTML = h;
+}
+
+function cargarMasVideos(){
+  if(!lastVidQ) return;
+  var extra = vidVariants[Math.floor(Math.random()*vidVariants.length)];
+  var q = lastVidQ + " " + extra;
+  var btn = document.querySelector("#vidLoad button");
+  if(btn){btn.disabled=true;btn.textContent="Cargando...";}
+  var xhr = new XMLHttpRequest();
+  xhr.open("GET","/api/search?q="+encodeURIComponent(q),true);
+  xhr.timeout = 25000;
+  xhr.onload = function(){
+    try{
+      var data = JSON.parse(xhr.responseText);
+      var items = data.results || [];
+      var nuevas = 0;
+      items.forEach(function(it){
+        if(!it.id || vidResults.some(function(r){return r.id===it.id;})) return;
+        vidResults.push(it);
+        nuevas++;
+        var idx = vidResults.length - 1;
+        var div = document.createElement("div");
+        div.className = "card";
+        div.innerHTML = '<div onclick="reproducirVideo('+idx+')">'+
+          (it.thumb?'<img src="'+it.thumb+'" loading="lazy">':'<div style="aspect-ratio:16/9;background:#000;display:flex;align-items:center;justify-content:center;font-size:2em;opacity:.3">🧠</div>')+
+          '<div class="inf"><div class="t">'+esc((it.title||"").slice(0,55))+'</div>'+
+          (it.channel?'<div class="c">'+esc(it.channel)+'</div>':'')+
+          '</div></div>';
+        document.getElementById("vidGrid").appendChild(div);
+      });
+      document.getElementById("vidStatus").textContent = vidResults.length + " videos";
+    }catch(e){}
+    if(btn){btn.disabled=false;btn.textContent="Cargar mas";}
+  };
+  xhr.send();
+}
+
+function reproducirVideo(idx){
+  var it = vidResults[idx];
+  if(!it) return;
+  window.location.href = "/?q=" + encodeURIComponent((it.title||"") + " " + (it.channel||""));
+}
+
+function renderLibros(){
+  var el = document.getElementById("bookGrid");
+  el.innerHTML = LIBROS.map(function(l){
+    return '<div class="card card-book" onclick="buscarLibro(\''+esc(l.t)+'\')"><div class="ico">'+l.i+'</div><div class="tit">'+esc(l.t)+'</div><div class="aut">'+esc(l.a)+'</div><div style="font-size:.45em;color:rgba(200,214,229,.15)">'+l.c+'</div></div>';
+  }).join("");
+}
+
+function buscarLibro(titulo){
+  // Buscar el libro en YouTube
+  var q = titulo + " audiolibro espanol completo";
+  document.getElementById("vidStatus").textContent = 'Buscando: '+titulo;
+  switchTab("videos");
+  document.querySelectorAll("#vidCats button").forEach(function(b){b.classList.remove("active");});
+  buscarVideo(q, null);
+}
+</script>
+<script src="/errores.js" defer></script>
+<script src="/update_check.js" defer></script>
+</body>
+</html>

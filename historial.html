@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>📺 Historial - ZonaHack</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0a;color:#e0e0e0;font-family:'Courier New',monospace;min-height:100vh}
+.header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.06);background:#050505;position:sticky;top:0;z-index:100}
+.header h1{color:#f1c40f;font-size:.85em;letter-spacing:1px}
+.back{color:#f1c40f;text-decoration:none;font-size:.65em;padding:4px 8px;border:1px solid rgba(255,255,255,.1);border-radius:3px}
+.container{max-width:700px;margin:0 auto;padding:12px}
+.actions{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+.actions button{padding:5px 12px;border:1px solid rgba(255,255,255,.08);border-radius:3px;background:rgba(0,0,0,.3);color:rgba(255,255,255,.5);font-size:.62em;cursor:pointer;font-family:'Courier New',monospace}
+.actions button:hover,.actions button.active{color:#f1c40f;border-color:rgba(241,196,15,.3)}
+.actions button.danger{color:#e74c3c;border-color:rgba(231,76,60,.2)}
+.status{text-align:center;font-size:.6em;color:rgba(255,255,255,.25);margin:6px 0}
+.list{display:flex;flex-direction:column;gap:6px}
+.item{display:flex;gap:8px;background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.04);border-radius:4px;padding:8px;align-items:center;transition:.15s}
+.item:hover{border-color:rgba(241,196,15,.1)}
+.item img{width:80px;height:45px;object-fit:cover;border-radius:2px;background:#000}
+.item .info{flex:1;overflow:hidden}
+.item .t{font-size:.7em;color:#e0e0e0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.item .bar{height:3px;background:#222;border-radius:2px;margin:3px 0}
+.item .bar-fill{height:100%;background:#f1c40f;border-radius:2px;transition:.3s}
+.item .meta{font-size:.6em;color:rgba(255,255,255,.3)}
+.item .meta b{color:#f1c40f}
+.item button{padding:4px 8px;border:1px solid rgba(255,255,255,.1);border-radius:3px;background:rgba(0,0,0,.3);color:rgba(255,255,255,.5);font-size:.55em;cursor:pointer;font-family:'Courier New',monospace;white-space:nowrap}
+.item button:hover{color:#f1c40f;border-color:rgba(241,196,15,.3)}
+.item button.del:hover{color:#e74c3c;border-color:rgba(231,76,60,.3)}
+.empty{text-align:center;color:rgba(255,255,255,.15);padding:50px;font-size:.8em}
+.spin{width:20px;height:20px;border:2px solid rgba(241,196,15,.1);border-top-color:#f1c40f;border-radius:50%;animation:spin .7s linear infinite;margin:10px auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media(max-width:480px){.item img{width:60px;height:34px}}
+</style>
+</head>
+<body>
+<div class="header">
+  <a href="/" class="back">←</a>
+  <h1>📺 HISTORIAL</h1>
+  <div style="width:40px"></div>
+</div>
+<div class="container">
+  <div class="actions">
+    <button class="active" onclick="filtrar('todo',this)">📺 TODO</button>
+    <button onclick="filtrar('viendo',this)">⏯️ En progreso</button>
+    <button onclick="filtrar('completo',this)">✅ Completado</button>
+    <button class="danger" onclick="limpiarHistorial()">🗑 Limpiar todo</button>
+  </div>
+  <div class="status" id="st">Cargando historial...</div>
+  <div class="list" id="list"></div>
+</div>
+
+<script>
+var SB="https://xfwolaurpeofysnymqle.supabase.co";
+var KEY="sb_publishable_3VvBUD5Bdu3Uaq59fJ99MQ_XDCtujUU";
+var H={"apikey":KEY,"Authorization":"Bearer "+KEY};
+var historial=[];
+var filtroActual="todo";
+
+function esc(s){return (s||"").replace(/[&<>]/g,z=>({'"':"&quot;","&":"&amp;","<":"&lt;",">":"&gt;"})[z]);}
+
+function cargar(){
+  document.getElementById("st").textContent="Cargando...";
+  document.getElementById("list").innerHTML='<div class="spin"></div>';
+  var user=localStorage.getItem("vh_usuario")||"anon";
+  
+  // Cargar de localStorage (siempre funciona)
+  var localP={};
+  try{localP=JSON.parse(localStorage.getItem("vh2_prog")||"{}");}catch(e){}
+  
+  // Convertir a array ordenado
+  historial=Object.entries(localP).map(function(e){
+    return Object.assign({video_id:e[0]},e[1]);
+  }).sort(function(a,b){
+    return (b.ts||0) - (a.ts||0);
+  });
+  
+  render();
+  document.getElementById("st").textContent=historial.length+" videos en el historial";
+  
+  // Bonus: intentar cargar de Supabase para cross-device sync
+  try{
+    fetch(SB+"/rest/v1/progreso?select=video_id,titulo,progreso,ultima_reproduccion,thumbnail&usuario_nombre=eq."+encodeURIComponent(user)+"&order=ultima_reproduccion.desc&limit=100",{headers:H})
+    .then(function(r){return r.json().catch(function(){return[]});})
+    .then(function(d){
+      if(!d||!d.length) return;
+      // Merge: Supabase gana si es mas reciente
+      var merged={};
+      var localObj={};
+      try{localObj=JSON.parse(localStorage.getItem("vh2_prog")||"{}");}catch(e){}
+      Object.keys(localObj).forEach(function(id){merged[id]=localObj[id];});
+      d.forEach(function(x){
+        if(!x.video_id)return;
+        var id=x.video_id;
+        if(!merged[id] || toMs(x.ultima_reproduccion)>toMs(merged[id].ts)){
+          merged[id]={video_id:id,tit:x.titulo||"Video",pct:x.progreso||0,ts:x.ultima_reproduccion,thumb:x.thumbnail||""};
+        }
+      });
+      historial=Object.values(merged).sort(function(a,b){return toMs(b.ts)-toMs(a.ts);});
+      render();
+      document.getElementById("st").textContent=historial.length+" videos (sync)";
+    }).catch(function(){});
+  }catch(e){}
+}
+
+function toMs(v){
+  if(v===0||v==="0")return 0;
+  if(!v)return 0;
+  var n=new Date(v);
+  return isNaN(n.getTime())?0:n.getTime();
+}
+
+function render(){
+  var list=historial;
+  if(filtroActual==="viendo"){
+    list=historial.filter(function(v){return v.pct>0&&v.pct<95;});
+  }else if(filtroActual==="completo"){
+    list=historial.filter(function(v){return v.pct>=95;});
+  }
+  document.getElementById("st").textContent=list.length+" videos"+(filtroActual!=="todo"?" ("+filtroActual+")":"")+" · "+historial.length+" total";
+  var h="";
+  list.forEach(function(v){
+    var pct=Math.min(100,Math.max(0,v.pct||0));
+    h+='<div class="item">';
+    if(v.thumb)h+='<img src="'+v.thumb+'" loading="lazy">';
+    else h+='<div style="width:80px;height:45px;background:#000;display:flex;align-items:center;justify-content:center;font-size:1.2em;opacity:.2">▶</div>';
+    h+='<div class="info">';
+    h+='<div class="t">'+esc((v.tit||"Video").slice(0,60))+'</div>';
+    h+='<div class="bar"><div class="bar-fill" style="width:'+pct+'%"></div></div>';
+    h+='<div class="meta"><b>'+pct+'%</b> · '+fmtRel(v.ts)+'</div>';
+    h+='</div>';
+    h+='<button onclick="resumir(decodeURIComponent(\''+encodeURIComponent(v.video_id)+'\'))">▶ Ver</button>';
+    h+='<button class="del" onclick="borrar(decodeURIComponent(\''+encodeURIComponent(v.video_id)+'\'))">✕</button>';
+    h+='</div>';
+  });
+  document.getElementById("list").innerHTML=h||'<div class="empty">📭 Sin historial todavia<br><small style="color:rgba(255,255,255,.1)">Mira videos y apareceran aca</small></div>';
+}
+
+function fmtRel(d){
+  if(!d)return "sin fecha";
+  var ms=new Date()-new Date(d);
+  var s=Math.floor(ms/1000),m=Math.floor(s/60),h=Math.floor(m/60),dd=Math.floor(h/24);
+  if(dd>30)return new Date(d).toLocaleDateString();
+  if(dd>0)return "hace "+dd+"d";
+  if(h>0)return "hace "+h+"h";
+  if(m>0)return "hace "+m+"m";
+  return "ahora";
+}
+
+function filtrar(f,btn){
+  filtroActual=f;
+  document.querySelectorAll(".actions button:not(.danger)").forEach(function(b){b.classList.remove("active");});
+  if(btn)btn.classList.add("active");
+  render();
+}
+
+function resumir(vid){
+  // Guardar video y progreso para que index lo retome
+  var pct = 0;
+  var encontrado = historial.find(function(v){return v.video_id===vid;});
+  if(encontrado) pct = encontrado.pct||0;
+  localStorage.setItem("_resume_vid", vid);
+  localStorage.setItem("_resume_pct", pct);
+  window.location.href="/";
+}
+
+function borrar(vid){
+  if(!confirm("Borrar del historial?"))return;
+  try{
+    var p=JSON.parse(localStorage.getItem("vh2_prog")||"{}");
+    delete p[vid];
+    localStorage.setItem("vh2_prog",JSON.stringify(p));
+  }catch(e){}
+  historial=historial.filter(function(v){return v.video_id!==vid;});
+  render();
+}
+
+function limpiarHistorial(){
+  if(!confirm("Borrar TODO el historial?"))return;
+  try{localStorage.setItem("vh2_prog","{}");}catch(e){}
+  historial=[];
+  render();
+}
+
+cargar();
+</script>
+<script src="/errores.js" defer></script>
+<script src="/update_check.js" defer></script>
+</body>
+</html>

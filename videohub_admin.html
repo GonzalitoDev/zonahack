@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>> VIDEHUB_Admin</title>
+<style>
+/* ═══════════════════════════════════════
+   VIDEHUB - PANEL ADMIN (mismo estilo que ZonaHack)
+   ═══════════════════════════════════════ */
+:root{--bg:#020402;--bg2:#050a05;--card:#080f08;--border:rgba(0,255,65,.08);--text:#a0ffa0;--text2:#2a5a2a;--accent:#00ff41;--accent2:#00cc33;--red:#ff3333;--yellow:#ccff00;--blue:#3399ff;--gold:#f1c40f;--radius:2px;--font:'Courier New',monospace}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:var(--font);display:flex;min-height:100vh;overflow-x:hidden;letter-spacing:.3px}
+body::before{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,255,65,.012) 3px,rgba(0,255,65,.012) 3px);pointer-events:none;z-index:9999}
+body::after{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:radial-gradient(ellipse at 50% 0%,rgba(0,255,50,.03) 0%,transparent 60%);pointer-events:none;z-index:9998}
+.sidebar{width:210px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;transition:transform .3s}
+.sidebar .logo{padding:14px;border-bottom:1px solid var(--border)}
+.sidebar .logo h1{font-size:.8em;color:var(--accent);letter-spacing:2px;text-shadow:0 0 10px rgba(0,255,65,.3)}
+.sidebar .logo h1::after{content:'_';animation:blink 1s step-end infinite}
+.sidebar .logo span{font-size:.5em;color:var(--text2);display:block;margin-top:2px}
+@keyframes blink{50%{opacity:0}}
+.sidebar nav{flex:1;padding:8px;overflow-y:auto}
+.sidebar nav .nav-section{font-size:.58em;color:var(--text2);text-transform:uppercase;letter-spacing:2px;padding:10px 8px 4px;font-weight:600}
+.sidebar nav a{display:flex;align-items:center;gap:8px;padding:7px 10px;border-left:2px solid transparent;color:var(--text2);text-decoration:none;font-size:.7em;transition:all .15s;margin:1px 0;cursor:pointer}
+.sidebar nav a:hover{background:rgba(0,255,65,.03);color:var(--text);border-left-color:rgba(0,255,65,.3)}
+.sidebar nav a.active{background:rgba(0,255,65,.04);color:var(--accent);border-left-color:var(--accent);text-shadow:0 0 8px rgba(0,255,65,.2)}
+.sidebar .back-link{padding:10px;border-top:1px solid var(--border)}
+.sidebar .back-link a{color:var(--text2);text-decoration:none;font-size:.66em;display:block;padding:6px}
+.sidebar .back-link a:hover{color:var(--accent)}
+.main{margin-left:210px;flex:1;padding:20px;max-width:calc(100vw - 210px)}
+.top-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px;border-bottom:1px solid var(--border);padding-bottom:10px}
+.top-bar h2{font-size:.95em;font-weight:400;letter-spacing:2px;color:var(--accent);text-shadow:0 0 8px rgba(0,255,65,.15)}
+.top-bar .hint{font-size:.6em;color:var(--text2)}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin-bottom:16px}
+.stat-card{background:var(--card);border:1px solid var(--border);padding:14px}
+.stat-card .num{font-size:1.4em;font-weight:700;color:var(--accent);text-shadow:0 0 6px rgba(0,255,65,.2)}
+.stat-card .lbl{font-size:.58em;color:var(--text2);margin-top:2px;text-transform:uppercase;letter-spacing:1px}
+.card{background:var(--card);border:1px solid var(--border);padding:16px;margin-bottom:12px;position:relative}
+.card .hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:6px;border-bottom:1px solid var(--border);padding-bottom:8px}
+.card .hdr h3{font-size:.78em;font-weight:400;letter-spacing:1px;color:var(--accent);text-transform:uppercase}
+.card .hdr .actions{display:flex;gap:4px}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.68em}
+th{text-align:left;padding:8px 6px;color:var(--accent);font-weight:400;border-bottom:1px solid var(--border);white-space:nowrap;text-transform:uppercase;letter-spacing:1px}
+td{padding:6px;border-bottom:1px solid rgba(0,255,65,.03);white-space:nowrap;font-size:.95em}
+tr:hover td{background:rgba(0,255,65,.02)}
+.badge{display:inline-flex;align-items:center;gap:3px;padding:2px 6px;font-size:.7em;border:1px solid}
+.badge-ok{background:rgba(0,255,65,.05);color:var(--accent);border-color:rgba(0,255,65,.15)}
+.badge-warn{background:rgba(204,255,0,.05);color:var(--yellow);border-color:rgba(204,255,0,.15)}
+.badge-bad{background:rgba(255,51,51,.05);color:var(--red);border-color:rgba(255,51,51,.15)}
+.badge-gold{background:rgba(241,196,15,.05);color:var(--gold);border-color:rgba(241,196,15,.2)}
+.btn{padding:5px 12px;border:1px solid var(--border);background:transparent;color:var(--text);cursor:pointer;font-size:.66em;font-family:var(--font);transition:all .15s;display:inline-flex;align-items:center;gap:4px;text-transform:uppercase;letter-spacing:1px}
+.btn:hover{border-color:var(--accent);color:var(--accent);box-shadow:0 0 8px rgba(0,255,65,.08)}
+.btn-primary{border-color:var(--accent);color:var(--accent)}
+.btn-primary:hover{background:rgba(0,255,65,.06)}
+.btn-danger{border-color:var(--red);color:var(--red)}
+.btn-danger:hover{background:rgba(255,51,51,.06)}
+.btn-gold{border-color:var(--gold);color:var(--gold)}
+.btn-gold:hover{background:rgba(241,196,15,.06)}
+.btn-sm{padding:3px 7px;font-size:.58em}
+select,input,textarea{padding:6px 10px;border:1px solid var(--border);background:var(--bg);color:var(--accent);font-size:.68em;outline:none;font-family:var(--font)}
+select:focus,input:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 4px rgba(0,255,65,.06)}
+::placeholder{color:var(--text2)}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:rgba(0,255,65,.1)}
+.form-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;align-items:center}
+.form-row label{font-size:.6em;color:var(--text2);width:110px}
+.form-row input,.form-row select,.form-row textarea{flex:1;min-width:180px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media(max-width:768px){.form-grid{grid-template-columns:1fr}.sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.main{margin-left:0;max-width:100vw;padding:12px}.stats-grid{grid-template-columns:repeat(2,1fr)}}
+.menu-toggle{display:none;position:fixed;top:10px;left:10px;z-index:101;background:var(--bg2);border:1px solid var(--accent);color:var(--accent);padding:8px 10px;cursor:pointer;font-family:var(--font);font-size:.9em;border-radius:2px}
+@media(max-width:768px){.menu-toggle{display:block}}
+/* LOCK */
+#adminLock{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 30%,#0b1a12,#04070a 70%);padding:20px}
+.lock-box{background:rgba(8,12,9,.9);border:1px solid rgba(0,255,65,.18);border-radius:18px;padding:30px;text-align:center;max-width:340px;width:100%;box-shadow:0 0 60px rgba(0,255,65,.06)}
+.lock-ico{font-size:44px;filter:drop-shadow(0 0 16px rgba(0,255,65,.35))}
+.lock-box h1{font-family:'Courier New',monospace;font-size:20px;color:#fff;letter-spacing:2px;margin-top:10px}
+.lock-box h1 span{color:#00ff41}
+.lock-box p{color:rgba(200,214,229,.45);font-size:12px;margin-top:8px;line-height:1.5}
+.lock-box input{width:100%;margin-top:16px;padding:12px;background:rgba(0,0,0,.5);border:1px solid rgba(0,255,65,.25);border-radius:8px;color:#00ff41;font-size:16px;text-align:center;outline:none;font-family:'Courier New',monospace;letter-spacing:3px}
+.lock-box button{width:100%;margin-top:12px;padding:12px;background:rgba(0,255,65,.1);border:1px solid var(--accent);color:var(--accent);border-radius:8px;cursor:pointer;font-size:14px;font-family:'Courier New',monospace;letter-spacing:2px;transition:.2s}
+.lock-box button:hover{background:rgba(0,255,65,.2);box-shadow:0 0 20px rgba(0,255,65,.15)}
+#lockMsg{color:var(--red);font-size:12px;margin-top:10px;min-height:16px}
+.spin{width:20px;height:20px;border:2px solid rgba(0,255,65,.1);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;margin:5px auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty{text-align:center;color:var(--text2);padding:20px;font-size:.7em}
+.checkbox{width:auto;min-width:0;margin:0}
+</style>
+</head>
+<body>
+<button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+
+<!-- LOCK -->
+<div id="adminLock">
+  <div class="lock-box">
+    <div class="lock-ico">🎬</div>
+    <h1>VIDEOHUB_<span>ADMIN</span></h1>
+    <p>Panel protegido. Ingresá la contraseña de administrador.</p>
+    <input type="password" id="lockPass" placeholder="••••••••">
+    <button onclick="desbloquear()">DESBLOQUEAR</button>
+    <div id="lockMsg"></div>
+  </div>
+</div>
+
+<div class="sidebar" id="sidebar">
+  <div class="logo"><h1>VIDEOHUB</h1><span>Admin de catálogo legal</span></div>
+  <nav>
+    <div class="nav-section">VideoHub</div>
+    <a class="active" onclick="navegar('dashboard')">📊 Dashboard</a>
+    <a onclick="navegar('peliculas')">🎬 Películas</a>
+    <a onclick="navegar('fuentes')">🔗 Fuentes</a>
+    <a onclick="navegar('importador')">📥 Importador</a>
+    <div class="nav-section">Contenido</div>
+    <a onclick="navegar('generos')">🏷 Géneros</a>
+    <a onclick="navegar('categorias')">🗂 Categorías</a>
+    <a onclick="navegar('usuarios')">👥 Usuarios</a>
+    <div class="nav-section">Sistema</div>
+    <a onclick="navegar('seguridad')">🛡 Seguridad</a>
+  </nav>
+  <div class="back-link"><a href="/videohub.html">← Volver a VideoHub</a></div>
+</div>
+
+<div class="main">
+  <div class="top-bar">
+    <h2 id="pageTitle">DASHBOARD</h2>
+    <div class="hint">Solo contenido con reproducción autorizada llega al reproductor</div>
+  </div>
+
+  <section id="sec-dashboard">
+    <div class="stats-grid" id="statsGrid"></div>
+    <div class="card"><div class="hdr"><h3>Últimos registros del importador</h3></div><div class="table-wrap"><table><thead><tr><th>Fecha</th><th>Acción</th><th>Proveedor</th><th>Estado</th><th>Procesados</th><th>Agregados</th><th>Detalle</th></tr></thead><tbody id="impLogsBody"></tbody></table></div></div>
+  </section>
+
+  <section id="sec-peliculas" style="display:none">
+    <div class="card">
+      <div class="hdr"><h3>Películas en el catálogo</h3>
+        <div class="actions"><input id="movieSearch" placeholder="Buscar película..." style="width:160px" onkeyup="renderMovies()">
+        <button class="btn btn-primary" onclick="editMovie(null)">➕ Nueva película</button></div>
+      </div>
+      <div class="table-wrap"><table><thead><tr><th>ID</th><th>Título</th><th>Año</th><th>Géneros</th><th>Categoría</th><th>Fuentes</th><th>Acciones</th></tr></thead><tbody id="moviesBody"></tbody></table></div>
+    </div>
+  </section>
+
+  <section id="sec-fuentes" style="display:none">
+    <div class="card">
+      <div class="hdr"><h3>Fuentes de reproducción</h3>
+        <div class="actions"><select id="srcMovieSel" style="width:220px" onchange="loadSources()"><option value="">— Seleccioná película —</option></select>
+        <button class="btn btn-primary" onclick="editSource(null)">➕ Nueva fuente</button></div>
+      </div>
+      <div class="table-wrap"><table><thead><tr><th>ID</th><th>Película</th><th>Proveedor</th><th>Tipo</th><th>URL</th><th>Licencia</th><th>Autorizada</th><th>Activa</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="sourcesBody"></tbody></table></div>
+    </div>
+  </section>
+
+  <section id="sec-importador" style="display:none">
+    <div class="card">
+      <div class="hdr"><h3>Importador Legal</h3></div>
+      <div class="form-row"><label>Modo</label>
+        <select id="impMode">
+          <option value="full">full (metadatos + fuentes)</option>
+          <option value="metadata">metadata (TMDB, sin video)</option>
+          <option value="sources">sources (dominio público Archive.org)</option>
+        </select>
+        <label style="width:auto">Límite</label><input id="impLimit" type="number" value="20" style="width:80px">
+        <button class="btn btn-gold" onclick="runImport()">▶ Ejecutar importación</button>
+      </div>
+      <div id="impStatus" style="font-size:.7em;color:var(--accent);min-height:20px;margin-top:8px"></div>
+    </div>
+    <div class="card"><div class="hdr"><h3>Historial del importador</h3></div><div class="table-wrap"><table><thead><tr><th>Fecha</th><th>Acción</th><th>Proveedor</th><th>Estado</th><th>Proc</th><th>Agreg</th><th>Salt</th><th>Detalle</th></tr></thead><tbody id="impLogsBody2"></tbody></table></div></div>
+  </section>
+
+  <section id="sec-generos" style="display:none">
+    <div class="card">
+      <div class="hdr"><h3>Géneros del catálogo</h3>
+        <div class="actions"><input id="newGenre" placeholder="Nuevo género..." style="width:140px"><button class="btn btn-primary" onclick="saveGenre()">➕ Agregar</button></div>
+      </div>
+      <div class="table-wrap"><table><thead><tr><th>ID</th><th>Nombre</th><th>Acciones</th></tr></thead><tbody id="genresBody"></tbody></table></div>
+    </div>
+  </section>
+
+  <section id="sec-categorias" style="display:none">
+    <div class="card">
+      <div class="hdr"><h3>Categorías del catálogo</h3>
+        <div class="actions"><input id="newCategory" placeholder="Nueva categoría..." style="width:140px"><button class="btn btn-primary" onclick="saveCategory()">➕ Agregar</button></div>
+      </div>
+      <div class="table-wrap"><table><thead><tr><th>ID</th><th>Nombre</th><th>Acciones</th></tr></thead><tbody id="categoriesBody"></tbody></table></div>
+    </div>
+  </section>
+
+  <section id="sec-usuarios" style="display:none">
+    <div class="card">
+      <div class="hdr"><h3>Usuarios (roles ZonaHack)</h3></div>
+      <div class="table-wrap"><table><thead><tr><th>Usuario</th><th>Rol</th><th>Acceso VideoHub Admin</th></tr></thead><tbody id="usersBody"></tbody></table></div>
+    </div>
+  </section>
+
+  <section id="sec-seguridad" style="display:none">
+    <div class="card">
+      <div class="hdr"><h3>Seguridad de VideoHub</h3></div>
+      <div style="font-size:.68em;color:var(--text2);line-height:1.8">
+        • El endpoint <b>/api/videohub</b> solo envía al reproductor fuentes con <b>authorized=true</b> y <b>active=true</b>.<br>
+        • Una fuente no autorizada jamás se entrega al reproductor.<br>
+        • Las acciones de administración exigen rol <b>admin/root/owner/super_admin</b> (tabla <span style="color:var(--accent)">rangos</span>) o la variable <span style="color:var(--accent)">VH_ADMIN_PASS</span> del servidor.<br>
+        • El importador solo usa APIs oficiales/documentadas: <b>TMDB</b> (metadatos) y <b>Archive.org</b> (dominio público / CC, embed oficial).<br>
+        • No descarga videos de sitios externos, no busca enlaces ocultos, no evade DRM/paywalls.<br>
+        • Recomendado en producción: variables <span style="color:var(--accent)">TMDB_API_KEY</span>, <span style="color:var(--accent)">VH_ADMIN_PASS</span> y RLS restrictivo en Supabase.
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+var SB="https://xfwolaurpeofysnymqle.supabase.co";
+var API="/api/videohub";
+var USER=localStorage.getItem("vh_usuario")||"anon";
+/* ─── BLOQUEO DE SEGURIDAD (misma clave que el panel ZonaHack) ─── */
+function _dec(s,k){var r='';for(var i=0;i<s.length;i+=2){r+=String.fromCharCode(parseInt(s.substr(i,2),16)^k.charCodeAt((i/2)%k.length));}return r;}
+function _b64(s){return atob(s);}
+var _master=_b64("WkgkM2N1cjF0eSE=");
+var _passAdmin=_dec("000065570e1c1c03444b17",_master);
+var _desbloqueado=(sessionStorage.getItem("zh_admin_unlock")==="1");
+var _adminPass=sessionStorage.getItem("zh_admin_pass")||"";
+function desbloquear(){
+  var c=document.getElementById("lockPass").value;
+  if(c===_passAdmin){
+    _desbloqueado=true;_adminPass=c;
+    sessionStorage.setItem("zh_admin_unlock","1");sessionStorage.setItem("zh_admin_pass",c);
+    document.getElementById("adminLock").style.display="none";
+    init();
+  }else{
+    document.getElementById("lockMsg").textContent="❌ Contraseña incorrecta";
+  }
+}
+(function(){var p=new URLSearchParams(location.search);if(p.get("pass")===_passAdmin)desbloquear();})();
+if(_desbloqueado){document.getElementById("adminLock").style.display="none";}
+
+/* ─── HELPERS ─── */
+function $(id){return document.getElementById(id);}
+function esc(s){return (s||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[m]);}
+function toggleSidebar(){$("sidebar").classList.toggle("open");}
+var titles={dashboard:"DASHBOARD",peliculas:"PELICULAS",fuentes:"FUENTES",importador:"IMPORTADOR",generos:"GENEROS",categorias:"CATEGORIAS",usuarios:"USUARIOS",seguridad:"SEGURIDAD"};
+function navegar(sec){
+  document.querySelectorAll("section").forEach(s=>s.style.display="none");
+  document.querySelectorAll("nav a").forEach(a=>a.classList.remove("active"));
+  $("sec-"+sec).style.display="block";
+  $("pageTitle").textContent=titles[sec]||sec.toUpperCase();
+  event.target.classList.add("active");
+  $("sidebar").classList.remove("open");
+  if(sec==="dashboard"){cargarStats();cargarImpLogs();}
+  if(sec==="peliculas")renderMovies();
+  if(sec==="fuentes"){cargarSrcMovieSel();loadSources();}
+  if(sec==="importador")cargarImpLogs2();
+  if(sec==="generos")cargarGenres();
+  if(sec==="categorias")cargarCategories();
+  if(sec==="usuarios")cargarUsers();
+}
+function apiGet(params){params.admin_user=USER;if(_adminPass)params.admin_pass=_adminPass;return fetch(API+"?"+new URLSearchParams(params)).then(r=>r.json().catch(()=>({})));}
+function apiPost(action,data,extra){var p={action:action,admin_user:USER};if(_adminPass)p.admin_pass=_adminPass;if(extra)Object.assign(p,extra);return fetch(API+"?"+new URLSearchParams(p),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(data||{})}).then(r=>r.json().catch(()=>({})));}
+
+function init(){
+  cargarStats();cargarImpLogs();cargarGenres();cargarCategories();cargarUsers();
+}
+/* ─── DASHBOARD ─── */
+function cargarStats(){
+  apiGet({action:"stats"}).then(function(d){
+    if(!d||d.error){$("statsGrid").innerHTML='<div class="empty">⚠ Error: '+esc(d.error||"acceso denegado")+'</div>';return;}
+    var cards=[
+      ["🎬",d.movies||0,"Películas"],
+      ["🔗",d.sources||0,"Fuentes"],
+      ["✅",d.authorized_sources||0,"Fuentes autorizadas"],
+      ["❤",d.favorites||0,"Favoritos"],
+      ["👥",d.users||0,"Usuarios"],
+    ];
+    $("statsGrid").innerHTML=cards.map(c=>'<div class="stat-card"><div class="num">'+c[0]+' '+c[1]+'</div><div class="lbl">'+c[2]+'</div></div>').join("");
+  });
+}
+function cargarImpLogs(){
+  apiGet({action:"import_logs"}).then(function(d){
+    $("impLogsBody").innerHTML=(d.logs||[]).slice(0,10).map(logRow).join("")||'<tr><td colspan="7" class="empty">Sin registros</td></tr>';
+  });
+}
+function cargarImpLogs2(){
+  apiGet({action:"import_logs"}).then(function(d){
+    $("impLogsBody2").innerHTML=(d.logs||[]).map(logRow).join("")||'<tr><td colspan="8" class="empty">Sin registros</td></tr>';
+  });
+}
+function logRow(l){
+  var st='<span class="badge '+(l.status==="ok"?"badge-ok":l.status==="parcial"?"badge-warn":"badge-bad")+'">'+esc(l.status||"—")+'</span>';
+  return '<tr><td>'+(l.created_at?esc(l.created_at).replace("T"," ").slice(5,19):"—")+'</td><td>'+esc(l.action||"—")+'</td><td>'+esc(l.provider||"—")+'</td><td>'+st+'</td><td>'+l.items_processed+'</td><td>'+l.items_added+'</td><td>'+l.items_skipped+'</td><td style="max-width:200px;white-space:normal">'+esc((l.details||"").slice(0,80))+'</td></tr>';
+}
+/* ─── PELICULAS ─── */
+var allMovies=[];
+function renderMovies(){
+  var q=($("movieSearch").value||"").toLowerCase();
+  apiGet({action:"catalog",per_page:100}).then(function(d){
+    allMovies=d.movies||[];
+    var list=allMovies.filter(m=>!q||(m.title||"").toLowerCase().indexOf(q)>=0);
+    $("moviesBody").innerHTML=list.map(function(m){
+      return '<tr><td>'+m.id+'</td><td>'+esc(m.title)+'</td><td>'+(m.year||"—")+'</td><td>'+esc((m.genres||[]).join(", ")).slice(0,30)+'</td><td>'+esc(m.category||"—")+'</td><td><span class="badge '+(m._srcs?'badge-ok':'badge-warn')+'">'+(m._srcs||0)+'</span></td>'+
+      '<td><button class="btn btn-sm" onclick="editMovie('+m.id+')">✏</button> '+
+      '<button class="btn btn-sm" onclick="verFuentesDe('+m.id+',\''+esc(m.title).replace(/'/g,"\\'")+'\')">🔗</button> '+
+      '<button class="btn btn-sm btn-danger" onclick="delMovie('+m.id+')">🗑</button></td></tr>';
+    }).join("")||'<tr><td colspan="7" class="empty">Sin películas. Ejecutá el importador o creá una.</td></tr>';
+    // contar fuentes por película (consulta liviana)
+    allMovies.forEach(function(m){
+      apiGet({action:"movie",id:m.id}).then(function(d){
+        if(d&&d.sources){(m._srcs=d.sources.length);renderMoviesCounts(m);}
+      });
+    });
+  });
+}
+function renderMoviesCounts(){renderMovies();}
+function editMovie(id){
+  var m=id?allMovies.find(x=>x.id===id):null;
+  var g=$("genreOpts")?$("genreOpts").innerHTML:"";
+  var title=prompt("Título de la película:",m?m.title:"");
+  if(title===null)return;
+  var desc=prompt("Descripción:",m?(m.description||""):"");
+  var year=prompt("Año:",m?(m.year||""):"")||null;
+  var dur=prompt("Duración (min):",m?(m.duration||""):"")||null;
+  var poster=prompt("URL póster:",m?(m.poster||""):"")||"";
+  var backdrop=prompt("URL backdrop:",m?(m.backdrop||""):"")||"";
+  var cat=prompt("Categoría:",m?(m.category||""):"")||"";
+  var rating=prompt("Rating (0-10):",m?(m.rating||""):"")||"0";
+  var genres=(m&&m.genres||[]).join(", ");
+  var genIn=prompt("Géneros (separados por coma):",genres)||"";
+  var gens=genIn.split(",").map(s=>s.trim()).filter(Boolean);
+  var data={id:m?m.id:null,title:title,description:desc,year:year,duration:dur,poster:poster,backdrop:backdrop,category:cat,rating:rating,genres:gens};
+  apiPost("save_movie",data).then(function(r){
+    if(r.ok){alert("✓ Película guardada");renderMovies();cargarStats();}
+    else alert("⛔ Error: "+esc(r.error||""));
+  });
+}
+function delMovie(id){
+  if(!confirm("¿Eliminar la película #"+id+" y sus fuentes?"))return;
+  apiPost("delete_movie",{id:id}).then(function(r){
+    if(r.ok){alert("✓ Eliminada");renderMovies();cargarStats();}
+    else alert("⛔ Error");
+  });
+}
+/* ─── FUENTES ─── */
+var currentSrcMovie=null;
+function cargarSrcMovieSel(){
+  var sel=$("srcMovieSel");
+  if(!allMovies.length){
+    apiGet({action:"catalog",per_page:100}).then(function(d){allMovies=d.movies||[];fillSrcSel();});
+  }else fillSrcSel();
+}
+function fillSrcSel(){
+  $("srcMovieSel").innerHTML='<option value="">— Seleccioná película —</option>'+allMovies.map(m=>'<option value="'+m.id+'">'+esc(m.title)+'</option>').join("");
+}
+function verFuentesDe(id,title){
+  currentSrcMovie=id;
+  navegar("fuentes");
+  var sel=$("srcMovieSel");sel.value=id;loadSources();
+}
+function loadSources(){
+  var mid=currentSrcMovie||$("srcMovieSel").value;
+  if(!mid){$("sourcesBody").innerHTML='<tr><td colspan="10" class="empty">Seleccioná una película</td></tr>';return;}
+  apiGet({action:"movie",id:mid}).then(function(d){
+    var srcs=d.sources||[];
+    $("sourcesBody").innerHTML=srcs.map(function(s){
+      var auth=s.authorized?'<span class="badge badge-ok">SÍ</span>':'<span class="badge badge-bad">NO</span>';
+      var act=s.active?'<span class="badge badge-ok">SÍ</span>':'<span class="badge badge-warn">NO</span>';
+      var st=s.last_status?'<span class="badge '+(s.last_status==="ok"?"badge-ok":s.last_status.startsWith("http")?"badge-warn":"badge-bad")+'">'+esc(s.last_status)+'</span>':'<span class="badge badge-warn">sin verificar</span>';
+      return '<tr><td>'+s.id+'</td><td>'+esc(d.movie.title)+'</td><td>'+esc(s.provider||"—")+'</td><td>'+esc(s.type||"—")+'</td><td style="max-width:160px;white-space:normal">'+esc(s.playback_url||"—")+'</td><td>'+esc(s.license||"—")+'</td>'+
+      '<td><button class="btn btn-sm" onclick="toggleSrc('+s.id+',\'authorized\')">'+auth+'</button></td>'+
+      '<td><button class="btn btn-sm" onclick="toggleSrc('+s.id+',\'active\')">'+act+'</button></td>'+
+      '<td>'+st+'</td>'+
+      '<td><button class="btn btn-sm" onclick="verifySrc('+s.id+')">✓ Verificar</button> '+
+      '<button class="btn btn-sm btn-danger" onclick="delSource('+s.id+')">🗑</button></td></tr>';
+    }).join("")||'<tr><td colspan="10" class="empty">Esta película no tiene fuentes</td></tr>';
+  });
+}
+function editSource(id){
+  if(!currentSrcMovie&&!$("srcMovieSel").value){alert("Seleccioná primero una película");return;}
+  var mid=currentSrcMovie||$("srcMovieSel").value;
+  var url=prompt("URL de reproducción (debe ser autorizada por el proveedor):");
+  if(url===null)return;
+  var provider=prompt("Proveedor (archive, own, youtube, vimeo...):","own")||"own";
+  var type=prompt("Tipo (mp4, hls, embed):","embed")||"embed";
+  var license=prompt("Licencia (dominio publico, CC, propio...):","Propio")||"Propio";
+  var auth=confirm("¿El proveedor autoriza explícitamente la reproducción/embed? (Aceptar = authorized=true)");
+  var data={movie_id:parseInt(mid),playback_url:url,provider:provider,type:type,license:license,authorized:auth,active:true};
+  apiPost("save_source",data).then(function(r){
+    if(r.ok){alert("✓ Fuente guardada (authorized="+auth+")");loadSources();cargarStats();}
+    else alert("⛔ "+esc(r.error||""));
+  });
+}
+function toggleSrc(id,field){
+  apiPost("toggle_source",{id:id,field:field}).then(function(r){
+    if(r.ok)loadSources();else alert("⛔ Error");
+  });
+}
+function verifySrc(id){
+  apiPost("verify_source",{id:id}).then(function(r){
+    alert("Resultado de verificación: "+(r.status||"error"));
+    loadSources();
+  });
+}
+function delSource(id){
+  if(!confirm("¿Eliminar fuente #"+id+"?"))return;
+  apiPost("delete_source",{id:id}).then(function(r){
+    if(r.ok){alert("✓ Eliminada");loadSources();cargarStats();}
+  });
+}
+/* ─── IMPORTADOR ─── */
+function runImport(){
+  var mode=$("impMode").value,limit=$("impLimit").value||20;
+  $("impStatus").textContent="⏳ Importando (modo "+mode+", límite "+limit+")... esto puede tardar hasta ~60s";
+  apiGet({action:"import",mode:mode,limit:limit}).then(function(d){
+    if(d.error){$("impStatus").textContent="⛔ "+d.error;return;}
+    var s=d.stats||{};
+    $("impStatus").textContent="✓ Importación finalizada · procesados: "+s.processed+" · agregados: "+s.added+" · omitidos: "+s.skipped+" · errores: "+s.errors;
+    cargarImpLogs2();cargarImpLogs();cargarStats();renderMovies();cargarSrcMovieSel();
+  });
+}
+/* ─── GENEROS / CATEGORIAS ─── */
+function cargarGenres(){
+  apiGet({action:"genres"}).then(function(d){
+    $("genresBody").innerHTML=(d.genres||[]).map(function(g){
+      return '<tr><td>'+g.id+'</td><td>'+esc(g.name)+'</td><td><button class="btn btn-sm btn-danger" onclick="delGenre('+g.id+')">🗑</button></td></tr>';
+    }).join("")||'<tr><td colspan="3" class="empty">Sin géneros</td></tr>';
+  });
+}
+function saveGenre(){
+  var n=$("newGenre").value.trim();
+  if(!n){alert("Escribí un género");return;}
+  apiPost("save_genre",{name:n}).then(function(r){
+    if(r.ok){$("newGenre").value="";cargarGenres();alert("✓ Género agregado");}
+    else alert("⛔ Error");
+  });
+}
+function delGenre(id){
+  if(!confirm("¿Eliminar género?"))return;
+  apiPost("delete_genre",{id:id}).then(function(r){if(r.ok)cargarGenres();});
+}
+function cargarCategories(){
+  apiGet({action:"categories"}).then(function(d){
+    $("categoriesBody").innerHTML=(d.categories||[]).map(function(c){
+      return '<tr><td>'+c.id+'</td><td>'+esc(c.name)+'</td><td><button class="btn btn-sm btn-danger" onclick="delCategory('+c.id+')">🗑</button></td></tr>';
+    }).join("")||'<tr><td colspan="3" class="empty">Sin categorías</td></tr>';
+  });
+}
+function saveCategory(){
+  var n=$("newCategory").value.trim();
+  if(!n){alert("Escribí una categoría");return;}
+  apiPost("save_category",{name:n}).then(function(r){
+    if(r.ok){$("newCategory").value="";cargarCategories();alert("✓ Categoría agregada");}
+    else alert("⛔ Error");
+  });
+}
+function delCategory(id){
+  if(!confirm("¿Eliminar categoría?"))return;
+  apiPost("delete_category",{id:id}).then(function(r){if(r.ok)cargarCategories();});
+}
+/* ─── USUARIOS ─── */
+function cargarUsers(){
+  apiGet({action:"admin_users"}).then(function(d){
+    $("usersBody").innerHTML=(d.users||[]).map(function(u){
+      var admin=["admin","root","owner","super_admin"].indexOf((u.rango||"").toLowerCase())>=0;
+      return '<tr><td>'+esc(u.usuario_nombre)+'</td><td><span class="badge '+(admin?"badge-gold":"badge-warn")+'">'+esc(u.rango||"user")+'</span></td><td>'+(admin?'<span class="badge badge-ok">SÍ</span>':'<span class="badge badge-bad">NO</span>')+'</td></tr>';
+    }).join("")||'<tr><td colspan="3" class="empty">Sin usuarios</td></tr>';
+  });
+}
+/* ─── INIT ─── */
+if(_desbloqueado)init();
+</script>
+<script src="/errores.js" defer></script>
+<script src="/update_check.js" defer></script>
+</body>
+</html>

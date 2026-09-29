@@ -1,0 +1,1458 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>💻 Aprende Programación - ZonaHack</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0a;color:#00ff41;font-family:'Courier New',monospace;min-height:100vh}
+.header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid rgba(0,255,65,.12);background:#050505;position:sticky;top:0;z-index:100}
+.header h1{color:#00ff41;font-size:.85em;letter-spacing:1px;text-shadow:0 0 10px rgba(0,255,65,.15)}
+.back{color:#00ff41;text-decoration:none;font-size:.65em;padding:4px 8px;border:1px solid rgba(0,255,65,.1);border-radius:3px}
+.back:hover{border-color:rgba(0,255,65,.3)}
+.container{max-width:1100px;margin:0 auto;padding:10px;display:grid;grid-template-columns:1fr 320px;gap:10px}
+.main-col{display:flex;flex-direction:column;gap:10px}
+.side-col{display:flex;flex-direction:column;gap:10px}
+.cats{display:flex;gap:3px;flex-wrap:wrap;margin-bottom:6px}
+.cats button{padding:5px 10px;border:1px solid rgba(0,255,65,.08);border-radius:2px;background:rgba(0,0,0,.3);color:rgba(0,255,65,.4);font-size:.58em;cursor:pointer;font-family:'Courier New',monospace;transition:.2s}
+.cats button:hover,.cats button.active{color:#00ff41;border-color:rgba(0,255,65,.3);background:rgba(0,255,65,.05)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px}
+.card{border:1px solid rgba(0,255,65,.04);border-radius:3px;overflow:hidden;cursor:pointer;background:#0a0a0a;transition:all .15s}
+.card:hover{border-color:rgba(0,255,65,.2);box-shadow:0 0 15px rgba(0,255,65,.04)}
+.card img{width:100%;aspect-ratio:16/9;object-fit:cover;background:#000}
+.card .inf{padding:6px}
+.card .t{font-size:.62em;color:rgba(0,255,65,.7);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card .c{font-size:.55em;color:rgba(0,255,65,.25);margin-top:1px}
+.card{position:relative}
+.card.done{border-color:rgba(0,255,65,.35)}
+.barbg{height:3px;background:rgba(255,255,255,.06)}
+.bar{height:100%;background:linear-gradient(90deg,#00ff41,#00c8ff)}
+.pct{font-size:.52em;color:#00ff41;padding:0 8px 5px;opacity:.85}
+.cont-row{margin-bottom:10px}
+.cont-hdr{font-size:.68em;color:#00c8ff;margin:2px 0 6px;letter-spacing:1px}
+.cont-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px}
+.cont-card{border:1px solid rgba(0,200,255,.15);border-radius:3px;overflow:hidden;cursor:pointer;background:#0a0a0a}
+.cont-card img{width:100%;aspect-ratio:16/9;object-fit:cover;background:#000}
+.cont-card .inf{padding:5px 6px}
+.cont-card .t{font-size:.58em;color:rgba(0,200,255,.8);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.curso-card{border:1px solid rgba(0,255,65,.08);border-radius:6px;padding:14px 10px;text-align:center;cursor:pointer;background:#0d0f0d;transition:.2s}
+.curso-card:hover{border-color:rgba(0,255,65,.3);box-shadow:0 0 15px rgba(0,255,65,.06)}
+.curso-card.done{border-color:rgba(0,255,65,.4)}
+.curso-ico{font-size:2em;margin-bottom:6px}
+.curso-t{font-size:.78em;color:#00ff41;margin-bottom:8px}
+.curso-sub{font-size:.6em;color:rgba(0,255,65,.4);margin-top:6px}
+.back-curso{background:none;border:1px solid rgba(0,255,65,.15);color:#00ff41;padding:6px 12px;border-radius:4px;font-size:.65em;cursor:pointer;font-family:'Courier New',monospace;margin-bottom:10px}
+.curso-hdr{display:flex;gap:10px;align-items:center;padding:10px;border:1px solid rgba(0,255,65,.08);border-radius:6px;margin-bottom:10px}
+.curso-hdr-ico{font-size:2em}
+.curso-hdr-t{font-size:.8em;color:#00ff41}
+.curso-hdr-sub{font-size:.62em;color:rgba(0,255,65,.5);margin-top:2px}
+.leccion-item{display:flex;align-items:center;gap:10px;padding:8px;border:1px solid rgba(0,255,65,.06);border-radius:5px;margin-bottom:6px;cursor:pointer;background:#0a0a0a;transition:.15s}
+.leccion-item:hover{border-color:rgba(0,255,65,.25)}
+.leccion-item.done{border-color:rgba(0,255,65,.3);opacity:.75}
+.leccion-num{width:24px;height:24px;flex:0 0 24px;border:1px solid rgba(0,255,65,.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.62em;color:#00ff41}
+.leccion-item img{width:80px;aspect-ratio:16/9;object-fit:cover;border-radius:3px;background:#000;flex:0 0 80px}
+.leccion-inf{flex:1;min-width:0}
+.leccion-t{font-size:.66em;color:rgba(0,255,65,.8);overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.btn-completar{font-size:.6em;border:1px solid rgba(0,255,65,.3);padding:5px 10px;border-radius:4px;color:#00ff41;background:rgba(0,255,65,.06);cursor:pointer;font-family:'Courier New',monospace;white-space:nowrap}
+.quiz-box{border:1px solid rgba(0,255,65,.08);border-radius:6px;padding:12px;margin-top:14px}
+.quiz-hdr{font-size:.75em;color:#00ff41;margin-bottom:10px}
+.quiz-q{margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,.05)}
+.quiz-q:last-child{border-bottom:none}
+.quiz-qtxt{font-size:.68em;color:rgba(0,255,65,.85);margin-bottom:6px;white-space:pre-wrap}
+.quiz-opt{display:block;font-size:.65em;color:rgba(255,255,255,.6);padding:4px 0;cursor:pointer}
+.quiz-opt input{margin-right:6px}
+.quiz-opt.correcta{color:#2ecc71}
+.quiz-opt.incorrecta{color:#e74c3c;text-decoration:line-through}
+.quiz-btn{background:rgba(0,255,65,.08);border:1px solid rgba(0,255,65,.25);color:#00ff41;padding:7px 14px;border-radius:4px;font-size:.68em;cursor:pointer;font-family:'Courier New',monospace;margin-top:4px}
+.quiz-score{font-size:.7em;margin-top:8px;padding:8px;border-radius:4px}
+.quiz-score.bien{background:rgba(46,204,113,.1);color:#2ecc71}
+.quiz-score.mal{background:rgba(231,76,60,.1);color:#e74c3c}
+.status{font-size:.6em;color:rgba(0,255,65,.3);margin:4px 0;letter-spacing:1px}
+.loading{text-align:center;padding:20px;color:rgba(0,255,65,.2);font-size:.62em}
+.ai-panel{background:#0a0a0a;border:1px solid rgba(0,255,65,.08);border-radius:4px;padding:10px;display:flex;flex-direction:column;height:calc(100vh - 80px);position:sticky;top:50px}
+.ai-header{font-size:.72em;color:#00ff41;border-bottom:1px solid rgba(0,255,65,.1);padding-bottom:6px;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.ai-header .dot{width:6px;height:6px;background:#00ff41;border-radius:50%;animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.ai-chat{flex:1;overflow:auto;padding:4px 0;display:flex;flex-direction:column;gap:6px;margin-bottom:8px}
+.ai-msg{padding:7px 9px;border-radius:3px;font-size:.65em;line-height:1.5;max-width:95%}
+.ai-user{align-self:flex-end;background:rgba(0,255,65,.06);color:#00ff41;border:1px solid rgba(0,255,65,.1)}
+.ai-bot{align-self:flex-start;background:rgba(0,0,0,.3);color:rgba(0,255,65,.6);border:1px solid rgba(0,255,65,.04)}
+.ai-input-wrap{display:flex;gap:4px}
+.ai-input-wrap input{flex:1;background:rgba(0,0,0,.4);border:1px solid rgba(0,255,65,.1);border-radius:3px;color:#00ff41;padding:7px 9px;font-size:.65em;font-family:'Courier New',monospace}
+.ai-input-wrap input:focus{border-color:rgba(0,255,65,.3);outline:none}
+.ai-input-wrap button{background:rgba(0,255,65,.08);border:1px solid rgba(0,255,65,.2);color:#00ff41;padding:7px 12px;border-radius:3px;cursor:pointer;font-size:.62em;font-family:'Courier New',monospace}
+.quick-btns{display:flex;flex-wrap:wrap;gap:3px;margin-top:4px}
+.quick-btns button{padding:3px 7px;background:rgba(0,0,0,.3);border:1px solid rgba(0,255,65,.06);border-radius:2px;color:rgba(0,255,65,.35);font-size:.55em;cursor:pointer;font-family:'Courier New',monospace}
+.quick-btns button:hover{color:#00ff41;border-color:rgba(0,255,65,.2)}
+@media(max-width:768px){
+  .container{grid-template-columns:1fr}
+  .side-col{display:none}
+}
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:#000;z-index:999;display:none;flex-direction:column}
+.modal-overlay.show{display:flex}
+.modal-overlay .top{display:flex;align-items:center;padding:8px 12px;background:#050505;border-bottom:1px solid rgba(0,255,65,.1);gap:6px}
+.modal-overlay .top button{background:none;border:none;color:#00ff41;font-size:1.2em;cursor:pointer}
+.modal-overlay .top .title{flex:1;font-size:.65em;color:rgba(0,255,65,.5);padding:0 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.player-body{flex:1;display:flex;min-height:0}
+.player-video{flex:1;display:flex;min-width:0;position:relative}
+.player-video iframe{flex:1;border:none;width:100%;height:100%}
+#playerIframe{flex:1;width:100%}
+.player-code{width:44%;flex:0 0 44%;display:flex;flex-direction:column;border-left:1px solid rgba(0,255,65,.1);background:#050505;min-width:0}
+.player-code.hidden{display:none}
+.player-body.solo .player-code{display:none}
+.player-body.solo .player-video{flex:1}
+.code-tabs{display:flex;align-items:center;gap:6px;padding:6px 8px;border-bottom:1px solid rgba(0,255,65,.08);flex-wrap:wrap}
+.code-tabs .lbl{font-size:.6em;color:rgba(0,255,65,.5);flex:1}
+.code-tabs button{background:rgba(0,255,65,.06);border:1px solid rgba(0,255,65,.2);color:#00ff41;padding:4px 9px;border-radius:4px;font-size:.6em;cursor:pointer;font-family:'Courier New',monospace}
+.code-tabs button.sec{background:none;border-color:rgba(255,255,255,.1);color:rgba(255,255,255,.4)}
+#codeEditor,.code-editor-ta{flex:0 0 45%;background:#0a0a0a;color:#00ff41;border:none;border-bottom:1px solid rgba(0,255,65,.08);padding:8px;font-family:'Courier New',monospace;font-size:.72em;resize:none;outline:none;line-height:1.5}
+.sandbox-box{width:100%;display:flex;flex-direction:column;border:1px solid rgba(0,255,65,.08);border-radius:6px;background:#050505;min-height:440px;margin-top:10px}
+.sandbox-box .code-editor-ta{flex:0 0 220px}
+.sandbox-box .code-output{flex:0 0 200px}
+.sandbox-langs{display:flex;gap:4px;flex-wrap:wrap;margin-top:10px}
+.sandbox-langs button{padding:6px 12px;border:1px solid rgba(0,255,65,.1);border-radius:4px;background:rgba(0,0,0,.3);color:rgba(0,255,65,.5);font-size:.65em;cursor:pointer;font-family:'Courier New',monospace;transition:.2s}
+.sandbox-langs button:hover,.sandbox-langs button.active{color:#00ff41;border-color:rgba(0,255,65,.35);background:rgba(0,255,65,.06)}
+.badges-row{margin-bottom:10px}
+.badges-hdr{font-size:.68em;color:#f1c40f;margin:2px 0 6px;letter-spacing:1px}
+.badges-list{display:flex;gap:8px;flex-wrap:wrap}
+.badge-chip{display:flex;align-items:center;gap:6px;border-radius:16px;padding:5px 12px 5px 6px;font-size:.68em;background:rgba(241,196,15,.06)}
+.badge-chip .ico{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.05em;background:rgba(255,255,255,.06)}
+.join-sala-card{display:flex;align-items:center;gap:8px;border:1px dashed rgba(241,196,15,.25);border-radius:6px;padding:9px 12px;margin-bottom:10px}
+.join-sala-card input{flex:1;background:#0a0a0a;border:1px solid rgba(241,196,15,.15);color:#f1c40f;padding:6px 9px;border-radius:4px;font-size:.68em;font-family:'Courier New',monospace;outline:none;min-width:0}
+.join-sala-card button{background:rgba(241,196,15,.08);border:1px solid rgba(241,196,15,.3);color:#f1c40f;padding:6px 12px;border-radius:4px;font-size:.68em;cursor:pointer;font-family:'Courier New',monospace;white-space:nowrap}
+.sala-chat-input{display:flex;gap:6px;padding:8px;border-top:1px solid rgba(0,255,65,.08)}
+.sala-chat-input input{flex:1;background:#0a0a0a;border:1px solid rgba(0,255,65,.12);color:#c8d6e5;padding:7px 9px;border-radius:4px;font-size:.72em;font-family:'Courier New',monospace;outline:none;min-width:0}
+.sala-chat-input button{background:rgba(0,255,65,.1);border:1px solid rgba(0,255,65,.3);color:#00ff41;padding:7px 12px;border-radius:4px;cursor:pointer;font-size:.85em}
+.sala-msg{margin-bottom:8px;font-size:.68em;line-height:1.5}
+.sala-msg .who{color:rgba(0,255,65,.5);font-size:.85em;margin-bottom:1px}
+.sala-msg.yo .who{color:#f1c40f}
+.sandbox-card{border:1px dashed rgba(0,255,65,.15);border-radius:6px;padding:12px 14px;margin-bottom:10px;cursor:pointer;transition:.2s;display:flex;align-items:center;gap:10px}
+.sandbox-card:hover{border-color:rgba(0,255,65,.4);background:rgba(0,255,65,.03)}
+.sandbox-card .ico{font-size:1.6em}
+.sandbox-card .t{font-size:.78em;color:#00ff41}
+.sandbox-card .s{font-size:.62em;color:rgba(0,255,65,.4);margin-top:2px}
+.code-output{flex:1;overflow:auto;padding:8px;font-size:.68em;color:rgba(0,255,65,.7);white-space:pre-wrap;font-family:'Courier New',monospace}
+.code-output.preview{padding:0}
+.code-output.preview iframe{width:100%;height:100%;border:none;background:#fff}
+.code-output table{border-collapse:collapse;width:100%;font-size:.9em}
+.code-output td,.code-output th{border:1px solid rgba(0,255,65,.15);padding:3px 6px;text-align:left}
+.code-err{color:#ff5b5b}
+@media(max-width:768px){
+  .player-body{flex-direction:column}
+  .player-video{flex:0 0 34vh}
+  .player-code{width:100%;flex:1;border-left:none;border-top:1px solid rgba(0,255,65,.1)}
+  #codeEditor{flex:0 0 40%}
+  .sandbox-box .code-editor-ta{flex:0 0 160px}
+  .sandbox-box .code-output{flex:0 0 140px}
+  .modal-overlay .top{flex-wrap:wrap;padding:6px 8px}
+  .modal-overlay .top .title{flex:0 0 100%;order:1;padding:2px 0 0}
+  .modal-overlay .top button{font-size:1em}
+  .btn-completar{font-size:.56em;padding:4px 7px}
+}
+</style>
+</head>
+<body>
+<div class="header">
+  <a href="/" class="back">←</a>
+  <h1>💻 APRENDE PROGRAMACION</h1>
+  <div style="width:40px"></div>
+</div>
+<div class="container">
+  <div class="main-col">
+    <div class="cont-row" id="contRow" style="display:none">
+      <div class="cont-hdr">📊 Continuando</div>
+      <div class="cont-grid" id="contGrid"></div>
+    </div>
+    <div id="vistaCursos">
+      <div class="badges-row" id="badgesRow" style="display:none">
+        <div class="badges-hdr">🏅 Tus insignias</div>
+        <div class="badges-list" id="badgesList"></div>
+      </div>
+      <div class="sandbox-card" onclick="abrirSandbox()">
+        <div class="ico">💻</div>
+        <div>
+          <div class="t">Practicá código libre</div>
+          <div class="s">Un editor sin lección ni video — elegí un lenguaje y ya viene con un ejemplo cargado para probar</div>
+        </div>
+      </div>
+      <div class="sandbox-card" onclick="abrirQuizzes()">
+        <div class="ico">📝</div>
+        <div>
+          <div class="t">Quizzes de todos los cursos</div>
+          <div class="s">Cada curso tiene su propio quiz, separados — entrá directo al que quieras rendir</div>
+        </div>
+      </div>
+      <div class="join-sala-card">
+        <span style="font-size:1.2em">🔗</span>
+        <input id="joinSalaCodigo" placeholder="Código de sala de un amigo (ej: DUO-AB12C)" maxlength="12" onkeydown="if(event.key==='Enter')unirseSala()">
+        <button onclick="unirseSala()">Unirme</button>
+      </div>
+      <div class="status" id="st">Elegí un curso para empezar</div>
+      <div class="grid" id="cursosGrid" style="margin-bottom:10px"></div>
+    </div>
+    <div id="vistaLecciones" style="display:none">
+      <button class="back-curso" onclick="volverACursos()">← Volver a cursos</button>
+      <div class="curso-hdr" id="cursoHdr"></div>
+      <div id="leccionesGrid"></div>
+      <div id="quizSection"></div>
+    </div>
+    <div id="vistaQuizzes" style="display:none">
+      <button class="back-curso" onclick="volverACursosDesdeQuizzes()">← Volver a cursos</button>
+      <div class="curso-hdr">
+        <div class="curso-hdr-ico">📝</div>
+        <div style="flex:1">
+          <div class="curso-hdr-t">Quizzes de todos los cursos</div>
+          <div class="curso-hdr-sub">Cada curso tiene su propio quiz de 6 preguntas, separado del resto — elegí uno</div>
+        </div>
+      </div>
+      <div class="grid" id="quizzesHubGrid" style="margin-bottom:10px"></div>
+    </div>
+    <div id="vistaSandbox" style="display:none">
+      <button class="back-curso" onclick="volverACursosDesdeSandbox()">← Volver a cursos</button>
+      <div class="curso-hdr">
+        <div class="curso-hdr-ico">💻</div>
+        <div style="flex:1">
+          <div class="curso-hdr-t">Practicá código libre</div>
+          <div class="curso-hdr-sub">Elegí un lenguaje, editá el ejemplo y tocá Ejecutar</div>
+        </div>
+      </div>
+      <div class="sandbox-langs" id="sandboxLangs">
+        <button class="active" onclick="cambiarLenguajeSandbox('javascript',this)">🟨 JavaScript</button>
+        <button onclick="cambiarLenguajeSandbox('python',this)">🐍 Python</button>
+        <button onclick="cambiarLenguajeSandbox('htmlcss',this)">🎨 HTML/CSS</button>
+        <button onclick="cambiarLenguajeSandbox('sql',this)">🗄️ SQL</button>
+      </div>
+      <div class="sandbox-box">
+        <div class="code-tabs">
+          <span class="lbl" id="sandboxLangLabel">🟨 JavaScript</span>
+          <button class="sec" onclick="reiniciarSandbox()">↺ Reiniciar</button>
+          <button onclick="ejecutarSandbox()">▶ Ejecutar</button>
+        </div>
+        <textarea id="sandboxEditor" class="code-editor-ta" spellcheck="false"></textarea>
+        <div class="code-output" id="sandboxOutput"></div>
+      </div>
+    </div>
+  </div>
+  <div class="side-col">
+    <div class="ai-panel">
+      <div class="ai-header"><div class="dot"></div> Asistente de Programacion<span style="flex:1"></span><button onclick="borrarHistorialChat()" title="Borrar historial del chat" style="background:none;border:1px solid rgba(0,255,65,.12);color:rgba(0,255,65,.4);border-radius:3px;font-size:.75em;padding:2px 6px;cursor:pointer;font-family:inherit">🗑</button></div>
+      <div class="ai-chat" id="aiChat">
+        <div class="ai-msg ai-bot">🤖 Hola! Soy tu asistente de programacion. Preguntame sobre codigo, sintaxis, errores, o lo que necesites.</div>
+      </div>
+      <div class="ai-input-wrap">
+        <input id="aiInput" placeholder="Preguntame de codigo..." onkeydown="if(event.key==='Enter')preguntarAI()">
+        <button onclick="preguntarAI()">→</button>
+      </div>
+      <div class="quick-btns">
+        <button onclick="si('que es python')">Python?</button>
+        <button onclick="si('como hacer un bucle for en javascript')">for loop</button>
+        <button onclick="si('como crear una funcion')">funcion</button>
+        <button onclick="si('que es html')">HTML?</button>
+        <button onclick="si('como centrar un div con css')">CSS centrar</button>
+        <button onclick="si('explicame que es una API')">API?</button>
+        <button onclick="si('listas python')">Listas Python</button>
+        <button onclick="si('arrays objetos javascript')">Arrays JS</button>
+        <button onclick="si('select sql')">SQL Select</button>
+        <button onclick="si('git commit add init')">Git commit</button>
+        <button onclick="si('errores comunes debugging')">Errores</button>
+        <button onclick="si('soy principiante, recien empiezo')">Soy principiante</button>
+        <button onclick="si('me gusta python')">Me gusta Python</button>
+        <button onclick="iniciarEstudio()" style="color:#f1c40f;border-color:rgba(241,196,15,.2)">📖 Estudiar conmigo</button>
+        <button onclick="si('que es ciberseguridad')">Ciberseguridad?</button>
+        <button onclick="si('que es pentesting hacking etico')">Pentesting?</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="playerModal">
+  <div class="top">
+    <button onclick="cerrarPlayer()">←</button>
+    <span class="title" id="playerTitle"></span>
+    <button class="btn-completar" onclick="repetirUltimos()" title="Retrocede el video 15 segundos">⏪ No entendí</button>
+    <button class="btn-completar" onclick="toggleCodePanel()" id="btnToggleCode">💻 Código</button>
+    <button class="btn-completar" onclick="marcarCompletada()">✅ Completar</button>
+    <button class="btn-completar" onclick="crearSalaVIP()" style="color:#f1c40f;border-color:rgba(241,196,15,.3)" title="Compartí esta lección con un amigo en tiempo real (VIP)">👑 Sala</button>
+  </div>
+  <div class="player-body" id="playerBody">
+    <div class="player-video">
+      <div id="playerIframe"></div>
+    </div>
+    <div class="player-code" id="playerCode">
+      <div class="code-tabs">
+        <span class="lbl" id="codeLangLabel">Código</span>
+        <button class="sec" onclick="reiniciarCodigo()">↺ Reiniciar</button>
+        <button onclick="ejecutarCodigo()">▶ Ejecutar</button>
+      </div>
+      <textarea id="codeEditor" spellcheck="false"></textarea>
+      <div class="code-output" id="codeOutput"></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="salaModal">
+  <div class="top">
+    <button onclick="salirSala()">←</button>
+    <span class="title" id="salaTitle">Sala de estudio</span>
+    <button class="btn-completar" id="salaCodigoBtn" onclick="copiarCodigoSala()" title="Copiar código">📋 —</button>
+  </div>
+  <div class="player-body" id="salaBody">
+    <div class="player-video">
+      <div id="salaIframe"></div>
+    </div>
+    <div class="player-code" id="salaChatPanel">
+      <div class="code-tabs">
+        <span class="lbl" id="salaEstado">🟢 Conectando...</span>
+      </div>
+      <div class="code-output" id="salaChatMsgs" style="flex:1"></div>
+      <div class="sala-chat-input">
+        <input id="salaChatInput" placeholder="Escribile a tu amigo..." onkeydown="if(event.key==='Enter')enviarMensajeSala()">
+        <button onclick="enviarMensajeSala()">➤</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function esc(s){return (s||"").replace(/[&<>]/g,function(m){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m];});}
+
+// ─── CATALOGO DE CURSOS (lecciones fijas y verificadas) ───
+var CURSOS = [{"id":"python","titulo":"Python","icono":"🐍","lecciones":[{"id":"HKL1G9-mwcM","titulo":"✅ Curso Maestro de Python: De Cero a Programador Master 😎 #1","thumb":"https://i.ytimg.com/vi/HKL1G9-mwcM/hqdefault.jpg"},{"id":"v5zoIqha5U4","titulo":"✅ Curso Maestro de Python: Tipos de Datos 😎 #2","thumb":"https://i.ytimg.com/vi/v5zoIqha5U4/hqdefault.jpg"},{"id":"LCTQIWCC8HU","titulo":"✅ Curso Maestro de Python: Instrucciones 'if' en Python 🤔 #9","thumb":"https://i.ytimg.com/vi/LCTQIWCC8HU/hqdefault.jpg"},{"id":"z77LgEgfVDc","titulo":"✅ Curso Maestro de Python: Bucles FOR en Python ➰ #12","thumb":"https://i.ytimg.com/vi/z77LgEgfVDc/hqdefault.jpg"},{"id":"_2bRQFzPiVA","titulo":"✅ Curso Maestro de Python: Funciones en Python 📞 #21","thumb":"https://i.ytimg.com/vi/_2bRQFzPiVA/hqdefault.jpg"},{"id":"VJOTzCh3kcg","titulo":"✅ Curso Maestro de Python: Diccionarios en Python 📖 #19","thumb":"https://i.ytimg.com/vi/VJOTzCh3kcg/hqdefault.jpg"},{"id":"uMi4hCXD_3Q","titulo":"✅ Curso Maestro de Python: Programación Orientada a Objetos (OOP) en Python 🐍 #40","thumb":"https://i.ytimg.com/vi/uMi4hCXD_3Q/hqdefault.jpg"},{"id":"NNvodMT6GIk","titulo":"✅ Curso Maestro de Python: Manejo de excepciones en Python ⚠️ #30","thumb":"https://i.ytimg.com/vi/NNvodMT6GIk/hqdefault.jpg"}]},{"id":"javascript","titulo":"JavaScript","icono":"🟨","lecciones":[{"id":"x5YUu0eUc8s","titulo":"👩🏻‍💻 ¿Qué es JAVASCRIPT? | 🚀 ARMÁ TU PRIMER PROGRAMA | ⭐ Curso JAVASCRIPT DESDE CERO #1","thumb":"https://i.ytimg.com/vi/x5YUu0eUc8s/hqdefault.jpg"},{"id":"kXMpu07zjN4","titulo":"👩🏻‍💻 VARIABLES y TIPOS DE DATOS en JAVASCRIPT  | ⭐ Curso JAVASCRIPT DESDE CERO 🚀 #2","thumb":"https://i.ytimg.com/vi/kXMpu07zjN4/hqdefault.jpg"},{"id":"XYs3nHEKfeY","titulo":"👩🏻‍💻 CONDICIONALES IF + ELSE en JAVASCRIPT  + EJERCICIO | ⭐ Curso JAVASCRIPT DESDE CERO 🚀 #7","thumb":"https://i.ytimg.com/vi/XYs3nHEKfeY/hqdefault.jpg"},{"id":"-0t2bLM4SD4","titulo":"👩🏻‍💻 ESTRUCTURA REPETITIVA FOR EN JAVASCRIPT | ⭐ Curso JAVASCRIPT DESDE CERO 🚀 #11","thumb":"https://i.ytimg.com/vi/-0t2bLM4SD4/hqdefault.jpg"},{"id":"aYdvt6myUkc","titulo":"FUNCIONES en JAVASCRIPT | ⭐ Curso JAVASCRIPT DESDE CERO 🚀 #23","thumb":"https://i.ytimg.com/vi/aYdvt6myUkc/hqdefault.jpg"},{"id":"BxGRts-WLgM","titulo":"🟧 Métodos de ARRAYS en JAVASCRIPT | ⭐ Curso JAVASCRIPT DESDE CERO 🚀 #22","thumb":"https://i.ytimg.com/vi/BxGRts-WLgM/hqdefault.jpg"},{"id":"4ILE0y58J00","titulo":"¿Qué es el DOM? | ⭐ Curso JAVASCRIPT DESDE CERO 🚀 #28","thumb":"https://i.ytimg.com/vi/4ILE0y58J00/hqdefault.jpg"},{"id":"IwnIxk8DdHs","titulo":"⭐¿Qué son las APIS? ¿Para qué sirven? 🖥️EJEMPLO PRÁCTICO con la POKEAPI | DESARROLLO WEB 🌎","thumb":"https://i.ytimg.com/vi/IwnIxk8DdHs/hqdefault.jpg"}]},{"id":"htmlcss","titulo":"HTML y CSS","icono":"🎨","lecciones":[{"id":"QwMlgfMK6fQ","titulo":"🛑Curso HTML - #01 INTRODUCCIÓN 🖥️","thumb":"https://i.ytimg.com/vi/QwMlgfMK6fQ/hqdefault.jpg"},{"id":"GucaPbn9Cf8","titulo":"🛑 #02 QUÉ SON LAS ETIQUETAS 🖥️ - Curso HTML","thumb":"https://i.ytimg.com/vi/GucaPbn9Cf8/hqdefault.jpg"},{"id":"cX7Pml5ZM84","titulo":"🛑 #07 CÓMO CREAR FORMULARIOS - Curso HTML 🖥️","thumb":"https://i.ytimg.com/vi/cX7Pml5ZM84/hqdefault.jpg"},{"id":"I_RG3bNjTfQ","titulo":"▶️ #01 INTRODUCCIÓN 💻 Curso CSS","thumb":"https://i.ytimg.com/vi/I_RG3bNjTfQ/hqdefault.jpg"},{"id":"dJLYnB395kg","titulo":"▶️ #02 COLORES 💻 Curso CSS","thumb":"https://i.ytimg.com/vi/dJLYnB395kg/hqdefault.jpg"},{"id":"c3Ok7uIKwU8","titulo":"▶️ #05 MODELO DE CAJA 💻 Curso CSS","thumb":"https://i.ytimg.com/vi/c3Ok7uIKwU8/hqdefault.jpg"},{"id":"u1iI_pNHFS8","titulo":"▶️ #12 Aprende FLEXBOX fácil 💻 Curso CSS","thumb":"https://i.ytimg.com/vi/u1iI_pNHFS8/hqdefault.jpg"},{"id":"xIVYp5TRHd8","titulo":"▶️  #13 Aprende GRID Fácil 💻 Curso CSS","thumb":"https://i.ytimg.com/vi/xIVYp5TRHd8/hqdefault.jpg"}]},{"id":"git","titulo":"Git y GitHub","icono":"🔧","lecciones":[{"id":"jSJ8xhKtfP4","titulo":"Tutorial de Git – 1. Qué es Git","thumb":"https://i.ytimg.com/vi/jSJ8xhKtfP4/hqdefault.jpg"},{"id":"UJGKWMHX038","titulo":"Tutorial de Git – 3. Creando tu primer commit","thumb":"https://i.ytimg.com/vi/UJGKWMHX038/hqdefault.jpg"},{"id":"vu4Rv1SmzwM","titulo":"Tutorial de Git – 11. ¿Cómo hacer un merge?","thumb":"https://i.ytimg.com/vi/vu4Rv1SmzwM/hqdefault.jpg"},{"id":"jgeLj45G0tk","titulo":"Tutorial de Git – 19. ¿Cómo hacer push?","thumb":"https://i.ytimg.com/vi/jgeLj45G0tk/hqdefault.jpg"},{"id":"t8O7dMDD5nw","titulo":"Tutorial de Git – 20. ¿Cómo clonar y hacer pull?","thumb":"https://i.ytimg.com/vi/t8O7dMDD5nw/hqdefault.jpg"},{"id":"CzOj076YGRY","titulo":"Tutorial de Git – 14. ¿Cómo resolver conflictos en Git?","thumb":"https://i.ytimg.com/vi/CzOj076YGRY/hqdefault.jpg"}]},{"id":"sql","titulo":"Bases de datos SQL","icono":"🗄️","lecciones":[{"id":"SKOiEXlFNeM","titulo":"💥 ¿Qué son las BASES DE DATOS? | ✅ Explicación FÁCIL | CREA TU PRIMERA BASE DE DATOS #1","thumb":"https://i.ytimg.com/vi/SKOiEXlFNeM/hqdefault.jpg"},{"id":"WimSXuCam5g","titulo":"💥 CONSULTAS SQL:  SELECT (Lectura) | Con EJERCICIO PRÁCTICO | BASES DE DATOS ✅ Explicación FÁCIL #5","thumb":"https://i.ytimg.com/vi/WimSXuCam5g/hqdefault.jpg"},{"id":"-d339YTkoxQ","titulo":"💥 CONSULTAS SQL: INSERT (Alta) | CLASE 99% EJERCICIOS PRÁCTICOS | BASES DE DATOS ✅ Explicación FÁCIL","thumb":"https://i.ytimg.com/vi/-d339YTkoxQ/hqdefault.jpg"},{"id":"E8KqhbSw1KM","titulo":"💥 CONSULTAS SQL: UPDATE (Editar) | CON EJERCICIOS PRÁCTICOS |  BASES DE DATOS ✅ Explicación FÁCIL #7","thumb":"https://i.ytimg.com/vi/E8KqhbSw1KM/hqdefault.jpg"},{"id":"0BstRqp6Svg","titulo":"💥 CONSULTAS SQL: INNER JOIN | CON PRÁCTICA | Bases de Datos ✅ Explicación FÁCIL #11","thumb":"https://i.ytimg.com/vi/0BstRqp6Svg/hqdefault.jpg"},{"id":"eVzmJv2B2wk","titulo":"💥 CONSULTAS SQL: ORDER y GROUP BY | CON EJERCICIOS PRÁCTICOS | BASES DE DATOS  ✅Explicación FÁCIL #9","thumb":"https://i.ytimg.com/vi/eVzmJv2B2wk/hqdefault.jpg"}]},{"id":"ciberseguridad","titulo":"Ciberseguridad","icono":"🛡️","lecciones":[{"id":"NoV_pP0Bx_Q","titulo":"Ciberseguridad Para Principiantes | Curso Completo Desde Cero","thumb":"https://i.ytimg.com/vi/NoV_pP0Bx_Q/hqdefault.jpg"},{"id":"joA061BiwRA","titulo":"Aprende Redes (en 33 MINUTOS o menos) ","thumb":"https://i.ytimg.com/vi/joA061BiwRA/hqdefault.jpg"},{"id":"gzES0MuWqHE","titulo":"Aprende CIBERSEGURIDAD Desde Cero | Curso de Ciberseguridad y Privacidad 101 v2 Completo","thumb":"https://i.ytimg.com/vi/gzES0MuWqHE/hqdefault.jpg"},{"id":"8v1cR7-msQ0","titulo":"Linux para Hacking Ético | Curso de Linux DESDE CERO Para Hacking Ético","thumb":"https://i.ytimg.com/vi/8v1cR7-msQ0/hqdefault.jpg"},{"id":"DN6fgzyNb3M","titulo":"OSINT: Cómo Investigar A Cualquiera En Internet","thumb":"https://i.ytimg.com/vi/DN6fgzyNb3M/hqdefault.jpg"},{"id":"UZS_OpxR1EU","titulo":"🏁 Cómo Empezar en Hacking Ético Desde Cero 2026 (✅FUNCIONA)","thumb":"https://i.ytimg.com/vi/UZS_OpxR1EU/hqdefault.jpg"}]},{"id":"pentesting","titulo":"Pentesting (Hacking Ético)","icono":"🥷","lecciones":[{"id":"jbaXMj22w-I","titulo":"Curso de Hacking Ético DESDE CERO","thumb":"https://i.ytimg.com/vi/jbaXMj22w-I/hqdefault.jpg"},{"id":"7ejIdyu8hug","titulo":"Redes para Hacking Ético | Curso De Redes Para Hacking Ético Desde Cero","thumb":"https://i.ytimg.com/vi/7ejIdyu8hug/hqdefault.jpg"},{"id":"JvvueDQL3BE","titulo":"Aprende Nmap Desde Cero | Curso De Nmap para Hacking Ético","thumb":"https://i.ytimg.com/vi/JvvueDQL3BE/hqdefault.jpg"},{"id":"OL1L15nJQ8Q","titulo":"Aprende Bases De Datos Para Hacking Etico | Curso de SQL (Desde Cero)","thumb":"https://i.ytimg.com/vi/OL1L15nJQ8Q/hqdefault.jpg"},{"id":"Bv0Bpw2qwNs","titulo":"¡Aprende Burp Suite Para Hacking Ético Desde Cero!","thumb":"https://i.ytimg.com/vi/Bv0Bpw2qwNs/hqdefault.jpg"},{"id":"YMIAUPNQHoI","titulo":"🔺Metasploit: GUÍA DEFINITIVA para HACKING ÉTICO (REAL)","thumb":"https://i.ytimg.com/vi/YMIAUPNQHoI/hqdefault.jpg"}]}];
+
+// ─── QUIZ: preguntas relacionadas a cada curso ───
+var QUIZZES={
+  python:[
+    {q:"¿Cómo se imprime texto en Python?",opciones:['print("Hola")','console.log("Hola")','echo "Hola"','System.out.println("Hola")'],correcta:0},
+    {q:"¿Qué imprime este código?\nfor i in range(3):\n  print(i)",opciones:["1 2 3","0 1 2","0 1 2 3","3 2 1"],correcta:1},
+    {q:"¿Cómo se define una función en Python?",opciones:["function saludar():","def saludar():","func saludar():","void saludar():"],correcta:1},
+    {q:"¿Cuál es la forma correcta de crear una lista en Python?",opciones:["lista = (1,2,3)","lista = {1,2,3}","lista = [1,2,3]","lista = <1,2,3>"],correcta:2},
+    {q:"¿Qué bloque se usa para capturar errores sin que el programa se rompa?",opciones:["if/else","try/except","switch/case","loop/break"],correcta:1},
+    {q:"¿Qué tipo de dato representa True o False en Python?",opciones:["string","integer","boolean","float"],correcta:2}
+  ],
+  javascript:[
+    {q:"¿Cuál es la palabra clave recomendada para declarar una variable que NO va a cambiar?",opciones:["var","let","const","static"],correcta:2},
+    {q:"¿Cómo se imprime algo en la consola en JavaScript?",opciones:["print()","console.log()","echo()","System.out()"],correcta:1},
+    {q:"¿Qué método de un array agrega un elemento al final?",opciones:["add()","push()","append()","insert()"],correcta:1},
+    {q:"¿Cómo se escucha un click sobre un botón en JS?",opciones:["boton.onClick = true","boton.addEventListener('click', fn)","boton.click(fn)","on(boton,'click',fn)"],correcta:1},
+    {q:"¿Qué palabra clave se usa junto con 'await' para código asíncrono?",opciones:["sync","async","promise","defer"],correcta:1},
+    {q:"¿Cuál es una función flecha (arrow function) válida?",opciones:["function => f(){}","const f = () => {}","arrow f(){}","const f == () => {}"],correcta:1}
+  ],
+  htmlcss:[
+    {q:"¿Qué etiqueta HTML se usa para el título más importante de la página?",opciones:["<title>","<h1>","<head>","<b>"],correcta:1},
+    {q:"¿Qué etiqueta se usa para crear un formulario?",opciones:["<input>","<form>","<table>","<field>"],correcta:1},
+    {q:"Con display:flex, ¿qué propiedad centra los hijos horizontalmente?",opciones:["align-items","text-align","justify-content","flex-center"],correcta:2},
+    {q:"¿Qué activa display:grid?",opciones:["Un layout de una sola columna","Un layout bidimensional de filas y columnas","Solo alinea texto","Oculta el elemento"],correcta:1},
+    {q:"¿Para qué sirve @media en CSS?",opciones:["Para importar imágenes","Para aplicar estilos según el tamaño de pantalla","Para crear animaciones","Para centrar texto"],correcta:1},
+    {q:"¿Qué hace CSS respecto a HTML?",opciones:["Define la estructura","Define el estilo visual","Define el comportamiento","Define la base de datos"],correcta:1}
+  ],
+  git:[
+    {q:"¿Qué comando guarda los cambios preparados con un mensaje?",opciones:['git save -m "..."','git commit -m "..."','git push -m "..."','git store -m "..."'],correcta:1},
+    {q:"¿Qué comando prepara TODOS los cambios para el próximo commit?",opciones:["git add .","git commit .","git stage all","git ready ."],correcta:0},
+    {q:"¿Qué comando crea una nueva rama?",opciones:["git new rama","git branch rama","git create rama","git rama new"],correcta:1},
+    {q:"¿Qué comando sube tus commits a GitHub?",opciones:["git push","git send","git upload","git commit --remote"],correcta:0},
+    {q:"¿Qué comando descarga un repositorio completo por primera vez?",opciones:["git download","git pull --all","git clone URL","git get URL"],correcta:2},
+    {q:"¿Qué texto marca el INICIO de un conflicto en un archivo?",opciones:["<<<<<<< HEAD","### CONFLICTO","!!! ERROR","--- START"],correcta:0}
+  ],
+  sql:[
+    {q:"¿Qué comando trae datos de una tabla?",opciones:["GET","SELECT","FETCH","SHOW"],correcta:1},
+    {q:"¿Qué cláusula filtra filas según una condición?",opciones:["FILTER","IF","WHERE","WHEN"],correcta:2},
+    {q:"¿Qué comando agrega una fila nueva a una tabla?",opciones:["ADD ROW","INSERT INTO","NEW ROW","CREATE ROW"],correcta:1},
+    {q:"¿Qué hace un JOIN?",opciones:["Borra una tabla","Combina filas de dos tablas relacionadas","Crea un índice","Ordena resultados"],correcta:1},
+    {q:"¿Qué cláusula agrupa filas para calcular totales (como COUNT o AVG)?",opciones:["ORDER BY","GROUP BY","JOIN BY","SET BY"],correcta:1},
+    {q:"¿Qué comando crea una tabla nueva?",opciones:["NEW TABLE","MAKE TABLE","CREATE TABLE","BUILD TABLE"],correcta:2}
+  ],
+  ciberseguridad:[
+    {q:"¿Qué es el phishing?",opciones:["Un virus que borra archivos","Engañar a alguien haciéndose pasar por una entidad confiable para robar información","Un tipo de firewall","Un método para cifrar contraseñas"],correcta:1},
+    {q:"¿Qué es un firewall?",opciones:["Un antivirus","Un sistema que filtra el tráfico de red según reglas de seguridad","Una contraseña fuerte","Un tipo de malware"],correcta:1},
+    {q:"¿Qué es la autenticación de dos factores (2FA)?",opciones:["Usar dos contraseñas iguales","Un segundo paso de verificación además de la contraseña","Un tipo de encriptación","Cambiar la contraseña dos veces"],correcta:1},
+    {q:"¿Qué significa OSINT?",opciones:["Un virus informático","Inteligencia de fuentes abiertas (información pública recolectada legalmente)","Un protocolo de red","Un tipo de firewall"],correcta:1},
+    {q:"¿Para qué sirve Nmap?",opciones:["Para escanear puertos y servicios de una red","Para mandar mensajes cifrados","Para hacer copias de seguridad","Para crear contraseñas"],correcta:0},
+    {q:"¿Qué es un ataque de fuerza bruta?",opciones:["Un ataque físico a un servidor","Probar muchísimas combinaciones de contraseñas hasta acertar","Un tipo de firewall","Un virus que se replica solo"],correcta:1}
+  ],
+  pentesting:[
+    {q:"¿Qué es el pentesting?",opciones:["Instalar antivirus","Simular ataques reales, CON PERMISO, para encontrar vulnerabilidades antes que un atacante","Borrar archivos de un sistema","Crear contraseñas seguras"],correcta:1},
+    {q:"¿Qué es Burp Suite?",opciones:["Un antivirus","Una herramienta para interceptar y analizar tráfico web durante pruebas de seguridad","Un lenguaje de programación","Un sistema operativo"],correcta:1},
+    {q:"¿Qué es Metasploit?",opciones:["Un firewall","Un framework para desarrollar y ejecutar exploits de forma controlada","Un antivirus","Un protocolo de red"],correcta:1},
+    {q:"¿Qué es una inyección SQL?",opciones:["Un tipo de virus","Insertar código SQL malicioso en un campo de entrada para manipular una base de datos","Un método de cifrado","Un tipo de firewall"],correcta:1},
+    {q:"¿Qué hace Nmap en un pentest?",opciones:["Descubre hosts, puertos abiertos y servicios activos en una red","Borra logs del sistema","Encripta archivos","Manda correos falsos"],correcta:0},
+    {q:"¿Qué es fundamental ANTES de hacer un pentest real?",opciones:["Tener el mejor antivirus","Tener autorización explícita por escrito del dueño del sistema","Usar una VPN","Tener Kali Linux instalado"],correcta:1}
+  ]
+};
+function getQuizGuardado(){ try{return JSON.parse(localStorage.getItem("vh_cursos_quiz")||"{}");}catch(e){return {};} }
+function guardarQuizResultado(cursoId,correctas,total){
+  var q=getQuizGuardado();
+  var prev=q[cursoId];
+  if(!prev||correctas>prev.correctas){
+    q[cursoId]={correctas:correctas,total:total,ts:Date.now()};
+    localStorage.setItem("vh_cursos_quiz",JSON.stringify(q));
+  }
+}
+function pintarQuiz(){
+  var preguntas=QUIZZES[cursoActual.id]||[];
+  var sec=document.getElementById("quizSection");
+  if(!preguntas.length){ sec.innerHTML=""; return; }
+  var mejor=getQuizGuardado()[cursoActual.id];
+  var h='<div class="quiz-box"><div class="quiz-hdr">📝 Quiz del curso'+(mejor?' — mejor puntaje: '+mejor.correctas+'/'+mejor.total:'')+'</div>';
+  preguntas.forEach(function(p,i){
+    h+='<div class="quiz-q" data-qi="'+i+'"><div class="quiz-qtxt">'+(i+1)+'. '+esc(p.q)+'</div>';
+    p.opciones.forEach(function(op,oi){
+      h+='<label class="quiz-opt"><input type="radio" name="quiz-'+i+'" value="'+oi+'"> '+esc(op)+'</label>';
+    });
+    h+='</div>';
+  });
+  h+='<button class="quiz-btn" onclick="corregirQuiz()">✅ Corregir</button><div id="quizResultado"></div></div>';
+  sec.innerHTML=h;
+}
+window.corregirQuiz=function(){
+  var preguntas=QUIZZES[cursoActual.id]||[];
+  var correctas=0;
+  preguntas.forEach(function(p,i){
+    var seleccionado=document.querySelector('input[name="quiz-'+i+'"]:checked');
+    var labels=document.querySelectorAll('.quiz-q[data-qi="'+i+'"] .quiz-opt');
+    labels.forEach(function(lbl,oi){
+      lbl.classList.remove("correcta","incorrecta");
+      if(oi===p.correcta) lbl.classList.add("correcta");
+      else if(seleccionado&&parseInt(seleccionado.value,10)===oi) lbl.classList.add("incorrecta");
+    });
+    if(seleccionado&&parseInt(seleccionado.value,10)===p.correcta) correctas++;
+  });
+  var prevMejor=getQuizGuardado()[cursoActual.id];
+  var esMejora=!prevMejor||correctas>prevMejor.correctas;
+  guardarQuizResultado(cursoActual.id,correctas,preguntas.length);
+  var res=document.getElementById("quizResultado");
+  var pct=Math.round(correctas/preguntas.length*100);
+  res.className="quiz-score "+(pct>=60?"bien":"mal");
+  res.textContent="Resultado: "+correctas+"/"+preguntas.length+" ("+pct+"%)"+(pct>=60?" — ¡bien! 🎉":" — repasá las lecciones y probá de nuevo");
+  if(esMejora&&correctas>0) sumarXP(correctas*2,"Quiz de "+cursoActual.titulo);
+};
+
+// ─── PROGRESO POR LECCION (por dispositivo) ───
+var LS_CURSOS="vh_cursos_prog2";
+function getPC(){try{return JSON.parse(localStorage.getItem(LS_CURSOS)||"{}");}catch(e){return{};}}
+function setPC(p){try{localStorage.setItem(LS_CURSOS,JSON.stringify(p));}catch(e){}}
+function progLeccion(cursoId,leccionId){
+  var p=getPC();
+  return (p[cursoId]&&p[cursoId].lecciones&&p[cursoId].lecciones[leccionId])||0;
+}
+function guardarLeccion(cursoId,leccionId,pct){
+  var p=getPC();
+  if(!p[cursoId]) p[cursoId]={lecciones:{},ultima:null,ts:0};
+  var actual=p[cursoId].lecciones[leccionId]||0;
+  var nuevo=Math.max(actual,Math.min(pct||0,99));
+  p[cursoId].lecciones[leccionId]=nuevo;
+  p[cursoId].ultima=leccionId;
+  p[cursoId].ts=Date.now();
+  setPC(p);
+  if(actual<90&&nuevo>=90){
+    sumarXP(5,"Lección completada");
+    verificarInsigniaCurso(cursoId);
+  }
+}
+// ─── GAMIFICACION: XP y niveles (mismo sistema que el resto de ZonaHack) ───
+function notificarXP(cant,accion){
+  var noti=document.createElement("div");
+  noti.style.cssText="position:fixed;top:60px;right:20px;z-index:99999;padding:8px 14px;border:1px solid rgba(0,255,65,.12);border-radius:8px;background:#0d0d0d;color:#00ff41;font-size:.75em;font-family:'Courier New',monospace;box-shadow:0 4px 20px rgba(0,0,0,.4);transition:all .4s;opacity:0;transform:translateX(40px)";
+  noti.innerHTML="⭐ +"+cant+" XP <span style='color:rgba(200,214,229,.4);font-size:.9em'>"+esc(accion)+"</span>";
+  document.body.appendChild(noti);
+  setTimeout(function(){noti.style.opacity="1";noti.style.transform="translateX(0)";},50);
+  setTimeout(function(){noti.style.opacity="0";noti.style.transform="translateX(40px)";setTimeout(function(){if(noti.parentNode)noti.parentNode.removeChild(noti);},400);},2200);
+}
+function notificarNivel(nv){
+  var el=document.createElement("div");
+  el.style.cssText="position:fixed;top:100px;right:20px;z-index:99999;padding:12px 18px;border:1px solid rgba(241,196,15,.2);border-radius:8px;background:#0d0d0d;color:#f1c40f;font-size:.9em;font-family:'Courier New',monospace;box-shadow:0 4px 20px rgba(0,0,0,.4);transition:all .4s;opacity:0;transform:translateX(40px)";
+  el.innerHTML="🎉 SUBISTE AL NIVEL "+nv+"!";
+  document.body.appendChild(el);
+  setTimeout(function(){el.style.opacity="1";el.style.transform="translateX(0)";},50);
+  setTimeout(function(){el.style.opacity="0";el.style.transform="translateX(40px)";setTimeout(function(){if(el.parentNode)el.parentNode.removeChild(el);},400);},3000);
+}
+// Cola secuencial: si se ganan varios XP casi juntos (ej. terminar la última lección
+// Y desbloquear la insignia del curso al mismo tiempo), cada suma espera a que la
+// anterior termine de leer+escribir en Supabase, para no pisarse (lost update).
+var _xpQueue=Promise.resolve();
+function sumarXP(cant,accion){
+  var user=localStorage.getItem('vh_usuario')||'';
+  if(!user||user==='anon')return;
+  notificarXP(cant,accion);
+  _xpQueue=_xpQueue.then(function(){
+    return fetch('https://xfwolaurpeofysnymqle.supabase.co/rest/v1/usuarios_ext?usuario_nombre=eq.'+encodeURIComponent(user)+'&limit=1',{
+      headers:{'apikey':'sb_publishable_3VvBUD5Bdu3Uaq59fJ99MQ_XDCtujUU','Authorization':'Bearer sb_publishable_3VvBUD5Bdu3Uaq59fJ99MQ_XDCtujUU'}
+    }).then(function(r){return r.json();}).then(function(d){
+      var xp=cant,nv=1;
+      if(d&&d.length){
+        xp=(d[0].xp||0)+cant;
+        nv=Math.min(15,Math.max(1,Math.floor(xp/100)+1));
+        if(nv>(d[0].nivel||1)) notificarNivel(nv);
+        return fetch('https://xfwolaurpeofysnymqle.supabase.co/rest/v1/usuarios_ext?usuario_nombre=eq.'+encodeURIComponent(user),{method:'PATCH',headers:{'apikey':'sb_publishable_3VvBUD5Bdu3Uaq59fJ99MQ_XDCtujUU','Authorization':'Bearer sb_publishable_3VvBUD5Bdu3Uaq59fJ99MQ_XDCtujUU','Content-Type':'application/json'},body:JSON.stringify({xp:xp,nivel:nv})}).catch(function(){});
+      }else{
+        return fetch('https://xfwolaurpeofysnymqle.supabase.co/rest/v1/usuarios_ext',{method:'POST',headers:{'apikey':'sb_publishable_3VvBUD5Bdu3Uaq59fJ99MQ_XDCtujUU','Authorization':'Bearer sb_publishable_3VvBUD5Bdu3Uaq59fJ99MQ_XDCtujUU','Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify({usuario_nombre:user,xp:cant,nivel:nv,rol:'user',estado:'activo'})}).catch(function(){});
+      }
+    }).catch(function(){});
+  });
+}
+
+// ─── INSIGNIAS: una medalla por curso completo al 100% ───
+var INSIGNIAS_CURSO={
+  python:{nombre:"🐍 Pythonista",color:"#3776AB",desc:"Completó el curso de Python en ZonaHack"},
+  javascript:{nombre:"🟨 JS Ninja",color:"#f1c40f",desc:"Completó el curso de JavaScript en ZonaHack"},
+  htmlcss:{nombre:"🎨 Maestro del Frontend",color:"#e34c26",desc:"Completó el curso de HTML y CSS en ZonaHack"},
+  git:{nombre:"🔧 Git Master",color:"#f34f29",desc:"Completó el curso de Git y GitHub en ZonaHack"},
+  sql:{nombre:"🗄️ Database Wizard",color:"#00758f",desc:"Completó el curso de SQL en ZonaHack"}
+};
+function getInsigniasGanadas(){ try{return JSON.parse(localStorage.getItem("vh_insignias_cursos")||"{}");}catch(e){return {};} }
+function mostrarInsigniaGanada(def){
+  var el=document.createElement("div");
+  el.style.cssText="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.85);z-index:999999;background:#0d0d0d;border:2px solid "+def.color+";border-radius:14px;padding:26px 32px;text-align:center;box-shadow:0 10px 50px rgba(0,0,0,.6);font-family:'Courier New',monospace;opacity:0;transition:all .4s;max-width:88vw";
+  el.innerHTML="<div style='font-size:2.6em;margin-bottom:8px'>"+def.nombre.split(' ')[0]+"</div>"+
+    "<div style='color:#fff;font-size:1em;font-weight:bold;margin-bottom:4px'>¡Insignia desbloqueada!</div>"+
+    "<div style='color:"+def.color+";font-size:.9em;font-weight:bold'>"+esc(def.nombre)+"</div>"+
+    "<div style='color:rgba(255,255,255,.4);font-size:.65em;margin-top:8px;max-width:260px'>"+esc(def.desc)+"</div>";
+  document.body.appendChild(el);
+  requestAnimationFrame(function(){el.style.opacity="1";el.style.transform="translate(-50%,-50%) scale(1)";});
+  setTimeout(function(){
+    el.style.opacity="0";el.style.transform="translate(-50%,-50%) scale(.9)";
+    setTimeout(function(){if(el.parentNode)el.parentNode.removeChild(el);},400);
+  },3200);
+}
+function verificarInsigniaCurso(cursoId){
+  var curso=CURSOS.filter(function(c){return c.id===cursoId;})[0];
+  var def=INSIGNIAS_CURSO[cursoId];
+  if(!curso||!def)return;
+  var s=statsCurso(curso);
+  if(s.total===0||s.completadas<s.total)return;
+  var ya=getInsigniasGanadas();
+  if(ya[cursoId])return;
+  ya[cursoId]=true;
+  localStorage.setItem("vh_insignias_cursos",JSON.stringify(ya));
+  mostrarInsigniaGanada(def);
+  sumarXP(25,"Curso completo: "+curso.titulo);
+  renderBadgesRow();
+  var user=localStorage.getItem('vh_usuario')||'';
+  if(user&&user!=='anon'){
+    fetch('https://xfwolaurpeofysnymqle.supabase.co/rest/v1/insignias',{method:'POST',headers:{'apikey':'sb_publishable_3VvBUD5Bdu3Uaq59fJ99MQ_XDCtujUU','Authorization':'Bearer sb_publishable_3VvBUD5Bdu3Uaq59fJ99MQ_XDCtujUU','Content-Type':'application/json','Prefer':'return=minimal,resolution=ignore-duplicates'},body:JSON.stringify({usuario_nombre:user,insignia:def.nombre,color:def.color,descripcion:def.desc})}).catch(function(){});
+  }
+}
+function renderBadgesRow(){
+  var ya=getInsigniasGanadas();
+  var ids=Object.keys(ya).filter(function(id){return ya[id]&&INSIGNIAS_CURSO[id];});
+  var row=document.getElementById("badgesRow"),list=document.getElementById("badgesList");
+  if(!row||!list)return;
+  if(!ids.length){row.style.display="none";return;}
+  row.style.display="block";
+  list.innerHTML=ids.map(function(id){
+    var def=INSIGNIAS_CURSO[id];
+    return '<div class="badge-chip" style="border:1px solid '+def.color+'55;color:'+def.color+'" title="'+esc(def.desc)+'">'+
+      '<span class="ico">'+def.nombre.split(' ')[0]+'</span>'+esc(def.nombre.split(' ').slice(1).join(' '))+'</div>';
+  }).join("");
+}
+
+function statsCurso(curso){
+  var p=getPC()[curso.id];
+  var lecc=(p&&p.lecciones)||{};
+  var total=curso.lecciones.length;
+  var completadas=curso.lecciones.filter(function(l){return (lecc[l.id]||0)>=90;}).length;
+  var pct=total?Math.round(completadas/total*100):0;
+  return {completadas:completadas,total:total,pct:pct};
+}
+
+function renderCursosGrid(){
+  document.getElementById("cursosGrid").innerHTML=CURSOS.map(function(c){
+    var s=statsCurso(c),done=s.total>0&&s.completadas===s.total;
+    var mejor=getQuizGuardado()[c.id];
+    return '<div class="curso-card'+(done?' done':'')+'" onclick="abrirCurso(\''+c.id+'\')">'+
+      '<div class="curso-ico">'+c.icono+'</div>'+
+      '<div class="curso-t">'+esc(c.titulo)+'</div>'+
+      '<div class="barbg"><div class="bar" style="width:'+s.pct+'%"></div></div>'+
+      '<div class="curso-sub">'+(done?'✅ Completado':s.completadas+' / '+s.total+' lecciones')+'</div>'+
+      (mejor?'<div class="curso-sub">📝 Quiz: '+mejor.correctas+'/'+mejor.total+'</div>':'')+
+    '</div>';
+  }).join("");
+  document.getElementById("st").textContent=CURSOS.length+" cursos disponibles";
+  renderBadgesRow();
+}
+
+var cursoActual=null, leccionActualIdx=null, progIntCurso=null;
+
+window.abrirCurso=function(cursoId){
+  cursoActual=CURSOS.filter(function(c){return c.id===cursoId;})[0];
+  if(!cursoActual)return;
+  document.getElementById("vistaCursos").style.display="none";
+  document.getElementById("vistaQuizzes").style.display="none";
+  document.getElementById("vistaSandbox").style.display="none";
+  document.getElementById("vistaLecciones").style.display="block";
+  pintarLecciones();
+  pintarQuiz();
+};
+window.volverACursos=function(){
+  document.getElementById("vistaLecciones").style.display="none";
+  document.getElementById("vistaCursos").style.display="block";
+  cursoActual=null;
+  renderCursosGrid();
+  renderContinuando();
+};
+
+function pintarLecciones(){
+  var s=statsCurso(cursoActual);
+  document.getElementById("cursoHdr").innerHTML=
+    '<div class="curso-hdr-ico">'+cursoActual.icono+'</div>'+
+    '<div style="flex:1"><div class="curso-hdr-t">'+esc(cursoActual.titulo)+'</div>'+
+    '<div class="curso-hdr-sub">'+s.completadas+' de '+s.total+' lecciones completadas ('+s.pct+'%)</div>'+
+    '<div class="barbg" style="margin-top:5px"><div class="bar" style="width:'+s.pct+'%"></div></div></div>';
+  document.getElementById("leccionesGrid").innerHTML=cursoActual.lecciones.map(function(l,i){
+    var pct=progLeccion(cursoActual.id,l.id),done=pct>=90;
+    return '<div class="leccion-item'+(done?' done':'')+'" onclick="abrirLeccion('+i+')">'+
+      '<div class="leccion-num">'+(done?'✅':(i+1))+'</div>'+
+      '<img src="'+esc(l.thumb)+'" loading="lazy">'+
+      '<div class="leccion-inf"><div class="leccion-t">'+esc(l.titulo)+'</div>'+
+      (pct>3&&!done?'<div class="barbg" style="margin-top:4px"><div class="bar" style="width:'+pct+'%"></div></div>':'')+
+      '</div></div>';
+  }).join("");
+}
+
+window.abrirLeccion=function(idx){
+  leccionActualIdx=idx;
+  var l=cursoActual.lecciones[idx];
+  var pr=progLeccion(cursoActual.id,l.id);
+  document.getElementById("playerTitle").textContent=l.titulo;
+  cargarVideoEnPlayer(l.id,(pr>3&&pr<95)?Math.round(pr/100*900):0);
+  document.getElementById("playerModal").classList.add("show");
+  prepararPanelCodigo();
+  guardarLeccion(cursoActual.id,l.id,Math.max(pr,2));
+  if(progIntCurso)clearInterval(progIntCurso);
+  progIntCurso=setInterval(function(){
+    if(!document.getElementById("playerModal").classList.contains("show"))return;
+    var nuevo=null;
+    if(_ytPlayer&&_ytPlayer.getCurrentTime&&_ytPlayer.getDuration){
+      try{
+        var cur=_ytPlayer.getCurrentTime(),dur=_ytPlayer.getDuration();
+        if(dur>0)nuevo=Math.min(95,Math.round(cur/dur*100));
+      }catch(e){}
+    }
+    if(nuevo==null)nuevo=Math.min(progLeccion(cursoActual.id,l.id)+1,90);
+    guardarLeccion(cursoActual.id,l.id,nuevo);
+  },5000);
+};
+
+// ─── CONTROL REAL DEL VIDEO (YouTube IFrame API): permite "retroceder 15s" y progreso exacto ───
+var _ytReady=false,_ytPlayer=null,_ytPendingLoad=null;
+(function(){
+  var tag=document.createElement("script");
+  tag.src="https://www.youtube.com/iframe_api";
+  document.head.appendChild(tag);
+})();
+window.onYouTubeIframeAPIReady=function(){
+  _ytReady=true;
+  if(_ytPendingLoad){cargarVideoEnPlayer(_ytPendingLoad.id,_ytPendingLoad.start);_ytPendingLoad=null;}
+};
+function cargarVideoEnPlayer(videoId,startSeconds){
+  if(!_ytReady){_ytPendingLoad={id:videoId,start:startSeconds};return;}
+  if(_ytPlayer&&_ytPlayer.loadVideoById){
+    _ytPlayer.loadVideoById({videoId:videoId,startSeconds:startSeconds||0});
+    return;
+  }
+  _ytPlayer=new YT.Player("playerIframe",{
+    videoId:videoId,
+    width:"100%",
+    height:"100%",
+    playerVars:{autoplay:1,rel:0,start:startSeconds||0,modestbranding:1}
+  });
+}
+window.repetirUltimos=function(){
+  if(!_ytPlayer||!_ytPlayer.getCurrentTime||!_ytPlayer.seekTo)return;
+  try{
+    var t=_ytPlayer.getCurrentTime();
+    _ytPlayer.seekTo(Math.max(0,t-15),true);
+    _ytPlayer.playVideo();
+  }catch(e){}
+};
+
+// ─── SALA VIP: mirar y estudiar una lección en vivo con un amigo (video + chat sincronizados) ───
+var SALA_SB="https://xfwolaurpeofysnymqle.supabase.co/rest/v1/";
+var SALA_H={"apikey":"sb_publishable_3VvBUD5Bdu3Uaq59fJ99MQ_XDCtujUU","Authorization":"Bearer sb_publishable_3VvBUD5Bdu3Uaq59fJ99MQ_XDCtujUU","Content-Type":"application/json"};
+function salaApi(m,e,d){
+  return fetch(SALA_SB+e,{method:m,headers:SALA_H,body:d?JSON.stringify(d):undefined}).then(function(r){return r.json().catch(function(){return [];});});
+}
+function nombreSala(){
+  var u=localStorage.getItem("vh_usuario");
+  if(u&&u!=="anon")return u;
+  var g=localStorage.getItem("vh_sala_invitado");
+  if(!g){ g="Invitado_"+Math.random().toString(36).slice(2,6); localStorage.setItem("vh_sala_invitado",g); }
+  return g;
+}
+function esVipOAdmin(cb){
+  var u=localStorage.getItem("vh_usuario");
+  if(!u||u==="anon"){cb(false);return;}
+  var privilegiados=["vip","premium","moderator","admin","super_admin","root","owner","developer","fundador"];
+  Promise.all([
+    fetch(SALA_SB+"vip?select=activo,fecha_expiracion&usuario_nombre=eq."+encodeURIComponent(u)+"&limit=1",{headers:SALA_H}).then(function(r){return r.json();}).catch(function(){return [];}),
+    fetch(SALA_SB+"rangos?select=rango&usuario_nombre=eq."+encodeURIComponent(u)+"&limit=1",{headers:SALA_H}).then(function(r){return r.json();}).catch(function(){return [];})
+  ]).then(function(res){
+    var vipRow=res[0]&&res[0][0];
+    var vipActivo=!!(vipRow&&vipRow.activo&&(!vipRow.fecha_expiracion||new Date(vipRow.fecha_expiracion).getTime()>Date.now()));
+    var rangoRow=res[1]&&res[1][0];
+    var esPriv=!!(rangoRow&&privilegiados.indexOf((rangoRow.rango||"").toLowerCase())>=0);
+    cb(vipActivo||esPriv);
+  }).catch(function(){cb(false);});
+}
+
+var _salaId=null,_salaCodigo=null,_salaEsHost=false,_salaYtPlayer=null;
+var _salaSyncInt=null,_salaChatInt=null;
+
+window.crearSalaVIP=function(){
+  if(!cursoActual||leccionActualIdx==null){ alert("Abrí una lección primero para compartirla con tu amigo."); return; }
+  esVipOAdmin(function(esVip){
+    if(!esVip){
+      alert("👑 Esta función es para usuarios VIP. Hacete VIP desde el menú Premium para estudiar en vivo con un amigo.");
+      return;
+    }
+    var l=cursoActual.lecciones[leccionActualIdx];
+    var codigo="DUO-"+Math.random().toString(36).slice(2,7).toUpperCase();
+    var nombre=nombreSala();
+    if(_ytPlayer&&_ytPlayer.pauseVideo){try{_ytPlayer.pauseVideo();}catch(e){}}
+    salaApi("POST","salas",{codigo:codigo,nombre:"Sala de "+nombre,video_id:l.id,video_titulo:l.titulo,estado:"idle",tiempo_actual:0,creador_nombre:nombre}).then(function(){
+      return salaApi("GET","salas?codigo=eq."+codigo+"&select=id");
+    }).then(function(rows){
+      if(!rows||!rows.length){ alert("No se pudo crear la sala, probá de nuevo."); return; }
+      var sid=rows[0].id;
+      salaApi("POST","sala_usuarios",{sala_id:sid,usuario_nombre:nombre}).catch(function(){});
+      entrarSala(sid,codigo,true,l.id,l.titulo,0);
+    }).catch(function(){ alert("No se pudo crear la sala, probá de nuevo."); });
+  });
+};
+
+window.unirseSala=function(){
+  var input=document.getElementById("joinSalaCodigo");
+  var codigo=(input.value||"").trim().toUpperCase();
+  if(!codigo)return;
+  salaApi("GET","salas?codigo=eq."+encodeURIComponent(codigo)+"&select=id,video_id,video_titulo,tiempo_actual").then(function(rows){
+    if(!rows||!rows.length){ alert("No encontré esa sala. Revisá el código con tu amigo."); return; }
+    var s=rows[0];
+    input.value="";
+    salaApi("POST","sala_usuarios",{sala_id:s.id,usuario_nombre:nombreSala()}).catch(function(){});
+    entrarSala(s.id,codigo,false,s.video_id,s.video_titulo,s.tiempo_actual||0);
+  }).catch(function(){ alert("No se pudo entrar a la sala."); });
+};
+
+function entrarSala(sid,codigo,host,videoId,videoTitulo,tiempo){
+  _salaId=sid; _salaCodigo=codigo; _salaEsHost=host;
+  document.getElementById("salaTitle").textContent=(host?"👑 Tu sala: ":"🙋 Sala de un amigo: ")+videoTitulo;
+  document.getElementById("salaCodigoBtn").textContent="📋 "+codigo;
+  document.getElementById("salaEstado").textContent=host?"🟢 Sos el anfitrión — tu amigo ve lo mismo que vos":"🟢 Conectado — mirando junto al anfitrión";
+  document.getElementById("salaChatMsgs").innerHTML="";
+  document.getElementById("salaModal").classList.add("show");
+  cargarVideoEnSala(videoId,tiempo||0);
+  cargarMensajesSala();
+  if(_salaChatInt)clearInterval(_salaChatInt);
+  _salaChatInt=setInterval(cargarMensajesSala,2500);
+  if(_salaSyncInt)clearInterval(_salaSyncInt);
+  _salaSyncInt=setInterval(host?sincronizarComoHost:sincronizarComoGuest,3000);
+}
+
+window.salirSala=function(){
+  if(_salaId){
+    salaApi("PATCH","sala_usuarios?sala_id=eq."+_salaId+"&usuario_nombre=eq."+encodeURIComponent(nombreSala()),{conectado:false}).catch(function(){});
+  }
+  if(_salaSyncInt){clearInterval(_salaSyncInt);_salaSyncInt=null;}
+  if(_salaChatInt){clearInterval(_salaChatInt);_salaChatInt=null;}
+  if(_salaYtPlayer&&_salaYtPlayer.stopVideo){try{_salaYtPlayer.stopVideo();}catch(e){}}
+  document.getElementById("salaModal").classList.remove("show");
+  _salaId=null;_salaCodigo=null;_salaEsHost=false;
+};
+
+window.copiarCodigoSala=function(){
+  if(!_salaCodigo)return;
+  var btn=document.getElementById("salaCodigoBtn");
+  try{
+    navigator.clipboard.writeText(_salaCodigo);
+    var orig=btn.textContent; btn.textContent="✅ Copiado";
+    setTimeout(function(){btn.textContent=orig;},1500);
+  }catch(e){}
+};
+
+function sincronizarComoHost(){
+  if(!_salaId||!_salaYtPlayer||!_salaYtPlayer.getCurrentTime)return;
+  var t; try{t=_salaYtPlayer.getCurrentTime();}catch(e){return;}
+  var estado="playing";
+  try{ if(_salaYtPlayer.getPlayerState&&_salaYtPlayer.getPlayerState()===2) estado="pausado"; }catch(e){}
+  salaApi("PATCH","salas?id=eq."+_salaId,{estado:estado,tiempo_actual:t}).catch(function(){});
+}
+function sincronizarComoGuest(){
+  if(!_salaId||!_salaYtPlayer)return;
+  salaApi("GET","salas?id=eq."+_salaId+"&select=estado,tiempo_actual").then(function(rows){
+    var s=rows&&rows[0]; if(!s)return;
+    try{
+      var actual=_salaYtPlayer.getCurrentTime();
+      if(Math.abs(actual-(s.tiempo_actual||0))>4){ _salaYtPlayer.seekTo(s.tiempo_actual||0,true); }
+      if(s.estado==="pausado"&&_salaYtPlayer.pauseVideo)_salaYtPlayer.pauseVideo();
+      else if(s.estado==="playing"&&_salaYtPlayer.playVideo)_salaYtPlayer.playVideo();
+    }catch(e){}
+  }).catch(function(){});
+}
+
+function cargarVideoEnSala(videoId,startSeconds){
+  if(!_ytReady){ setTimeout(function(){cargarVideoEnSala(videoId,startSeconds);},300); return; }
+  if(_salaYtPlayer&&_salaYtPlayer.loadVideoById){
+    _salaYtPlayer.loadVideoById({videoId:videoId,startSeconds:startSeconds||0});
+    return;
+  }
+  _salaYtPlayer=new YT.Player("salaIframe",{
+    videoId:videoId,
+    width:"100%",
+    height:"100%",
+    playerVars:{autoplay:1,rel:0,start:startSeconds||0,modestbranding:1}
+  });
+}
+
+window.enviarMensajeSala=function(){
+  var inp=document.getElementById("salaChatInput");
+  var txt=(inp.value||"").trim();
+  if(!txt||!_salaId)return;
+  inp.value="";
+  salaApi("POST","sala_mensajes",{sala_id:_salaId,usuario_nombre:nombreSala(),mensaje:txt.slice(0,500)}).catch(function(){});
+  cargarMensajesSala();
+};
+function cargarMensajesSala(){
+  if(!_salaId)return;
+  salaApi("GET","sala_mensajes?sala_id=eq."+_salaId+"&order=created_at.asc&limit=50").then(function(rows){
+    var cont=document.getElementById("salaChatMsgs");
+    if(!cont||!rows)return;
+    var mio=nombreSala();
+    cont.innerHTML=rows.map(function(m){
+      return '<div class="sala-msg'+(m.usuario_nombre===mio?" yo":"")+'"><div class="who">'+esc(m.usuario_nombre)+'</div>'+esc(m.mensaje)+'</div>';
+    }).join("")||'<div style="opacity:.4">Todavía no hay mensajes. Escribile algo a tu amigo.</div>';
+    cont.scrollTop=cont.scrollHeight;
+  }).catch(function(){});
+}
+
+window.marcarCompletada=function(){
+  if(!cursoActual||leccionActualIdx===null)return;
+  var l=cursoActual.lecciones[leccionActualIdx];
+  guardarLeccion(cursoActual.id,l.id,99);
+  pintarLecciones();
+  renderContinuando();
+};
+
+function cerrarPlayerReal(){
+  if(_ytPlayer&&_ytPlayer.stopVideo){try{_ytPlayer.stopVideo();}catch(e){}}
+  document.getElementById("playerModal").classList.remove("show");
+  if(progIntCurso){clearInterval(progIntCurso);progIntCurso=null;}
+  leccionActualIdx=null;
+  pararJS();
+  if(cursoActual)pintarLecciones();
+  renderContinuando();
+}
+window.cerrarPlayer=cerrarPlayerReal;
+
+// ─── PANEL DE CODIGO: programá mientras escuchás el curso ───
+var CODE_STARTERS={
+  python:"# Escribí tu código de Python acá y probalo mientras mirás la lección\nnombre = 'Mundo'\nprint('Hola, ' + nombre)\n",
+  javascript:"// Escribí tu código de JavaScript acá y probalo mientras mirás la lección\nfunction saludar(nombre){\n  return 'Hola, ' + nombre;\n}\nconsole.log(saludar('Mundo'));\n",
+  htmlcss:"<!-- Escribí HTML y CSS. Tocá Ejecutar para ver la vista previa -->\n<style>\n  body{font-family:sans-serif;text-align:center;padding:40px}\n  h1{color:#2ecc71}\n</style>\n<h1>Hola Mundo</h1>\n<p>Editá este código y tocá Ejecutar.</p>\n",
+  git:"# Git se ejecuta en tu propia terminal, no en el navegador.\n# Usá este espacio para anotar los comandos que vayas practicando:\n\ngit init\ngit add .\ngit commit -m \"mi primer commit\"\ngit push\n",
+  sql:"-- Hay una base de datos de ejemplo cargada (tabla 'usuarios')\nSELECT * FROM usuarios;\n"
+};
+var CODE_LABELS={python:"🐍 Python",javascript:"🟨 JavaScript",htmlcss:"🎨 HTML/CSS",git:"🔧 Notas de Git",sql:"🗄️ SQL"};
+
+function getCodigoGuardado(cursoId){
+  try{var p=JSON.parse(localStorage.getItem("vh_cursos_code")||"{}");return p[cursoId];}catch(e){return null;}
+}
+function guardarCodigo(cursoId,code){
+  try{var p=JSON.parse(localStorage.getItem("vh_cursos_code")||"{}");p[cursoId]=code;localStorage.setItem("vh_cursos_code",JSON.stringify(p));}catch(e){}
+}
+
+function prepararPanelCodigo(){
+  if(!cursoActual)return;
+  document.getElementById("codeLangLabel").textContent=CODE_LABELS[cursoActual.id]||"Código";
+  var guardado=getCodigoGuardado(cursoActual.id);
+  document.getElementById("codeEditor").value=(guardado!=null)?guardado:(CODE_STARTERS[cursoActual.id]||"");
+  var out=document.getElementById("codeOutput");
+  out.className="code-output";
+  out.innerHTML="";
+  document.getElementById("playerBody").classList.remove("solo");
+  document.getElementById("btnToggleCode").textContent="💻 Código";
+}
+window.toggleCodePanel=function(){
+  var solo=document.getElementById("playerBody").classList.toggle("solo");
+  document.getElementById("btnToggleCode").textContent=solo?"💻 Mostrar código":"💻 Código";
+};
+window.reiniciarCodigo=function(){
+  if(!cursoActual)return;
+  var v=CODE_STARTERS[cursoActual.id]||"";
+  document.getElementById("codeEditor").value=v;
+  guardarCodigo(cursoActual.id,v);
+  document.getElementById("codeOutput").innerHTML="";
+};
+window.ejecutarCodigo=function(){
+  if(!cursoActual)return;
+  var code=document.getElementById("codeEditor").value;
+  guardarCodigo(cursoActual.id,code);
+  if(cursoActual.id==="javascript")ejecutarJS(code);
+  else if(cursoActual.id==="python")ejecutarPython(code);
+  else if(cursoActual.id==="htmlcss")ejecutarHTML(code);
+  else if(cursoActual.id==="sql")ejecutarSQL(code);
+  else{
+    var out=document.getElementById("codeOutput");
+    out.className="code-output";
+    out.textContent="📝 Guardado. Git se practica en tu propia terminal — este espacio es solo para anotar comandos.";
+  }
+};
+(function(){
+  var ed=document.getElementById("codeEditor");
+  if(ed)ed.addEventListener("input",function(){ if(cursoActual)guardarCodigo(cursoActual.id,ed.value); });
+})();
+
+// ─── SANDBOX: practicar código libre, sin lección ni video ───
+var sandboxLang="javascript";
+// ─── HUB DE QUIZZES: cada curso tiene el suyo, separado del resto ───
+window.abrirQuizzes=function(){
+  document.getElementById("vistaCursos").style.display="none";
+  document.getElementById("vistaQuizzes").style.display="block";
+  renderQuizzesHub();
+};
+window.volverACursosDesdeQuizzes=function(){
+  document.getElementById("vistaQuizzes").style.display="none";
+  document.getElementById("vistaCursos").style.display="block";
+  renderCursosGrid();
+  renderContinuando();
+};
+function renderQuizzesHub(){
+  document.getElementById("quizzesHubGrid").innerHTML=CURSOS.filter(function(c){return QUIZZES[c.id];}).map(function(c){
+    var preguntas=QUIZZES[c.id]||[];
+    var mejor=getQuizGuardado()[c.id];
+    return '<div class="curso-card" onclick="irARendirQuiz(\''+c.id+'\')">'+
+      '<div class="curso-ico">'+c.icono+'</div>'+
+      '<div class="curso-t">'+esc(c.titulo)+'</div>'+
+      '<div class="curso-sub">📝 '+preguntas.length+' preguntas</div>'+
+      (mejor?'<div class="curso-sub">Mejor puntaje: '+mejor.correctas+'/'+mejor.total+'</div>':'<div class="curso-sub" style="opacity:.5">Todavía no lo rendiste</div>')+
+    '</div>';
+  }).join("");
+}
+window.irARendirQuiz=function(cursoId){
+  window.abrirCurso(cursoId);
+  setTimeout(function(){
+    var sec=document.getElementById("quizSection");
+    if(sec)sec.scrollIntoView({behavior:"smooth",block:"start"});
+  },80);
+};
+
+window.abrirSandbox=function(){
+  document.getElementById("vistaCursos").style.display="none";
+  document.getElementById("vistaLecciones").style.display="none";
+  document.getElementById("vistaSandbox").style.display="block";
+  cargarLenguajeSandbox(sandboxLang);
+};
+window.volverACursosDesdeSandbox=function(){
+  document.getElementById("vistaSandbox").style.display="none";
+  document.getElementById("vistaCursos").style.display="block";
+  renderCursosGrid();
+  renderContinuando();
+};
+window.cambiarLenguajeSandbox=function(lang,btn){
+  sandboxLang=lang;
+  document.querySelectorAll("#sandboxLangs button").forEach(function(b){b.classList.remove("active");});
+  if(btn)btn.classList.add("active");
+  cargarLenguajeSandbox(lang);
+};
+function cargarLenguajeSandbox(lang){
+  document.getElementById("sandboxLangLabel").textContent=CODE_LABELS[lang]||"Código";
+  var guardado=getCodigoGuardado("sandbox_"+lang);
+  document.getElementById("sandboxEditor").value=(guardado!=null)?guardado:(CODE_STARTERS[lang]||"");
+  var out=document.getElementById("sandboxOutput");
+  out.className="code-output";
+  out.innerHTML="";
+}
+window.reiniciarSandbox=function(){
+  var v=CODE_STARTERS[sandboxLang]||"";
+  document.getElementById("sandboxEditor").value=v;
+  guardarCodigo("sandbox_"+sandboxLang,v);
+  document.getElementById("sandboxOutput").innerHTML="";
+};
+window.ejecutarSandbox=function(){
+  var code=document.getElementById("sandboxEditor").value;
+  guardarCodigo("sandbox_"+sandboxLang,code);
+  if(sandboxLang==="javascript")ejecutarJS(code,"sandboxOutput");
+  else if(sandboxLang==="python")ejecutarPython(code,"sandboxOutput");
+  else if(sandboxLang==="htmlcss")ejecutarHTML(code,"sandboxOutput");
+  else if(sandboxLang==="sql")ejecutarSQL(code,"sandboxOutput");
+};
+(function(){
+  var ed=document.getElementById("sandboxEditor");
+  if(ed)ed.addEventListener("input",function(){ guardarCodigo("sandbox_"+sandboxLang,ed.value); });
+})();
+
+// JavaScript: se ejecuta de verdad en un Web Worker (hilo aparte, sin acceso al DOM).
+// Un Worker se puede matar de verdad con .terminate() aunque tenga un while(true) colgado;
+// un iframe corre en el mismo hilo que la página y un bucle infinito ahí congela todo el tab.
+var _jsWorker=null,_jsWatchdog=null,_jsBlobUrl=null;
+function pararJS(){
+  if(_jsWatchdog){clearTimeout(_jsWatchdog);_jsWatchdog=null;}
+  if(_jsWorker){try{_jsWorker.terminate();}catch(e){}_jsWorker=null;}
+  if(_jsBlobUrl){try{URL.revokeObjectURL(_jsBlobUrl);}catch(e){}_jsBlobUrl=null;}
+}
+function ejecutarJS(code, outId){
+  var out=document.getElementById(outId||"codeOutput");
+  out.className="code-output";out.textContent="⏳ Ejecutando...";
+  pararJS();
+  var workerSrc=
+    'var OUT=[];'+
+    'function L(t){return function(){var a=[].slice.call(arguments).map(function(x){try{return typeof x==="object"?JSON.stringify(x):String(x);}catch(e){return String(x);}}).join(" ");OUT.push({t:t,m:a});};}'+
+    'console.log=L("log");console.error=L("error");console.warn=L("warn");'+
+    'self.onerror=function(msg){OUT.push({t:"error",m:String(msg)});postMessage({out:OUT});return true;};'+
+    'try{\n'+code+'\n}catch(e){OUT.push({t:"error",m:String(e)});}'+
+    'postMessage({out:OUT});';
+  try{
+    var blob=new Blob([workerSrc],{type:"application/javascript"});
+    _jsBlobUrl=URL.createObjectURL(blob);
+    var w=new Worker(_jsBlobUrl);
+    _jsWorker=w;
+    w.onmessage=function(ev){
+      pararJS();
+      var lines=(ev.data&&ev.data.out)||[];
+      if(!lines.length){out.textContent="✅ Ejecutado sin salida (probá con console.log).";return;}
+      out.innerHTML=lines.map(function(l){
+        var cls=l.t==="error"?"code-err":"";
+        return '<div class="'+cls+'">'+(l.t==="error"?"⛔ ":"")+esc(l.m)+'</div>';
+      }).join("");
+    };
+    w.onerror=function(ev){
+      pararJS();
+      out.innerHTML='<span class="code-err">⛔ '+esc(ev.message||"Error ejecutando el código")+'</span>';
+    };
+    _jsWatchdog=setTimeout(function(){
+      out.innerHTML='<span class="code-err">⏱️ Tardó demasiado (¿bucle infinito?). Se detuvo la ejecución.</span>';
+      pararJS();
+    },4000);
+  }catch(e){
+    out.innerHTML='<span class="code-err">⛔ '+esc(String((e&&e.message)||e))+'</span>';
+  }
+}
+// Python: interprete real via Pyodide (WebAssembly), se descarga la primera vez que se usa
+var _pyodide=null,_pyodideLoading=null;
+function cargarPyodide(){
+  if(_pyodide)return Promise.resolve(_pyodide);
+  if(_pyodideLoading)return _pyodideLoading;
+  _pyodideLoading=new Promise(function(resolve,reject){
+    var s=document.createElement("script");
+    s.src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js";
+    s.onload=function(){
+      loadPyodide().then(function(py){_pyodide=py;resolve(py);}).catch(reject);
+    };
+    s.onerror=function(){reject(new Error("No se pudo cargar Pyodide"));};
+    document.head.appendChild(s);
+  });
+  return _pyodideLoading;
+}
+function ejecutarPython(code, outId){
+  var out=document.getElementById(outId||"codeOutput");
+  out.className="code-output";
+  out.textContent="⏳ Cargando intérprete de Python (primera vez puede tardar unos segundos)...";
+  cargarPyodide().then(function(py){
+    out.textContent="⏳ Ejecutando...";
+    var buffer=[];
+    py.setStdout({batched:function(s){buffer.push(s);}});
+    py.setStderr({batched:function(s){buffer.push("⛔ "+s);}});
+    return py.runPythonAsync(code).then(function(){
+      out.textContent=buffer.length?buffer.join("\n"):"✅ Ejecutado sin salida (probá con print()).";
+    });
+  }).catch(function(e){
+    out.innerHTML='<span class="code-err">⛔ '+esc(String((e&&e.message)||e))+'</span>';
+  });
+}
+
+// SQL: motor real via sql.js (SQLite en WebAssembly) con una tabla de ejemplo
+var _sqlDb=null,_sqljsLoading=null;
+function cargarSqlJs(){
+  if(_sqlDb)return Promise.resolve(_sqlDb);
+  if(_sqljsLoading)return _sqljsLoading;
+  _sqljsLoading=new Promise(function(resolve,reject){
+    var s=document.createElement("script");
+    s.src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/sql-wasm.js";
+    s.onload=function(){
+      initSqlJs({locateFile:function(f){return "https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/"+f;}}).then(function(SQL){
+        var db=new SQL.Database();
+        db.run("CREATE TABLE usuarios (id INTEGER PRIMARY KEY, nombre TEXT, edad INTEGER, pais TEXT);"+
+          "INSERT INTO usuarios (nombre,edad,pais) VALUES "+
+          "('Ana',28,'Argentina'),('Luis',35,'Mexico'),('Marta',22,'España'),('Carlos',41,'Colombia'),('Sofia',19,'Chile');");
+        _sqlDb=db;resolve(db);
+      }).catch(reject);
+    };
+    s.onerror=function(){reject(new Error("No se pudo cargar sql.js"));};
+    document.head.appendChild(s);
+  });
+  return _sqljsLoading;
+}
+function ejecutarSQL(code, outId){
+  var out=document.getElementById(outId||"codeOutput");
+  out.className="code-output";
+  out.textContent="⏳ Cargando motor SQL...";
+  cargarSqlJs().then(function(db){
+    try{
+      var res=db.exec(code);
+      if(!res.length){out.textContent="✅ Ejecutado (sin filas para mostrar).";return;}
+      var r=res[0];
+      var html="<table><tr>"+r.columns.map(function(c){return "<th>"+esc(c)+"</th>";}).join("")+"</tr>";
+      r.values.forEach(function(row){
+        html+="<tr>"+row.map(function(v){return "<td>"+esc(v===null?"NULL":String(v))+"</td>";}).join("")+"</tr>";
+      });
+      html+="</table>";
+      out.innerHTML=html;
+    }catch(e){
+      out.innerHTML='<span class="code-err">⛔ '+esc(String(e.message||e))+'</span>';
+    }
+  }).catch(function(e){
+    out.innerHTML='<span class="code-err">⛔ '+esc(String((e&&e.message)||e))+'</span>';
+  });
+}
+
+// HTML/CSS: vista previa en vivo dentro de un iframe aislado
+function ejecutarHTML(code, outId){
+  var out=document.getElementById(outId||"codeOutput");
+  out.className="code-output preview";
+  out.innerHTML='<iframe sandbox="allow-scripts"></iframe>';
+  out.querySelector("iframe").srcdoc=code;
+}
+
+function renderContinuando(){
+  var p=getPC();
+  var items=[];
+  CURSOS.forEach(function(c){
+    var s=statsCurso(c);
+    var pd=p[c.id];
+    if(pd&&s.completadas<s.total&&(s.completadas>0||Object.keys(pd.lecciones||{}).length>0)){
+      items.push({curso:c,stats:s,ts:pd.ts||0,ultima:pd.ultima});
+    }
+  });
+  items.sort(function(a,b){return b.ts-a.ts;});
+  var row=document.getElementById("contRow"),grid=document.getElementById("contGrid");
+  if(!items.length){row.style.display="none";return;}
+  row.style.display="block";
+  grid.innerHTML=items.slice(0,8).map(function(it){
+    var c=it.curso,s=it.stats;
+    var ul=null;
+    for(var i=0;i<c.lecciones.length;i++){ if(c.lecciones[i].id===it.ultima){ul=c.lecciones[i];break;} }
+    if(!ul) ul=c.lecciones[0];
+    return '<div class="cont-card" onclick="reanudarCurso(\''+c.id+'\')">'+
+      '<img src="'+esc(ul.thumb)+'" loading="lazy">'+
+      '<div class="barbg"><div class="bar" style="width:'+s.pct+'%"></div></div>'+
+      '<div class="inf"><div class="t">'+c.icono+' '+esc(c.titulo)+'</div>'+
+      '<div class="pct">'+s.completadas+'/'+s.total+' lecciones</div></div></div>';
+  }).join("");
+}
+window.reanudarCurso=function(cursoId){
+  abrirCurso(cursoId);
+  document.getElementById("vistaLecciones").scrollIntoView({behavior:"smooth",block:"start"});
+};
+
+// ─── ASISTENTE DE PROGRAMACION ───
+var AI_CONOCIMIENTO = {
+"que es python":"Python es un lenguaje de programacion interpretado, de alto nivel y facil de aprender. Se usa en web, ciencia de datos, IA, automatizacion y mas. Sintaxis limpia y legible.\n\nEjemplo:\nprint('Hola Mundo')\nnombre = input('Tu nombre: ')\nprint(f'Hola {nombre}')\n\nPara empezar: instalalo desde python.org o usa los cursos de YouTube en esta pagina.",
+"como hacer un bucle for":"Un bucle FOR repite codigo varias veces.\n\nJavaScript:\nfor(var i=0; i<5; i++){\n  console.log('Vuelta '+i);\n}\n\nPython:\nfor i in range(5):\n  print('Vuelta', i)\n\nSi queres recorrer una lista:\nfrutas = ['manzana','pera','uva']\nfor fruta in frutas:\n  print(fruta)",
+"como crear una funcion":"Las funciones son bloques de codigo reutilizables.\n\nPython:\ndef saludar(nombre):\n  return 'Hola ' + nombre\n\nprint(saludar('Mundo'))\n\nJavaScript:\nfunction saludar(nombre){\n  return 'Hola ' + nombre;\n}\n\nconsole.log(saludar('Mundo'));\n\nTambien hay arrow functions en JS:\nconst saludar = (nombre) => 'Hola ' + nombre;",
+"que es html":"HTML (HyperText Markup Language) es el lenguaje de marcado para crear paginas web. NO es un lenguaje de programacion, es de estructura.\n\nEjemplo basico:\n<!DOCTYPE html>\n<html>\n<head><title>Mi Pagina</title></head>\n<body>\n  <h1>Hola Mundo</h1>\n  <p>Este es un parrafo.</p>\n<\/body>\n<\/html>\n\nLos elementos se arman con etiquetas: <h1>, <p>, <div>, <a>, <img>...\nCSS le da el estilo visual arriba de HTML.",
+"como centrar un div":"CSS: centrar un div horizontal y verticalmente.\n\nMetodo Flexbox (recomendado):\n.contenedor{\n  display: flex;\n  justify-content: center; /* horizontal */\n  align-items: center;     /* vertical */\n  height: 100vh;\n}\n\nMetodo Grid:\n.contenedor{\n  display: grid;\n  place-items: center;\n  height: 100vh;\n}\n\nCon margin auto (centrado horizontal):\n.centrado{\n  width: 300px;\n  margin: 0 auto;\n}",
+"que es una api":"API (Application Programming Interface) es una interfaz que permite que dos programas se comuniquen entre si.\n\nEjemplo: cuando usas fetch() en JavaScript para pedir datos de un servidor, estas usando una API.\n\nfetch('https://api.ejemplo.com/datos')\n  .then(r => r.json())\n  .then(datos => console.log(datos));\n\nUna API REST responde con JSON, tiene endpoints como:\n- GET /usuarios → lista usuarios\n- POST /usuarios → crea usuario\n- DELETE /usuarios/5 → borra usuario 5",
+"variables":"Las variables guardan datos en memoria.\n\nJavaScript:\nlet nombre = 'Juan';\nconst PI = 3.14;\nvar edad = 25; // viejo, evitar\n\nPython:\nnombre = 'Juan'\nPI = 3.14\nedad = 25\n\nTipos: string (texto), number (numeros), boolean (true/false), array/list, objeto/diccionario.",
+"como aprender a programar":"Para aprender a programar desde cero:\n\n1. Empeza con logica de programacion (variables, bucles, condiciones)\n2. Elegi UN lenguaje (recomiendo Python o JavaScript)\n3. Practica con ejercicios simples (calculadora, adivinanzas)\n4. Mira los cursos de esta pagina (son gratis)\n5. Hace proyectos reales (to-do list, blog, juego simple)\n6. Lee codigo de otros en GitHub\n7. No te frustres, programar es practica\n\nTiempo estimado: 3-6 meses para lo basico, 1+ año para trabajo.",
+"html javascript css diferencia":"HTML, CSS y JavaScript son el trio del desarrollo web:\n\nHTML → Estructura: que elementos hay (titulos, parrafos, botones)\nCSS → Estilo: como se ven (colores, tamaños, posiciones)\nJavaScript → Comportamiento: que hacen (clicks, animaciones, datos)\n\nAnalogia de una casa:\nHTML = los planos y paredes\nCSS = la pintura y decoracion\nJS = la electricidad y cañerias",
+"node js que es":"Node.js es un entorno que permite ejecutar JavaScript FUERA del navegador, en el servidor.\n\nCon Node podes:\n- Crear servidores web (Express.js)\n- Leer/escribir archivos\n- Conectar bases de datos\n- Hacer APIs REST\n\nEjemplo servidor minimo:\nconst http = require('http');\nhttp.createServer((req,res)=>{\n  res.end('Hola Mundo');\n}).listen(3000);\n\nSe instala desde nodejs.org. Viene con npm (gestor de paquetes).",
+"git que es":"Git es un sistema de control de versiones. Guarda el historial de cambios de tu codigo.\n\nComandos basicos:\ngit init → crear repositorio\ngit add . → preparar archivos\ngit commit -m 'mensaje' → guardar cambios\ngit push → subir a GitHub\ngit pull → bajar cambios\ngit clone URL → copiar repositorio\n\nGitHub/GitLab son plataformas online para alojar repositorios Git.",
+"base de datos sql":"SQL (Structured Query Language) es el lenguaje para bases de datos relacionales.\n\nComandos basicos:\nSELECT * FROM usuarios;\nSELECT nombre FROM usuarios WHERE edad > 18;\nINSERT INTO usuarios VALUES ('Juan',25);\nUPDATE usuarios SET edad=26 WHERE nombre='Juan';\nDELETE FROM usuarios WHERE id=5;\n\nCREATE TABLE productos (id INT, nombre TEXT, precio REAL);\n\nBases de datos: MySQL, PostgreSQL, SQLite, SQL Server.",
+"css flexbox":"Flexbox es un sistema de layout CSS unidimensional.\n\nContenedor padre:\n.contenedor{\n  display: flex;\n  flex-direction: row; /* o column */\n  justify-content: center; /* alinear horizontal */\n  align-items: center; /* alinear vertical */\n  gap: 10px; /* espacio entre hijos */\n}\n\nHijos:\n.hijo{\n  flex: 1; /* ocupa espacio disponible */\n}\n\nIdeal para menus, cards, centrar elementos.",
+"responsivo que es":"Diseño responsivo = que la pagina se adapte a cualquier pantalla (celu, tablet, PC).\n\nTecnicas:\n1. Media queries en CSS:\n@media(max-width: 768px){\n  .menu{ display: none; }\n}\n\n2. Unidades relativas: %, vw, vh, rem\n3. max-width en imagenes: img{ max-width:100%; }\n4. Flexbox y Grid para layouts adaptables\n5. Mobile-first: diseñar primero para celu",
+"diferencia let var const":"let, var y const declaran variables en JavaScript.\n\nvar → alcance de funcion, se puede redeclarar (evitar)\nlet → alcance de bloque {}, no se redeclara\nconst → constante, no cambia su valor\n\nEjemplo:\nvar x = 5; // evitar\nlet y = 10; y = 20; // ok\nconst z = 30; // z = 40 da error\n\nSiempre usa const por defecto. Si necesitas cambiar el valor, usa let. Nunca var en codigo nuevo.",
+"bucle while python":"El while repite mientras se cumpla una condicion.\n\nPython:\ni = 0\nwhile i < 5:\n  print(i)\n  i += 1\n\nCuidado: si la condicion nunca se vuelve falsa, es un bucle infinito y cuelga el programa. Siempre asegurate de modificar la variable adentro del while.",
+"funciones python avanzado":"Funciones en Python en detalle:\n\ndef sumar(a, b=0):  # b tiene valor por defecto\n  return a + b\n\nsumar(3, 4)  # 7\nsumar(3)     # 3 (usa b=0)\n\nArgumentos con nombre:\nsumar(a=1, b=2)\n\n*args y **kwargs (cantidad variable de argumentos):\ndef todos(*args):\n  return sum(args)\ntodos(1,2,3,4)  # 10",
+"listas python":"Las listas en Python guardan varios valores en orden.\n\nfrutas = ['manzana','pera','uva']\nfrutas.append('kiwi')      # agregar\nfrutas.remove('pera')      # quitar\nfrutas[0]                  # 'manzana'\nlen(frutas)                # cantidad\nfrutas.sort()               # ordenar\n\nList comprehension (forma corta de crear listas):\ncuadrados = [x*x for x in range(5)]  # [0,1,4,9,16]",
+"diccionarios python":"Los diccionarios guardan pares clave-valor.\n\nusuario = {'nombre':'Ana','edad':28}\nusuario['nombre']       # 'Ana'\nusuario['pais']='AR'    # agregar clave\ndel usuario['edad']     # borrar clave\n\nRecorrer un diccionario:\nfor clave, valor in usuario.items():\n  print(clave, valor)",
+"programacion orientada a objetos poo":"POO organiza el codigo en clases y objetos.\n\nclass Perro:\n  def __init__(self, nombre):\n    self.nombre = nombre\n  def ladrar(self):\n    return self.nombre + ' dice: Guau!'\n\nfido = Perro('Fido')\nprint(fido.ladrar())\n\n4 pilares: Encapsulamiento (agrupar datos y metodos), Herencia (una clase hereda de otra), Polimorfismo (mismo metodo, distinto comportamiento), Abstraccion (ocultar detalles internos).",
+"try except python":"Manejo de errores en Python:\n\ntry:\n  numero = int(input('Numero: '))\n  resultado = 10 / numero\nexcept ZeroDivisionError:\n  print('No se puede dividir por cero')\nexcept ValueError:\n  print('Eso no es un numero')\nfinally:\n  print('Esto se ejecuta siempre')\n\nSirve para que el programa no se rompa cuando algo falla.",
+"arrays objetos javascript":"Arrays y objetos en JavaScript:\n\nconst frutas = ['manzana','pera'];\nfrutas.push('uva');       // agregar\nfrutas.map(f => f.toUpperCase());  // transformar\nfrutas.filter(f => f !== 'pera');  // filtrar\n\nconst usuario = {nombre:'Ana', edad:28};\nusuario.nombre;            // 'Ana'\nObject.keys(usuario);      // ['nombre','edad']",
+"eventos dom javascript":"Los event listeners reaccionan a acciones del usuario.\n\nconst boton = document.querySelector('#miBoton');\nboton.addEventListener('click', function(){\n  console.log('Click!');\n});\n\nEventos comunes: click, input, submit, keydown, mouseover.\n\ndocument.querySelector('#input').addEventListener('input', e => {\n  console.log(e.target.value);\n});",
+"fetch async await promesas":"Promesas y async/await en JavaScript sirven para trabajar con codigo asincrono (que tarda, como pedir datos a un servidor).\n\nCon .then():\nfetch('/api/datos')\n  .then(r => r.json())\n  .then(datos => console.log(datos));\n\nCon async/await (mas legible):\nasync function cargar(){\n  const r = await fetch('/api/datos');\n  const datos = await r.json();\n  console.log(datos);\n}",
+"json que es":"JSON (JavaScript Object Notation) es un formato de texto para intercambiar datos.\n\n{\"nombre\":\"Ana\",\"edad\":28,\"activo\":true}\n\nEn JavaScript:\nJSON.stringify(objeto)   // objeto -> texto JSON\nJSON.parse(texto)        // texto JSON -> objeto\n\nCasi todas las APIs REST responden en JSON.",
+"formulario html":"Formularios en HTML:\n\n<form>\n  <label>Nombre:</label>\n  <input type=\"text\" name=\"nombre\" required>\n  <input type=\"email\" name=\"correo\">\n  <button type=\"submit\">Enviar</button>\n<\/form>\n\nTipos de input: text, email, password, number, checkbox, radio, date, file.",
+"css grid":"CSS Grid es un sistema de layout bidimensional (filas y columnas).\n\n.contenedor{\n  display: grid;\n  grid-template-columns: repeat(3, 1fr);\n  gap: 10px;\n}\n\nCada hijo cae automaticamente en una celda. Es ideal para layouts de pagina completos; Flexbox es mejor para filas o columnas simples.",
+"git commit add init":"Flujo basico de Git:\n\ngit init                       → crear repositorio\ngit add archivo.txt            → preparar UN archivo\ngit add .                      → preparar TODOS los cambios\ngit commit -m \"mensaje\"        → guardar los cambios preparados\ngit status                     → ver que cambio\ngit log                        → ver historial de commits\n\nSiempre: add -> commit -> (push).",
+"git branch merge":"Ramas (branches) en Git te dejan trabajar en algo sin tocar el codigo principal.\n\ngit branch nueva-funcion       → crear rama\ngit checkout nueva-funcion     → cambiar a esa rama\ngit checkout -b nueva-funcion  → crear y cambiar en un paso\ngit merge nueva-funcion        → traer los cambios a la rama actual\n\nRebase reordena los commits en vez de mezclarlos; para empezar, usa merge.",
+"subir proyecto github":"Subir tu proyecto a GitHub:\n\n1. Cre[a]á un repositorio vacio en github.com\n2. En tu proyecto local:\ngit init\ngit add .\ngit commit -m \"primer commit\"\ngit branch -M main\ngit remote add origin https://github.com/tu-usuario/tu-repo.git\ngit push -u origin main\n\nDespues de eso, con 'git push' alcanza.",
+"git clone pull push":"git clone URL          → descarga un repositorio completo por primera vez\ngit pull               → baja los cambios nuevos del repositorio remoto\ngit push               → sube tus cambios (commits) al repositorio remoto\n\nSiempre hace 'git pull' antes de empezar a trabajar, para no pisar cambios de otros.",
+"conflictos git":"Un conflicto de Git pasa cuando dos cambios tocan la misma linea.\n\nGit marca el archivo asi:\n<<<<<<< HEAD\ntu version\n=======\nversion de la otra rama\n>>>>>>> rama-x\n\nSolucion: editá el archivo a mano, dejá la version correcta, borrá esas marcas, despues:\ngit add archivo\ngit commit",
+"select sql":"SELECT trae datos de una tabla.\n\nSELECT * FROM usuarios;                        -- todas las columnas\nSELECT nombre, edad FROM usuarios;              -- columnas especificas\nSELECT * FROM usuarios WHERE edad > 18;          -- con condicion\nSELECT * FROM usuarios ORDER BY edad DESC;       -- ordenado\nSELECT * FROM usuarios LIMIT 10;                 -- limitar cantidad",
+"insert update delete sql":"Modificar datos en SQL:\n\nINSERT INTO usuarios (nombre, edad) VALUES ('Juan', 25);\nUPDATE usuarios SET edad = 26 WHERE nombre = 'Juan';\nDELETE FROM usuarios WHERE id = 5;\n\nOJO: UPDATE y DELETE sin WHERE afectan TODAS las filas de la tabla.",
+"joins sql":"JOIN combina filas de dos tablas relacionadas.\n\nSELECT pedidos.id, usuarios.nombre\nFROM pedidos\nJOIN usuarios ON pedidos.usuario_id = usuarios.id;\n\nINNER JOIN → solo filas que coinciden en ambas tablas.\nLEFT JOIN → todas las de la izquierda, aunque no tengan match.",
+"group by sql":"GROUP BY agrupa filas para calcular totales.\n\nSELECT pais, COUNT(*) as cantidad\nFROM usuarios\nGROUP BY pais;\n\nSELECT pais, AVG(edad) as promedio\nFROM usuarios\nGROUP BY pais\nHAVING COUNT(*) > 2;   -- HAVING filtra DESPUES de agrupar",
+"crear tabla sql":"Crear tablas en SQL:\n\nCREATE TABLE usuarios (\n  id INTEGER PRIMARY KEY,\n  nombre TEXT NOT NULL,\n  edad INTEGER,\n  pais TEXT\n);\n\nPRIMARY KEY → identifica cada fila de forma unica.\nFOREIGN KEY → conecta con la clave primaria de otra tabla (relacion).",
+"errores comunes debugging":"Errores tipicos y que significan:\n\nSyntaxError → te faltó algo (paréntesis, dos puntos, punto y coma)\nTypeError → usaste un valor del tipo equivocado (ej: sumar texto con numero mal)\nNameError / ReferenceError → usaste una variable que no existe o no declaraste\nIndentationError (Python) → la identación (espacios) esta mal\nundefined is not a function → llamaste algo que no es una funcion\n\nTip: leé el error de abajo hacia arriba, la ULTIMA linea suele decir el problema real.",
+"como debuggear":"Como debuggear (encontrar el error) en tu codigo:\n\n1. Leé el mensaje de error completo, dice el tipo y la linea\n2. Agregá console.log() (JS) o print() (Python) antes de la linea que falla, para ver los valores\n3. Comentá partes del codigo para aislar donde esta el problema\n4. Revisá que no te falten llaves {}, parentesis () o comillas\n5. Copiá el error exacto y buscalo, seguro alguien mas lo tuvo",
+}
+var LESSON_MAP={
+  "bucle while python":{curso:"python",idx:3},
+  "funciones python avanzado":{curso:"python",idx:4},
+  "listas python":{curso:"python",idx:5},
+  "diccionarios python":{curso:"python",idx:5},
+  "programacion orientada a objetos poo":{curso:"python",idx:6},
+  "try except python":{curso:"python",idx:7},
+  "arrays objetos javascript":{curso:"javascript",idx:5},
+  "eventos dom javascript":{curso:"javascript",idx:6},
+  "fetch async await promesas":{curso:"javascript",idx:7},
+  "formulario html":{curso:"htmlcss",idx:2},
+  "css flexbox":{curso:"htmlcss",idx:6},
+  "css grid":{curso:"htmlcss",idx:7},
+  "git commit add init":{curso:"git",idx:1},
+  "git branch merge":{curso:"git",idx:2},
+  "subir proyecto github":{curso:"git",idx:3},
+  "git clone pull push":{curso:"git",idx:4},
+  "conflictos git":{curso:"git",idx:5},
+  "select sql":{curso:"sql",idx:1},
+  "insert update delete sql":{curso:"sql",idx:2},
+  "joins sql":{curso:"sql",idx:4},
+  "group by sql":{curso:"sql",idx:5},
+  "crear tabla sql":{curso:"sql",idx:0}
+};
+
+function si(q){ document.getElementById("aiInput").value=q; preguntarAI(); }
+
+// ─── MEMORIA DE LA IA: recuerda que preguntaste, para conocerte mejor con el tiempo ───
+var MEM_KEY="vh_ia_memoria";
+function getMemoria(){ try{return JSON.parse(localStorage.getItem(MEM_KEY)||'{}');}catch(e){return {};} }
+function guardarMemoria(m){ try{localStorage.setItem(MEM_KEY,JSON.stringify(m));}catch(e){} }
+function registrarPregunta(topicKey){
+  if(!topicKey)return 0;
+  var m=getMemoria();
+  m[topicKey]=(m[topicKey]||0)+1;
+  guardarMemoria(m);
+  return m[topicKey];
+}
+function temaMasPreguntado(){
+  var m=getMemoria(),mejor=null,max=0;
+  for(var k in m){ if(m[k]>max){max=m[k];mejor=k;} }
+  return max>=2?{tema:mejor,veces:max}:null;
+}
+
+// ─── PERFIL: la IA aprende sobre vos a medida que le hablás (nivel, lenguaje favorito) ───
+var PERFIL_KEY="vh_ia_perfil";
+function getPerfilIA(){ try{return JSON.parse(localStorage.getItem(PERFIL_KEY)||'{}');}catch(e){return {};} }
+function guardarPerfilIA(p){ try{localStorage.setItem(PERFIL_KEY,JSON.stringify(p));}catch(e){} }
+var PERFIL_LANGS=["python","javascript","java","html","css","sql","git"];
+function actualizarPerfilDesdeMensaje(t){
+  var perfil=getPerfilIA();
+  var aprendido=[];
+  if(/soy (un |una )?principiante|reci[eé]n empiezo|no s[eé] nada de programa|nunca programe|nunca programé|estoy empezando|soy (nuevo|nueva) en esto/.test(t)){
+    if(perfil.nivel!=="principiante"){ perfil.nivel="principiante"; aprendido.push("sos principiante — voy a explicar todo paso a paso"); }
+  }else if(/ya s[eé] programar|tengo experiencia programando|soy programador|soy programadora|soy desarrollador|soy desarrolladora|no soy principiante/.test(t)){
+    if(perfil.nivel!=="avanzado"){ perfil.nivel="avanzado"; aprendido.push("ya tenés experiencia — te voy a tirar respuestas más directas"); }
+  }
+  PERFIL_LANGS.forEach(function(lang){
+    var re=new RegExp("(me gusta|prefiero|quiero aprender|me interesa)\\s+"+lang);
+    if(re.test(t)&&perfil.lenguajeFavorito!==lang){
+      perfil.lenguajeFavorito=lang;
+      aprendido.push("te gusta "+lang+" — lo voy a priorizar en los ejemplos");
+    }
+  });
+  if(/no entiendo|estoy perdid|no entend[ií]|es muy dif[ií]cil|complicado/.test(t)){
+    perfil.vecesConfundido=(perfil.vecesConfundido||0)+1;
+  }
+  guardarPerfilIA(perfil);
+  return aprendido;
+}
+function adaptarPorPerfil(texto){
+  var perfil=getPerfilIA();
+  if(perfil.nivel==="principiante"){
+    texto+="\n\n💡 Como sos principiante: no te preocupes si no te sale a la primera. Probá el código en la pestaña 💻 Código mientras mirás el video.";
+  }else if(perfil.nivel==="avanzado"&&perfil.lenguajeFavorito){
+    texto+="\n\n(Sé que te gusta "+perfil.lenguajeFavorito+", así que priorizá ese curso si esto lo cubre.)";
+  }
+  return texto;
+}
+
+// ─── ESTUDIAR CONMIGO: sesión de preguntas y respuestas por chat, con las mismas
+// preguntas de los quiz de cada curso, pero conversacional en vez de a clic ───
+var _estudioModo=null;
+window.iniciarEstudio=function(){
+  var perfil=getPerfilIA();
+  var cursoId=(cursoActual&&cursoActual.id)||perfil.lenguajeFavorito||"python";
+  if(cursoId==="html"||cursoId==="css")cursoId="htmlcss";
+  if(!QUIZZES[cursoId])cursoId="python";
+  agregarMsg("📖 Empecemos a estudiar. Te voy preguntando y me respondés como quieras (con el número o con tus palabras).","bot");
+  setTimeout(function(){ hacerPreguntaEstudio(cursoId); },400);
+};
+function hacerPreguntaEstudio(cursoId){
+  var preguntas=QUIZZES[cursoId]||QUIZZES.python;
+  var p=preguntas[Math.floor(Math.random()*preguntas.length)];
+  _estudioModo={cursoId:cursoId,pregunta:p,esperandoContinuar:false};
+  var curso=CURSOS.filter(function(c){return c.id===cursoId;})[0];
+  var opciones=p.opciones.map(function(o,i){return (i+1)+") "+o;}).join("\n");
+  agregarMsg((curso?curso.icono+" "+curso.titulo+"\n\n":"")+p.q+"\n\n"+opciones,"bot");
+}
+function evaluarRespuestaEstudio(texto){
+  var em=_estudioModo;
+  if(!em)return;
+  var p=em.pregunta;
+  var idxElegido=-1;
+  var num=texto.match(/\d+/);
+  if(num){ idxElegido=parseInt(num[0],10)-1; }
+  if(idxElegido<0||idxElegido>=p.opciones.length){
+    idxElegido=-1;
+    for(var i=0;i<p.opciones.length;i++){
+      var op=p.opciones[i].toLowerCase();
+      if(texto.indexOf(op)>=0||op.indexOf(texto)>=0){ idxElegido=i; break; }
+    }
+  }
+  var correcto=idxElegido===p.correcta;
+  var msg=correcto?"✅ ¡Correcto!":"❌ No — la respuesta era: \""+p.opciones[p.correcta]+"\".";
+  if(correcto)sumarXP(2,"Estudiando con la IA");
+  msg+="\n\n¿Seguimos con otra? (sí / no)";
+  agregarMsg(msg,"bot");
+  _estudioModo={cursoId:em.cursoId,esperandoContinuar:true};
+}
+
+function preguntarAI(){
+  var inp = document.getElementById("aiInput");
+  var original = inp.value.trim();
+  if(!original) return;
+  var p = original.toLowerCase();
+  agregarMsg(original,"user");
+  inp.value = "";
+
+  if(_estudioModo){
+    if(_estudioModo.esperandoContinuar){
+      var quiere=/^(s|si|sí|dale|va|obvio|otra|another|ok|yes)/.test(p);
+      var cursoId=_estudioModo.cursoId;
+      _estudioModo=null;
+      setTimeout(function(){
+        if(quiere) hacerPreguntaEstudio(cursoId);
+        else agregarMsg("👍 Terminamos por hoy. Cuando quieras seguir estudiando, tocá 📖 Estudiar conmigo.","bot");
+      },350);
+    }else{
+      setTimeout(function(){ evaluarRespuestaEstudio(p); },400);
+    }
+    return;
+  }
+
+  var aprendido=actualizarPerfilDesdeMensaje(p);
+  var r = buscarRespuesta(p);
+  setTimeout(function(){
+    var veces=registrarPregunta(r.topicKey);
+    var texto=r.texto;
+    if(veces>=3) texto="🧠 Ya me preguntaste esto "+veces+" veces — parece un tema que te cuesta, no te preocupes.\n\n"+texto;
+    texto=adaptarPorPerfil(texto);
+    agregarMsg(texto,"bot",r.leccion);
+    if(aprendido.length){
+      setTimeout(function(){ agregarMsg("🧠 Anotado: "+aprendido.join(". ")+".","bot"); },500);
+    }
+  },400);
+}
+
+function buscarRespuesta(p){
+  // Buscar en el mapa de lecciones primero (respuestas con link directo a la leccion)
+  for(var lk in LESSON_MAP){
+    if(coincideTema(p,lk)) return {texto:AI_CONOCIMIENTO[lk],topicKey:lk,leccion:LESSON_MAP[lk]};
+  }
+  // Buscar clave exacta en el resto del conocimiento
+  for(var k in AI_CONOCIMIENTO){
+    if(coincideTema(p,k)) return {texto:AI_CONOCIMIENTO[k],topicKey:k,leccion:null};
+  }
+  // Buscar palabras clave generales
+  var temas = {python:{texto:"Python es un lenguaje facil de aprender. En esta pagina tenes un curso completo de Python con lecciones en orden, tarjeta 🐍 Python.",curso:"python"},
+    javascript:{texto:"JavaScript es el lenguaje de la web. Entra a la tarjeta 🟨 JavaScript para el curso completo, leccion por leccion.",curso:"javascript"},
+    html:{texto:"HTML estructura paginas web, CSS las estiliza. Entra a la tarjeta 🎨 HTML y CSS.",curso:"htmlcss"},
+    css:{texto:AI_CONOCIMIENTO["como centrar un div"],curso:"htmlcss"},
+    git:{texto:"Git y GitHub sirven para versionar tu codigo. Entra a la tarjeta 🔧 Git y GitHub.",curso:"git"},
+    sql:{texto:AI_CONOCIMIENTO["base de datos sql"],curso:"sql"},
+    react:{texto:"React es una libreria de JavaScript para interfaces de usuario. Todavia no tengo un curso curado de React, pero podes empezar por la tarjeta 🟨 JavaScript primero."},
+    java:{texto:"Java es orientado a objetos, usado en Android y backend. Todavia no tengo un curso curado de Java en esta pagina."},
+    php:{texto:"PHP es para backend web. WordPress lo usa. Todavia no tengo un curso curado de PHP en esta pagina."},
+    ciberseguridad:{texto:"Ciberseguridad es proteger sistemas, redes y datos de ataques. Entra a la tarjeta 🛡️ Ciberseguridad para el curso completo: redes, Linux, OSINT y más.",curso:"ciberseguridad"},
+    hacking:{texto:"El hacking ético (o pentesting) es probar sistemas CON PERMISO para encontrar vulnerabilidades antes que un atacante real. Entra a la tarjeta 🥷 Pentesting.",curso:"pentesting"},
+    pentesting:{texto:"Pentesting es simular ataques reales, con autorización, para encontrar fallas de seguridad. Entra a la tarjeta 🥷 Pentesting (Hacking Ético).",curso:"pentesting"},
+    programar:{texto:"Elegi un curso de los que estan arriba (Python, JavaScript, HTML/CSS, Git, SQL, Ciberseguridad o Pentesting) y segui las lecciones en orden. Preguntame 'como aprender a programar' para mas detalle."}};
+  for(var t in temas){
+    if(p.indexOf(t)>=0) return {texto:temas[t].texto+"\n\n¿Queres saber algo mas especifico?",topicKey:"tema_"+t,leccion:temas[t].curso?{curso:temas[t].curso,idx:0}:null};
+  }
+  // Si hay una leccion abierta ahora mismo, usar eso de contexto en la respuesta por defecto
+  var ctx="";
+  if(cursoActual&&leccionActualIdx!=null){
+    ctx="\n\n📍 Como estás en \""+cursoActual.lecciones[leccionActualIdx].titulo+"\" (curso "+cursoActual.titulo+"), probá el botón ⏪ No entendí del video para reescuchar esa parte.";
+  }
+  return {texto:"Buena pregunta sobre '"+p+"'. Te recomiendo elegir uno de los cursos de arriba y arrancar por la leccion 1. Tambien podes preguntarme cosas como: que es python, como hacer un bucle for, listas python, arrays javascript, git commit, select sql, errores comunes."+ctx,topicKey:null,leccion:null};
+}
+function coincideTema(p,k){ return p.indexOf(k)>=0 || k.indexOf(p)>=0; }
+
+window.irALeccionDesdeIA=function(cursoId,idx){
+  window.abrirCurso(cursoId);
+  setTimeout(function(){ window.abrirLeccion(idx); },50);
+};
+
+// ─── HISTORIAL DE CHAT: se guarda solo, para que la IA "recuerde" la charla entre visitas ───
+var CHAT_HIST_KEY="vh_ia_chat";
+function getChatHistorial(){ try{return JSON.parse(localStorage.getItem(CHAT_HIST_KEY)||"[]");}catch(e){return [];} }
+function guardarEnHistorial(txt,tipo,leccion){
+  var h=getChatHistorial();
+  h.push({txt:txt,tipo:tipo,leccion:leccion||null});
+  if(h.length>40) h=h.slice(h.length-40);
+  try{localStorage.setItem(CHAT_HIST_KEY,JSON.stringify(h));}catch(e){}
+}
+window.borrarHistorialChat=function(){
+  try{localStorage.removeItem(CHAT_HIST_KEY);}catch(e){}
+  document.getElementById("aiChat").innerHTML="";
+  saludoPersonalizado();
+};
+
+function pintarMsg(txt, tipo, leccion){
+  var chat = document.getElementById("aiChat");
+  var d = document.createElement("div");
+  d.className = "ai-msg ai-"+tipo;
+  d.style.whiteSpace = "pre-wrap";
+  d.textContent = txt;
+  if(leccion){
+    var curso=CURSOS.filter(function(c){return c.id===leccion.curso;})[0];
+    if(curso&&curso.lecciones[leccion.idx]){
+      var btn=document.createElement("button");
+      btn.textContent="▶ Ver lección: "+curso.icono+" "+curso.lecciones[leccion.idx].titulo.slice(0,40);
+      btn.style.cssText="display:block;margin-top:8px;background:rgba(0,255,65,.08);border:1px solid rgba(0,255,65,.25);color:#00ff41;padding:6px 9px;border-radius:3px;font-size:.85em;cursor:pointer;font-family:'Courier New',monospace;white-space:normal;text-align:left";
+      btn.onclick=function(){ irALeccionDesdeIA(leccion.curso,leccion.idx); };
+      d.appendChild(btn);
+    }
+  }
+  chat.appendChild(d);
+  chat.scrollTop = chat.scrollHeight;
+}
+function agregarMsg(txt, tipo, leccion){
+  pintarMsg(txt,tipo,leccion);
+  guardarEnHistorial(txt,tipo,leccion);
+}
+
+function saludoPersonalizado(){
+  var chat=document.getElementById("aiChat");
+  var hist=getChatHistorial();
+  if(hist.length){
+    chat.innerHTML="";
+    hist.forEach(function(m){ pintarMsg(m.txt,m.tipo,m.leccion); });
+    return;
+  }
+  var totalLecciones=0,totalCompletadas=0;
+  CURSOS.forEach(function(c){ var s=statsCurso(c); totalLecciones+=s.total; totalCompletadas+=s.completadas; });
+  var msg="🤖 Hola! Soy tu asistente de programacion.";
+  if(totalCompletadas>0){
+    msg+=" Vas "+totalCompletadas+"/"+totalLecciones+" lecciones completadas en total, seguí así.";
+  }
+  var perfil=getPerfilIA();
+  if(perfil.nivel==="principiante") msg+="\n\n🧠 Sé que sos principiante — te voy a explicar todo paso a paso.";
+  else if(perfil.nivel==="avanzado") msg+="\n\n🧠 Sé que ya tenés experiencia — voy directo al grano.";
+  if(perfil.lenguajeFavorito) msg+=" Y sé que te gusta "+perfil.lenguajeFavorito+".";
+  var top=temaMasPreguntado();
+  if(top&&AI_CONOCIMIENTO[top.tema]){
+    msg+="\n\n🧠 Ya me preguntaste sobre esto "+top.veces+" veces — decime si querés que te lo vuelva a explicar.";
+  }
+  msg+="\n\nPreguntame sobre codigo, sintaxis, errores, o lo que necesites. También podés tocar 📖 Estudiar conmigo para que te haga preguntas.";
+  chat.innerHTML="";
+  agregarMsg(msg,"bot",top&&LESSON_MAP[top.tema]?LESSON_MAP[top.tema]:null);
+}
+
+// Cargar cursos al iniciar
+renderContinuando();
+renderCursosGrid();
+saludoPersonalizado();
+</script>
+</body>
+</html>

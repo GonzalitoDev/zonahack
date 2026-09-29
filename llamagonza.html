@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>🟢 Llama a Gonza — ZonaHack</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#050805;color:#c8d6e5;font-family:'Courier New',monospace;min-height:100vh}
+.header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid rgba(0,255,65,.1);background:#050505;position:sticky;top:0;z-index:100}
+.header h1{color:#00ff41;font-size:.85em;letter-spacing:1px}
+.back{color:#00ff41;text-decoration:none;font-size:.65em;padding:4px 8px;border:1px solid rgba(255,255,255,.1);border-radius:3px}
+.container{max-width:520px;margin:0 auto;padding:14px}
+.card{border:1px solid rgba(0,255,65,.1);border-radius:12px;padding:16px;margin-bottom:12px;background:#0d0f0d}
+.avatar{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,rgba(0,255,65,.25),rgba(0,200,255,.1));border:2px solid rgba(0,255,65,.4);display:flex;align-items:center;justify-content:center;font-size:1.8em;margin:0 auto 8px;box-shadow:0 0 20px rgba(0,255,65,.15)}
+.nombre{text-align:center;font-size:1em;color:#00ff41;font-weight:700;letter-spacing:1px}
+.rol{text-align:center;font-size:.62em;color:rgba(200,214,229,.5);margin-top:2px}
+.online{text-align:center;font-size:.6em;color:#2ecc71;margin-top:4px}
+.online::before{content:'';display:inline-block;width:7px;height:7px;border-radius:50%;background:#2ecc71;margin-right:5px;animation:pulse 1.5s infinite}
+@keyframes pulse{50%{opacity:.4}}
+.btns{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:12px}
+.btns a{display:flex;align-items:center;justify-content:center;gap:5px;padding:11px 6px;border:1px solid rgba(0,255,65,.15);border-radius:10px;background:rgba(0,255,65,.04);color:#00ff41;font-size:.68em;cursor:pointer;text-decoration:none;font-family:'Courier New',monospace;transition:.15s}
+.btns a:hover{background:rgba(0,255,65,.12)}
+.btns .disc{color:#5865F2;border-color:rgba(88,101,242,.4);background:rgba(88,101,242,.06)}
+.btns .tel{color:#2ecc71;border-color:rgba(46,204,113,.4);background:rgba(46,204,113,.06)}
+label{font-size:.6em;color:rgba(200,214,229,.4);display:block;margin:8px 0 3px}
+textarea,input[type=text]{width:100%;padding:10px;border:1px solid rgba(0,255,65,.15);border-radius:8px;background:#0a0a0a;color:#c8d6e5;font-size:.75em;outline:none;font-family:'Courier New',monospace;box-sizing:border-box}
+textarea{min-height:90px;resize:vertical}
+textarea:focus,input:focus{border-color:#00ff41}
+.send{width:100%;padding:12px;border:1px solid #00ff41;border-radius:8px;background:rgba(0,255,65,.1);color:#00ff41;font-weight:700;font-size:.78em;cursor:pointer;font-family:'Courier New',monospace;letter-spacing:1px;margin-top:10px}
+.send:hover{background:rgba(0,255,65,.18)}
+#msgbox{font-size:.64em;color:rgba(200,214,229,.5);margin-top:8px;min-height:16px;text-align:center}
+.hint{font-size:.58em;color:rgba(200,214,229,.3);line-height:1.6;margin-top:8px;text-align:center}
+.calling{display:none;text-align:center;padding:14px}
+.calling .ic{font-size:2.4em;animation:ring 1s infinite}
+@keyframes ring{0%,100%{transform:rotate(0)}10%{transform:rotate(-12deg)}20%{transform:rotate(12deg)}30%{transform:rotate(-10deg)}40%{transform:rotate(10deg)}50%{transform:rotate(0)}}
+.calling .txt{color:#00ff41;font-size:.75em;letter-spacing:2px;margin-top:8px}
+</style>
+</head>
+<body>
+<div class="header">
+  <a href="/" class="back">←</a>
+  <h1>🟢 LLAMA A GONZA</h1>
+  <a href="/" class="back">Volver</a>
+</div>
+<div class="container">
+  <div class="card">
+    <div class="avatar">🕹️</div>
+    <div class="nombre">GONZA</div>
+    <div class="rol">FUNDADOR · ZONAHACK</div>
+    <div class="online">Disponible en el server</div>
+    <div class="btns">
+      <a class="disc" href="https://discord.gg/wxenp5qWjX" target="_blank">💬 Discord</a>
+      <a href="mailto:zona.dmca@gmail.com">✉️ Email</a>
+      <a class="tel" onclick="llamar()">📞 Llamar</a>
+    </div>
+  </div>
+
+  <div id="calling" class="calling" style="display:none">
+    <div class="ic">📞</div>
+    <div class="txt">LLAMANDO A GONZA...</div>
+    <div style="font-size:.6em;color:rgba(200,214,229,.4);margin-top:10px">Abriendo Discord para hablar con él...</div>
+    <div class="btns" style="margin-top:10px">
+      <a href="https://discord.gg/wxenp5qWjX" target="_blank">💬 Unirse a la llamada</a>
+      <a onclick="colgar()" style="color:#e74c3c;border-color:rgba(231,76,60,.4);background:rgba(231,76,60,.06)">✕ Colgar</a>
+    </div>
+  </div>
+
+  <div class="card" id="msjCard">
+    <div style="font-size:.75em;color:#00ff41;font-weight:700;letter-spacing:1px;margin-bottom:4px">📨 Dejale un mensaje a Gonza</div>
+    <div style="font-size:.58em;color:rgba(200,214,229,.4);margin-bottom:8px">Le llega al instante. Si está conectado, te responde.</div>
+    <label>Tu nombre</label>
+    <input type="text" id="mUser" placeholder="Tu nombre de usuario" maxlength="50">
+    <label>Mensaje</label>
+    <textarea id="mText" placeholder="Contale qué querés, un bug, una idea, algo para la radio..." maxlength="600"></textarea>
+    <button class="send" onclick="enviar()">📨 ENVIAR A GONZA</button>
+    <div id="msgbox"></div>
+    <div class="hint">💡 Si necesitás soporte técnico o un ticket formal, usá la sección <b>🎫 Soporte</b>.</div>
+  </div>
+</div>
+
+<script>
+var SB="https://xfwolaurpeofysnymqle.supabase.co/rest/v1";
+var KEY="sb_publishable_3VvBUD5Bdu3Uaq59fJ99MQ_XDCtujUU";
+var H={"apikey":KEY,"Authorization":"Bearer "+KEY,"Content-Type":"application/json","Prefer":"return=minimal"};
+document.getElementById("mUser").value=localStorage.getItem("vh_usuario")||"";
+function esc(s){return (s||"").replace(/[&<>"]/g,function(m){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m];});}
+
+function enviar(){
+  var u=document.getElementById("mUser").value.trim()||"anon";
+  var m=document.getElementById("mText").value.trim();
+  var mb=document.getElementById("msgbox");
+  if(!m){mb.innerHTML='<span style="color:#e74c3c">Escribí un mensaje</span>';return;}
+  fetch(SB+"/mensajes_gonza",{method:"POST",headers:H,body:JSON.stringify({usuario:u.slice(0,50),mensaje:m.slice(0,600)})})
+  .then(function(r){if(!r.ok)throw new Error();mb.innerHTML='<span style="color:#2ecc71">✅ Mensaje enviado a Gonza. Gracias!</span>';document.getElementById("mText").value="";})
+  .catch(function(){mb.innerHTML='<span style="color:#e74c3c">Error al enviar (¿corriste sql_llamagonza.sql?)</span>';});
+}
+
+function llamar(){
+  document.getElementById("calling").style.display="block";
+  document.getElementById("msjCard").style.display="none";
+  setTimeout(function(){window.open("https://discord.gg/wxenp5qWjX","_blank");},1600);
+}
+function colgar(){
+  document.getElementById("calling").style.display="none";
+  document.getElementById("msjCard").style.display="";
+}
+</script>
+</body>
+</html>

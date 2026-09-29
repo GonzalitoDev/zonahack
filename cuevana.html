@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<title>🍿 Cine Cuevana · Varias páginas · ZonaHack</title>
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/icon_96.png" type="image/png">
+<meta name="theme-color" content="#e74c3c">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:radial-gradient(circle at 20% 10%,rgba(231,76,60,.05),transparent 50%),#0a0d0f;color:#d7e2ef;font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh}
+.wrap{max-width:1020px;margin:0 auto;padding:14px}
+.hdr{display:flex;align-items:center;gap:10px;padding-bottom:10px;border-bottom:1px solid rgba(231,76,60,.25)}
+.hdr .logo{font-size:1.6em}
+.hdr h1{font-size:1.05em;letter-spacing:2px;color:#e74c3c;font-family:'Courier New',monospace;text-shadow:0 0 14px rgba(231,76,60,.4)}
+.hdr span{font-size:.56em;color:#6d7f93}
+.hdr a{margin-left:auto;color:#e74c3c;text-decoration:none;font-size:.7em;border:1px solid rgba(231,76,60,.3);padding:5px 10px;border-radius:8px}
+.hero{text-align:center;padding:14px;border:1px solid rgba(231,76,60,.16);border-radius:16px;margin:12px 0;background:rgba(30,10,10,.3)}
+.hero .big{font-size:2em}
+.hero h2{color:#e74c3c;letter-spacing:2px;font-size:1em;margin:6px 0}
+.hero p{font-size:.6em;color:#6d7f93}
+.badge{display:inline-block;margin-top:6px;background:rgba(231,76,60,.08);border:1px solid rgba(231,76,60,.3);color:#ff6b6b;font-size:.56em;padding:3px 10px;border-radius:16px;letter-spacing:1px}
+.searchrow{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.searchrow input{flex:1;min-width:200px;background:#0d0d0d;border:1px solid rgba(231,76,60,.25);border-radius:10px;color:#fff;padding:13px 16px;font-size:.82em;outline:none;font-family:inherit}
+.searchrow input:focus{border-color:#e74c3c}
+.searchrow button{background:linear-gradient(135deg,#e74c3c,#ff8c42);color:#fff;border:none;border-radius:10px;padding:13px 20px;font-weight:800;font-size:.74em;cursor:pointer;font-family:inherit}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.chip{padding:8px 13px;border-radius:18px;border:1px solid rgba(231,76,60,.2);background:rgba(231,76,60,.04);color:rgba(255,107,107,.8);font-size:.62em;cursor:pointer;font-family:inherit}
+.chip:hover{color:#ff6b6b;border-color:#e74c3c}
+.chip.on{background:rgba(231,76,60,.15);border-color:#e74c3c;color:#ff6b6b;font-weight:700}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}
+.movie{background:#0f1115;border:1px solid rgba(255,255,255,.07);border-radius:14px;overflow:hidden;cursor:pointer;transition:.18s;animation:fadeIn .3s both}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.movie:hover{transform:translateY(-4px);border-color:rgba(231,76,60,.4);box-shadow:0 10px 26px rgba(0,0,0,.5)}
+.movie .th{position:relative;aspect-ratio:16/9;background:#0f1430;overflow:hidden}
+.movie .th img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s}
+.movie:hover .th img{transform:scale(1.07)}
+.movie .th .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:2em;opacity:.4}
+.movie .th .playov{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0);opacity:0;transition:.2s}
+.movie:hover .th .playov{opacity:1;background:rgba(0,0,0,.4)}
+.movie .th .playov span{width:44px;height:44px;border-radius:50%;background:#e74c3c;color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 0 20px rgba(231,76,60,.5)}
+.movie .th .dur{position:absolute;right:5px;bottom:5px;background:rgba(0,0,0,.75);color:#fff;font-size:.55em;padding:2px 6px;border-radius:5px}
+.movie .th .src{position:absolute;top:5px;left:5px;background:rgba(0,0,0,.7);color:#ffd166;font-size:.5em;padding:2px 7px;border-radius:5px}
+.movie .bd{padding:9px 11px}
+.movie .t{font-size:.74em;color:#fff;font-weight:600;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.4em}
+.movie .meta{font-size:.56em;color:#6d7f93;margin-top:5px}
+.movie .meta b{color:#00ff41}
+.spin{width:34px;height:34px;border:3px solid rgba(231,76,60,.15);border-top-color:#e74c3c;border-radius:50%;animation:sp .8s linear infinite;margin:30px auto}
+@keyframes sp{100%{transform:rotate(360deg)}}
+.empty{background:#0f1115;border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:34px;text-align:center;color:#6d7f93;font-size:.7em}
+#player{display:none;position:fixed;inset:0;z-index:100;background:#05070a;flex-direction:column}
+#player .ph{display:flex;align-items:center;gap:8px;padding:9px 12px;background:#0d0d0d;border-bottom:1px solid rgba(231,76,60,.3);flex-wrap:wrap}
+#player .ph b{flex:1;font-size:.72em;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#player .ph .src{color:#ffd166;font-size:.6em;border:1px solid rgba(255,209,102,.4);padding:3px 9px;border-radius:8px}
+#player .ph button{background:#0a0a0a;border:1px solid rgba(231,76,60,.4);color:#ff6b6b;border-radius:8px;padding:8px 13px;font-size:.66em;cursor:pointer;font-family:inherit}
+#player .ph button.verde{color:#00ff41;border-color:rgba(0,255,65,.4)}
+#player iframe{flex:1;border:none;background:#000}
+.servers{display:flex;gap:6px;flex-wrap:wrap;padding:8px 12px;background:#0a0a0a;border-bottom:1px solid rgba(231,76,60,.15)}
+.servers .lbl{font-size:.6em;color:#6d7f93;align-self:center;letter-spacing:1px}
+.srv{background:#0d0d0d;border:1px solid rgba(231,76,60,.25);color:#ff8a8a;border-radius:8px;padding:7px 12px;font-size:.62em;cursor:pointer;font-family:inherit;transition:.15s}
+.srv:hover{border-color:#e74c3c;color:#fff}
+.srv.on{background:#e74c3c;color:#fff;border-color:#e74c3c;font-weight:800}
+.foot{text-align:center;font-size:.56em;color:#6d7f93;letter-spacing:1px;margin-top:16px;padding-bottom:20px}
+.toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#0d0d0d;border:1px solid #e74c3c;color:#ff6b6b;padding:10px 18px;border-radius:12px;font-size:.66em;z-index:99;display:none;max-width:90vw;text-align:center}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="hdr">
+    <div class="logo">🍿</div>
+    <div><h1>CINE CUEVANA</h1><span>VARIAS PÁGINAS · UNA SOLA PLATAFORMA</span></div>
+    <a href="/">←</a>
+  </div>
+
+  <div class="hero">
+    <div class="big">🍿</div>
+    <h2>PELÍCULAS DE VARIAS FUENTES</h2>
+    <p>Buscá una película y mirala acá. Busca en YouTube, Archive.org, Vimeo, Dailymotion y Commons a la vez.</p>
+    <span class="badge">🔎 5 FUENTES · VER EN LA MISMA PÁGINA · SIN SALIR</span>
+  </div>
+
+  <div class="searchrow">
+    <input id="q" placeholder="🔎 Buscar película (ej: matrix, terminator, el padrino)..." onkeydown="if(event.key==='Enter')buscar()">
+    <button onclick="buscar()">🔍 Buscar</button>
+  </div>
+
+  <div class="chips" id="chips"></div>
+
+  <div id="grid" class="grid"><div class="spin"></div></div>
+
+  <div class="foot">ZONAHACK · CINE CUEVANA · MULTIFUENTE 🍿</div>
+</div>
+
+<div id="player">
+  <div class="ph"><b id="pTitle">Reproduciendo</b><span class="src" id="pSrc">youtube</span>
+    <button class="verde" onclick="siguiente()">⏭ Siguiente</button>
+    <button onclick="cerrarP()">✕ Cerrar</button>
+  </div>
+  <div class="servers" id="servers"></div>
+  <iframe id="pFrame" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-presentation"></iframe>
+  <video id="pVideo" controls playsinline style="display:none;flex:1;background:#000;width:100%"></video>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ═══ CINE CUEVANA — buscador multifuente ═══ */
+var CATS=["Películas","Acción","Terror","Comedia","Ciencia Ficción","Drama","Suspenso","Animación"];
+var FUENTES="youtube,archive,vimeo,dailymotion,commons";
+var INV="https://offlinevideoplayer.vercel.app";
+var INVIDIOUS=["https://inv.nadeko.net","https://yewtu.be","https://invidious.nerdvpn.de"];
+var resultados=[], idx=0, servidorActual=0;
+function $(i){return document.getElementById(i);}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function toast(m){var t=$("toast");t.textContent=m;t.style.display="block";clearTimeout(t._x);t._x=setTimeout(function(){t.style.display="none";},2600);}
+function renderChips(){
+  $("chips").innerHTML=CATS.map(function(c,i){
+    return '<button class="chip'+(i===0?' on':'')+'" onclick="buscarCat('+i+')">'+c+'</button>';
+  }).join("");
+}
+function buscarCat(i){
+  var base=CATS[i];
+  var q=(i===0)?"pelicula completa en español":(base+" pelicula completa en español");
+  $("q").value=q;
+  document.querySelectorAll("#chips .chip").forEach(function(c,j){ c.classList.toggle("on", j===i); });
+  buscar(q);
+}
+function buscar(q){
+  if(!q){ q=$("q").value.trim(); }
+  var grid=$("grid");
+  grid.innerHTML='<div class="spin"></div>';
+  fetch("/api/search_multi?q="+encodeURIComponent(q)+"&fuentes="+FUENTES+"&es=1")
+  .then(function(r){return r.json();}).then(function(d){
+    var res=(d&&d.results)||[];
+    // filtrar clips cortos y ordenar por duración (pelis completas arriba)
+    res=res.filter(function(v){ return (v.duration_sec||0)>=900; });
+    res.sort(function(a,b){ return (b.duration_sec||0)-(a.duration_sec||0); });
+    resultados=res;
+    if(!res.length){ grid.innerHTML='<div class="empty">🎬 No se encontraron películas para "'+esc(q)+'".<br>Probá con otro título o agregá "pelicula completa en español".</div>'; return; }
+    grid.innerHTML=res.slice(0,24).map(function(v,i){
+      return '<div class="movie" onclick="ver('+i+')">'+
+        '<div class="th">'+(v.thumb?'<img src="'+v.thumb+'" loading="lazy" decoding="async" onerror="this.style.display=\'none\'">':'<div class="ph">🎬</div>')+
+        '<span class="src">'+esc(v.source)+'</span>'+
+        (v.duration?'<span class="dur">'+esc(v.duration)+'</span>':'')+
+        '<div class="playov"><span>▶</span></div></div>'+
+        '<div class="bd"><div class="t">'+esc(v.title)+'</div>'+
+        '<div class="meta">'+(v.views?('👁 <b>'+esc(v.views)+'</b>'):'')+(v.published?(' · '+esc(v.published)):'')+'</div></div></div>';
+    }).join("");
+    toast("🎬 "+res.length+" resultados en varias fuentes");
+  }).catch(function(){ grid.innerHTML='<div class="empty">⚠️ Error al buscar. Probá de nuevo.</div>'; });
+}
+function playURL(v){
+  if(v.play==="archive"||v.source==="archive") return "https://archive.org/embed/"+v.id.replace("ia_","");
+  if(v.play==="dailymotion"||v.source==="dailymotion") return "https://www.dailymotion.com/embed/video/"+v.id;
+  if(v.play==="vimeo"||v.source==="vimeo") return "https://player.vimeo.com/video/"+v.id;
+  if(v.play==="commons"||v.source==="commons") return "https://commons.wikimedia.org/wiki/File:"+decodeURIComponent(v.id);
+  return "https://www.youtube.com/embed/"+v.id;
+}
+function renderServers(){
+  var v=resultados[idx];
+  var box=$("servers");
+  box.innerHTML="";
+  if(!v) return;
+  var esYT=(v.source==="youtube"||!v.play||v.play==="youtube");
+  if(!esYT){
+    box.innerHTML='<span class="lbl">🎛️ FUENTE</span><button class="srv on" onclick="setServer(-1)">'+esc(v.source||v.play||"youtube")+'</button>';
+    return;
+  }
+  var srv=[["S1","YouTube",function(){return "https://www.youtube.com/embed/"+v.id;},false]];
+  INVIDIOUS.forEach(function(inst,i){
+    srv.push(["S"+(i+2),"Invidious "+(i+1),function(){return inst+"/embed/"+v.id;},false]);
+  });
+  srv.push(["S"+(srv.length+1),"Directo",function(){return INV+"/api/proxy_youtube?id="+v.id+"&mode=direct";},true]);
+  srv.push(["🌐","YouTube",function(){return "https://www.youtube.com/watch?v="+v.id;},false,true]);
+  box.innerHTML='<span class="lbl">🎛️ SERVIDORES</span>'+srv.map(function(s,i){
+    return '<button class="srv'+(servidorActual===i?' on':'')+'" onclick="setServer('+i+')">'+s[0]+' · '+s[1]+'</button>';
+  }).join("");
+}
+function setServer(i){
+  var v=resultados[idx];
+  if(!v) return;
+  servidorActual=i;
+  var box=$("servers");
+  var btns=box.querySelectorAll(".srv");
+  btns.forEach(function(b,j){ b.classList.toggle("on", j===i); });
+  var esYT=(v.source==="youtube"||!v.play||v.play==="youtube");
+  var ifr=$("pFrame"), vid=$("pVideo");
+  if(!esYT){ ifr.style.display="block"; vid.style.display="none"; ifr.src=playURL(v); return; }
+  var srv=[["S1","YouTube",function(){return "https://www.youtube.com/embed/"+v.id;},false]];
+  INVIDIOUS.forEach(function(inst,j){ srv.push(["S"+(j+2),"Invidious "+(j+1),function(){return inst+"/embed/"+v.id;},false]); });
+  srv.push(["S"+(srv.length+1),"Directo",function(){return INV+"/api/proxy_youtube?id="+v.id+"&mode=direct";},true]);
+  srv.push(["🌐","YouTube",function(){return "https://www.youtube.com/watch?v="+v.id;},false,true]);
+  var s=srv[i];
+  if(!s) return;
+  if(s[3]){ // video directo
+    ifr.style.display="none"; vid.style.display="block"; vid.src=s[2]();
+    $("pSrc").textContent="directo";
+  } else if(s[4]){ // externo
+    window.open(s[2](),"_blank");
+  } else {
+    vid.style.display="none"; vid.src="";
+    ifr.style.display="block"; ifr.src=s[2]();
+    $("pSrc").textContent=s[1];
+  }
+}
+function ver(i){
+  idx=i;
+  var v=resultados[i];
+  $("pTitle").textContent=v.title;
+  $("pSrc").textContent=v.source||v.play||"youtube";
+  servidorActual=0;
+  renderServers();
+  var ifr=$("pFrame"), vid=$("pVideo");
+  ifr.style.display="block"; vid.style.display="none"; vid.src="";
+  ifr.src=playURL(v);
+  $("player").style.display="flex";
+  document.body.style.overflow="hidden";
+}
+function siguiente(){
+  if(!resultados.length) return;
+  idx=(idx+1)%resultados.length;
+  ver(idx);
+  toast("⏭ Siguiente resultado");
+}
+function cerrarP(){ $("player").style.display="none"; $("pFrame").src="about:blank"; var v=$("pVideo"); if(v){v.src="";v.style.display="none";} document.body.style.overflow=""; }
+renderChips();
+buscar("pelicula completa en español");
+</script>
+</body>
+</html>

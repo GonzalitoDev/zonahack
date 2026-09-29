@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<title>🔎 Buscador de Páginas · Retransmisión · ZonaHack</title>
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/icon_96.png" type="image/png">
+<meta name="theme-color" content="#4ca3ff">
+<meta name="description" content="Buscador de páginas web para retransmitir dentro de ZonaHack. Buscá cualquier sitio y miralo embebido, sin salir.">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--az:#4ca3ff;--az2:#9dccff;--cian:#00e5ff;--fondo:#07090c;--panel:#0e1217;--borde:rgba(255,255,255,.08);--txt:#d7e2ef;--sub:#6d7f93}
+body{background:var(--fondo);color:var(--txt);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;z-index:-1;background:
+ radial-gradient(600px 300px at 15% 0%,rgba(76,163,255,.10),transparent 60%),
+ radial-gradient(600px 300px at 85% 10%,rgba(0,229,255,.07),transparent 60%)}
+.wrap{max-width:1040px;margin:0 auto;padding:14px 14px 0}
+.hdr{display:flex;align-items:center;gap:12px;padding:14px 18px;border:1px solid var(--borde);border-radius:18px;background:rgba(14,18,23,.7);backdrop-filter:blur(12px);box-shadow:0 8px 30px rgba(0,0,0,.35)}
+.hdr .logo{font-size:2em;filter:drop-shadow(0 0 14px rgba(76,163,255,.6));animation:flot 3s ease-in-out infinite}
+@keyframes flot{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+.hdr h1{font-size:1.05em;letter-spacing:3px;font-family:'Courier New',monospace;background:linear-gradient(90deg,var(--az),var(--cian));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hdr span{font-size:.6em;color:var(--sub);letter-spacing:1px;display:block;margin-top:2px}
+.hdr a{margin-left:auto;color:var(--az);text-decoration:none;font-size:.72em;border:1px solid rgba(76,163,255,.35);padding:7px 14px;border-radius:10px;transition:.2s}
+.hdr a:hover{background:rgba(76,163,255,.12);box-shadow:0 0 18px rgba(76,163,255,.25)}
+.hero{text-align:center;padding:26px 18px;margin:14px 0;border-radius:20px;border:1px solid var(--borde);background:linear-gradient(160deg,rgba(76,163,255,.08),rgba(0,229,255,.05) 60%),rgba(10,12,16,.6);position:relative;overflow:hidden}
+.hero::after{content:"🔎🌐";position:absolute;font-size:60px;opacity:.05;top:-8px;right:8px;transform:rotate(12deg)}
+.hero .big{font-size:2.4em;animation:flot 3s ease-in-out infinite}
+.hero h2{font-size:1.15em;letter-spacing:4px;margin:8px 0 6px;background:linear-gradient(90deg,#fff,var(--az2));-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:800}
+.hero p{font-size:.68em;color:var(--sub);max-width:600px;margin:0 auto;line-height:1.6}
+.badge{display:inline-flex;align-items:center;gap:6px;margin-top:12px;background:rgba(76,163,255,.08);border:1px solid rgba(76,163,255,.3);color:var(--az2);font-size:.6em;padding:6px 14px;border-radius:20px;letter-spacing:1px}
+.badge .punto{width:8px;height:8px;border-radius:50%;background:#00ff41;box-shadow:0 0 10px #00ff41;animation:late 1.4s infinite}
+@keyframes late{0%,100%{opacity:1}50%{opacity:.35}}
+.aviso{display:flex;align-items:center;gap:8px;background:rgba(76,163,255,.06);border:1px solid rgba(76,163,255,.25);color:#a8d4ff;border-radius:14px;padding:12px 16px;font-size:.64em;line-height:1.6;margin:0 0 14px}
+.aviso b{color:var(--az)}
+.searchrow{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.searchrow input{flex:1;min-width:200px;background:rgba(10,12,16,.8);border:1px solid rgba(76,163,255,.22);border-radius:14px;color:#fff;padding:15px 18px;font-size:.84em;outline:none;font-family:inherit;transition:.2s;box-shadow:inset 0 2px 8px rgba(0,0,0,.4)}
+.searchrow input:focus{border-color:var(--az);box-shadow:0 0 0 3px rgba(76,163,255,.15)}
+.searchrow button{background:linear-gradient(135deg,var(--az),var(--cian));color:#03140a;border:none;border-radius:14px;padding:15px 26px;font-weight:800;font-size:.76em;cursor:pointer;font-family:inherit;letter-spacing:.5px;transition:.2s;box-shadow:0 6px 22px rgba(76,163,255,.35)}
+.searchrow button:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(0,229,255,.35)}
+.rap{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.rap button{background:transparent;border:1px solid var(--borde);color:var(--sub);border-radius:16px;padding:8px 14px;font-size:.64em;cursor:pointer;font-family:inherit;transition:.15s}
+.rap button:hover{border-color:var(--az);color:var(--az2)}
+.rap .lab{font-size:.6em;color:var(--sub);align-self:center;letter-spacing:1px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.pag{background:var(--panel);border:1px solid var(--borde);border-radius:16px;overflow:hidden;cursor:pointer;transition:.2s;animation:fadeIn .35s both}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.pag:hover{transform:translateY(-4px);border-color:rgba(76,163,255,.45);box-shadow:0 14px 34px rgba(0,0,0,.55),0 0 22px rgba(76,163,255,.15)}
+.pag .th{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--borde);background:linear-gradient(160deg,#10141d,#0d1130)}
+.pag .fav{width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;font-size:1.3em;overflow:hidden;flex-shrink:0}
+.pag .fav img{width:100%;height:100%;object-fit:cover}
+.pag .dom{font-size:.62em;color:var(--az2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
+.pag .bd{padding:12px 14px}
+.pag .t{font-size:.76em;color:#fff;font-weight:600;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.pag .sn{font-size:.6em;color:var(--sub);margin-top:7px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.pag .btn{margin-top:10px;font-size:.6em;color:var(--az2);letter-spacing:.5px;display:inline-flex;align-items:center;gap:5px}
+.spin{width:38px;height:38px;border:3px solid rgba(76,163,255,.15);border-top-color:var(--az);border-radius:50%;animation:sp .8s linear infinite;margin:36px auto}
+@keyframes sp{100%{transform:rotate(360deg)}}
+.empty{background:var(--panel);border:1px solid var(--borde);border-radius:16px;padding:40px 20px;text-align:center;color:var(--sub);font-size:.72em;line-height:1.7}
+.empty b{color:#fff}
+.foot{margin-top:20px;border:1px solid var(--borde);border-radius:16px;background:rgba(14,18,23,.6);padding:20px;font-size:.64em;color:var(--sub);line-height:1.7}
+.foot h4{color:var(--az2);letter-spacing:2px;font-size:.9em;margin-bottom:8px;font-family:'Courier New',monospace}
+.foot p{margin:0 0 6px}
+.foot .bot{margin-top:14px;border-top:1px dashed var(--borde);padding-top:12px;text-align:center}
+.foot a{color:var(--az);text-decoration:none}
+#player{display:none;position:fixed;inset:0;z-index:100;background:#05070a;flex-direction:column}
+#player .ph{display:flex;align-items:center;gap:8px;padding:10px 14px;background:rgba(10,12,16,.95);border-bottom:1px solid rgba(76,163,255,.35);flex-wrap:wrap;backdrop-filter:blur(10px)}
+#player .ph b{flex:1;font-size:.74em;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
+#player .ph button{background:#0a0a0a;border:1px solid rgba(76,163,255,.4);color:var(--az2);border-radius:10px;padding:9px 14px;font-size:.66em;cursor:pointer;font-family:inherit;transition:.15s}
+#player .ph button:hover{background:rgba(76,163,255,.12)}
+#player .ph button.verde{color:#00ff41;border-color:rgba(0,255,65,.4)}
+#player .ph button.verde:hover{background:rgba(0,255,65,.1)}
+#player iframe{flex:1;border:none;background:#fff}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:rgba(10,12,16,.95);border:1px solid var(--az);color:var(--az2);padding:11px 20px;border-radius:14px;font-size:.68em;z-index:99;display:none;max-width:90vw;text-align:center;box-shadow:0 8px 30px rgba(0,0,0,.5)}
+@media(max-width:640px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hdr">
+    <div class="logo">🔎</div>
+    <div><h1>BUSCADOR DE PÁGINAS</h1><span>RETRANSMISIÓN · CUALQUIER SITIO, ADENTRO DE ZONAHACK</span></div>
+    <a href="/">← Volver</a>
+  </div>
+
+  <div class="hero">
+    <div class="big">🔎</div>
+    <h2>BUSCÁ UNA PÁGINA Y RETRANSMITILA ACÁ</h2>
+    <p>Escribí lo que quieras encontrar. El buscador <b>scrapea resultados web</b> y tocando cualquiera, la página se abre <b>retransmitida dentro de ZonaHack</b>, sin salir.</p>
+    <span class="badge"><span class="punto"></span> SCRAPPER ACTIVO · RETRANSMISIÓN EMBEBIDA</span>
+  </div>
+
+  <div class="aviso">🌐 <span><b>Retransmisión de páginas web</b>: ZonaHack no almacena ningún sitio; solo scrapea la búsqueda y embebe la página original de su servidor. Cada sitio conserva sus derechos y contenidos.</span></div>
+
+  <div class="searchrow">
+    <input id="q" placeholder="🔎 Buscar páginas (ej: wikipedia, musica, fotos, clima...)..." onkeydown="if(event.key==='Enter')buscar()">
+    <button onclick="buscar()">🔍 Buscar</button>
+  </div>
+
+  <div class="rap" id="rap">
+    <span class="lab">⚡ RÁPIDO:</span>
+    <button onclick="rap('wikipedia')">📚 Wikipedia</button>
+    <button onclick="rap('peliculas dominio publico')">🎬 Pelis libres</button>
+    <button onclick="rap('musica gratis')">🎵 Música</button>
+    <button onclick="rap('fotos gratis')">📷 Fotos</button>
+    <button onclick="rap('clima del mundo')">⛅ Clima</button>
+    <button onclick="rap('tutoriales')">🎓 Tutoriales</button>
+    <span class="lab" id="labHist" style="display:none">🕘 REVIENTES:</span>
+    <span id="histChips"></span>
+  </div>
+
+  <div id="grid" class="grid"><div class="empty">🔎 Escribí una búsqueda arriba y tocá <b>Buscar</b>. Luego tocá cualquier resultado para <b>retransmitirlo</b> acá dentro.</div></div>
+
+  <div class="foot">
+    <h4>🌐 AVISO LEGAL</h4>
+    <p>El Buscador de Páginas usa el buscador de <b>Bing</b> (scrapeando) para encontrar sitios web, y los <b>retransmite embebidos</b> desde sus propios servidores. <b>ZonaHack no aloja, copia ni modifica</b> ninguna página: todo el contenido pertenece a sus autores y se muestra con fines de navegación personal.</p>
+    <p>Algunos sitios pueden bloquear la retransmisión o requerir sesión; en ese caso usá el botón <b>🌐 Abrir</b> para ir directo.</p>
+    <div class="bot">🔎 ZONAHACK · BUSCADOR DE PÁGINAS · RETRANSMISIÓN EMBEBIDA · 2026</div>
+  </div>
+</div>
+
+<div id="player">
+  <div class="ph"><b id="pTitle">Cargando página...</b>
+    <button class="verde" onclick="exterior()">🌐 Abrir</button>
+    <button onclick="cerrarP()">✕ Cerrar</button>
+  </div>
+  <iframe id="pFrame" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-downloads allow-presentation allow-pointer-lock"></iframe>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ═══ BUSCADOR DE PÁGINAS — scrapea Bing + retransmisión embebida ═══ */
+var API = location.hostname.indexOf("5fae371f") >= 0 ? "https://5fae371f-39e5-4c16-9b04-658e273c947c.clouding.host/api/buscar_paginas" : "/api/buscar_paginas";
+var PROXY = location.hostname.indexOf("5fae371f") >= 0 ? "https://offlinevideoplayer.vercel.app/api/proxy?url=" : "/api/proxy?url=";
+var resultados = [], recientes = JSON.parse(localStorage.getItem("zh_pags_recientes") || "[]");
+function $(i){return document.getElementById(i);}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function toast(m){var t=$("toast");t.textContent=m;t.style.display="block";clearTimeout(t._x);t._x=setTimeout(function(){t.style.display="none";},2600);}
+function favicon(dom){ return "https://www.google.com/s2/favicons?domain="+encodeURIComponent(dom)+"&sz=64"; }
+function buscar(q){
+  if(!q){ q=$("q").value.trim(); }
+  if(!q){ toast("Escribí qué páginas querés buscar"); return; }
+  var grid=$("grid");
+  grid.innerHTML='<div class="spin"></div>';
+  fetch(API+"?q="+encodeURIComponent(q))
+  .then(function(r){return r.json();}).then(function(d){
+    var res=(d&&d.resultados)||[];
+    resultados=res;
+    if(!res.length){ grid.innerHTML='<div class="empty">🔎 Sin resultados para "<b>'+esc(q)+'</b>". Probá con otras palabras.</div>'; return; }
+    grid.innerHTML=res.map(function(v,i){ return pagHTML(v,i); }).join("");
+    toast("🔎 "+res.length+" páginas encontradas");
+  }).catch(function(){ grid.innerHTML='<div class="empty">⚠️ Error al buscar. Reintentá en unos segundos.</div>'; });
+}
+function rap(q){ $("q").value=q; buscar(q); }
+function pagHTML(v,i){
+  return '<div class="pag" onclick="ver('+i+')">'+
+    '<div class="th"><div class="fav"><img src="'+esc(favicon(v.dominio))+'" onerror="this.style.display=\'none\';this.parentNode.textContent=\'🌐\'"></div>'+
+    '<span class="dom">'+esc(v.dominio)+'</span></div>'+
+    '<div class="bd"><div class="t">'+esc(v.titulo)+'</div>'+
+    '<div class="sn">'+esc(v.snippet||"")+'</div>'+
+    '<span class="btn">▶ Retransmitir</span></div></div>';
+}
+function ver(i){
+  var v=resultados[i];
+  var real = v.url;
+  $("pTitle").textContent = v.dominio+" · "+v.titulo;
+  $("pFrame").src = PROXY + encodeURIComponent(real);
+  $("player").style.display="flex";
+  document.body.style.overflow="hidden";
+  var reps=recientes.filter(function(x){return x.url!==real;});
+  reps.unshift({url:real, dominio:v.dominio, titulo:v.titulo});
+  recientes=reps.slice(0,8);
+  localStorage.setItem("zh_pags_recientes", JSON.stringify(recientes));
+  pintarHist();
+}
+function pintarHist(){
+  if(!recientes.length){ $("labHist").style.display="none"; $("histChips").innerHTML=""; return; }
+  $("labHist").style.display="inline";
+  $("histChips").innerHTML = recientes.map(function(x){
+    return '<button onclick="verHist(\''+esc(x.url)+'\')">'+esc(x.dominio)+'</button>';
+  }).join(" ");
+}
+function verHist(url){
+  var dom = url.split("/")[2] || "";
+  $("pTitle").textContent = dom;
+  $("pFrame").src = PROXY + encodeURIComponent(url);
+  $("player").style.display="flex";
+  document.body.style.overflow="hidden";
+}
+function exterior(){
+  var fr=$("pFrame"); if(!fr||!fr.src||fr.src.indexOf("about:blank")>=0) return;
+  var d=decodeURIComponent(fr.src); var m=d.match(/url=([^&]+)/);
+  var real=m?decodeURIComponent(m[1]):d;
+  if(real.indexOf("http")>=0) window.open(real,"_blank");
+}
+function cerrarP(){ $("player").style.display="none"; $("pFrame").src="about:blank"; document.body.style.overflow=""; }
+pintarHist();
+</script>
+</body>
+</html>

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<title>🎭 ÚNETE A ANONYMOUS</title>
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/icon_96.png" type="image/png">
+<meta name="theme-color" content="#00ff41">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#000;color:#00ff41;font-family:'Courier New',monospace;min-height:100vh;overflow:hidden}
+#matrix{position:fixed;inset:0;z-index:0;opacity:.28;pointer-events:none}
+.wrap{position:relative;z-index:2;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px}
+.mask{font-size:6em;line-height:1;filter:drop-shadow(0 0 22px rgba(0,255,65,.55));animation:flotar 3.4s ease-in-out infinite;cursor:pointer}
+@keyframes flotar{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+h1{font-size:clamp(1.4em,4.5vw,2.6em);letter-spacing:4px;margin:14px 0 4px;text-shadow:0 0 18px rgba(0,255,65,.6)}
+.sub{font-size:.62em;color:rgba(0,255,65,.6);letter-spacing:3px;margin-bottom:8px}
+.desc{font-size:.68em;color:rgba(0,255,65,.45);max-width:440px;line-height:1.7;margin-bottom:20px}
+.btn{background:linear-gradient(135deg,#00ff41,#00c73a);color:#03140a;border:none;border-radius:12px;padding:16px 40px;font-size:1em;font-weight:800;letter-spacing:2px;cursor:pointer;font-family:'Courier New',monospace;box-shadow:0 0 26px rgba(0,255,65,.35);transition:.2s;animation:pulso 2s infinite}
+.btn:hover{transform:scale(1.05);box-shadow:0 0 40px rgba(0,255,65,.6)}
+.btn:active{transform:scale(.96)}
+@keyframes pulso{0%,100%{box-shadow:0 0 18px rgba(0,255,65,.3)}50%{box-shadow:0 0 34px rgba(0,255,65,.55)}}
+.marca{position:fixed;bottom:10px;left:0;right:0;text-align:center;font-size:.55em;color:rgba(0,255,65,.35);letter-spacing:2px;z-index:2}
+#fase{display:none;position:fixed;inset:0;z-index:5;background:rgba(0,0,0,.94);padding:22px;overflow-y:auto}
+.term{max-width:600px;margin:40px auto 0;text-align:left;font-size:.78em;line-height:1.9}
+.term .p{opacity:0;transform:translateY(6px);animation:aparece .3s forwards}
+@keyframes aparece{to{opacity:1;transform:none}}
+.term .ok{color:#00ff41}
+.term .wa{color:#f1c40f}
+.term .bar{height:8px;background:#0a2a0a;border-radius:5px;overflow:hidden;margin:6px 0 12px;border:1px solid rgba(0,255,65,.25)}
+.term .bar span{display:block;height:100%;background:linear-gradient(90deg,#00ff41,#7dffa8);animation:fill 2.2s ease-out forwards}
+@keyframes fill{from{width:0}to{width:100%}}
+#reveal{display:none;position:fixed;inset:0;z-index:6;background:radial-gradient(circle at 50% 30%,#1a0d00,#000 70%);flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px}
+#reveal .big{font-size:3.4em;animation:rebota .5s .3s both}
+@keyframes rebota{0%{transform:scale(0) rotate(-20deg)}60%{transform:scale(1.25)}100%{transform:scale(1)}}
+#reveal h2{font-size:clamp(1.2em,4vw,2em);color:#ff4d4d;letter-spacing:2px;text-shadow:0 0 22px rgba(255,77,77,.6);margin:14px 0 8px}
+#reveal p{color:rgba(255,255,255,.8);font-size:.8em;max-width:460px;line-height:1.8}
+#reveal .hecho{color:#f1c40f;margin-top:10px;font-size:.72em;letter-spacing:1px}
+#reveal button{margin-top:20px;background:#ff4d4d;color:#1a0505;border:none;border-radius:12px;padding:14px 34px;font-size:.85em;font-weight:800;cursor:pointer;font-family:'Courier New',monospace;letter-spacing:1px}
+.alert{position:fixed;inset:0;z-index:7;background:#ff0000;opacity:0;pointer-events:none}
+.alert.on{animation:flash .12s steps(1) 8}
+@keyframes flash{50%{opacity:.22}}
+</style>
+</head>
+<body>
+<canvas id="matrix"></canvas>
+
+<div class="wrap">
+  <div class="mask" onclick="iniciar()" title="Hacé clic">🎭</div>
+  <h1>ÚNETE A ANONYMOUS</h1>
+  <div class="sub">WE ARE LEGION · ESPERAMOS POR TI</div>
+  <div class="desc">El colectivo te está observando. Si querés ser parte de la resistencia y luchar contra el sistema, apretá el botón y completá la iniciación. <b>No lo pienses. Sé uno de nosotros.</b></div>
+  <button class="btn" onclick="iniciar()">🎭 UNIRME AL COLECTIVO</button>
+</div>
+<div class="marca">PROTOCOLO ANONYMUS · ZONAHACK · SOLO PARA INICIADOS</div>
+
+<div id="fase">
+  <div class="term" id="term"></div>
+</div>
+
+<div id="reveal">
+  <div class="big">🎭</div>
+  <h2>🚨 ¡INICIACIÓN COMPLETADA!</h2>
+  <p>Bueno... la parte de "hackearte" era una trampa del Tío Gonza. 😂 Pero el colectivo <b style="color:#00ff41">es real</b> y te acabamos de dar <b style="color:#00ff41">acceso al SECTOR PRIVADO</b> por 24 horas.</p>
+  <div class="hecho" style="color:#00ff41">🔓 SECTOR PRIVADO DESBLOQUEADO · SOLO POR 24H</div>
+  <div style="display:flex;flex-direction:column;gap:10px;margin-top:20px;max-width:340px;width:100%">
+    <a href="/chat_onion.html" style="background:#00ff41;color:#03140a;padding:14px 20px;border-radius:12px;text-decoration:none;font-weight:800;font-size:.8em;letter-spacing:1px">💬 ENTRAR AL CHAT .ONION</a>
+    <a href="/privada.html" style="background:#1a1400;border:1px solid rgba(241,196,15,.5);color:#f1c40f;padding:13px 20px;border-radius:12px;text-decoration:none;font-weight:800;font-size:.76em">💎 SECTOR PRIVADO VIP</a>
+    <a href="/secreta.html" style="background:#071820;border:1px solid rgba(0,229,255,.4);color:#00e5ff;padding:13px 20px;border-radius:12px;text-decoration:none;font-weight:800;font-size:.76em">🔐 ZONA SECRETA</a>
+  </div>
+</div>
+
+<div class="alert" id="alert"></div>
+
+<script>
+/* ─── MATRIX RAIN ─── */
+var cv=document.getElementById("matrix"),ctx=cv.getContext("2d");
+var cols,drop,glyph="アイウエオカキクケコサシスセソタチツテト0123456789ABCDEF";
+function size(){cv.width=innerWidth;cv.height=innerHeight;cols=Math.floor(cv.width/16);drop=Array(cols).fill(0);}
+size();addEventListener("resize",size);
+setInterval(function(){
+  ctx.fillStyle="rgba(0,0,0,.12)";ctx.fillRect(0,0,cv.width,cv.height);
+  ctx.fillStyle="#00ff41";ctx.font="15px monospace";
+  for(var i=0;i<drop.length;i++){
+    var t=glyph[Math.floor(Math.random()*glyph.length)];
+    ctx.fillText(t,i*16,drop[i]*16);
+    if(drop[i]*16>cv.height&&Math.random()>.975)drop[i]=0;
+    drop[i]++;
+  }
+},55);
+
+/* ─── INICIACIÓN (trampa) ─── */
+var term=document.getElementById("term"),fase=document.getElementById("fase");
+function line(html,delay,cls){return new Promise(function(res){
+  setTimeout(function(){
+    var d=document.createElement("div");d.className="p "+(cls||"");
+    d.innerHTML=html;term.appendChild(d);term.scrollTop=term.scrollHeight;res();
+  },delay||250);
+});}
+function iniciar(){
+  if(fase.style.display==="block")return;
+  fase.style.display="block";
+  term.innerHTML="";
+  (async function(){
+    await line("<span class='ok'>[$] INICIANDO PROTOCOLO ANONYMUS...</span>",300);
+    await line("[$] Cifrando identidad ..................... <span class='ok'>OK</span>",400);
+    await line("[$] Ocultando tu IP con 13 proxies ......... <span class='ok'>OK</span>",450);
+    await line("[$] Conectando a servidores secretos ....... <span class='ok'>OK</span>",500);
+    await line("[$] Saltando firewalls del sistema ......... <span class='ok'>OK</span>",550);
+    await line("<div class='bar'><span></span></div>",200);
+    await line("[$] Descargando herramientas ................ <span class='wa'>98%</span>",600);
+    await line("[$] Buscando en la deep web ................ <span class='ok'>encontrado</span>",650);
+    await line("[$] Accediendo al servidor principal ....... <span class='ok'>OK</span>",600);
+    await line("[$] PING 8.8.8.8 ......................... <span class='ok'>32ms</span>",400);
+    await line("[$] Bypass del sistema ..................... <span class='ok'>COMPLETADO</span>",550);
+    await line("[$] <span class='wa'>Cargando tu diploma de hacker...</span>",900);
+    await line("[$] <span class='ok'>YA SOS UNO DE NOSOTROS</span>",800);
+    await line("[$] <span style='color:#f1c40f'>⚠ ERROR: detectamos que sos amigo de Gonza</span>",1200);
+    await line("[$] <span style='color:#ff4d4d'>⚠ CANCELANDO ACCESO...</span>",700);
+    fase.style.display="none";
+    document.getElementById("alert").classList.add("on");
+    setTimeout(function(){
+      document.getElementById("alert").classList.remove("on");
+      // OTORGAR ACCESO AL SECTOR PRIVADO (24h)
+      try{ localStorage.setItem("zh_anon_pass", JSON.stringify({exp:Date.now()+24*3600000})); }catch(e){}
+      var r=document.getElementById("reveal");
+      r.style.display="flex";
+      r.querySelector("h2").textContent="🚨 ¡INICIACIÓN COMPLETADA!";
+    },1200);
+  })();
+}
+</script>
+</body>
+</html>

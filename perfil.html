@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="theme-color" content="#0a0a0a">
+<title>ZonaHack - Mi Perfil</title>
+<style>
+/* ═══════════════════════════════════════
+   ZONAHACK - FICHA MILITAR
+   Diseño: Estilo Ejército / Ficha de Combate
+   ═══════════════════════════════════════ */
+:root{
+  --bg:#0b0d09;--bg2:#10130c;--card:rgba(20,24,15,.92);
+  --accent:#c2b280;--accent2:#8a9a5b;
+  --text:#d8d4c2;--text2:rgba(216,212,194,.55);
+  --glass:rgba(194,178,128,.04);--glass-border:rgba(138,154,91,.18);
+  --shadow:0 4px 20px rgba(0,0,0,.5);
+  --radius:6px;--radius-sm:3px;
+  --font:'Courier New',monospace;
+  --transition:.25s cubic-bezier(.4,0,.2,1);
+  --olive:#6b7a3f;--khaki:#c2b280;--drab:#5d6b3d;--camo1:#4a532f;--camo2:#39411f;
+  --steel:#7d8694;--alert:#c0392b;--gold:#d4af37;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);padding:0;font-family:var(--font);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:
+  radial-gradient(circle at 20% 30%,rgba(194,178,128,.03),transparent 40%),
+  radial-gradient(circle at 80% 70%,rgba(138,154,91,.03),transparent 40%);
+  pointer-events:none;z-index:0}
+/* Patrón camuflaje sutil en el fondo */
+body::after{content:'';position:fixed;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:0;opacity:.09;
+  background:
+    radial-gradient(ellipse at 8% 22%,var(--camo1) 0,transparent 42%),
+    radial-gradient(ellipse at 42% 62%,var(--camo2) 0,transparent 48%),
+    radial-gradient(ellipse at 68% 28%,var(--camo1) 0,transparent 38%),
+    radial-gradient(ellipse at 92% 76%,var(--camo2) 0,transparent 44%),
+    radial-gradient(ellipse at 24% 88%,var(--camo1) 0,transparent 40%),
+    radial-gradient(ellipse at 55% 40%,var(--camo2) 0,transparent 35%);}
+
+/* ─── MARCO MILITAR (esquinas tipo visor de mirilla) ─── */
+.mil-frame{position:relative}
+.mil-frame::before,.mil-frame::after{content:'';position:absolute;width:14px;height:14px;border:2px solid var(--khaki);opacity:.5;pointer-events:none}
+.mil-frame::before{top:-4px;left:-4px;border-right:none;border-bottom:none}
+.mil-frame::after{bottom:-4px;right:-4px;border-left:none;border-top:none}
+
+/* ─── ETIQUETA STENCIL MILITAR ─── */
+.stencil{font-weight:bold;letter-spacing:3px;text-transform:uppercase;text-shadow:1px 1px 0 rgba(0,0,0,.6)}
+
+/* ─── BANDA DE BARRA SUPERIOR (franja de seguridad) ─── */
+.mil-band{display:block;text-align:center;font-size:.5em;letter-spacing:4px;color:var(--khaki);padding:3px 0;border-top:1px solid var(--glass-border);border-bottom:1px solid var(--glass-border);background:rgba(194,178,128,.05);text-transform:uppercase}
+
+/* ─── SCROLLBAR ─────────────────────── */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--glass-border);border-radius:2px}
+
+/* ─── RENDIMIENTO MÓVIL ──────────────── */
+@media(max-width:768px), (prefers-reduced-motion: reduce){
+  .banner::before{display:none}
+  .xp-bar::after{display:none}
+  .card,.stat-card,.ach-card,.custom-item{transition:none!important}
+  .avatar:hover{transform:none}
+  .card{backdrop-filter:none;-webkit-backdrop-filter:none}
+  *{animation-duration:.2s!important;animation-iteration-count:1!important}
+}
+
+/* ─── BANNER (CAMPAMENTO) ────────────── */
+.banner{position:relative;height:200px;background:linear-gradient(135deg,#0b0d09 0%,#1d2410 40%,#2e3518 100%);overflow:hidden;z-index:1;border-bottom:2px solid var(--glass-border)}
+.banner::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle at 30% 50%,rgba(194,178,128,.05) 0,transparent 50%),radial-gradient(circle at 70% 50%,rgba(138,154,91,.04) 0,transparent 50%);animation:bannerGlow 8s ease-in-out infinite}
+.banner::after{content:'';position:absolute;top:0;left:0;right:0;bottom:0;opacity:.12;background:
+  radial-gradient(ellipse at 15% 30%,var(--camo1) 0,transparent 45%),
+  radial-gradient(ellipse at 50% 70%,var(--camo2) 0,transparent 50%),
+  radial-gradient(ellipse at 85% 40%,var(--camo1) 0,transparent 40%),
+  radial-gradient(ellipse at 30% 80%,var(--camo2) 0,transparent 45%)}
+@keyframes bannerGlow{0%,100%{transform:scale(1);opacity:.5}50%{transform:scale(1.05);opacity:1}}
+.banner .stars{position:absolute;top:16px;right:22px;color:rgba(194,178,128,.3);letter-spacing:6px;font-size:.65em;z-index:2}
+.banner .overlay{position:absolute;bottom:0;left:0;right:0;height:60%;background:linear-gradient(0deg,var(--bg),transparent)}
+
+/* ─── HEADER PROFILE (FICHA MILITAR) ─── */
+.profile-header{position:relative;z-index:2;padding:0 20px;margin-top:-60px;display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap}
+.profile-header::before{content:'';position:absolute;bottom:0;left:-20px;right:-20px;height:1px;background:linear-gradient(90deg,transparent,var(--glass-border),transparent)}
+.avatar{width:90px;height:90px;border-radius:8px;border:2px solid var(--glass-border);background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:2.2em;position:relative;cursor:pointer;transition:var(--transition);overflow:hidden;flex-shrink:0}
+.avatar:hover{transform:scale(1.05);border-color:rgba(194,178,128,.2);box-shadow:0 0 20px rgba(194,178,128,.08)}
+.avatar .edit-badge{position:absolute;bottom:-2px;right:-2px;width:24px;height:24px;border-radius:50%;background:var(--accent);color:#000;font-size:.55em;display:flex;align-items:center;justify-content:center;opacity:0;transition:var(--transition)}
+.avatar:hover .edit-badge{opacity:1}
+.profile-info{flex:1;min-width:200px;padding-bottom:8px}
+.profile-info .name{font-size:1.3em;color:var(--khaki);text-shadow:0 0 12px rgba(194,178,128,.15);font-weight:bold;letter-spacing:2px;text-transform:uppercase}
+.profile-info .name::before{content:'▲ ';font-size:.6em;color:var(--text2)}
+.profile-info .bio{font-size:.7em;color:var(--text2);margin-top:2px;max-width:400px;line-height:1.4;font-style:italic}
+.profile-info .meta{display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;font-size:.6em;color:var(--text2)}
+.profile-info .meta span{display:flex;align-items:center;gap:3px;padding:2px 7px;border:1px solid var(--glass-border);border-radius:3px;background:var(--glass)}
+.legajo{font-size:.58em;color:var(--text2);margin-top:5px;display:flex;gap:5px;align-items:center}
+.legajo span{letter-spacing:1px}
+
+/* ─── LEVEL XP BAR ──────────────────── */
+.xp-bar-cont{background:var(--card);border:1px solid var(--glass-border);border-radius:2px;padding:3px;margin-top:6px;max-width:300px;position:relative;overflow:hidden}
+.xp-bar{height:7px;border-radius:2px;background:linear-gradient(90deg,var(--khaki),var(--accent2));transition:width 1s ease;position:relative}
+.xp-bar::after{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.12),transparent);animation:xpShine 2s infinite}
+@keyframes xpShine{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+.xp-label{font-size:.5em;color:var(--text2);margin-top:2px;letter-spacing:1px}
+
+/* ─── RANGO MILITAR ──────────────────── */
+.mil-badge-img{width:56px;height:70px;display:flex;align-items:center;justify-content:center;background:rgba(194,178,128,.06);border-radius:6px;flex-shrink:0;overflow:hidden;transition:box-shadow .4s}
+.mil-bar-cont{height:9px;background:rgba(255,255,255,.07);border-radius:5px;margin-top:6px;overflow:hidden;border:1px solid var(--glass-border);position:relative}
+.mil-bar-fill{height:100%;border-radius:5px;position:relative;overflow:hidden;transition:width .8s cubic-bezier(.22,1,.36,1)}
+.mil-bar-fill::after{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent);animation:xpShine 2.2s infinite}
+
+/* ─── CONTAINER ──────────────────────── */
+.container{max-width:1000px;margin:0 auto;padding:12px 16px 60px;position:relative;z-index:1}
+
+/* ─── STATS GRID (DATOS DE CAMPO) ────── */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:6px;margin-bottom:12px}
+.stat-card{background:var(--card);border:1px solid var(--glass-border);border-radius:3px;padding:10px;text-align:center;transition:var(--transition);position:relative}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--khaki),transparent)}
+.stat-card:hover{transform:translateY(-2px);border-color:rgba(194,178,128,.2);box-shadow:0 4px 15px rgba(0,0,0,.3)}
+.stat-card .num{font-size:1.3em;color:var(--khaki);font-weight:bold;font-family:'Courier New',monospace;letter-spacing:1px}
+.stat-card .lbl{font-size:.55em;color:var(--text2);margin-top:2px;text-transform:uppercase;letter-spacing:1px}
+
+/* ─── CARDS (DOSSIER MILITAR) ────────── */
+.card{background:var(--card);border:1px solid var(--glass-border);border-radius:4px;padding:14px;margin-bottom:8px;backdrop-filter:blur(10px);transition:var(--transition);position:relative}
+.card:hover{border-color:rgba(194,178,128,.18)}
+.card::before,.card::after{content:'';position:absolute;width:10px;height:10px;border:1px solid rgba(194,178,128,.3);opacity:0;transition:opacity var(--transition);pointer-events:none}
+.card::before{top:3px;left:3px;border-right:none;border-bottom:none}
+.card::after{bottom:3px;right:3px;border-left:none;border-top:none}
+.card:hover::before,.card:hover::after{opacity:.8}
+.card .hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;padding-bottom:6px;border-bottom:1px dashed var(--glass-border)}
+.card .hdr h2{font-size:.75em;color:var(--khaki);display:flex;align-items:center;gap:5px;text-transform:uppercase;letter-spacing:1px}
+.card .hdr h2::before{content:'▸';color:var(--olive);font-size:.8em}
+.card .hdr .more{font-size:.55em;color:var(--text2);cursor:pointer;transition:var(--transition)}
+.card .hdr .more:hover{color:var(--khaki)}
+
+/* ─── TABS ───────────────────────────── */
+.tabs{display:flex;gap:3px;margin-bottom:10px;flex-wrap:wrap}
+.tab{padding:6px 12px;border:1px solid var(--glass-border);border-radius:3px;background:transparent;color:var(--text2);font-size:.6em;cursor:pointer;font-family:var(--font);transition:var(--transition);text-transform:uppercase;letter-spacing:.5px}
+.tab:hover{border-color:rgba(194,178,128,.15);color:var(--khaki)}
+.tab.active{background:rgba(194,178,128,.06);border-color:rgba(194,178,128,.25);color:var(--khaki)}
+.tabc{display:none}
+.tabc.active{display:block}
+
+/* ─── FICHA MILITAR ──────────────────── */
+.militar-card{border:1px solid rgba(194,178,128,.25);background:linear-gradient(180deg,rgba(194,178,128,.05),rgba(20,24,15,.92));position:relative}
+.militar-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--khaki),transparent)}
+.militar-card::after{content:'☰';position:absolute;top:10px;right:14px;color:rgba(194,178,128,.3);font-size:1em}
+.militar-card .hdr{border-bottom:1px dashed rgba(194,178,128,.2)}
+
+/* ─── CONDECORACIONES (MEDALLERO) ────── */
+.condeco-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(74px,1fr));gap:8px}
+.condeco{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px;border:1px solid var(--glass-border);border-radius:4px;background:var(--glass);transition:var(--transition);position:relative}
+.condeco:hover{border-color:rgba(194,178,128,.3);transform:translateY(-2px)}
+.condeco.locked{opacity:.22;filter:grayscale(1)}
+.condeco .medal{font-size:1.5em;line-height:1}
+.condeco .mname{font-size:.48em;color:var(--text);text-align:center;line-height:1.2}
+.condeco .mdesc{font-size:.42em;color:var(--text2);text-align:center;line-height:1.15}
+.condeco .ribbon{width:26px;height:5px;border-radius:1px;margin-top:1px;border:1px solid rgba(0,0,0,.4)}
+
+/* ─── ACHIEVEMENTS ──────────────────── */
+.ach-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:6px}
+.ach-card{border:1px solid var(--glass-border);border-radius:4px;padding:10px;text-align:center;background:var(--glass);transition:var(--transition);position:relative;overflow:hidden}
+.ach-card::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(135deg,transparent,rgba(194,178,128,.03));opacity:0;transition:var(--transition)}
+.ach-card:hover::before{opacity:1}
+.ach-card.locked{opacity:.3}
+.ach-card .ico{font-size:1.5em;margin-bottom:3px}
+.ach-card .name{font-size:.55em;color:var(--text);margin-bottom:2px}
+.ach-card .desc{font-size:.48em;color:var(--text2)}
+.ach-card .rarity{font-size:.45em;color:var(--text2);margin-top:2px;padding:1px 6px;border-radius:2px;border:1px solid var(--glass-border);display:inline-block}
+.ach-card .prog{width:100%;height:2px;background:var(--glass-border);border-radius:2px;margin-top:4px;overflow:hidden}
+.ach-card .prog span{display:block;height:100%;background:var(--khaki);border-radius:2px;transition:width 1s}
+
+/* ─── ACTIVITY TIMELINE ─────────────── */
+.timeline{position:relative;padding-left:16px}
+.timeline::before{content:'';position:absolute;left:4px;top:0;bottom:0;width:1px;background:var(--glass-border)}
+.tl-item{position:relative;padding:6px 0 6px 12px}
+.tl-item::before{content:'';position:absolute;left:-12px;top:12px;width:7px;height:7px;border-radius:50%;background:var(--khaki);border:1px solid var(--bg)}
+.tl-item .tl-time{font-size:.5em;color:var(--text2)}
+.tl-item .tl-text{font-size:.65em;color:var(--text);margin-top:1px}
+.tl-item .tl-text span{color:var(--khaki)}
+
+/* ─── FAVORITES GRID ─────────────────── */
+.fav-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:4px}
+.fav-grid .fav-item{aspect-ratio:16/9;border-radius:3px;overflow:hidden;background:var(--glass);border:1px solid var(--glass-border);cursor:pointer;transition:var(--transition)}
+.fav-grid .fav-item:hover{transform:scale(1.03);border-color:rgba(194,178,128,.15)}
+
+/* ─── PLAYLISTS ──────────────────────── */
+.playlist-item{display:flex;align-items:center;gap:8px;padding:8px;border:1px solid var(--glass-border);border-radius:4px;margin-bottom:4px;transition:var(--transition);cursor:pointer}
+.playlist-item:hover{border-color:rgba(194,178,128,.15);background:var(--glass)}
+.playlist-item .pl-thumb{width:40px;height:40px;border-radius:3px;background:var(--glass);display:flex;align-items:center;justify-content:center;font-size:1em}
+.playlist-item .pl-info{flex:1}
+.playlist-item .pl-info .pl-name{font-size:.65em;color:var(--text)}
+.playlist-item .pl-info .pl-meta{font-size:.5em;color:var(--text2)}
+
+/* ─── CUSTOMIZATION PANEL ────────────── */
+.custom-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:6px}
+.custom-item{padding:8px;border:1px solid var(--glass-border);border-radius:4px;text-align:center;cursor:pointer;transition:var(--transition);background:var(--glass)}
+.custom-item:hover{border-color:rgba(194,178,128,.15)}
+.custom-item.active{border-color:var(--khaki);background:rgba(194,178,128,.06)}
+.custom-item .c-ico{font-size:1.2em}
+.custom-item .c-name{font-size:.5em;color:var(--text2);margin-top:3px}
+
+/* ─── RESPONSIVE ─────────────────────── */
+@media(max-width:600px){
+  .profile-header{padding:0 12px;margin-top:-50px}
+  .avatar{width:65px;height:65px;font-size:1.6em;border-radius:6px}
+  .profile-info .name{font-size:1.05em}
+  .stats-grid{grid-template-columns:repeat(3,1fr)}
+  .banner{height:130px}
+  .ach-grid{grid-template-columns:repeat(2,1fr)}
+  .fav-grid{grid-template-columns:repeat(4,1fr)}
+}
+
+/* ─── UTILITIES ──────────────────────── */
+.tag{padding:1px 6px;border-radius:2px;font-size:.5em;border:1px solid var(--glass-border);display:inline-block}
+.tag-admin{border-color:rgba(241,196,15,.15);color:#f1c40f}
+.tag-vip{border-color:rgba(194,178,128,.15);color:var(--khaki)}
+.tag-user{border-color:rgba(214,210,192,.08);color:var(--text2)}
+.back-btn{color:var(--khaki);text-decoration:none;font-size:.6em;padding:4px 10px;border:1px solid var(--glass-border);border-radius:3px;display:inline-block;margin-bottom:8px;transition:var(--transition)}
+.back-btn:hover{border-color:rgba(194,178,128,.2)}
+</style>
+</head>
+<body>
+
+<div class="banner"><div class="stars">★ ★ ★</div><div class="overlay"></div></div>
+
+<div class="mil-band">⚔ EJÉRCITO ZONAHACK · FICHA DE SERVICIO ⚔</div>
+
+<div class="profile-header mil-frame">
+  <div class="avatar" id="avatarBtn" onclick="cambiarAvatar()">
+    <span id="avatarEmoji">🎬</span>
+    <span class="edit-badge">✎</span>
+  </div>
+  <div class="profile-info">
+    <div class="name stencil" id="userNameDisplay">---</div>
+    <div class="bio" id="userBio">Sin biografia</div>
+    <div class="meta">
+      <span id="userLevel">🎖️ Nivel 1</span>
+      <span id="userJoinDate">📅 Unido recientemente</span>
+      <span id="userStatus" class="tag tag-user">Online</span>
+      <span id="userRangoBadge"></span>
+      <span id="userRangoMilitarBadge"></span>
+      <span id="userIdBadge" style="cursor:pointer;border:1px solid rgba(212,175,55,.25);color:var(--gold);padding:1px 7px;border-radius:2px;letter-spacing:1px" title="Tu ID único - click para copiar">🆔 ---</span>
+    </div>
+    <div class="legajo"><span style="color:var(--text2)">Nº de legajo:</span> <span id="legajoNum" style="color:var(--khaki)">-</span> <span style="margin-left:10px;color:var(--text2)">Unidad:</span> <span id="unidadLine" style="color:var(--olive)">-</span></div>
+    <div class="xp-bar-cont"><div class="xp-bar" id="xpBar" style="width:0%"></div></div>
+    <div class="xp-label" id="xpLabel">0 / 100 XP</div>
+  </div>
+</div>
+
+<div class="container">
+  <a class="back-btn" href="/">← Volver al inicio</a>
+
+  <div class="tabs">
+    <button class="tab active" onclick="mostrar('resumen')">📊 Resumen</button>
+    <button class="tab" onclick="mostrar('logros')">🏆 Logros</button>
+    <button class="tab" onclick="mostrar('actividad')">📈 Actividad</button>
+    <button class="tab" onclick="mostrar('favoritos')">❤️ Favoritos</button>
+    <button class="tab" onclick="mostrar('personalizar')">🎨 Personalizar</button>
+  </div>
+
+  <!-- ═══ RESUMEN ═══ -->
+  <div id="tab-resumen" class="tabc active">
+    <div class="stats-grid" id="statsGrid"></div>
+    <div class="card"><div class="hdr"><h2>🔥 Rachas</h2></div><div id="streaksContent"><span style="font-size:.6em;color:var(--text2)">Cargando...</span></div></div>
+    <div class="card militar-card"><div class="hdr"><h2>🎖️ Ficha Militar</h2><span style="font-size:.5em;color:var(--text2);letter-spacing:2px">SERVICIO ACTIVO</span></div><div id="militarProgress" style="font-size:.6em;color:var(--text2)"><span style="color:#555">Cargando rango...</span></div></div>
+    <div class="card"><div class="hdr"><h2>🎖️ Condecoraciones</h2><span style="font-size:.5em;color:var(--text2);letter-spacing:1px">MEDALLERO</span></div><div id="condecoGrid" class="condeco-grid"><span style="font-size:.6em;color:var(--text2)">Cargando condecoraciones...</span></div></div>
+    <div class="card"><div class="hdr"><h2>⭐ Coleccion</h2></div><div id="coleccionContent"><span style="font-size:.6em;color:var(--text2)">Cargando...</span></div></div>
+    <div id="gestionSection" class="card" style="display:none">
+      <div class="hdr"><h2>⚙️ Gestion de usuarios</h2><span id="gestionLive" style="display:inline-block;width:5px;height:5px;border-radius:50%;background:#555"></span></div>
+      <div id="gestionUsers"><span style="font-size:.55em;color:var(--text2)">Ingresa con pass de admin para gestionar</span></div>
+      <div style="margin-top:4px;display:flex;gap:3px;flex-wrap:wrap">
+        <input id="inputGestNom" placeholder="User..." style="padding:4px 8px;border:1px solid var(--glass-border);border-radius:4px;background:var(--bg);color:var(--text);font-size:.55em;font-family:var(--font);outline:none;flex:1;min-width:80px">
+        <button onclick="gestRango('admin','#00ff41')" style="padding:4px 8px;border:1px solid var(--glass-border);border-radius:4px;background:transparent;color:var(--accent);cursor:pointer;font-size:.5em;font-family:var(--font)">Admin</button>
+        <button onclick="gestRango('vip','#e74c3c')" style="padding:4px 8px;border:1px solid var(--glass-border);border-radius:4px;background:transparent;color:var(--accent);cursor:pointer;font-size:.5em;font-family:var(--font)">VIP</button>
+        <button onclick="gestBan(prompt('Usuario:'))" style="padding:4px 8px;border:1px solid rgba(231,76,60,.12);border-radius:4px;background:transparent;color:#e74c3c;cursor:pointer;font-size:.5em;font-family:var(--font)">Ban</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ LOGROS ═══ -->
+  <div id="tab-logros" class="tabc"><div class="card"><div class="hdr"><h2>🏆 Logros</h2></div><div id="logrosGrid" class="ach-grid"></div></div></div>
+
+  <!-- ═══ ACTIVIDAD ═══ -->
+  <div id="tab-actividad" class="tabc"><div class="card"><div class="hdr"><h2>📈 Actividad reciente</h2></div><div id="actividadTimeline" class="timeline"></div></div></div>
+
+  <!-- ═══ FAVORITOS ═══ -->
+  <div id="tab-favoritos" class="tabc"><div class="card"><div class="hdr"><h2>❤️ Ultimos favoritos</h2></div><div id="favGrid" class="fav-grid"></div></div></div>
+
+  <!-- ═══ PERSONALIZAR ═══ -->
+  <div id="tab-personalizar" class="tabc">
+    <div class="card">
+      <div class="hdr"><h2>🎨 Tema</h2></div>
+      <div class="custom-grid" id="themeGrid"></div>
+    </div>
+    <div class="card">
+      <div class="hdr"><h2>🔧 Ajustes</h2></div>
+      <div style="font-size:.6em;color:var(--text2);line-height:1.8">
+        <label style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--glass-border)"><span>Avatar</span><button onclick="cambiarAvatar()" style="padding:2px 8px;border:1px solid var(--glass-border);border-radius:4px;background:transparent;color:var(--accent);cursor:pointer;font-size:.9em;font-family:var(--font)">Cambiar</button></label>
+        <label style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--glass-border)"><span>Biografia</span><button onclick="cambiarBio()" style="padding:2px 8px;border:1px solid var(--glass-border);border-radius:4px;background:transparent;color:var(--accent);cursor:pointer;font-size:.9em;font-family:var(--font)">Editar</button></label>
+        <label style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--glass-border)"><span>Exportar datos</span><button onclick="exportarDatos()" style="padding:2px 8px;border:1px solid var(--glass-border);border-radius:4px;background:transparent;color:var(--accent);cursor:pointer;font-size:.9em;font-family:var(--font)">Exportar</button></label>
+        <label style="display:flex;justify-content:space-between;padding:4px 0"><span>Cerrar sesion</span><button onclick="logout()" style="padding:2px 8px;border:1px solid rgba(231,76,60,.12);border-radius:4px;background:transparent;color:#e74c3c;cursor:pointer;font-size:.9em;font-family:var(--font)">Salir</button></label>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════
+   PERFIL v2 - JavaScript
+   ═══════════════════════════════════════ */
+var SUPABASE = "https://xfwolaurpeofysnymqle.supabase.co/rest/v1";
+var APIKEY = "sb_publishable_3VvBUD5Bdu3Uaq59fJ99MQ_XDCtujUU";
+var DBH = {"apikey":APIKEY,"Authorization":"Bearer "+APIKEY,"Content-Type":"application/json"};
+var USER = localStorage.getItem('vh_usuario')||'anon';
+var UID = localStorage.getItem('vh_user_id')||'0';
+var DB_NAME = "ZonaHackProfile";
+
+/* ─── INDEXEDDB ──────────────────────── */
+function openIDB(){
+  return new Promise(function(resolve,reject){
+    var r = indexedDB.open(DB_NAME,1);
+    r.onupgradeneeded = function(e){
+      var db = e.target.result;
+      if(!db.objectStoreNames.contains('perfil')) db.createObjectStore('perfil',{keyPath:'key'});
+      if(!db.objectStoreNames.contains('stats')) db.createObjectStore('stats',{keyPath:'id',autoIncrement:true});
+      if(!db.objectStoreNames.contains('logros')) db.createObjectStore('logros',{keyPath:'id',autoIncrement:true});
+      if(!db.objectStoreNames.contains('actividad')) db.createObjectStore('actividad',{keyPath:'id',autoIncrement:true});
+      if(!db.objectStoreNames.contains('playlists')) db.createObjectStore('playlists',{keyPath:'id',autoIncrement:true});
+      if(!db.objectStoreNames.contains('config')) db.createObjectStore('config',{keyPath:'key'});
+    };
+    r.onsuccess = function(e){ resolve(e.target.result); };
+    r.onerror = function(e){ reject(e); };
+  });
+}
+function idbPut(store,data){
+  return openIDB().then(function(db){
+    return new Promise(function(resolve,reject){
+      var t = db.transaction(store,'readwrite').objectStore(store);
+      var r = t.put(data);
+      r.onsuccess = function(){ resolve(); };
+      r.onerror = function(){ reject(); };
+    });
+  });
+}
+function idbGet(store,key){
+  return openIDB().then(function(db){
+    return new Promise(function(resolve,reject){
+      var t = db.transaction(store,'readonly').objectStore(store);
+      var r = t.get(key);
+      r.onsuccess = function(){ resolve(r.result); };
+      r.onerror = function(){ reject(); };
+    });
+  });
+}
+function idbGetAll(store){
+  return openIDB().then(function(db){
+    return new Promise(function(resolve,reject){
+      var t = db.transaction(store,'readonly').objectStore(store);
+      var r = t.getAll();
+      r.onsuccess = function(){ resolve(r.result||[]); };
+      r.onerror = function(){ reject(); };
+    });
+  });
+}
+
+/* ─── XP & LEVEL SYSTEM ─────────────── */
+var XP_TABLE = {1:0,2:100,3:250,4:500,5:800,6:1200,7:1700,8:2300,9:3000,10:4000,11:5200,12:6600,13:8200,14:10000,15:12000};
+function calcLevel(xp){
+  var lv=1;
+  for(var i=1;i<=15;i++){
+    if(xp>=(XP_TABLE[i]||0)) lv=i;
+  }
+  return lv;
+}
+function xpForLevel(lv){ return XP_TABLE[lv]||0; }
+function xpToNext(lv){ return (XP_TABLE[lv+1]||XP_TABLE[lv]+500)-(XP_TABLE[lv]||0); }
+function xpInLevel(xp,lv){ return xp-(XP_TABLE[lv]||0); }
+
+function actualizarXP(totalXP){
+  var lv = calcLevel(totalXP);
+  var inLv = xpInLevel(totalXP,lv);
+  var need = xpToNext(lv);
+  var pct = Math.min(100, (inLv/need)*100);
+  document.getElementById('userLevel').textContent = '🎖️ Nivel '+lv;
+  document.getElementById('xpBar').style.width = pct+'%';
+  document.getElementById('xpLabel').textContent = totalXP+' / '+(xpForLevel(lv)+need)+' XP';
+  idbPut('perfil',{key:'xp',value:totalXP});
+  return lv;
+}
+
+/* ─── TEMAS ──────────────────────────── */
+var TEMAS = [
+  {id:'hacker',nom:'Hacker',ico:'💚',bg:'#0a0a0a',accent:'#00ff41'},
+  {id:'neon',nom:'Neon',ico:'💜',bg:'#0a0015',accent:'#ff00ff'},
+  {id:'oceano',nom:'Oceano',ico:'🌊',bg:'#000d1a',accent:'#00bfff'},
+  {id:'fuego',nom:'Fuego',ico:'🔥',bg:'#1a0500',accent:'#ff4500'},
+  {id:'oro',nom:'Oro',ico:'👑',bg:'#0a0800',accent:'#f1c40f'},
+  {id:'plata',nom:'Plata',ico:'⚪',bg:'#0d0d0d',accent:'#c0c0c0'},
+];
+function aplicarTema(id){
+  var t = TEMAS.find(function(x){return x.id===id;})||TEMAS[0];
+  document.documentElement.style.setProperty('--accent',t.accent);
+  document.documentElement.style.setProperty('--accent2',t.accent);
+  document.body.style.background = t.bg;
+  idbPut('config',{key:'theme',value:id});
+  document.querySelectorAll('.custom-item').forEach(function(e){e.classList.toggle('active',e.dataset.tema===id);});
+}
+
+/* ─── LOGROS ─────────────────────────── */
+var LOGROS_DISPONIBLES = [
+  {id:'primer_video',ico:'🎬',nom:'Primer video',desc:'Viste tu primer video',rarity:'Comun',check:function(s){return s.vistos>=1;}},
+  {id:'100_horas',ico:'⏱️',nom:'100 horas',desc:'Acumulaste 100 horas de reproduccion',rarity:'Raro',check:function(s){return s.horas>=100;}},
+  {id:'coleccionista',ico:'📦',nom:'Coleccionista',desc:'Agregaste 50 videos a tu biblioteca',rarity:'Raro',check:function(s){return s.favoritos>=50;}},
+  {id:'maraton',ico:'🏃',nom:'Maraton',desc:'Viste 10 videos en un dia',rarity:'Epico',check:function(s){return s.racha>=10;}},
+  {id:'500_videos',ico:'💎',nom:'500 videos',desc:'Viste 500 videos',rarity:'Legendario',check:function(s){return s.vistos>=500;}},
+  {id:'cinefilo',ico:'🎥',nom:'Cinefilo',desc:'Alcanzaste nivel 10',rarity:'Legendario',check:function(s){return s.nivel>=10;}},
+  {id:'madrugador',ico:'🌅',nom:'Madrugador',desc:'Usaste la app antes de las 6am',rarity:'Comun',check:function(){return new Date().getHours()<6;}},
+  {id:'social',ico:'💬',nom:'Social',desc:'Escribiste 50 mensajes en el chat',rarity:'Raro',check:function(s){return (s.chat||0)>=50;}},
+];
+
+/* ─── CARGAR PERFIL ──────────────────── */
+function esc(s){return (s||"").replace(/[&<>"]/g,function(m){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m];});}
+
+function mostrar(id){
+  document.querySelectorAll('.tabc').forEach(function(e){e.classList.remove('active');});
+  document.getElementById('tab-'+id).classList.add('active');
+  document.querySelectorAll('.tab').forEach(function(e){e.classList.remove('active');});
+  document.querySelectorAll('.tab').forEach(function(e){
+    if(e.getAttribute('onclick')&&e.getAttribute('onclick').includes("'"+id+"'")) e.classList.add('active');
+  });
+  if(id==='logros') renderLogros();
+  if(id==='actividad') renderActividad();
+  if(id==='favoritos') renderFavoritos();
+  if(id==='personalizar') renderTemas();
+}
+
+function cargarPerfil(){
+  // Cargar datos de Supabase
+  Promise.all([
+    fetch(SUPABASE+"/progreso?select=id",{headers:DBH}).then(function(r){return r.json();}).catch(function(){return[];}),
+    fetch(SUPABASE+"/favoritos?select=id",{headers:DBH}).then(function(r){return r.json();}).catch(function(){return[];}),
+    fetch(SUPABASE+"/logs?select=id",{headers:DBH}).then(function(r){return r.json();}).catch(function(){return[];}),
+    fetch(SUPABASE+"/rangos?select=rango,color&usuario_nombre=eq."+encodeURIComponent(USER)+"&limit=1",{headers:DBH}).then(function(r){return r.json();}).catch(function(){return[];})
+  ]).then(function(d){
+    var vistos = (d[0]||[]).length || 0;
+    var favoritos = (d[1]||[]).length || 0;
+    var logs = (d[2]||[]).length || 0;
+    var rango = (d[3]||[])[0]||null;
+    var horas = Math.round(vistos * 1.5);
+    var xpBase = vistos*10 + favoritos*5 + logs*2;
+
+    // Cargar XP desde DB (usuarios_ext)
+    var stats = {vistos:vistos,horas:horas,favoritos:favoritos,logs:logs,xp:xpBase,racha:contarRacha()};
+    fetch(SUPABASE+"/usuarios_ext?select=xp,nivel&usuario_nombre=eq."+encodeURIComponent(USER)+"&limit=1",{headers:DBH})
+    .then(function(r){return r.json();}).then(function(xpData){
+      var xpFinal = xpBase;
+      if(xpData && xpData.length){
+        xpFinal = Math.max((xpData[0].xp||0), xpBase);
+      }else{
+        // Crear si no existe
+        fetch(SUPABASE+"/usuarios_ext",{method:"POST",headers:Object.assign({},DBH,{"Prefer":"return=minimal"}),body:JSON.stringify({usuario_nombre:USER,xp:xpBase,nivel:Math.min(15,Math.max(1,Math.floor(xpBase/100)+1)),rol:rango?rango.rango:"user",estado:"activo"})}).catch(function(){});
+      }
+      var nivelCalc = Math.min(15, Math.max(1, Math.floor(xpFinal/100)+1));
+      // Guardar XP actualizado
+      fetch(SUPABASE+"/usuarios_ext?usuario_nombre=eq."+encodeURIComponent(USER),{method:"PATCH",headers:DBH,body:JSON.stringify({xp:xpFinal,nivel:nivelCalc})}).catch(function(){});
+      stats.xp = xpFinal;
+      actualizarXP(xpFinal);
+      mostrarStats(stats);
+    }).catch(function(){
+      actualizarXP(stats.xp);
+      mostrarStats(stats);
+    });
+
+    // Mostrar stats
+    function mostrarStats(s){
+      var h = '', it = [
+        {n:s.vistos,l:'Vistos',i:'🎬'},{n:s.horas+'h',l:'Horas',i:'⏱️'},{n:s.favoritos,l:'Favoritos',i:'❤️'},
+        {n:s.logs,l:'Acciones',i:'📋'},{n:s.racha,l:'Racha',i:'🔥'},{n:s.xp,l:'XP total',i:'⭐'}
+      ];
+      it.forEach(function(x){h+='<div class="stat-card"><div class="num">'+x.n+'</div><div class="lbl">'+x.i+' '+x.l+'</div></div>';});
+      document.getElementById('statsGrid').innerHTML = h;
+    }
+    mostrarStats(stats);
+    // Condecoraciones militares según actividad
+    cargarCondecoraciones(stats);
+
+    // XP
+    var lv = actualizarXP(stats.xp);
+
+    // Rango
+    if(rango){
+      document.getElementById('userRangoBadge').innerHTML = '<span class="tag tag-admin" style="color:'+rango.color+'">'+esc(rango.rango||'')+'</span>';
+    }
+
+    // Rango militar automático por actividad
+    cargarRangoMilitar();
+    // Unidad/División según rango militar
+    cargarUnidad();
+
+    // Name & bio
+    document.getElementById('userNameDisplay').textContent = USER;
+    idbGet('perfil',{key:'bio'}).then(function(d){if(d)document.getElementById('userBio').textContent=d.value;}).catch(function(){});
+
+    // ID único de usuario
+    cargarUserId();
+
+    // Avatar
+    idbGet('perfil',{key:'avatar'}).then(function(d){if(d)document.getElementById('avatarEmoji').textContent=d.value;}).catch(function(){});
+
+    // Check logros
+    var logrosData = {vistos:vistos,horas:horas,favoritos:favoritos,racha:stats.racha,nivel:lv,chat:logs};
+    verificarLogros(logrosData);
+
+    // Streaks - mejorado con record real
+    var racha = contarRacha();
+    var record = parseInt(localStorage.getItem("vh_streak_record")||"0");
+    if(racha > record){ record = racha; localStorage.setItem("vh_streak_record", record); }
+    document.getElementById('streaksContent').innerHTML =
+      '<div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center">'+
+      '<div style="text-align:center"><div style="font-size:1.8em;color:#f1c40f;font-weight:bold">'+racha+'</div><div style="font-size:.55em;color:var(--text2)">🔥 Racha actual</div></div>'+
+      '<div style="text-align:center"><div style="font-size:1.2em;color:var(--accent)">🏆</div><div style="font-size:.55em;color:var(--text2)">Record: '+record+' dias</div></div>'+
+      '<div style="font-size:.55em;color:var(--text2)">+'+(Math.min(100,racha*5))+'% XP bonus</div></div>';
+
+    // Coleccion - conteo real del historial
+    var progs = {};
+    try{progs = JSON.parse(localStorage.getItem("vh2_prog")||"{}");}catch(e){}
+    var vistas = Object.keys(progs).length;
+    var cats = {peliculas:0,series:0,anime:0,docs:0};
+    try{
+      var catData = JSON.parse(localStorage.getItem("vh_cat_cache")||"{}");
+      cats.peliculas = catData.p||Math.round(vistas*0.4);
+      cats.series = catData.s||Math.round(vistas*0.2);
+      cats.anime = catData.a||Math.round(vistas*0.15);
+      cats.docs = catData.d||Math.round(vistas*0.05);
+    }catch(e){ cats.peliculas = Math.round(vistas*0.4); }
+    document.getElementById('coleccionContent').innerHTML =
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:.65em">'+
+      '<div>🎬 Peliculas: <b style="color:var(--accent)">'+cats.peliculas+'</b></div>'+
+      '<div>📺 Series: <b style="color:var(--accent)">'+cats.series+'</b></div>'+
+      '<div>🍥 Anime: <b style="color:var(--accent)">'+cats.anime+'</b></div>'+
+      '<div>📽️ Docs: <b style="color:var(--accent)">'+cats.docs+'</b></div>'+
+      '<div style="grid-column:1/-1;border-top:1px solid rgba(0,255,65,.1);padding-top:4px">📦 Total vistos: <b style="color:var(--accent)">'+vistas+'</b></div></div>';
+
+    // Stats actualizadas con racha real
+    stats.racha = racha;
+
+    // Theme
+    idbGet('config',{key:'theme'}).then(function(d){if(d)aplicarTema(d.value);}).catch(function(){});
+  }).catch(function(){});
+}
+
+/* ─── RACHA ──────────────────────────── */
+function contarRacha(){
+  try{
+    var reg = JSON.parse(localStorage.getItem('vh_streak')||'{"date":"","count":0}');
+    var hoy = new Date().toDateString();
+    var ayer = new Date(Date.now()-86400000).toDateString();
+    if(reg.date === hoy) return reg.count;
+    if(reg.date === ayer){reg.count++;reg.date=hoy;localStorage.setItem('vh_streak',JSON.stringify(reg));return reg.count;}
+    localStorage.setItem('vh_streak',JSON.stringify({date:hoy,count:1}));
+    return 1;
+  }catch(e){return 1;}
+}
+
+/* ─── LOGROS ─────────────────────────── */
+function verificarLogros(s){
+  idbGetAll('logros').then(function(existentes){
+    LOGROS_DISPONIBLES.forEach(function(l){
+      if(existentes.some(function(e){return e.logroId===l.id;})) return;
+      if(l.check(s)){
+        idbPut('logros',{logroId:l.id,fecha:new Date().toISOString()});
+        // Sumar XP por logro
+        idbGet('perfil',{key:'xp'}).then(function(x){actualizarXP((x?x.value:0)+100);}).catch(function(){});
+      }
+    });
+  });
+}
+
+function renderLogros(){
+  idbGetAll('logros').then(function(logros){
+    var s = document.getElementById('logrosGrid');
+    if(!s) return;
+    LOGROS_DISPONIBLES.forEach(function(l){
+      var obtenido = logros.find(function(o){return o.logroId===l.id;});
+      var html = '<div class="ach-card'+(obtenido?'':' locked')+'"><div class="ico">'+l.ico+'</div><div class="name">'+esc(l.nom)+'</div><div class="desc">'+esc(l.desc)+'</div><div class="rarity">'+l.rarity+'</div>';
+      if(obtenido) html += '<div style="font-size:.45em;color:var(--accent);margin-top:2px">'+new Date(obtenido.fecha).toLocaleDateString()+'</div>';
+      html += '</div>';
+      s.innerHTML += html;
+    });
+    if(!s.innerHTML) s.innerHTML = '<span style="font-size:.6em;color:var(--text2);grid-column:1/-1;text-align:center;padding:20px">Sin logros aun. Sigue usando la app!</span>';
+  });
+}
+
+/* ─── ACTIVIDAD ──────────────────────── */
+function renderActividad(){
+  var el = document.getElementById('actividadTimeline');
+  if(!el) return;
+  fetch(SUPABASE+"/logs?select=accion,detalle,created_at&order=created_at.desc&limit=20",{headers:DBH})
+  .then(function(r){return r.json();}).then(function(d){
+    if(!d||!d.length){el.innerHTML='<div style="font-size:.6em;color:var(--text2);padding:20px;text-align:center">Sin actividad reciente</div>';return;}
+    var dias = {};
+    d.forEach(function(l){
+      var dia = new Date(l.created_at).toLocaleDateString();
+      if(!dias[dia]) dias[dia] = [];
+      dias[dia].push(l);
+    });
+    var html = '';
+    Object.keys(dias).slice(0,7).forEach(function(dia){
+      html += '<div style="font-size:.55em;color:var(--accent);margin:6px 0 2px">'+dia+'</div>';
+      dias[dia].forEach(function(l){
+        html += '<div class="tl-item"><div class="tl-time">'+new Date(l.created_at).toLocaleTimeString()+'</div><div class="tl-text"><span>'+esc(l.accion||'')+'</span> '+esc((l.detalle||'').slice(0,80))+'</div></div>';
+      });
+    });
+    el.innerHTML = html;
+  }).catch(function(){el.innerHTML='<div style="font-size:.6em;color:var(--text2);padding:20px;text-align:center">Error al cargar</div>';});
+}
+
+/* ─── FAVORITOS ──────────────────────── */
+function renderFavoritos(){
+  var el = document.getElementById('favGrid');
+  if(!el) return;
+  fetch(SUPABASE+"/favoritos?select=video_id,titulo&order=created_at.desc&limit=20",{headers:DBH})
+  .then(function(r){return r.json();}).then(function(d){
+    if(!d||!d.length){el.innerHTML='<span style="font-size:.6em;color:var(--text2);grid-column:1/-1;text-align:center;padding:20px">Sin favoritos</span>';return;}
+    el.innerHTML = d.map(function(f){return '<div class="fav-item" title="'+esc(f.titulo||'')+'" onclick="window.location.href=\'/?q='+encodeURIComponent(f.titulo||'')+'\'"></div>';}).join('');
+  }).catch(function(){});
+}
+
+/* ─── TEMAS ──────────────────────────── */
+function renderTemas(){
+  var el = document.getElementById('themeGrid');
+  if(!el) return;
+  el.innerHTML = TEMAS.map(function(t){
+    return '<div class="custom-item" data-tema="'+t.id+'" onclick="aplicarTema(\''+t.id+'\')"><div class="c-ico">'+t.ico+'</div><div class="c-name">'+t.nom+'</div></div>';
+  }).join('');
+}
+
+/* ─── ACCIONES ───────────────────────── */
+function cambiarAvatar(){
+  var emojis = ['🎬','🍿','🎥','📺','🎮','🎵','📽️','💻','🖥️','🎧','👾','🕹️','📀','💿','📼','🔞','🍥','🎭','🎪','🎤','🎶','🎵','📻','📡','💎','👑','⭐','🔥','💀','👽','🤖','👻','💩'];
+  var actual = document.getElementById('avatarEmoji').textContent;
+  var idx = emojis.indexOf(actual);
+  var nuevo = emojis[(idx+1)%emojis.length];
+  document.getElementById('avatarEmoji').textContent = nuevo;
+  idbPut('perfil',{key:'avatar',value:nuevo});
+}
+
+function cambiarBio(){
+  var nueva = prompt('Nueva biografia:', document.getElementById('userBio').textContent);
+  if(nueva !== null){
+    document.getElementById('userBio').textContent = nueva || 'Sin biografia';
+    idbPut('perfil',{key:'bio',value:nueva||'Sin biografia'});
+  }
+}
+
+/* ─── ID ÚNICO DE USUARIO ────────────── */
+function generarUserId(){
+  function r4(){ return Math.random().toString(36).slice(2,6).toUpperCase(); }
+  return "ZH-" + r4() + "-" + r4();
+}
+function cargarUserId(){
+  var el = document.getElementById('userIdBadge');
+  if(!el) return;
+  var id = localStorage.getItem('vh_user_id');
+  // Si no tiene formato ZH-, generar uno
+  if(!id || id.indexOf('ZH-') !== 0){
+    id = generarUserId();
+    localStorage.setItem('vh_user_id', id);
+    // Guardar en DB
+    if(USER && USER!=='anon'){
+      fetch(SUPABASE+"/usuarios_ext?usuario_nombre=eq."+encodeURIComponent(USER),{method:"PATCH",headers:DBH,body:JSON.stringify({user_id:id})}).catch(function(){});
+    }
+  }
+  el.textContent = '🆔 ' + id;
+  el.onclick = function(){
+    try{
+      if(navigator.clipboard){ navigator.clipboard.writeText(id).then(function(){ el.textContent='✅ Copiado: '+id; setTimeout(function(){el.textContent='🆔 '+id;},1500); }); }
+      else{ prompt('Tu ID único:', id); }
+    }catch(e){ prompt('Tu ID único:', id); }
+  };
+  // Nº de legajo militar (derivado del ID)
+  try{
+    var leg = document.getElementById('legajoNum');
+    if(leg){
+      var num = id.replace(/[^0-9]/g,'').slice(-6) || '000000';
+      leg.textContent = 'ZH-' + num;
+    }
+  }catch(e){}
+}
+
+function exportarDatos(){
+  Promise.all([
+    fetch(SUPABASE+"/progreso?order=created_at.desc&limit=100",{headers:DBH}).then(function(r){return r.json();}).catch(function(){return[];}),
+    fetch(SUPABASE+"/favoritos?order=created_at.desc&limit=100",{headers:DBH}).then(function(r){return r.json();}).catch(function(){return[];}),
+    fetch(SUPABASE+"/logs?order=created_at.desc&limit=100",{headers:DBH}).then(function(r){return r.json();}).catch(function(){return[];})
+  ]).then(function(d){
+    var data = {exportado:new Date().toISOString(),usuario:USER,progreso:d[0]||[],favoritos:d[1]||[],logs:d[2]||[]};
+    var blob = new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+    var a = document.createElement('a');a.href=URL.createObjectURL(blob);a.download='zonahack_datos_'+new Date().toISOString().slice(0,10)+'.json';a.click();
+  });
+}
+
+function logout(){
+  if(confirm('Cerrar sesion?')){
+    localStorage.removeItem('vh_usuario');
+    localStorage.removeItem('vh_user_id');
+    window.location.href='/';
+  }
+}
+
+/* ─── GESTION ────────────────────────── */
+function gestSetRango(nom,rango,color){
+  if(!nom) return;
+  fetch(SUPABASE+"/rangos?usuario_nombre=eq."+encodeURIComponent(nom)+"&limit=1",{headers:DBH}).then(function(r){return r.json();}).then(function(d){
+    if(d&&d.length>0) return fetch(SUPABASE+"/rangos?usuario_nombre=eq."+encodeURIComponent(nom),{method:"PATCH",headers:DBH,body:JSON.stringify({rango:rango,color:color})});
+    else return fetch(SUPABASE+"/rangos",{method:"POST",headers:Object.assign({},DBH,{"Prefer":"return=minimal"}),body:JSON.stringify({usuario_nombre:nom,rango:rango,color:color})});
+  }).then(function(){cargarGestion();}).catch(function(){});
+}
+function gestRango(rango,color){
+  var nom = document.getElementById('inputGestNom').value.trim();
+  if(!nom) return;
+  gestSetRango(nom,rango,color);
+  document.getElementById('inputGestNom').value='';
+}
+function gestBan(nom){
+  if(!nom||!confirm("Banear a "+nom+"?\n\nSu VIP se le QUITARÁ automáticamente.")) return;
+  fetch(SUPABASE+"/baneados",{method:"POST",headers:Object.assign({},DBH,{"Prefer":"return=minimal"}),body:JSON.stringify({usuario_nombre:nom,usuario_id:nom,tipo:"ban",motivo:"Baneado desde perfil",admin_nombre:USER,activo:true})}).then(function(){
+    gestSetRango(nom,"baneado","#e74c3c");
+    // Quitar VIP automáticamente
+    fetch(SUPABASE+"/vip?usuario_nombre=eq."+encodeURIComponent(nom),{method:"PATCH",headers:DBH,body:JSON.stringify({activo:false})}).catch(function(){});
+    alert("🚫 "+nom+" fue baneado y su VIP fue QUITADO.\nSolo un admin puede volver a dárselo.");
+    cargarGestion();
+  }).catch(function(){});
+}
+function cargarGestion(){
+  var div = document.getElementById('gestionUsers');
+  if(!div) return;
+  Promise.all([
+    fetch(SUPABASE+"/rangos?select=usuario_nombre,rango,color",{headers:DBH}).then(function(r){return r.json();}).catch(function(){return[];}),
+    fetch(SUPABASE+"/baneados?select=usuario_nombre,tipo,activo",{headers:DBH}).then(function(r){return r.json();}).catch(function(){return[];})
+  ]).then(function(d){
+    var rangos=d[0]||[], bans=d[1]||[];
+    var users={};
+    rangos.forEach(function(r){var n=r.usuario_nombre;if(n)users[n]=users[n]||{nombre:n,rango:r.rango,color:r.color};users[n].rango=r.rango;users[n].color=r.color;});
+    bans.forEach(function(b){var n=b.usuario_nombre;if(n&&b.activo){if(users[n])users[n].ban=b.tipo;}});
+    var sorted=Object.keys(users).sort();
+    div.innerHTML = '<div style="font-size:.5em;color:var(--text2);margin-bottom:4px">'+sorted.length+' usuarios</div>';
+    sorted.forEach(function(n){
+      var u=users[n],col=u.color||"rgba(200,214,229,.3)";
+      var r=u.rango?'<span style="border:1px solid '+col+';color:'+col+';padding:1px 5px;border-radius:2px;font-size:.5em">'+esc(u.rango)+'</span>':'';
+      var b=u.ban?'<span style="border:1px solid rgba(231,76,60,.12);color:#e74c3c;padding:1px 5px;border-radius:2px;font-size:.5em">BAN</span>':'';
+      div.innerHTML += '<div style="display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px solid var(--glass-border);font-size:.55em"><span style="color:'+col+'">'+esc(n)+'</span><span>'+r+' '+b+'</span></div>';
+    });
+  });
+}
+
+// Rango militar automático por actividad
+function cargarRangoMilitar(){
+  var b=document.getElementById('userRangoMilitarBadge');
+  if(!b) return;
+  // Consultar a usuarios_ext
+  fetch(SUPABASE+"/usuarios_ext?select=puntos_actividad,rango_militar,rango_militar_nivel&usuario_nombre=eq."+encodeURIComponent(USER)+"&limit=1",{headers:DBH})
+  .then(function(r){return r.json();}).then(function(d){
+    var dbPts = (d&&d[0]&&d[0].puntos_actividad!=null)?parseInt(d[0].puntos_actividad,10):null;
+    var rango=null;
+    if(window.ZHRango){
+      if(dbPts!=null && dbPts>(ZHRango.puntos()||0)){ try{localStorage.setItem('vh_puntos_actividad',String(dbPts));}catch(e){} }
+      rango=ZHRango.rangoActual();
+      ZHRango.actualizarBadge();
+    }
+    if(!rango){
+      var p=dbPts||0;
+      var RB=window.ZHRango?ZHRango.RANGOS:[{nivel:1,nombre:'Recluta',pts:0,emoji:'🪖',color:'#8a8a8a'}];
+      var act=RB[0];
+      for(var i=0;i<RB.length;i++){ if(p>=RB[i].pts) act=RB[i]; }
+      rango={rango:act, siguiente:null, progreso:100};
+    }
+    var r=rango.rango;
+    var rimg=r.img||'';
+    // Badge en el header (con imagen de insignia)
+    b.innerHTML='<span class="tag" style="border:1px solid '+r.color+';color:'+r.color+';background:'+r.color+'22;display:inline-flex;align-items:center;gap:3px">'+((rimg)?'<img src="'+rimg+'" style="width:14px;height:30px;object-fit:contain;margin-right:2px" onerror="this.style.display=\'none\'">':'')+'<span>'+esc(r.nombre)+'</span></span>';
+    // Barra de progreso hacia el siguiente rango en resumen (estilo insignia militar)
+    var pts=dbPts!=null?dbPts:(ZHRango?ZHRango.puntos():0);
+    if(rango.siguiente){
+      var prog=Math.min(100,Math.round((pts-r.pts)/(rango.siguiente.pts-r.pts)*100));
+      var pbar=document.getElementById('militarProgress');
+      if(pbar){ pbar.innerHTML=
+        '<div style="display:flex;align-items:center;gap:14px;padding:6px 2px">'+
+          '<div class="mil-badge-img" style="border:1px solid '+r.color+'55;box-shadow:0 0 16px '+r.color+'33, inset 0 0 12px '+r.color+'11">'+
+            ((rimg)?'<img src="'+rimg+'" style="width:100%;height:100%;object-fit:contain" onerror="this.outerHTML=\''+r.emoji+'\'">':'<span style="font-size:2em">'+r.emoji+'</span>')+
+          '</div>'+
+          '<div style="flex:1">'+
+            '<div style="color:'+r.color+';font-size:.9em;font-weight:bold;letter-spacing:2px;text-transform:uppercase;text-shadow:0 0 12px '+r.color+'55">'+r.emoji+' '+esc(r.nombre)+'</div>'+
+            '<div style="color:var(--text2);font-size:.62em;margin-top:2px">'+pts+' pts de actividad</div>'+
+            '<div class="mil-bar-cont"><div class="mil-bar-fill" style="width:'+prog+'%;background:linear-gradient(90deg,'+r.color+',var(--khaki))"></div></div>'+
+            '<div style="color:var(--text2);font-size:.6em;margin-top:4px">Próximo rango: <img src="'+(rango.siguiente.img||'')+'" style="width:10px;height:22px;object-fit:contain;vertical-align:middle" onerror="this.style.display=\'none\'"> '+esc(rango.siguiente.nombre)+' — faltan '+(rango.siguiente.pts-pts)+' pts</div>'+
+          '</div>'+
+        '</div>'; }
+    } else {
+      var pbar2=document.getElementById('militarProgress');
+      if(pbar2) pbar2.innerHTML=
+        '<div style="display:flex;align-items:center;gap:14px;padding:6px 2px">'+
+          '<div class="mil-badge-img" style="border:1px solid '+r.color+'55;box-shadow:0 0 16px '+r.color+'33, inset 0 0 12px '+r.color+'11">'+
+            ((rimg)?'<img src="'+rimg+'" style="width:100%;height:100%;object-fit:contain" onerror="this.outerHTML=\''+r.emoji+'\'">':'<span style="font-size:2em">'+r.emoji+'</span>')+
+          '</div>'+
+          '<div style="flex:1"><div style="color:'+r.color+';font-size:.9em;font-weight:bold;letter-spacing:2px;text-transform:uppercase;text-shadow:0 0 12px '+r.color+'55">'+r.emoji+' '+esc(r.nombre)+'</div>'+
+          '<div style="color:var(--text2);font-size:.62em;margin-top:2px">'+pts+' pts · COMANDANTE SUPREMO</div></div></div>';
+    }
+  }).catch(function(){
+    var p=ZHRango?ZHRango.puntos():0;
+    var RB=window.ZHRango?ZHRango.RANGOS:[{nivel:1,nombre:'Recluta',pts:0,emoji:'🪖',color:'#8a8a8a',img:''}];
+    var act=RB[0]; for(var i=0;i<RB.length;i++){ if(p>=RB[i].pts) act=RB[i]; }
+    var rimg=act.img||'';
+    b.innerHTML='<span class="tag" style="border:1px solid '+act.color+';color:'+act.color+';background:'+act.color+'22;display:inline-flex;align-items:center;gap:3px">'+((rimg)?'<img src="'+rimg+'" style="width:14px;height:30px;object-fit:contain" onerror="this.style.display=\'none\'">':'')+'<span>'+esc(act.nombre)+'</span></span>';
+  });
+}
+
+// ─── UNIDAD / DIVISIÓN ─────────────────
+var UNIDADES = [
+  {nivel:0, nombre:'Compañía Reclutas', ico:'🎖️'},
+  {nivel:5, nombre:'2ª Compañía de Asalto', ico:'🔫'},
+  {nivel:8, nombre:'7º Regimiento de Choque', ico:'💂'},
+  {nivel:12, nombre:'3ª División Blindada', ico:'🛡️'},
+  {nivel:15, nombre:'Comando de Fuerzas Especiales', ico:'⚡'},
+  {nivel:17, nombre:'Estado Mayor Supremo', ico:'👑'}
+];
+function cargarUnidad(){
+  var el=document.getElementById('unidadLine');
+  if(!el) return;
+  var nivel=0;
+  try{ if(window.ZHRango){ var r=ZHRango.rangoActual(); nivel=r&&r.rango?r.rango.nivel:0; } }catch(e){}
+  var u=UNIDADES[0];
+  for(var i=0;i<UNIDADES.length;i++){ if(nivel>=UNIDADES[i].nivel) u=UNIDADES[i]; }
+  el.textContent = u.ico+' '+u.nombre;
+}
+
+// ─── CONDECORACIONES (MEDALLERO) ───────
+var CONDECORACIONES = [
+  {id:'alta', ico:'🪖', name:'Alta', desc:'Registrarse en el ejército', ribbon:'linear-gradient(90deg,#8a8a8a,#c2b280)', cond:function(s){return true;}},
+  {id:'serv', ico:'🎬', name:'Cruz al Servicio', desc:'Ver 1+ videos', ribbon:'linear-gradient(90deg,#2ecc71,#27ae60)', cond:function(s){return s.vistos>=1;}},
+  {id:'valor', ico:'🥇', name:'Medalla al Valor', desc:'Ver 10+ videos', ribbon:'linear-gradient(90deg,#f1c40f,#d4af37)', cond:function(s){return s.vistos>=10;}},
+  {id:'comb', ico:'⚔️', name:'Estrella de Combate', desc:'Ver 30+ videos', ribbon:'linear-gradient(90deg,#e74c3c,#c0392b)', cond:function(s){return s.vistos>=30;}},
+  {id:'oper', ico:'🎯', name:'Experto en Operaciones', desc:'100+ XP', ribbon:'linear-gradient(90deg,#3498db,#2980b9)', cond:function(s){return s.xp>=100;}},
+  {id:'tact', ico:'⭐', name:'Táctica Avanzada', desc:'300+ XP', ribbon:'linear-gradient(90deg,#9b59b6,#8e44ad)', cond:function(s){return s.xp>=300;}},
+  {id:'hero', ico:'🏅', name:'Héroe de Guerra', desc:'1000+ XP', ribbon:'linear-gradient(90deg,#ff6b6b,#e74c3c)', cond:function(s){return s.xp>=1000;}},
+  {id:'leal', ico:'🔥', name:'Lealtad al Frente', desc:'Racha de 3 días', ribbon:'linear-gradient(90deg,#e67e22,#d35400)', cond:function(s){return s.racha>=3;}},
+  {id:'veter', ico:'💂', name:'Veterano', desc:'Racha de 7 días', ribbon:'linear-gradient(90deg,#2ecc71,#00ff41)', cond:function(s){return s.racha>=7;}},
+  {id:'fan', ico:'❤️', name:'Corazón Valiente', desc:'5+ favoritos', ribbon:'linear-gradient(90deg,#ff69b4,#e91e63)', cond:function(s){return s.favoritos>=5;}},
+  {id:'mov', ico:'📋', name:'Operador Activo', desc:'20+ acciones', ribbon:'linear-gradient(90deg,#7d8694,#5d6b7c)', cond:function(s){return s.logs>=20;}}
+];
+function cargarCondecoraciones(s){
+  var g=document.getElementById('condecoGrid');
+  if(!g) return;
+  var h=CONDECORACIONES.map(function(c){
+    var ok=c.cond(s);
+    return '<div class="condeco'+(ok?'':' locked')+'" title="'+(ok?'':'🔒 Bloqueada: ')+esc(c.desc)+'">'+
+      '<div class="medal">'+c.ico+'</div>'+
+      '<div class="ribbon" style="background:'+c.ribbon+'"></div>'+
+      '<div class="mname">'+esc(c.name)+'</div>'+
+      '<div class="mdesc">'+esc(c.desc)+'</div></div>';
+  }).join('');
+  g.innerHTML=h;
+}
+
+// Iniciar
+cargarPerfil();
+if('serviceWorker'in navigator){navigator.serviceWorker.register('sw.js').catch(function(){});}
+</script>
+<script src="/militar.js" defer></script>
+<script src="/errores.js" defer></script>
+<script src="/update_check.js" defer></script>
+</body>
+</html>

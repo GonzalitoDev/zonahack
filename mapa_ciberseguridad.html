@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>ZonaHack - Mapa Ciberseguridad</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:sans-serif;background:#080c24;color:#e8e8e8;min-height:100vh}
+.header{background:#0d1230;border-bottom:1px solid rgba(255,255,255,.08);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.header h1{font-size:1.05em;color:#667eea}
+.header .sub{font-size:.68em;color:#888}
+.back{color:#667eea;text-decoration:none;font-size:.78em}
+.wrap{max-width:1100px;margin:0 auto;padding:14px}
+.tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.tab{padding:8px 14px;border:1px solid rgba(255,255,255,.1);background:#111639;color:#ccc;border-radius:8px;cursor:pointer;font-size:.8em}
+.tab.active{background:#667eea;color:#fff;border-color:#667eea}
+#mapa{height:460px;border-radius:10px;border:1px solid rgba(255,255,255,.1);z-index:1;background:#0a0e1a}
+.legend{display:flex;gap:14px;margin:10px 0;flex-wrap:wrap;font-size:.75em;color:#aaa}
+.legend span{display:flex;align-items:center;gap:5px}
+.dot{width:12px;height:12px;border-radius:50%;display:inline-block}
+.sidebar{display:flex;gap:14px;margin-top:14px;flex-wrap:wrap}
+.news{flex:1;min-width:320px;background:#111639;border-radius:10px;padding:14px}
+.news h3{font-size:.85em;color:#667eea;margin-bottom:10px}
+.news-item{padding:8px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:.75em}
+.news-item a{color:#ddd;text-decoration:none}
+.news-item a:hover{color:#667eea}
+.news-item .src{color:#667eea;font-size:.7em}
+.news-item .time{color:#555;font-size:.65em}
+.stats{display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.stat{background:#111639;border:1px solid rgba(255,255,255,.06);border-radius:8px;padding:10px 16px;text-align:center}
+.stat .n{font-size:1.5em;font-weight:bold}
+.stat .l{font-size:.65em;color:#888;text-transform:uppercase}
+.stat .n.red{color:#ef4444}.stat .n.orange{color:#f97316}.stat .n.blue{color:#3b82f6}
+.tip{font-size:.68em;color:#555;margin-top:10px;text-align:center}
+@media(max-width:600px){#mapa{height:360px}}
+</style>
+</head>
+<body>
+<div class="header">
+  <div>
+    <h1>Mapa de Ciberseguridad</h1>
+    <div class="sub">Ataques ransomware y DDoS en el mundo · Noticias en espanol</div>
+  </div>
+  <a class="back" href="/">&larr; Volver</a>
+</div>
+
+<div class="wrap">
+  <div class="stats">
+    <div class="stat"><div class="n red" id="stRansom">0</div><div class="l">Ransomware</div></div>
+    <div class="stat"><div class="n orange" id="stDDoS">0</div><div class="l">DDoS</div></div>
+    <div class="stat"><div class="n blue" id="stTotal">0</div><div class="l">Total ataques</div></div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="setTab('todo')">Todo</button>
+    <button class="tab" onclick="setTab('ransomware')">Ransomware</button>
+    <button class="tab" onclick="setTab('ddos')">DDoS</button>
+  </div>
+
+  <div id="mapa"></div>
+
+  <div class="legend">
+    <span><span class="dot" style="background:#ef4444"></span> Ransomware</span>
+    <span><span class="dot" style="background:#f97316"></span> DDoS</span>
+    <span><span class="dot" style="background:#3b82f6"></span> Otro ciberataque</span>
+    <span>Toca un punto para ver el detalle</span>
+  </div>
+
+  <div class="sidebar">
+    <div class="news" style="flex:2">
+      <h3>Noticias de ciberseguridad (Argentina)</h3>
+      <div id="newsList"><p style="color:#555;font-size:.75em">Cargando...</p></div>
+    </div>
+    <div class="news" style="flex:1;max-height:380px;overflow:auto">
+      <h3>Registro de ataques</h3>
+      <div id="ataquesList"><p style="color:#555;font-size:.75em">Selecciona un punto del mapa...</p></div>
+    </div>
+  </div>
+
+  <div class="tip">Datos de ataques recientes documentados + noticias en vivo.</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+var mapa = L.map('mapa').setView([20, 0], 2);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+  attribution: 'OpenStreetMap & CARTO',
+  maxZoom: 18
+}).addTo(mapa);
+
+var ATAQUES = [
+  {tipo:'ransomware', pais:'Estados Unidos', ciudad:'Las Vegas', lat:36.17, lon:-115.14, empresa:'MGM Resorts', fecha:'2026', desc:'Ransomware Scattered Spider'},
+  {tipo:'ransomware', pais:'Estados Unidos', ciudad:'Chicago', lat:41.88, lon:-87.63, empresa:'UnitedHealth/Change', fecha:'2026', desc:'Ransomware a salud'},
+  {tipo:'ransomware', pais:'Reino Unido', ciudad:'Londres', lat:51.51, lon:-0.13, empresa:'British Library', fecha:'2026', desc:'Ransomware Rhysida'},
+  {tipo:'ransomware', pais:'Francia', ciudad:'Paris', lat:48.86, lon:2.35, empresa:'Hospital Versailles', fecha:'2026', desc:'Ransomware a hospital'},
+  {tipo:'ransomware', pais:'Alemania', ciudad:'Berlin', lat:52.52, lon:13.40, empresa:'Municipios', fecha:'2026', desc:'Ransomware a gobiernos'},
+  {tipo:'ransomware', pais:'Argentina', ciudad:'Buenos Aires', lat:-34.60, lon:-58.38, empresa:'Organismos AR', fecha:'2026', desc:'Ransomware en Argentina'},
+  {tipo:'ransomware', pais:'Mexico', ciudad:'Ciudad de Mexico', lat:19.43, lon:-99.13, empresa:'Sector publico', fecha:'2026', desc:'Ransomware gubernamental'},
+  {tipo:'ransomware', pais:'Brasil', ciudad:'Sao Paulo', lat:-23.55, lon:-46.63, empresa:'Bancos', fecha:'2026', desc:'Campañas LockBit'},
+  {tipo:'ransomware', pais:'Japon', ciudad:'Tokio', lat:35.68, lon:139.69, empresa:'Supply chain', fecha:'2026', desc:'Ransomware a cadenas'},
+  {tipo:'ransomware', pais:'Australia', ciudad:'Sydney', lat:-33.87, lon:151.21, empresa:'Infraestructura', fecha:'2026', desc:'Ransomware critico'},
+  {tipo:'ransomware', pais:'Sudafrica', ciudad:'Johannesburgo', lat:-26.20, lon:28.05, empresa:'Energia', fecha:'2026', desc:'Ransomware a energia'},
+  {tipo:'ransomware', pais:'India', ciudad:'Nueva Delhi', lat:28.61, lon:77.21, empresa:'Hospitales', fecha:'2026', desc:'Ransomware a salud'},
+  {tipo:'ransomware', pais:'Canada', ciudad:'Toronto', lat:43.65, lon:-79.38, empresa:'Gobierno Ontario', fecha:'2026', desc:'Ransomware municipal'},
+  {tipo:'ransomware', pais:'Colombia', ciudad:'Bogota', lat:4.71, lon:-74.07, empresa:'Gobierno', fecha:'2026', desc:'Ransomware en Colombia'},
+  {tipo:'ddos', pais:'Estados Unidos', ciudad:'Washington', lat:38.90, lon:-77.03, empresa:'Gobierno EEUU', fecha:'2026', desc:'DDoS a agencias'},
+  {tipo:'ddos', pais:'Reino Unido', ciudad:'Londres', lat:51.51, lon:-0.13, empresa:'Bancos', fecha:'2026', desc:'DDoS financiero'},
+  {tipo:'ddos', pais:'Ucrania', ciudad:'Kiev', lat:50.45, lon:30.52, empresa:'Gobierno', fecha:'2026', desc:'DDoS en conflicto'},
+  {tipo:'ddos', pais:'Rusia', ciudad:'Moscu', lat:55.76, lon:37.62, empresa:'Medios', fecha:'2026', desc:'DDoS a portales'},
+  {tipo:'ddos', pais:'Argentina', ciudad:'Buenos Aires', lat:-34.60, lon:-58.38, empresa:'Bancos', fecha:'2026', desc:'DDoS a entidades'},
+  {tipo:'ddos', pais:'Brasil', ciudad:'Rio de Janeiro', lat:-22.91, lon:-43.17, empresa:'Banca digital', fecha:'2026', desc:'DDoS a apps'},
+  {tipo:'ddos', pais:'China', ciudad:'Shanghai', lat:31.23, lon:121.47, empresa:'Tecnologia', fecha:'2026', desc:'DDoS a cloud'},
+  {tipo:'ddos', pais:'Corea del Sur', ciudad:'Seul', lat:37.57, lon:126.98, empresa:'Gobierno', fecha:'2026', desc:'DDoS a portales'},
+  {tipo:'ddos', pais:'Hong Kong', ciudad:'Hong Kong', lat:22.32, lon:114.17, empresa:'Finanzas', fecha:'2026', desc:'DDoS a trading'},
+  {tipo:'ddos', pais:'Paises Bajos', ciudad:'Amsterdam', lat:52.37, lon:4.90, empresa:'Bolsas', fecha:'2026', desc:'DDoS a mercado'},
+  {tipo:'ddos', pais:'Suiza', ciudad:'Zurich', lat:47.37, lon:8.54, empresa:'Banca', fecha:'2026', desc:'DDoS a bancos'},
+  {tipo:'ddos', pais:'Singapur', ciudad:'Singapur', lat:1.35, lon:103.82, empresa:'Telecom', fecha:'2026', desc:'DDoS a operadores'},
+  {tipo:'ddos', pais:'Emiratos', ciudad:'Dubai', lat:25.20, lon:55.27, empresa:'Fintech', fecha:'2026', desc:'DDoS a pagos'},
+];
+
+var iconoRansom = L.divIcon({className:'', html:'<div style="width:16px;height:16px;background:#ef4444;border-radius:50%;border:2px solid #fff;box-shadow:0 0 8px #ef4444"></div>'});
+var iconoDDoS = L.divIcon({className:'', html:'<div style="width:16px;height:16px;background:#f97316;border-radius:50%;border:2px solid #fff;box-shadow:0 0 8px #f97316"></div>'});
+var iconoOtro = L.divIcon({className:'', html:'<div style="width:16px;height:16px;background:#3b82f6;border-radius:50%;border:2px solid #fff;box-shadow:0 0 8px #3b82f6"></div>'});
+
+var markers = [];
+var filtro = 'todo';
+
+function agregarAtaque(a){
+  var icon = a.tipo==='ransomware'?iconoRansom:a.tipo==='ddos'?iconoDDoS:iconoOtro;
+  var color = a.tipo==='ransomware'?'#ef4444':a.tipo==='ddos'?'#f97316':'#3b82f6';
+  var m = L.marker([a.lat,a.lon],{icon:icon});
+  m.bindPopup('<div style="min-width:200px"><b>'+a.empresa+'</b><br><span style="color:'+color+'">'+a.tipo.toUpperCase()+'</span><br>'+a.pais+' · '+a.ciudad+'<br>'+a.desc+'<br><small>'+a.fecha+'</small></div>');
+  m.on('click',function(){ document.getElementById('ataquesList').innerHTML = detalleAtaque(a); });
+  m.ataque = a;
+  markers.push(m);
+}
+
+function detalleAtaque(a){
+  var color = a.tipo==='ransomware'?'#ef4444':a.tipo==='ddos'?'#f97316':'#3b82f6';
+  return '<div style="padding:8px;border:1px solid rgba(255,255,255,.1);border-radius:6px;margin-bottom:8px">'+
+    '<b style="color:'+color+'">'+a.tipo.toUpperCase()+'</b><br>'+
+    '<b>'+a.empresa+'</b><br>'+
+    '<span style="color:#888">'+a.pais+' · '+a.ciudad+'</span><br>'+
+    a.desc+'<br><small style="color:#555">'+a.fecha+'</small></div>';
+}
+
+ATAQUES.forEach(agregarAtaque);
+
+function setTab(t){
+  filtro = t;
+  document.querySelectorAll('.tab').forEach(function(b,i){ b.classList.toggle('active',['todo','ransomware','ddos'][i]===t); });
+  markers.forEach(function(m){
+    var show = t==='todo' || m.ataque.tipo===t;
+    if(show){ if(!mapa.hasLayer(m)) m.addTo(mapa); } else { mapa.removeLayer(m); }
+  });
+}
+setTab('todo');
+
+var nRansom = ATAQUES.filter(function(a){return a.tipo==='ransomware';}).length;
+var nDDoS = ATAQUES.filter(function(a){return a.tipo==='ddos';}).length;
+document.getElementById('stRansom').textContent = nRansom;
+document.getElementById('stDDoS').textContent = nDDoS;
+document.getElementById('stTotal').textContent = ATAQUES.length;
+
+async function cargarNoticias(){
+  try{
+    var resp = await fetch('https://news.google.com/rss/search?q=ciberseguridad+argentina&hl=es-419&gl=AR&ceid=AR:es-419');
+    var text = await resp.text();
+    var items = [];
+    var re = /<item>([\s\S]*?)<\/item>/g, m;
+    while((m=re.exec(text))!==null){
+      var b=m[1];
+      var t=(b.match(/<title>([\s\S]*?)<\/title>/)||[])[1]||'';
+      var l=(b.match(/<link>([\s\S]*?)<\/link>/)||[])[1]||'';
+      var d=(b.match(/<pubDate>([\s\S]*?)<\/pubDate>/)||[])[1]||'';
+      var src='';
+      var dm=(b.match(/<font color="#6f6f6f">([^<]*)<\/font>/)||[]);
+      if(dm) src=dm[1];
+      var ct=t.replace(/<!\[CDATA\[|\]\]>/g,'').trim();
+      if(ct.indexOf(' - ')>0){ var idx=ct.lastIndexOf(' - '); src=src||ct.slice(idx+3); ct=ct.slice(0,idx); }
+      items.push({t:ct,l:l,s:src,d:d});
+    }
+    var list=document.getElementById('newsList');
+    if(items.length===0){ list.innerHTML='<p style="color:#555">Sin noticias</p>'; return; }
+    list.innerHTML = items.slice(0,10).map(function(n){
+      return '<div class="news-item"><a href="'+n.l+'" target="_blank">'+n.t+'</a><br><span class="src">'+n.s+'</span> <span class="time">· '+n.d+'</span></div>';
+    }).join('');
+  }catch(e){
+    document.getElementById('newsList').innerHTML='<p style="color:#555">No se pudieron cargar las noticias</p>';
+  }
+}
+cargarNoticias();
+</script>
+</body>
+</html>

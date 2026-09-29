@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>⚔ Academia Militar - ZonaHack</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0a;color:#c8d6e5;font-family:'Courier New',monospace;min-height:100vh}
+.header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid rgba(0,255,65,.08);background:#050505;position:sticky;top:0;z-index:100}
+.header h1{color:#00ff41;font-size:.85em;letter-spacing:1px}
+.back{color:#00ff41;text-decoration:none;font-size:.65em;padding:4px 8px;border:1px solid rgba(255,255,255,.1);border-radius:3px}
+.container{max-width:820px;margin:0 auto;padding:12px}
+.hero{text-align:center;padding:14px;border:1px solid rgba(0,255,65,.1);border-radius:10px;background:rgba(0,255,65,.03);margin-bottom:14px}
+.hero h2{color:#00ff41;font-size:.95em}
+.hero p{font-size:.66em;color:rgba(255,255,255,.4);margin-top:6px}
+.status{font-size:.62em;color:rgba(200,214,229,.4);margin:6px 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:12px}
+.curso-card{border:1px solid rgba(0,255,65,.08);border-radius:8px;padding:16px 12px;text-align:center;cursor:pointer;background:#0d0f0d;transition:.2s}
+.curso-card:hover{border-color:rgba(0,255,65,.3);box-shadow:0 0 15px rgba(0,255,65,.06)}
+.curso-card.done{border-color:rgba(0,255,65,.4)}
+.curso-ico{font-size:2.1em;margin-bottom:8px}
+.curso-t{font-size:.8em;color:#00ff41;margin-bottom:8px}
+.curso-sub{font-size:.62em;color:rgba(0,255,65,.4);margin-top:4px}
+.barbg{height:4px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden}
+.bar{height:100%;background:linear-gradient(90deg,#00ff41,#00c8ff)}
+.back-curso{background:none;border:1px solid rgba(0,255,65,.15);color:#00ff41;padding:7px 13px;border-radius:5px;font-size:.68em;cursor:pointer;font-family:inherit;margin-bottom:12px}
+.curso-hdr{display:flex;gap:12px;align-items:center;padding:12px;border:1px solid rgba(0,255,65,.08);border-radius:8px;margin-bottom:12px}
+.curso-hdr-ico{font-size:2.2em}
+.curso-hdr-t{font-size:.85em;color:#00ff41}
+.curso-hdr-sub{font-size:.65em;color:rgba(0,255,65,.5);margin-top:3px}
+.leccion-item{display:flex;align-items:center;gap:12px;padding:9px;border:1px solid rgba(0,255,65,.06);border-radius:6px;margin-bottom:7px;cursor:pointer;background:#0a0a0a;transition:.15s}
+.leccion-item:hover{border-color:rgba(0,255,65,.25)}
+.leccion-item.done{border-color:rgba(0,255,65,.3);opacity:.75}
+.leccion-num{width:26px;height:26px;flex:0 0 26px;border:1px solid rgba(0,255,65,.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.68em;color:#00ff41}
+.leccion-item img{width:88px;aspect-ratio:16/9;object-fit:cover;border-radius:4px;background:#000;flex:0 0 88px}
+.leccion-inf{flex:1;min-width:0}
+.leccion-t{font-size:.7em;color:rgba(0,255,65,.85);overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.quiz-box{border:1px solid rgba(0,255,65,.08);border-radius:8px;padding:14px;margin-top:16px}
+.quiz-hdr{font-size:.78em;color:#00ff41;margin-bottom:10px}
+.quiz-q{margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,.05)}
+.quiz-q:last-child{border-bottom:none}
+.quiz-qtxt{font-size:.7em;color:rgba(0,255,65,.85);margin-bottom:6px}
+.quiz-opt{display:block;width:100%;text-align:left;font-size:.66em;color:rgba(255,255,255,.6);padding:4px 0;cursor:pointer}
+.quiz-opt input{margin-right:6px}
+.quiz-opt.correcta{color:#2ecc71}
+.quiz-opt.incorrecta{color:#e74c3c;text-decoration:line-through}
+.quiz-btn{background:rgba(0,255,65,.08);border:1px solid rgba(0,255,65,.25);color:#00ff41;padding:8px 16px;border-radius:5px;font-size:.7em;cursor:pointer;font-family:inherit;margin-top:4px}
+.quiz-score{font-size:.72em;margin-top:8px;padding:9px;border-radius:5px}
+.quiz-score.bien{background:rgba(46,204,113,.1);color:#2ecc71}
+.quiz-score.mal{background:rgba(231,76,60,.1);color:#e74c3c}
+.badges-row{margin-bottom:12px}
+.badges-hdr{font-size:.68em;color:#f1c40f;margin:2px 0 6px;letter-spacing:1px}
+.badges-list{display:flex;gap:8px;flex-wrap:wrap}
+.badge-chip{display:flex;align-items:center;gap:6px;border-radius:16px;padding:5px 12px;font-size:.68em;background:rgba(241,196,15,.06)}
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:#000;z-index:999;display:none;flex-direction:column}
+.modal-overlay.show{display:flex}
+.modal-overlay .top{display:flex;align-items:center;padding:8px 12px;background:#050505;border-bottom:1px solid rgba(0,255,65,.1);gap:6px}
+.modal-overlay .top button{background:none;border:none;color:#00ff41;font-size:1.2em;cursor:pointer}
+.modal-overlay .top .title{flex:1;font-size:.65em;color:rgba(0,255,65,.5);padding:0 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.btn-completar{font-size:.6em;border:1px solid rgba(0,255,65,.3);padding:5px 10px;border-radius:4px;color:#00ff41;background:rgba(0,255,65,.06);cursor:pointer;font-family:inherit;white-space:nowrap}
+#playerIframe{flex:1;width:100%}
+.loading{text-align:center;padding:20px;color:rgba(0,255,65,.2);font-size:.62em}
+</style>
+</head>
+<body>
+<div class="header">
+  <a href="/" class="back">←</a>
+  <h1>⚔ ACADEMIA MILITAR</h1>
+  <div style="width:40px"></div>
+</div>
+<div class="container">
+  <div class="hero">
+    <h2>⚔ Academia Militar</h2>
+    <p>Cursos cortitos, un tema por lección — historia, supervivencia y disciplina. Sumás XP y medallas igual que en el resto de ZonaHack.</p>
+  </div>
+
+  <div id="vistaCursos">
+    <div class="badges-row" id="badgesRow" style="display:none">
+      <div class="badges-hdr">🏅 Tus insignias</div>
+      <div class="badges-list" id="badgesList"></div>
+    </div>
+    <div class="status" id="st">Elegí un curso para empezar</div>
+    <div class="grid" id="cursosGrid"></div>
+  </div>
+
+  <div id="vistaLecciones" style="display:none">
+    <button class="back-curso" onclick="volverACursos()">← Volver a cursos</button>
+    <div class="curso-hdr" id="cursoHdr"></div>
+    <div id="leccionesGrid"></div>
+    <div id="quizSection"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="playerModal">
+  <div class="top">
+    <button onclick="cerrarPlayer()">←</button>
+    <span class="title" id="playerTitle"></span>
+    <button class="btn-completar" onclick="repetirUltimos()" title="Retrocede el video 15 segundos">⏪ No entendí</button>
+    <button class="btn-completar" onclick="marcarCompletada()">✅ Completar</button>
+  </div>
+  <div id="playerIframe"></div>
+</div>
+
+<script>
+function esc(s){return (s||"").replace(/[&<>]/g,function(m){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m];});}
+
+var CURSOS = [{"id":"historia","titulo":"Historia Militar","icono":"🎖️","lecciones":[{"id":"qBSc10NP5a8","titulo":"¿Qué sucedió en los ÚLTIMOS DÍAS de la 2° Guerra Mundial?","thumb":"https://i.ytimg.com/vi/qBSc10NP5a8/hqdefault.jpg"},{"id":"waZIaW6QcWI","titulo":"Batalla de Stalingrado: La TUMBA del Ejército N4zi","thumb":"https://i.ytimg.com/vi/waZIaW6QcWI/hqdefault.jpg"},{"id":"SBW5QYjvCGY","titulo":"Batalla de Kursk: El MAYOR duelo de TANQUES de la HISTORIA","thumb":"https://i.ytimg.com/vi/SBW5QYjvCGY/hqdefault.jpg"},{"id":"NhTgic3mp0w","titulo":"Batalla de Berlín | La gran victoria Soviética que puso fin al régimen nazi","thumb":"https://i.ytimg.com/vi/NhTgic3mp0w/hqdefault.jpg"}]},{"id":"supervivencia","titulo":"Supervivencia Básica","icono":"🏕️","lecciones":[{"id":"ItjKGQtZ0Y4","titulo":"SUPERVIVENCIA PARA NOVATOS - 10 TRUCOS QUE SALVARÁN TU VIDA","thumb":"https://i.ytimg.com/vi/ItjKGQtZ0Y4/hqdefault.jpg"},{"id":"b1a-0-iPod0","titulo":"UN TRUCO DE SUPERVIVENCIA QUE PUEDE SALVAR TU VIDA - ''Refugio'' de Supervivencia","thumb":"https://i.ytimg.com/vi/b1a-0-iPod0/hqdefault.jpg"},{"id":"UaXNlQcJ3ZA","titulo":"5 Objetos de Supervivencia que llevaría al Fin del Mundo","thumb":"https://i.ytimg.com/vi/UaXNlQcJ3ZA/hqdefault.jpg"},{"id":"99_-ufoXCaY","titulo":"SOBREVIVIRÍAS EN UN BOSQUE? - 10 Trucos de Supervivencia que SÍ Funcionan","thumb":"https://i.ytimg.com/vi/99_-ufoXCaY/hqdefault.jpg"}]},{"id":"vida","titulo":"Vida y Disciplina Militar","icono":"🫡","lecciones":[{"id":"tPS7stZ-KDo","titulo":"Soldado por 24 hrs, como es la vida de un militar de EEUU (Infantería 11B)","thumb":"https://i.ytimg.com/vi/tPS7stZ-KDo/hqdefault.jpg"},{"id":"Yitd2DSmjb4","titulo":"5 Ejercicios/Consejos Para Entrenamiento Básico, US Army.","thumb":"https://i.ytimg.com/vi/Yitd2DSmjb4/hqdefault.jpg"},{"id":"4Cv66-Ps-WA","titulo":"5 cosas PROHIBIDAS para MILITARES y que pasa si eres INFIEL.","thumb":"https://i.ytimg.com/vi/4Cv66-Ps-WA/hqdefault.jpg"},{"id":"FBkpIxs4ylk","titulo":"10 DESVENTAJAS de ser MILITAR en EEUU","thumb":"https://i.ytimg.com/vi/FBkpIxs4ylk/hqdefault.jpg"}]}];
+
+var QUIZZES={
+  historia:[
+    {q:"¿En qué batalla se dice que se quebró el avance alemán hacia el este en la 2GM?",opciones:["El Alamein","Stalingrado","Normandía","Midway"],correcta:1},
+    {q:"¿Qué batalla es conocida como el mayor duelo de tanques de la historia?",opciones:["Kursk","Berlín","Dunkerque","Iwo Jima"],correcta:0},
+    {q:"¿Qué batalla marcó el fin del régimen nazi en 1945?",opciones:["Varsovia","Berlín","Praga","Viena"],correcta:1},
+    {q:"¿En qué año terminó la Segunda Guerra Mundial?",opciones:["1943","1944","1945","1946"],correcta:2}
+  ],
+  supervivencia:[
+    {q:"¿Cuál de estas suele ser una prioridad temprana en una situación de supervivencia?",opciones:["Conseguir refugio","Buscar señal de celular","Hacer ejercicio","Dormir de inmediato"],correcta:0},
+    {q:"¿Para qué sirve principalmente el fuego en supervivencia, además de calor?",opciones:["Decoración","Purificar agua y cocinar","Espantar mosquitos únicamente","No sirve para nada más"],correcta:1},
+    {q:"¿Qué es lo más importante a la hora de elegir dónde armar un refugio?",opciones:["Que se vea lindo","Que esté cerca de agua y protegido del clima","Que esté en la cima de una montaña","Que sea muy grande"],correcta:1},
+    {q:"Entre los objetos básicos de supervivencia, ¿cuál suele recomendarse siempre llevar?",opciones:["Un cuchillo multiuso","Un espejo decorativo","Ropa de gala","Perfume"],correcta:0}
+  ],
+  vida:[
+    {q:"¿Qué representa el código '11B' en el ejército de EEUU?",opciones:["Un rango","La especialidad de Infantería","Un tipo de vehículo","Una medalla"],correcta:1},
+    {q:"En un entrenamiento militar básico, ¿qué se prioriza además de lo físico?",opciones:["La disciplina y el trabajo en equipo","Only estar solo","Ignorar las órdenes","Elegir tareas a gusto"],correcta:0},
+    {q:"¿Qué valor se asocia más comúnmente con la vida militar disciplinada?",opciones:["La impuntualidad","El compromiso y la responsabilidad","La improvisación total","La indiferencia"],correcta:1},
+    {q:"¿Qué suele mencionarse como una desventaja real de la vida militar?",opciones:["Nunca viajar","Estar lejos de la familia por despliegues","No hacer ejercicio","Sobra de tiempo libre"],correcta:1}
+  ]
+};
+
+// ─── PROGRESO POR LECCION ───
+var LS_CURSOS="vh_militar_prog";
+function getPC(){try{return JSON.parse(localStorage.getItem(LS_CURSOS)||"{}");}catch(e){return{};}}
+function setPC(p){try{localStorage.setItem(LS_CURSOS,JSON.stringify(p));}catch(e){}}
+function progLeccion(cursoId,leccionId){
+  var p=getPC();
+  return (p[cursoId]&&p[cursoId].lecciones&&p[cursoId].lecciones[leccionId])||0;
+}
+function guardarLeccion(cursoId,leccionId,pct){
+  var p=getPC();
+  if(!p[cursoId]) p[cursoId]={lecciones:{},ultima:null,ts:0};
+  var actual=p[cursoId].lecciones[leccionId]||0;
+  var nuevo=Math.max(actual,Math.min(pct||0,99));
+  p[cursoId].lecciones[leccionId]=nuevo;
+  p[cursoId].ultima=leccionId;
+  p[cursoId].ts=Date.now();
+  setPC(p);
+  if(actual<90&&nuevo>=90){
+    sumarXP(5,"Lección completada");
+    verificarInsigniaCurso(cursoId);
+  }
+}
+function statsCurso(curso){
+  var p=getPC()[curso.id];
+  var lecc=(p&&p.lecciones)||{};
+  var total=curso.lecciones.length;
+  var completadas=curso.lecciones.filter(function(l){return (lecc[l.id]||0)>=90;}).length;
+  var pct=total?Math.round(completadas/total*100):0;
+  return {completadas:completadas,total:total,pct:pct};
+}
+
+// ─── GAMIFICACION: XP y niveles (mismo sistema que el resto de ZonaHack) ───
+function notificarXP(cant,accion){
+  var noti=document.createElement("div");
+  noti.style.cssText="position:fixed;top:60px;right:20px;z-index:99999;padding:8px 14px;border:1px solid rgba(0,255,65,.12);border-radius:8px;background:#0d0d0d;color:#00ff41;font-size:.75em;font-family:'Courier New',monospace;box-shadow:0 4px 20px rgba(0,0,0,.4);transition:all .4s;opacity:0;transform:translateX(40px)";
+  noti.innerHTML="⭐ +"+cant+" XP <span style='color:rgba(200,214,229,.4);font-size:.9em'>"+esc(accion)+"</span>";
+  document.body.appendChild(noti);
+  setTimeout(function(){noti.style.opacity="1";noti.style.transform="translateX(0)";},50);
+  setTimeout(function(){noti.style.opacity="0";noti.style.transform="translateX(40px)";setTimeout(function(){if(noti.parentNode)noti.parentNode.removeChild(noti);},400);},2200);
+}
+function notificarNivel(nv){
+  var el=document.createElement("div");
+  el.style.cssText="position:fixed;top:100px;right:20px;z-index:99999;padding:12px 18px;border:1px solid rgba(241,196,15,.2);border-radius:8px;background:#0d0d0d;color:#f1c40f;font-size:.9em;font-family:'Courier New',monospace;box-shadow:0 4px 20px rgba(0,0,0,.4);transition:all .4s;opacity:0;transform:translateX(40px)";
+  el.innerHTML="🎉 SUBISTE AL NIVEL "+nv+"!";
+  document.body.appendChild(el);
+  setTimeout(function(){el.style.opacity="1";el.style.transform="translateX(0)";},50);
+  setTimeout(function(){el.style.opacity="0";el.style.transform="translateX(40px)";setTimeout(function(){if(el.parentNode)el.parentNode.removeChild(el);},400);},3000);
+}
+var _xpQueue=Promise.resolve();
+function sumarXP(cant,accion){
+  var user=localStorage.getItem('vh_usuario')||'';
+  if(!user||user==='anon')return;
+  notificarXP(cant,accion);
+  _xpQueue=_xpQueue.then(function(){
+    return fetch('https://xfwolaurpeofysnymqle.supabase.co/rest/v1/usuarios_ext?usuario_nombre=eq.'+encodeURIComponent(user)+'&limit=1',{
+      headers:{'apikey':'sb_publishable_3VvBUD5Bdu3Uaq59fJ99MQ_XDCtujUU','Authorization':'Bearer sb_publishable_3VvBUD5Bdu3Uaq59fJ99MQ_XDCtujUU'}
+    }).then(function(r){return r.json();}).then(function(d){
+      var xp=cant,nv=1;
+      if(d&&d.length){
+        xp=(d[0].xp||0)+cant;
+        nv=Math.min(15,Math.max(1,Math.floor(xp/100)+1));
+        if(nv>(d[0].nivel||1)) notificarNivel(nv);
+        return fetch('https://xfwolaurpeofysnymqle.supabase.co/rest/v1/usuarios_ext?usuario_nombre=eq.'+encodeURIComponent(user),{method:'PATCH',headers:{'apikey':'sb_publishable_3VvBUD5Bdu3Uaq59fJ99MQ_XDCtujUU','Authorization':'Bearer sb_publishable_3VvBUD5Bdu3Uaq59fJ99MQ_XDCtujUU','Content-Type':'application/json'},body:JSON.stringify({xp:xp,nivel:nv})}).catch(function(){});
+      }else{
+        return fetch('https://xfwolaurpeofysnymqle.supabase.co/rest/v1/usuarios_ext',{method:'POST',headers:{'apikey':'sb_publishable_3VvBUD5Bdu3Uaq59fJ99MQ_XDCtujUU','Authorization':'Bearer sb_publishable_3VvBUD5Bdu3Uaq59fJ99MQ_XDCtujUU','Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify({usuario_nombre:user,xp:cant,nivel:nv,rol:'user',estado:'activo'})}).catch(function(){});
+      }
+    }).catch(function(){});
+  });
+}
+
+// ─── INSIGNIAS ───
+var INSIGNIAS_CURSO={
+  historia:{nombre:"🎖️ Historiador Militar",color:"#c9a227",desc:"Completó el curso de Historia Militar en ZonaHack"},
+  supervivencia:{nombre:"🏕️ Superviviente",color:"#2ecc71",desc:"Completó el curso de Supervivencia Básica en ZonaHack"},
+  vida:{nombre:"🫡 Disciplina de Hierro",color:"#00c8ff",desc:"Completó el curso de Vida y Disciplina Militar en ZonaHack"}
+};
+function getInsigniasGanadas(){ try{return JSON.parse(localStorage.getItem("vh_insignias_militar")||"{}");}catch(e){return {};} }
+function mostrarInsigniaGanada(def){
+  var el=document.createElement("div");
+  el.style.cssText="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.85);z-index:999999;background:#0d0d0d;border:2px solid "+def.color+";border-radius:14px;padding:26px 32px;text-align:center;box-shadow:0 10px 50px rgba(0,0,0,.6);font-family:'Courier New',monospace;opacity:0;transition:all .4s;max-width:88vw";
+  el.innerHTML="<div style='font-size:2.6em;margin-bottom:8px'>"+def.nombre.split(' ')[0]+"</div>"+
+    "<div style='color:#fff;font-size:1em;font-weight:bold;margin-bottom:4px'>¡Insignia desbloqueada!</div>"+
+    "<div style='color:"+def.color+";font-size:.9em;font-weight:bold'>"+esc(def.nombre)+"</div>"+
+    "<div style='color:rgba(255,255,255,.4);font-size:.65em;margin-top:8px;max-width:260px'>"+esc(def.desc)+"</div>";
+  document.body.appendChild(el);
+  requestAnimationFrame(function(){el.style.opacity="1";el.style.transform="translate(-50%,-50%) scale(1)";});
+  setTimeout(function(){
+    el.style.opacity="0";el.style.transform="translate(-50%,-50%) scale(.9)";
+    setTimeout(function(){if(el.parentNode)el.parentNode.removeChild(el);},400);
+  },3200);
+}
+function verificarInsigniaCurso(cursoId){
+  var curso=CURSOS.filter(function(c){return c.id===cursoId;})[0];
+  var def=INSIGNIAS_CURSO[cursoId];
+  if(!curso||!def)return;
+  var s=statsCurso(curso);
+  if(s.total===0||s.completadas<s.total)return;
+  var ya=getInsigniasGanadas();
+  if(ya[cursoId])return;
+  ya[cursoId]=true;
+  localStorage.setItem("vh_insignias_militar",JSON.stringify(ya));
+  mostrarInsigniaGanada(def);
+  sumarXP(25,"Curso completo: "+curso.titulo);
+  renderBadgesRow();
+  var user=localStorage.getItem('vh_usuario')||'';
+  if(user&&user!=='anon'){
+    fetch('https://xfwolaurpeofysnymqle.supabase.co/rest/v1/insignias',{method:'POST',headers:{'apikey':'sb_publishable_3VvBUD5Bdu3Uaq59fJ99MQ_XDCtujUU','Authorization':'Bearer sb_publishable_3VvBUD5Bdu3Uaq59fJ99MQ_XDCtujUU','Content-Type':'application/json','Prefer':'return=minimal,resolution=ignore-duplicates'},body:JSON.stringify({usuario_nombre:user,insignia:def.nombre,color:def.color,descripcion:def.desc})}).catch(function(){});
+  }
+}
+function renderBadgesRow(){
+  var ya=getInsigniasGanadas();
+  var ids=Object.keys(ya).filter(function(id){return ya[id]&&INSIGNIAS_CURSO[id];});
+  var row=document.getElementById("badgesRow"),list=document.getElementById("badgesList");
+  if(!row||!list)return;
+  if(!ids.length){row.style.display="none";return;}
+  row.style.display="block";
+  list.innerHTML=ids.map(function(id){
+    var def=INSIGNIAS_CURSO[id];
+    return '<div class="badge-chip" style="border:1px solid '+def.color+'55;color:'+def.color+'" title="'+esc(def.desc)+'">'+
+      '<span>'+def.nombre.split(' ')[0]+'</span>'+esc(def.nombre.split(' ').slice(1).join(' '))+'</div>';
+  }).join("");
+}
+
+// ─── CURSOS Y LECCIONES ───
+function renderCursosGrid(){
+  document.getElementById("cursosGrid").innerHTML=CURSOS.map(function(c){
+    var s=statsCurso(c),done=s.total>0&&s.completadas===s.total;
+    var mejor=getQuizGuardado()[c.id];
+    return '<div class="curso-card'+(done?' done':'')+'" onclick="abrirCurso(\''+c.id+'\')">'+
+      '<div class="curso-ico">'+c.icono+'</div>'+
+      '<div class="curso-t">'+esc(c.titulo)+'</div>'+
+      '<div class="barbg"><div class="bar" style="width:'+s.pct+'%"></div></div>'+
+      '<div class="curso-sub">'+(done?'✅ Completado':s.completadas+' / '+s.total+' lecciones')+'</div>'+
+      (mejor?'<div class="curso-sub">📝 Quiz: '+mejor.correctas+'/'+mejor.total+'</div>':'')+
+    '</div>';
+  }).join("");
+  document.getElementById("st").textContent=CURSOS.length+" cursos disponibles";
+  renderBadgesRow();
+}
+
+var cursoActual=null, leccionActualIdx=null, progIntCurso=null;
+
+window.abrirCurso=function(cursoId){
+  cursoActual=CURSOS.filter(function(c){return c.id===cursoId;})[0];
+  if(!cursoActual)return;
+  document.getElementById("vistaCursos").style.display="none";
+  document.getElementById("vistaLecciones").style.display="block";
+  pintarLecciones();
+  pintarQuiz();
+};
+window.volverACursos=function(){
+  document.getElementById("vistaLecciones").style.display="none";
+  document.getElementById("vistaCursos").style.display="block";
+  cursoActual=null;
+  renderCursosGrid();
+};
+function pintarLecciones(){
+  var s=statsCurso(cursoActual);
+  document.getElementById("cursoHdr").innerHTML=
+    '<div class="curso-hdr-ico">'+cursoActual.icono+'</div>'+
+    '<div style="flex:1"><div class="curso-hdr-t">'+esc(cursoActual.titulo)+'</div>'+
+    '<div class="curso-hdr-sub">'+s.completadas+' de '+s.total+' lecciones completadas ('+s.pct+'%)</div>'+
+    '<div class="barbg" style="margin-top:5px"><div class="bar" style="width:'+s.pct+'%"></div></div></div>';
+  document.getElementById("leccionesGrid").innerHTML=cursoActual.lecciones.map(function(l,i){
+    var pct=progLeccion(cursoActual.id,l.id),done=pct>=90;
+    return '<div class="leccion-item'+(done?' done':'')+'" onclick="abrirLeccion('+i+')">'+
+      '<div class="leccion-num">'+(done?'✅':(i+1))+'</div>'+
+      '<img src="'+esc(l.thumb)+'" loading="lazy">'+
+      '<div class="leccion-inf"><div class="leccion-t">'+esc(l.titulo)+'</div>'+
+      (pct>3&&!done?'<div class="barbg" style="margin-top:4px"><div class="bar" style="width:'+pct+'%"></div></div>':'')+
+      '</div></div>';
+  }).join("");
+}
+
+// ─── CONTROL DEL VIDEO (YouTube IFrame API) ───
+var _ytReady=false,_ytPlayer=null,_ytPendingLoad=null;
+(function(){
+  var tag=document.createElement("script");
+  tag.src="https://www.youtube.com/iframe_api";
+  document.head.appendChild(tag);
+})();
+window.onYouTubeIframeAPIReady=function(){
+  _ytReady=true;
+  if(_ytPendingLoad){cargarVideoEnPlayer(_ytPendingLoad.id,_ytPendingLoad.start);_ytPendingLoad=null;}
+};
+function cargarVideoEnPlayer(videoId,startSeconds){
+  if(!_ytReady){_ytPendingLoad={id:videoId,start:startSeconds};return;}
+  if(_ytPlayer&&_ytPlayer.loadVideoById){
+    _ytPlayer.loadVideoById({videoId:videoId,startSeconds:startSeconds||0});
+    return;
+  }
+  _ytPlayer=new YT.Player("playerIframe",{
+    videoId:videoId,
+    width:"100%",
+    height:"100%",
+    playerVars:{autoplay:1,rel:0,start:startSeconds||0,modestbranding:1}
+  });
+}
+window.repetirUltimos=function(){
+  if(!_ytPlayer||!_ytPlayer.getCurrentTime||!_ytPlayer.seekTo)return;
+  try{
+    var t=_ytPlayer.getCurrentTime();
+    _ytPlayer.seekTo(Math.max(0,t-15),true);
+    _ytPlayer.playVideo();
+  }catch(e){}
+};
+
+window.abrirLeccion=function(idx){
+  leccionActualIdx=idx;
+  var l=cursoActual.lecciones[idx];
+  var pr=progLeccion(cursoActual.id,l.id);
+  document.getElementById("playerTitle").textContent=l.titulo;
+  cargarVideoEnPlayer(l.id,(pr>3&&pr<95)?Math.round(pr/100*600):0);
+  document.getElementById("playerModal").classList.add("show");
+  guardarLeccion(cursoActual.id,l.id,Math.max(pr,2));
+  if(progIntCurso)clearInterval(progIntCurso);
+  progIntCurso=setInterval(function(){
+    if(!document.getElementById("playerModal").classList.contains("show"))return;
+    var nuevo=null;
+    if(_ytPlayer&&_ytPlayer.getCurrentTime&&_ytPlayer.getDuration){
+      try{
+        var cur=_ytPlayer.getCurrentTime(),dur=_ytPlayer.getDuration();
+        if(dur>0)nuevo=Math.min(95,Math.round(cur/dur*100));
+      }catch(e){}
+    }
+    if(nuevo==null)nuevo=Math.min(progLeccion(cursoActual.id,l.id)+1,90);
+    guardarLeccion(cursoActual.id,l.id,nuevo);
+  },5000);
+};
+window.marcarCompletada=function(){
+  if(!cursoActual||leccionActualIdx===null)return;
+  var l=cursoActual.lecciones[leccionActualIdx];
+  guardarLeccion(cursoActual.id,l.id,99);
+  pintarLecciones();
+};
+window.cerrarPlayer=function(){
+  if(_ytPlayer&&_ytPlayer.stopVideo){try{_ytPlayer.stopVideo();}catch(e){}}
+  document.getElementById("playerModal").classList.remove("show");
+  if(progIntCurso){clearInterval(progIntCurso);progIntCurso=null;}
+  leccionActualIdx=null;
+  if(cursoActual)pintarLecciones();
+};
+
+// ─── QUIZ ───
+function getQuizGuardado(){ try{return JSON.parse(localStorage.getItem("vh_militar_quiz")||"{}");}catch(e){return {};} }
+function guardarQuizResultado(cursoId,correctas,total){
+  var q=getQuizGuardado();
+  var prev=q[cursoId];
+  if(!prev||correctas>prev.correctas){
+    q[cursoId]={correctas:correctas,total:total,ts:Date.now()};
+    localStorage.setItem("vh_militar_quiz",JSON.stringify(q));
+  }
+}
+function pintarQuiz(){
+  var preguntas=QUIZZES[cursoActual.id]||[];
+  var sec=document.getElementById("quizSection");
+  if(!preguntas.length){ sec.innerHTML=""; return; }
+  var mejor=getQuizGuardado()[cursoActual.id];
+  var h='<div class="quiz-box"><div class="quiz-hdr">📝 Quiz del curso'+(mejor?' — mejor puntaje: '+mejor.correctas+'/'+mejor.total:'')+'</div>';
+  preguntas.forEach(function(p,i){
+    h+='<div class="quiz-q" data-qi="'+i+'"><div class="quiz-qtxt">'+(i+1)+'. '+esc(p.q)+'</div>';
+    p.opciones.forEach(function(op,oi){
+      h+='<label class="quiz-opt"><input type="radio" name="quiz-'+i+'" value="'+oi+'"> '+esc(op)+'</label>';
+    });
+    h+='</div>';
+  });
+  h+='<button class="quiz-btn" onclick="corregirQuiz()">✅ Corregir</button><div id="quizResultado"></div></div>';
+  sec.innerHTML=h;
+}
+window.corregirQuiz=function(){
+  var preguntas=QUIZZES[cursoActual.id]||[];
+  var correctas=0;
+  preguntas.forEach(function(p,i){
+    var seleccionado=document.querySelector('input[name="quiz-'+i+'"]:checked');
+    var labels=document.querySelectorAll('.quiz-q[data-qi="'+i+'"] .quiz-opt');
+    labels.forEach(function(lbl,oi){
+      lbl.classList.remove("correcta","incorrecta");
+      if(oi===p.correcta) lbl.classList.add("correcta");
+      else if(seleccionado&&parseInt(seleccionado.value,10)===oi) lbl.classList.add("incorrecta");
+    });
+    if(seleccionado&&parseInt(seleccionado.value,10)===p.correcta) correctas++;
+  });
+  var prevMejor=getQuizGuardado()[cursoActual.id];
+  var esMejora=!prevMejor||correctas>prevMejor.correctas;
+  guardarQuizResultado(cursoActual.id,correctas,preguntas.length);
+  var res=document.getElementById("quizResultado");
+  var pct=Math.round(correctas/preguntas.length*100);
+  res.className="quiz-score "+(pct>=60?"bien":"mal");
+  res.textContent="Resultado: "+correctas+"/"+preguntas.length+" ("+pct+"%)"+(pct>=60?" — ¡bien! 🎉":" — repasá la lección y probá de nuevo");
+  if(esMejora&&correctas>0) sumarXP(correctas*2,"Quiz de "+cursoActual.titulo);
+};
+
+renderCursosGrid();
+</script>
+<script src="/logger_zh.js?v=2026"></script>
+</body>
+</html>

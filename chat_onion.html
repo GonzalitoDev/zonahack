@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<title>💬 Chat .onion · Red Anónima</title>
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/icon_96.png" type="image/png">
+<meta name="theme-color" content="#00ff41">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#030503;color:#00ff41;font-family:'Courier New',monospace;min-height:100vh;display:flex;flex-direction:column;height:100vh}
+#matrix{position:fixed;inset:0;z-index:0;opacity:.14;pointer-events:none}
+.wrap{position:relative;z-index:2;display:flex;flex-direction:column;height:100vh;max-width:760px;margin:0 auto;width:100%;padding:10px}
+.hdr{display:flex;align-items:center;gap:10px;padding-bottom:8px;border-bottom:1px solid rgba(0,255,65,.25)}
+.hdr .logo{font-size:1.6em;filter:drop-shadow(0 0 10px rgba(0,255,65,.5))}
+.hdr h1{font-size:.9em;letter-spacing:2px}
+.hdr .st{font-size:.55em;color:rgba(0,255,65,.6);letter-spacing:1px}
+.hdr .back{margin-left:auto;color:#00ff41;text-decoration:none;font-size:.7em;border:1px solid rgba(0,255,65,.3);padding:5px 10px;border-radius:8px}
+.status{display:flex;align-items:center;gap:7px;font-size:.58em;color:rgba(0,255,65,.7);padding:7px 0;border-bottom:1px solid rgba(0,255,65,.12);flex-wrap:wrap}
+.status .dot{width:8px;height:8px;border-radius:50%;background:#00ff41;box-shadow:0 0 8px rgba(0,255,65,.7);animation:pulse 1.4s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.nick{display:flex;align-items:center;gap:6px;padding:8px 0;font-size:.68em}
+.nick input{background:#061006;border:1px solid rgba(0,255,65,.3);color:#00ff41;padding:7px 10px;border-radius:8px;font-size:.8em;outline:none;font-family:'Courier New',monospace;flex:1;max-width:220px}
+.nick input:focus{border-color:#00ff41}
+.msgs{flex:1;overflow-y:auto;padding:10px 2px;display:flex;flex-direction:column;gap:7px;border:1px solid rgba(0,255,65,.1);border-radius:10px;background:rgba(0,20,0,.25);scrollbar-width:thin}
+.msgs::-webkit-scrollbar{width:5px}
+.msgs::-webkit-scrollbar-thumb{background:rgba(0,255,65,.25);border-radius:3px}
+.msg{max-width:88%;padding:8px 12px;border-radius:10px;font-size:.7em;line-height:1.55;word-break:break-word;animation:entra .25s both}
+@keyframes entra{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.msg.otra{background:rgba(0,255,65,.06);border:1px solid rgba(0,255,65,.12);align-self:flex-start}
+.msg.mia{background:rgba(0,200,65,.14);border:1px solid rgba(0,255,65,.35);align-self:flex-end}
+.msg .u{font-size:.58em;color:#7dffa8;margin-bottom:2px}
+.msg.mia .u{color:#00e5ff;text-align:right}
+.msg .t{color:#c8ffd8}
+.msg .h{font-size:.5em;color:rgba(0,255,65,.4);margin-top:3px}
+.send{display:flex;gap:8px;padding-top:9px}
+.send input{flex:1;background:#061006;border:1px solid rgba(0,255,65,.3);color:#00ff41;padding:12px 14px;border-radius:10px;font-size:.8em;outline:none;font-family:'Courier New',monospace}
+.send input:focus{border-color:#00ff41}
+.send button{background:linear-gradient(135deg,#00ff41,#00c73a);color:#03140a;border:none;border-radius:10px;padding:0 24px;font-weight:800;font-size:.75em;cursor:pointer;font-family:'Courier New',monospace;letter-spacing:1px}
+.foot{text-align:center;font-size:.5em;color:rgba(0,255,65,.35);padding:6px;letter-spacing:1px}
+.nodata{text-align:center;color:rgba(0,255,65,.4);font-size:.66em;padding:30px;line-height:1.8}
+</style>
+</head>
+<body>
+<canvas id="matrix"></canvas>
+
+<div class="wrap">
+  <div class="hdr">
+    <div class="logo">💬</div>
+    <div>
+      <h1>CHAT .ONION</h1>
+      <div class="st">RED ANÓNIMA · HABLÁ SIN DEJAR RASTRO</div>
+    </div>
+    <a class="back" href="/anon.html">←</a>
+  </div>
+
+  <div class="status">
+    <span class="dot"></span><span>conexión cifrada · chat en vivo real · <span id="userCount">0</span> en línea</span>
+    <span style="margin-left:auto">🕶️ anónimo</span>
+  </div>
+
+  <div class="nick">
+    <span>Tu alias:</span>
+    <input id="alias" maxlength="16">
+    <button onclick="renombrar()" style="background:none;border:1px solid rgba(0,255,65,.3);color:#00ff41;border-radius:8px;padding:7px 12px;font-size:.68em;cursor:pointer">🔄</button>
+  </div>
+
+  <div class="msgs" id="msgs"><div class="nodata">Conectando al chat anónimo...</div></div>
+
+  <div class="send">
+    <input id="inp" placeholder="Escribí tu mensaje (se ve en vivo)..." maxlength="500" onkeydown="if(event.key==='Enter')enviar()">
+    <button onclick="enviar()">ENVIAR ▸</button>
+  </div>
+  <div class="foot">ZONAHACK · CHAT ANÓNIMO EN VIVO · NO USES DATOS REALES</div>
+</div>
+
+<script src="/guardarango.js"></script>
+<script>
+/* ═══ CHAT .ONION — EN VIVO (Supabase Realtime) ═══ */
+var KEY="sb_publishable_3VvBUD5Bdu3Uaq59fJ99MQ_XDCtujUU";
+var API="https://xfwolaurpeofysnymqle.supabase.co/rest/v1";
+var WS="wss://xfwolaurpeofysnymqle.supabase.co/realtime/v1/websocket?apikey="+KEY+"&vsn=1.0.0";
+var H={"apikey":KEY,"Authorization":"Bearer "+KEY,"Content-Type":"application/json"};
+var yo="Anónimo-"+Math.floor(1000+Math.random()*9000);
+var ws=null, hb=null, enLinea={};
+
+function $(i){return document.getElementById(i);}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function fmt(ts){try{var d=new Date(ts);return d.toLocaleTimeString("es");}catch(e){return "";}}
+
+/* acceso: pase anónimo O rango vip+ */
+zhObtenerRango(function(r){
+  if(!zhPuede("vip",r)&&!zhTienePassAnon()){
+    zhBloquear("vip",r);
+  }
+});
+$("alias").value=yo;
+
+function msgsBox(){
+  var box=$("msgs");
+  var nearBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 80;
+  if(nearBottom) box.scrollTop=box.scrollHeight;
+}
+function agregar(msg, propio){
+  var box=$("msgs");
+  if(box.querySelector(".nodata")) box.innerHTML="";
+  var div=document.createElement("div");
+  div.className="msg "+(propio?"mia":"otra");
+  div.innerHTML='<div class="u">'+esc(msg.usuario)+'</div><div class="t">'+esc(msg.mensaje)+'</div><div class="h">'+fmt(msg.created_at)+'</div>';
+  box.appendChild(div);
+  while(box.children.length>150) box.removeChild(box.firstChild);
+  msgsBox();
+}
+
+function cargar(){
+  fetch(API+"/chat_mensajes?select=usuario,mensaje,created_at&user_id=like.onion_*&order=created_at.desc&limit=50",{headers:H})
+  .then(function(r){return r.json();}).then(function(d){
+    var box=$("msgs");
+    if(!d||!d.length){ box.innerHTML='<div class="nodata">🔒 Red en silencio...<br>Escribí el primer mensaje anónimo.</div>'; return; }
+    box.innerHTML="";
+    d.reverse().forEach(function(m){ agregar(m, m.usuario===yo); });
+  }).catch(function(){});
+}
+
+function enviar(){
+  var msg=$("inp").value.trim();
+  if(!msg)return;
+  var body={usuario:yo,user_id:"onion_"+Math.floor(Math.random()*1e9),mensaje:msg.slice(0,500)};
+  fetch(API+"/chat_mensajes",{method:"POST",headers:H,body:JSON.stringify(body)}).then(function(){
+    $("inp").value="";
+  }).catch(function(){});
+}
+function renombrar(){
+  yo=($("alias").value.trim()||"Anónimo-"+Math.floor(1000+Math.random()*9000)).slice(0,16);
+  $("alias").value=yo;
+}
+
+/* Realtime: recibir mensajes + presencia */
+function conectar(){
+  try{
+    ws=new WebSocket(WS);
+    ws.onopen=function(){
+      ws.send(JSON.stringify({topic:"realtime:chat_mensajes",event:"phx_join",payload:{config:{postgres_changes:[{event:"*",schema:"public",table:"chat_mensajes"}]}},ref:"1"}));
+      ws.send(JSON.stringify({topic:"realtime:actividad_usuarios",event:"phx_join",payload:{config:{postgres_changes:[{event:"*",schema:"public",table:"actividad_usuarios"}]}},ref:"2"}));
+      hb=setInterval(function(){ try{ws.send(JSON.stringify({topic:"phoenix",event:"heartbeat",payload:{},ref:"0"}));}catch(e){} },8000);
+    };
+    ws.onmessage=function(e){
+      try{
+        var m=JSON.parse(e.data);
+        if(m.event==="phx_reply")return;
+        if(m.event==="postgres_changes"){
+          var d=m.payload&&m.payload.data;
+          if(d&&d.type==="INSERT"&&d.record){
+            var t=(m.topic||"").replace("realtime:","");
+            if(t==="chat_mensajes"&&(d.record.user_id||"").indexOf("onion_")===0){
+              agregar(d.record, d.record.usuario===yo);
+            }
+            if(t==="actividad_usuarios"){
+              var u=d.record.usuario||"anon";
+              enLinea[u]=true;
+              $("userCount").textContent=Object.keys(enLinea).length;
+            }
+          }
+        }
+      }catch(err){}
+    };
+    ws.onclose=function(){ if(hb)clearInterval(hb); setTimeout(conectar,3000); };
+  }catch(e){ setTimeout(conectar,3000); }
+}
+
+/* fondo matrix */
+var cv=$("matrix"),ctx=cv.getContext("2d"),cols,drop;
+var glyph="アイウエオカキクケコ0123456789ABCDEF#$%&";
+function size(){cv.width=innerWidth;cv.height=innerHeight;cols=Math.floor(cv.width/14);drop=Array(cols).fill(0);}
+size();addEventListener("resize",size);
+setInterval(function(){
+  ctx.fillStyle="rgba(3,5,3,.12)";ctx.fillRect(0,0,cv.width,cv.height);
+  ctx.fillStyle="#00ff41";ctx.font="13px monospace";
+  for(var i=0;i<drop.length;i++){
+    ctx.fillText(glyph[Math.floor(Math.random()*glyph.length)],i*14,drop[i]*14);
+    if(drop[i]*14>cv.height&&Math.random()>.975)drop[i]=0;
+    drop[i]++;
+  }
+},50);
+
+cargar();
+conectar();
+</script>
+</body>
+</html>

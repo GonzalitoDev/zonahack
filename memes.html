@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>😂 Memes Argentina - ZonaHack</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0a;color:#c8d6e5;font-family:'Courier New',monospace;min-height:100vh}
+.header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid rgba(0,255,65,.1);position:sticky;top:0;z-index:100;background:#0a0a0a}
+.header h1{color:#00ff41;font-size:.95em;text-shadow:0 0 6px rgba(0,255,65,.08)}
+.back{color:#00ff41;text-decoration:none;font-size:.65em;padding:4px 8px;border:1px solid rgba(0,255,65,.1);border-radius:3px}
+.back:hover{border-color:rgba(0,255,65,.2)}
+.container{max-width:1000px;margin:0 auto;padding:10px}
+.hero{background:#0d0d0d;border:1px solid rgba(0,255,65,.06);border-radius:4px;padding:12px;margin-bottom:10px;text-align:center}
+.hero h2{color:#00ff41;font-size:.9em}
+.hero p{color:rgba(200,214,229,.3);font-size:.65em;margin-top:3px}
+.cats{display:flex;gap:3px;flex-wrap:wrap;margin-bottom:8px}
+.cats button{padding:4px 10px;border:1px solid rgba(0,255,65,.06);border-radius:3px;background:rgba(0,255,65,.02);color:rgba(0,255,65,.4);font-size:.58em;cursor:pointer;font-family:'Courier New',monospace;transition:.2s}
+.cats button:hover,.cats button.active{color:#00ff41;border-color:rgba(0,255,65,.12)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:5px}
+.card{border:1px solid rgba(0,255,65,.04);border-radius:4px;overflow:hidden;cursor:pointer;background:#0d0d0d;transition:all .15s}
+.card:hover{border-color:rgba(0,255,65,.1);box-shadow:0 0 10px rgba(0,255,65,.03)}
+.card img{width:100%;aspect-ratio:16/9;object-fit:cover;background:#000}
+.card .inf{padding:6px}
+.card .t{font-size:.65em;color:rgba(200,214,229,.6);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card .c{font-size:.55em;color:rgba(200,214,229,.25);margin-top:1px}
+.status{text-align:center;font-size:.6em;color:rgba(200,214,229,.2);margin:6px 0;min-height:14px}
+.snds{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:8px}
+.snds button{padding:9px 14px;border:1px solid rgba(0,255,65,.12);border-radius:10px;background:rgba(0,255,65,.04);color:#00ff41;font-size:.66em;cursor:pointer;font-family:'Courier New',monospace;transition:.2s;min-width:80px}
+.snds button:hover{background:rgba(0,255,65,.12);border-color:rgba(0,255,65,.3);transform:translateY(-1px)}
+.snds button:active{transform:scale(.93)}
+.loading{text-align:center;padding:25px;color:rgba(200,214,229,.12);font-size:.65em}
+.loading::after{content:'';display:block;width:16px;height:16px;margin:6px auto;border:1px solid rgba(0,255,65,.08);border-top-color:#00ff41;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media(max-width:480px){.grid{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="header">
+  <a href="/" class="back">←</a>
+  <h1>😂 Memes Argentina</h1>
+  <div style="width:40px"></div>
+</div>
+<div class="container">
+  <div class="hero">
+    <h2>🔊 Sonidos</h2>
+    <p>Tocá y escuchá (se sintetizan al instante, sin archivos)</p>
+    <div class="snds">
+      <button onclick="sonidoRisa()">😂 Risa</button>
+      <button onclick="sonidoExplosion()">💥 Explosión</button>
+      <button onclick="sonidoPito()">📣 Pito</button>
+      <button onclick="sonidoTriste()">🎺 Triste</button>
+      <button onclick="sonidoOla()">🌊 Ola</button>
+      <button onclick="sonidoZen()">🧘 Zen</button>
+      <button onclick="sonidoSirena()">🚨 Sirena</button>
+      <button onclick="sonidoMeme()">🤖 Meme</button>
+    </div>
+  </div>
+  <div class="hero">
+    <h2>😂 Memes argentinos</h2>
+    <p>Los mejores memes de Argentina en video</p>
+  </div>
+  <div class="cats" id="catBtns">
+    <button class="active" onclick="buscarMeme('memes argentinos graciosos',this)">🔥 General</button>
+    <button onclick="buscarMeme('memes argentinos 2026',this)">📅 2026</button>
+    <button onclick="buscarMeme('memes futbol argentina',this)">⚽ Futbol</button>
+    <button onclick="buscarMeme('memes politica argentina',this)">🏛️ Politica</button>
+    <button onclick="buscarMeme('memes argentinos messi',this)">🐐 Messi</button>
+    <button onclick="buscarMeme('memes argentinos ricardo fort',this)">🎤 Ricardo Fort</button>
+    <button onclick="buscarMeme('memes argentinos alberto',this)">🤡 Alberto</button>
+    <button onclick="buscarMeme('memes argentinos milei',this)">🦁 Milei</button>
+    <button onclick="buscarMeme('memes argentinos cristina',this)">👩 Cristina</button>
+    <button onclick="buscarMeme('memes villeros argentinos',this)">🏘️ Villeros</button>
+    <button onclick="buscarMeme('memes argentinos caniche',this)">🐩 Caniche</button>
+    <button onclick="buscarMeme('memes argentinos tinelli',this)">📺 Tinelli</button>
+    <button onclick="buscarMeme('memes argentinos susana',this)">👑 Susana</button>
+    <button onclick="buscarMeme('memes argentinos cordobes',this)">🧉 Cordobes</button>
+    <button onclick="buscarMeme('memes argentinos joda',this)">🎉 Joda</button>
+    <button onclick="buscarMeme('memes argentinos skin de messi',this)">👕 Messi skin</button>
+    <button onclick="buscarMeme('memes argentinos turros',this)">🕶️ Turros</button>
+    <button onclick="buscarMeme('humor argentino capusotto',this)">🎭 Capusotto</button>
+    <button onclick="buscarMeme('memes argentinos peter',this)">🕺 Peter</button>
+    <button onclick="buscarMeme('memes argentinos yayo',this)">🎪 Yayo</button>
+    <button onclick="buscarMeme('memes argentinos peluca',this)">👩‍🦰 Peluca</button>
+    <button onclick="buscarMeme('memes argentinos rocio',this)">💃 Rocio</button>
+  </div>
+  <div class="status" id="memeStatus">Elegi una categoria</div>
+  <div class="grid" id="memeGrid"></div>
+  <div id="memeLoad" style="display:none;text-align:center;margin:8px 0">
+    <button onclick="cargarMasMemes()" style="padding:5px 16px;border:1px solid rgba(0,255,65,.1);border-radius:3px;background:rgba(0,255,65,.03);color:#00ff41;cursor:pointer;font-size:.6em;font-family:'Courier New',monospace">Cargar mas memes</button>
+  </div>
+</div>
+
+<script>
+/* ─── SONIDOS (WebAudio, sintetizados) ─── */
+var sCtx=null;
+function sGet(){ if(!sCtx) sCtx=new (window.AudioContext||window.webkitAudioContext)(); if(sCtx.state==='suspended') sCtx.resume(); return sCtx; }
+function beep(freq,dur,vol,type,delay){ try{var c=sGet(),t=c.currentTime+(delay||0),o=c.createOscillator(),g=c.createGain(); o.type=type||'sine'; o.frequency.value=freq; g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(vol||0.2,t+0.01); g.gain.exponentialRampToValueAtTime(0.001,t+dur); o.connect(g); g.connect(c.destination); o.start(t); o.stop(t+dur);}catch(e){} }
+function noise(dur,vol,delay){ try{var c=sGet(),t=c.currentTime+(delay||0),b=c.createBuffer(1,c.sampleRate*dur,c.sampleRate),d=b.getChannelData(0); for(var i=0;i<d.length;i++)d[i]=Math.random()*2-1; var n=c.createBufferSource(); n.buffer=b; var g=c.createGain(); g.gain.setValueAtTime(vol||0.3,t); g.gain.exponentialRampToValueAtTime(0.001,t+dur); n.connect(g); g.connect(c.destination); n.start(t);}catch(e){} }
+function sonidoRisa(){ for(var i=0;i<8;i++) beep(400+Math.random()*300,0.12,0.14,'sawtooth',i*0.12); }
+function sonidoExplosion(){ noise(0.6,0.4); beep(80,0.5,0.3,'triangle'); }
+function sonidoPito(){ beep(1800,0.15,0.25,'square'); setTimeout(function(){beep(1800,0.3,0.25,'square');},150); }
+function sonidoTriste(){ beep(440,0.3,0.2,'sawtooth'); beep(440,0.3,0.2,'sawtooth',0.3); beep(330,0.5,0.2,'sawtooth',0.6); }
+function sonidoOla(){ for(var i=0;i<5;i++) beep(700-i*60,0.08,0.2,'sine',i*0.07); }
+function sonidoZen(){ [523,659,784,1047].forEach(function(f,i){ beep(f,0.25,0.15,'sine',i*0.18); }); }
+function sonidoSirena(){ beep(600,0.3,0.25,'sawtooth'); beep(900,0.3,0.25,'sawtooth',0.35); beep(600,0.3,0.25,'sawtooth',0.7); }
+function sonidoMeme(){ beep(300,0.1,0.2,'square'); beep(400,0.1,0.2,'square',0.12); beep(500,0.1,0.2,'square',0.24); beep(400,0.2,0.2,'square',0.36); }
+
+var memeResults = [];
+var lastMemeQ = "";
+var memeVars = ["memes","argentinos","gracioso","2026","humor","argentina","jaja"];
+
+function esc(s){return (s||"").replace(/[&<>"]/g,function(m){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m];});}
+
+function buscarMeme(q,btn){
+  if(!q) return;
+  lastMemeQ = q;
+  memeResults = [];
+  document.querySelectorAll("#catBtns button").forEach(function(b){b.classList.remove("active");});
+  if(btn) btn.classList.add("active");
+  document.getElementById("memeStatus").textContent = "Buscando memes...";
+  document.getElementById("memeGrid").innerHTML = '<div class="loading">Buscando...</div>';
+  document.getElementById("memeLoad").style.display = "none";
+  var xhr = new XMLHttpRequest();
+  xhr.open("GET","/api/search?q="+encodeURIComponent(q),true);
+  xhr.timeout = 25000;
+  xhr.onload = function(){
+    try{
+      var data = JSON.parse(xhr.responseText);
+      var items = data.results || [];
+      if(!items.length){
+        document.getElementById("memeGrid").innerHTML = '<div class="loading" style="grid-column:1/-1;padding:30px">😢 No se encontraron memes</div>';
+        document.getElementById("memeStatus").textContent = "Sin resultados";
+        return;
+      }
+      memeResults = items;
+      mostrarMemes(items);
+      document.getElementById("memeStatus").textContent = items.length + " memes";
+      document.getElementById("memeLoad").style.display = "block";
+    }catch(e){
+      document.getElementById("memeGrid").innerHTML = '<div class="loading">Error</div>';
+    }
+  };
+  xhr.onerror = function(){
+    document.getElementById("memeGrid").innerHTML = '<div class="loading">Error de conexion</div>';
+  };
+  xhr.send();
+}
+
+function mostrarMemes(items){
+  var h = "";
+  items.forEach(function(it,i){
+    if(!it.id) return;
+    h += '<div class="card" onclick="verMeme('+i+')">';
+    if(it.thumb) h += '<img src="'+it.thumb+'" loading="lazy">';
+    else h += '<div style="aspect-ratio:16/9;background:#000;display:flex;align-items:center;justify-content:center;font-size:2em;opacity:.3">😂</div>';
+    h += '<div class="inf"><div class="t">'+esc((it.title||"").slice(0,55))+'</div>';
+    if(it.channel) h += '<div class="c">'+esc(it.channel)+'</div>';
+    h += '</div></div>';
+  });
+  document.getElementById("memeGrid").innerHTML = h;
+}
+
+function cargarMasMemes(){
+  if(!lastMemeQ) return;
+  var extra = memeVars[Math.floor(Math.random()*memeVars.length)];
+  var q = lastMemeQ + " " + extra;
+  var btn = document.querySelector("#memeLoad button");
+  if(btn){btn.disabled=true;btn.textContent="Cargando...";}
+  var xhr = new XMLHttpRequest();
+  xhr.open("GET","/api/search?q="+encodeURIComponent(q),true);
+  xhr.timeout = 25000;
+  xhr.onload = function(){
+    try{
+      var data = JSON.parse(xhr.responseText);
+      var items = data.results || [];
+      items.forEach(function(it){
+        if(!it.id || memeResults.some(function(r){return r.id===it.id;})) return;
+        memeResults.push(it);
+        var idx = memeResults.length - 1;
+        var div = document.createElement("div"); div.className = "card";
+        div.innerHTML = '<div onclick="verMeme('+idx+')">'+
+          (it.thumb?'<img src="'+it.thumb+'" loading="lazy">':'<div style="aspect-ratio:16/9;background:#000;display:flex;align-items:center;justify-content:center;font-size:2em;opacity:.3">😂</div>')+
+          '<div class="inf"><div class="t">'+esc((it.title||"").slice(0,55))+'</div>'+
+          (it.channel?'<div class="c">'+esc(it.channel)+'</div>':'')+'</div></div>';
+        document.getElementById("memeGrid").appendChild(div);
+      });
+      document.getElementById("memeStatus").textContent = memeResults.length + " memes";
+    }catch(e){}
+    if(btn){btn.disabled=false;btn.textContent="Cargar mas memes";}
+  };
+  xhr.send();
+}
+
+function verMeme(idx){
+  var it = memeResults[idx];
+  if(!it) return;
+  window.location.href = "/?q=" + encodeURIComponent((it.title||"") + " meme");
+}
+
+// Cargar al inicio
+buscarMeme("memes argentinos graciosos", document.querySelector("#catBtns button.active"));
+</script>
+<script src="/errores.js" defer></script>
+<script src="/update_check.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>🎵 Música YouTube · ZonaHack</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#07090e;--card:rgba(13,17,23,.92);--border:#1c2531;--text:#d7e2ef;--muted:#6d7f93;--accent:#2ee6a8;--violet:#7a5cff;--pink:#ff5ec4}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh}
+.bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.orb{position:absolute;border-radius:50%;filter:blur(90px);opacity:.3;animation:flotar 18s ease-in-out infinite}
+.orb1{width:460px;height:460px;background:radial-gradient(circle,rgba(255,94,196,.16),transparent 70%);top:-170px;right:-120px}
+.orb2{width:500px;height:500px;background:radial-gradient(circle,rgba(46,230,168,.14),transparent 70%);bottom:-200px;left:-160px;animation-delay:-7s}
+@keyframes flotar{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(20px,-14px) scale(1.08)}}
+.header{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border);background:rgba(7,9,14,.92);backdrop-filter:blur(10px);position:sticky;top:0;z-index:100}
+.logo{width:40px;height:40px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px;background:linear-gradient(135deg,rgba(255,94,196,.3),rgba(122,92,255,.3));border:1px solid rgba(255,94,196,.4)}
+.ttl{flex:1;min-width:0}
+.ttl h1{font-size:.95em;letter-spacing:2px;font-weight:900;font-family:'Courier New',monospace;color:#fff;background:linear-gradient(90deg,#ff5ec4,#7a5cff,#ff5ec4);background-size:200%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:brillo 4s linear infinite}
+@keyframes brillo{to{background-position:200%}}
+.ttl span{font-size:.6em;color:var(--muted)}
+.back{color:var(--accent);text-decoration:none;font-size:.7em;padding:6px 10px;border:1px solid var(--border);border-radius:8px}
+.container{max-width:1000px;margin:0 auto;padding:14px 14px 50px;position:relative;z-index:1}
+.eq{display:inline-flex;align-items:flex-end;gap:2px;height:14px;margin-left:8px}
+.eq i{width:3px;background:var(--pink);border-radius:2px;animation:eq 1s ease-in-out infinite}
+.eq i:nth-child(1){height:40%;animation-delay:0s}.eq i:nth-child(2){height:100%;animation-delay:.2s}.eq i:nth-child(3){height:60%;animation-delay:.4s}.eq i:nth-child(4){height:80%;animation-delay:.6s}
+@keyframes eq{0%,100%{transform:scaleY(.4)}50%{transform:scaleY(1)}}
+.search{display:flex;gap:8px;margin-bottom:12px}
+.search input{flex:1;background:var(--card);border:1px solid var(--border);border-radius:14px;color:var(--text);padding:13px 16px;font-size:.85em;outline:none;font-family:inherit}
+.search input:focus{border-color:var(--accent)}
+.search button{background:linear-gradient(135deg,#ff5ec4,#7a5cff);color:#fff;border:none;border-radius:14px;padding:13px 20px;font-weight:800;font-size:.78em;cursor:pointer;font-family:inherit}
+.chips{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px}
+.chips button{padding:9px 15px;border:1px solid var(--border);border-radius:16px;background:var(--card);color:var(--muted);font-size:.68em;cursor:pointer;font-family:inherit;transition:.12s}
+.chips button:hover,.chips button.on{color:var(--pink);border-color:rgba(255,94,196,.4);background:rgba(255,94,196,.06)}
+.status{text-align:center;font-size:.66em;color:var(--muted);margin:6px 0;min-height:16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px}
+.card{border:1px solid var(--border);border-radius:14px;overflow:hidden;cursor:pointer;background:var(--card);transition:.18s;position:relative}
+.card:hover{transform:translateY(-4px);border-color:rgba(255,94,196,.4);box-shadow:0 10px 30px rgba(0,0,0,.5)}
+.card img{width:100%;aspect-ratio:16/9;object-fit:cover;background:#000;display:block}
+.card .play{position:absolute;top:6px;right:6px;width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#ff5ec4,#7a5cff);display:flex;align-items:center;justify-content:center;font-size:.85em;color:#fff;opacity:0;transition:.15s}
+.card:hover .play{opacity:1}
+.card .inf{padding:8px 10px 10px}
+.card .t{font-size:.7em;color:var(--text);font-weight:600;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.card .c{font-size:.56em;color:var(--muted);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.loading{text-align:center;padding:30px;color:var(--muted);font-size:.68em}
+.loading::after{content:'';display:block;width:18px;height:18px;margin:8px auto;border:2px solid rgba(255,94,196,.15);border-top-color:var(--pink);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.mas{display:flex;justify-content:center;margin:16px 0}
+.mas button{padding:10px 22px;border:1px solid rgba(255,94,196,.25);border-radius:12px;background:rgba(255,94,196,.05);color:var(--pink);cursor:pointer;font-size:.7em;font-family:inherit;font-weight:800}
+.player{position:fixed;left:0;right:0;bottom:0;background:rgba(10,8,14,.98);border-top:1px solid var(--border);z-index:200;padding:10px 14px;display:none}
+.player.active{display:block}
+.player .pt{font-size:.68em;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.player iframe{width:100%;aspect-ratio:16/9;border:none;border-radius:10px;background:#000;max-height:320px}
+.player .cerrar{position:absolute;top:10px;right:14px;background:none;border:none;color:var(--muted);font-size:1em;cursor:pointer}
+@media(min-width:768px){.player iframe{max-width:480px;margin:0 auto;display:block}}
+@media(max-width:480px){.grid{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="bg"><div class="orb orb1"></div><div class="orb orb2"></div></div>
+
+<div class="header">
+  <div class="logo">🎵</div>
+  <div class="ttl"><h1>MÚSICA YOUTUBE</h1><span>escuchá en línea · embed oficial · 100% legal</span></div>
+  <a href="/" class="back">←</a>
+</div>
+
+<div class="container">
+  <div class="search">
+    <input id="q" placeholder="Buscá música, artista o canción..." onkeydown="if(event.key==='Enter')buscar($('q').value)">
+    <button onclick="buscar($('q').value)">🔍 BUSCAR</button>
+  </div>
+  <div class="chips" id="chips">
+    <button class="on" onclick="buscar('musica cumbia',this)">💃 Cumbia</button>
+    <button onclick="buscar('musica reggaeton',this)">🔥 Reggaetón</button>
+    <button onclick="buscar('musica rock en español',this)">🎸 Rock</button>
+    <button onclick="buscar('musica pop en español',this)">✨ Pop</button>
+    <button onclick="buscar('cuarteto argentino',this)">🎺 Cuarteto</button>
+    <button onclick="buscar('musica para estudiar',this)">📚 Estudiar</button>
+    <button onclick="buscar('musica electronica',this)">🎛️ Electrónica</button>
+    <button onclick="buscar('bachata romantica',this)">💔 Bachata</button>
+    <button onclick="buscar('trap argentino',this)">🕶️ Trap</button>
+    <button onclick="buscar('musica romantica',this)">🌹 Romántica</button>
+    <button onclick="buscar('musica clasica',this)">🎻 Clásica</button>
+  </div>
+  <div class="status" id="status">Elegí un género o buscá una canción</div>
+  <div class="grid" id="grid"></div>
+  <div class="mas" id="mas" style="display:none"><button onclick="mas()">⬇ Cargar más</button></div>
+</div>
+
+<div class="player" id="player">
+  <button class="cerrar" onclick="cerrarPlayer()">✕</button>
+  <div class="pt"><span class="eq"><i></i><i></i><i></i><i></i></span><span id="ptTxt">Reproduciendo</span>
+    <a id="ytBtn" href="#" target="_blank" rel="noopener" style="margin-left:auto;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:8px;padding:4px 10px;color:var(--text);font-size:.62em;text-decoration:none">▶ Abrir en YouTube</a>
+  </div>
+  <iframe id="pFrame" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
+</div>
+
+<script>
+var SB="https://xfwolaurpeofysnymqle.supabase.co/rest/v1";
+var KEY="sb_publishable_3VvBUD5Bdu3Uaq59fJ99MQ_XDCtujUU";
+function $(id){return document.getElementById(id);}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+var resultados=[], qActual="", vidActual="", extra=["musica","video","remix","en vivo","2026","romantica"];
+
+function buscar(q,btn){
+  q=(q||"").trim(); if(!q)return;
+  qActual=q;
+  resultados=[];
+  document.querySelectorAll("#chips button").forEach(function(b){b.classList.remove("on");});
+  if(btn)btn.classList.add("on");
+  $("status").textContent="Buscando música...";
+  $("grid").innerHTML='<div class="loading">Cargando música...</div>';
+  $("mas").style.display="none";
+  fetch("/api/search?q="+encodeURIComponent(q)).then(function(r){return r.json();}).then(function(d){
+    var items=(d&&d.results)||[];
+    if(!items.length){ $("grid").innerHTML='<div class="loading" style="grid-column:1/-1">Sin resultados para "'+esc(q)+'"</div>'; $("status").textContent="Sin resultados"; return; }
+    resultados=items;
+    pintar(items);
+    $("status").textContent=items.length+" canciones · "+esc(q);
+    $("mas").style.display="block";
+  }).catch(function(){ $("grid").innerHTML='<div class="loading">Error de conexión</div>'; });
+}
+function pintar(items){
+  $("grid").innerHTML=items.map(function(it,i){
+    if(!it.id)return '';
+    return '<div class="card" onclick="ver('+i+')"><span class="play">▶</span>'+
+      (it.thumb?'<img src="'+esc(it.thumb)+'" loading="lazy" onerror="this.onerror=null;this.src=\'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==\'">':'<div style="aspect-ratio:16/9;background:#000;display:flex;align-items:center;justify-content:center;font-size:2em;opacity:.3">🎵</div>')+
+      '<div class="inf"><div class="t">'+esc((it.title||'').slice(0,60))+'</div><div class="c">'+esc(it.channel||'YouTube')+'</div></div></div>';
+  }).join('');
+}
+function mas(){
+  var extra2=extra[Math.floor(Math.random()*extra.length)];
+  var q2=qActual+" "+extra2;
+  fetch("/api/search?q="+encodeURIComponent(q2)).then(function(r){return r.json();}).then(function(d){
+    var items=(d&&d.results)||[];
+    items.forEach(function(it){
+      if(!it.id||resultados.some(function(r){return r.id===it.id;}))return;
+      resultados.push(it);
+    });
+    pintar(resultados);
+    $("status").textContent=resultados.length+" canciones";
+  });
+}
+function ver(i){
+  var it=resultados[i]; if(!it)return;
+  vidActual=it.id;
+  $("ptTxt").textContent=it.title||"Reproduciendo";
+  $("ytBtn").href="https://www.youtube.com/watch?v="+it.id;
+  $("pFrame").src="https://www.youtube-nocookie.com/embed/"+it.id+"?autoplay=1&rel=0&modestbranding=1&playsinline=1";
+  $("player").classList.add("active");
+  $("status").textContent="▶ "+esc((it.title||'').slice(0,50));
+}
+function cerrarPlayer(){
+  $("pFrame").src="";
+  $("player").classList.remove("active");
+  vidActual="";
+}
+document.addEventListener("keydown",function(e){ if(e.key==="Escape")cerrarPlayer(); });
+
+// cargar un género por defecto
+buscar("musica cumbia", document.querySelector("#chips button.on"));
+</script>
+<script src="/logger_zh.js?v=2026"></script>
+</body>
+</html>

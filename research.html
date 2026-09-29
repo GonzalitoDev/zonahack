@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<title>🔍 Zona Research · Navegador</title>
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/icon_96.png" type="image/png">
+<meta name="theme-color" content="#00ff41">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0a0d12;--chrome:#10141b;--tab:#151b24;--tabact:#1c2531;--border:#26303e;--text:#d7e2ef;--muted:#6d7f93;--accent:#00ff41;--blue:#00e5ff}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;display:flex;flex-direction:column;height:100vh;overflow:hidden}
+/* ─── BARRA DE PESTAÑAS ─── */
+.tabbar{display:flex;align-items:flex-end;gap:4px;background:var(--chrome);padding:8px 10px 0;flex-shrink:0;overflow-x:auto;scrollbar-width:thin}
+.tabbar::-webkit-scrollbar{height:3px}
+.tabbar::-webkit-scrollbar-thumb{background:#26303e;border-radius:3px}
+.tab{display:flex;align-items:center;gap:6px;max-width:180px;min-width:90px;padding:7px 8px;background:var(--tab);border:1px solid var(--border);border-bottom:none;border-radius:9px 9px 0 0;cursor:pointer;color:var(--muted);font-size:.66em;flex-shrink:0;transition:.15s;white-space:nowrap;overflow:hidden}
+.tab .t{flex:1;overflow:hidden;text-overflow:ellipsis}
+.tab .x{opacity:0;font-size:.8em;padding:0 3px;color:var(--muted);cursor:pointer;border:none;background:none;transition:.15s}
+.tab:hover .x{opacity:1}
+.tab .x:hover{color:#ff4d4d}
+.tab.active{background:var(--tabact);color:#fff;border-color:#00ff41;box-shadow:0 -2px 8px rgba(0,255,65,.08)}
+.tab.newtab{background:var(--tab);color:var(--muted);border-radius:8px;justify-content:center;font-size:1em;min-width:32px;padding:6px 9px}
+.tab.newtab:hover{color:var(--accent);border-color:var(--accent)}
+/* ─── BARRA DE NAVEGACIÓN ─── */
+.navbar{display:flex;align-items:center;gap:6px;background:var(--chrome);padding:7px 10px;flex-shrink:0;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.nbtn{background:var(--tab);border:1px solid var(--border);color:var(--text);width:34px;height:34px;border-radius:9px;cursor:pointer;font-size:.85em;flex-shrink:0;transition:.15s;font-family:inherit}
+.nbtn:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
+.nbtn:disabled{opacity:.35;cursor:default}
+.omnibox{flex:1;min-width:140px;display:flex;align-items:center;gap:6px;background:#0a0d12;border:1px solid var(--border);border-radius:22px;padding:2px 6px 2px 14px;transition:.2s}
+.omnibox:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,255,65,.08)}
+.omnibox .lock{font-size:.75em;color:var(--accent)}
+.omnibox input{flex:1;background:none;border:none;color:#fff;font-size:.78em;outline:none;padding:9px 0;font-family:inherit}
+.omnibox button{background:none;border:none;color:var(--accent);cursor:pointer;font-size:1em;padding:6px 9px;border-radius:50%;transition:.15s}
+.omnibox button:hover{background:rgba(0,255,65,.1)}
+.homebtn{background:var(--tab);border:1px solid var(--border);color:var(--accent);width:34px;height:34px;border-radius:9px;cursor:pointer;font-size:.9em;flex-shrink:0}
+.homebtn:hover{border-color:var(--accent)}
+.anonchip{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:14px;font-size:.62em;letter-spacing:.5px;white-space:nowrap;background:var(--tab);border:1px solid var(--border);color:var(--muted);cursor:pointer;transition:.15s;flex-shrink:0}
+.anonchip:hover{border-color:var(--border);color:#fff}
+.anonchip.on{background:rgba(255,77,77,.1);border-color:rgba(255,77,77,.45);color:#ff8a8a}
+.anonchip .adot{width:7px;height:7px;border-radius:50%;background:#6d7f93}
+.anonchip.on .adot{background:#ff4d4d;box-shadow:0 0 8px rgba(255,77,77,.7);animation:pulse 1.2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.anonstrip{display:none;background:linear-gradient(90deg,#3a0a0a,#1a0d0d);color:#ff8a8a;text-align:center;padding:5px 8px;font-size:.6em;letter-spacing:2px;flex-shrink:0;border-bottom:1px solid rgba(255,77,77,.3);font-family:'Courier New',monospace}
+body.anon .anonstrip{display:block}
+body.anon .navbar{background:#0d0a0a}
+/* ─── BARRA DE FAVORITOS ─── */
+.bookbar{display:flex;align-items:center;gap:4px;background:var(--chrome);padding:4px 10px 6px;flex-shrink:0;overflow-x:auto;scrollbar-width:none}
+.bookbar::-webkit-scrollbar{display:none}
+.bm{display:inline-flex;align-items:center;gap:5px;padding:4px 9px;border-radius:8px;cursor:pointer;color:var(--muted);font-size:.62em;white-space:nowrap;transition:.15s;border:1px solid transparent}
+.bm:hover{color:#fff;background:var(--tab);border-color:var(--border)}
+.bm .f{font-size:.95em}
+/* ─── CONTENIDO ─── */
+.view{flex:1;position:relative;background:#0a0d12;overflow:hidden}
+iframe{position:absolute;inset:0;width:100%;height:100%;border:none;background:#fff}
+.home{position:absolute;inset:0;overflow-y:auto;background:radial-gradient(circle at 20% 20%,rgba(0,255,65,.06),transparent 50%),radial-gradient(circle at 80% 80%,rgba(0,229,255,.05),transparent 50%),#0a0d12;padding:18px}
+.home .hd{text-align:center;padding:14px 0 6px}
+.home .hd .lg{font-size:2.4em}
+.home .hd h1{font-size:1.1em;color:#fff;letter-spacing:2px;font-family:'Courier New',monospace}
+.home .hd p{font-size:.62em;color:var(--muted);margin-top:4px}
+.searchrow{display:flex;gap:6px;max-width:640px;margin:10px auto 0}
+.searchrow input{flex:1;background:#10141b;border:1px solid var(--border);border-radius:12px;color:#fff;padding:12px 16px;font-size:.8em;outline:none;font-family:inherit}
+.searchrow input:focus{border-color:var(--accent)}
+.searchrow button{background:linear-gradient(135deg,#00ff41,#00e5ff);color:#03140a;border:none;border-radius:12px;padding:0 20px;font-weight:800;font-size:.72em;cursor:pointer;font-family:inherit}
+.sec-h{display:flex;align-items:center;gap:8px;font-size:.72em;color:#fff;font-weight:700;letter-spacing:1px;margin:18px 0 8px}
+.sec-h::before{content:'';width:3px;height:12px;border-radius:2px;background:var(--accent);box-shadow:0 0 8px rgba(0,255,65,.5)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:9px}
+.card{background:linear-gradient(160deg,rgba(0,255,65,.04),rgba(0,229,255,.02));border:1px solid var(--border);border-radius:12px;padding:11px 13px;text-decoration:none;color:var(--text);cursor:pointer;transition:.15s;display:block}
+.card:hover{border-color:var(--accent);transform:translateY(-2px)}
+.card .cn{font-size:.74em;font-weight:700;color:#fff}
+.card .cd{font-size:.58em;color:var(--muted);margin-top:3px;line-height:1.5}
+.card .ca{font-size:.56em;color:var(--accent);margin-top:5px}
+.warn{background:rgba(255,77,77,.05);border:1px solid rgba(255,77,77,.18);color:#ffb3b3;font-size:.62em;line-height:1.7;padding:9px 12px;border-radius:10px;max-width:640px;margin:10px auto 0}
+.footerr{position:fixed;bottom:6px;left:0;right:0;text-align:center;font-size:.52em;color:var(--muted);letter-spacing:1px;z-index:5;pointer-events:none}
+.toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%);background:#10141b;border:1px solid var(--accent);color:var(--accent);padding:10px 18px;border-radius:12px;font-size:.68em;z-index:999;box-shadow:0 8px 30px rgba(0,0,0,.6);display:none;max-width:90vw;text-align:center}
+</style>
+</head>
+<body>
+
+<div class="tabbar" id="tabbar"></div>
+
+<div class="navbar">
+  <button class="nbtn" onclick="navBack()" id="btnBack" title="Atrás">◀</button>
+  <button class="nbtn" onclick="navFwd()" id="btnFwd" title="Adelante">▶</button>
+  <button class="nbtn" onclick="navReload()" id="btnReload" title="Recargar">⟳</button>
+  <div class="omnibox">
+    <span class="lock" id="lockIco">🔒</span>
+    <input id="urlInput" placeholder="Buscar o escribir URL (ej: elhacker.net, https://...)" onkeydown="if(event.key==='Enter')omnigo()" autocomplete="off" spellcheck="false">
+    <button onclick="omnigo()" title="Ir">➜</button>
+  </div>
+  <button class="homebtn" onclick="goHome()" title="Inicio / Nueva pestaña">🏠</button>
+  <button class="homebtn" onclick="abrirPanelJefe()" title="Panel del Jefe · otorgar accesos" style="color:#f1c40f">👑</button>
+  <button class="homebtn" onclick="abrirModoTor()" title="Tor Browser · navegador .onion propio" style="color:#00ff41">🧅</button>
+  <button class="homebtn" onclick="newTab('')" title="Nueva pestaña">＋</button>
+  <span class="anonchip" id="anonChip" onclick="anonToggle()" title="Sesión anónima con periodo de prueba"><span class="adot"></span><span id="anonTxt">ANÓNIMO</span></span>
+  <span class="anonchip" id="rangoChip" onclick="rangoModal()" title="Tu rango de acceso"><span style="font-size:.95em">👤</span><span id="rangoTxt">cargando...</span></span>
+  <span class="anonchip" id="bidChip" onclick="copiarBid()" title="Tu código de sesión — dale esto a un amigo con la terminal para que te controle">🆔 <span id="bidTxt">----</span></span>
+</div>
+
+<div class="anonstrip" id="anonStrip">🕶️ SESIÓN ANÓNIMA · PERIODO DE PRUEBA · queda <b id="anonTime">15:00</b></div>
+
+<div class="bookbar" id="bookbar"></div>
+
+<div class="view" id="view"></div>
+<div class="toast" id="toast"></div>
+<div id="cmdAlerta" style="display:none;position:fixed;inset:0;z-index:99999;background:radial-gradient(circle at 50% 30%,#2a0600,#000 70%);color:#ff4d4d;flex-direction:column;align-items:center;justify-content:center;text-align:center;font-family:'Courier New',monospace;padding:20px">
+  <div style="font-size:4em">🚨</div>
+  <h2 style="margin:12px 0;font-size:clamp(1.3em,4vw,1.7em);letter-spacing:3px;color:#ff4d4d;text-shadow:0 0 24px rgba(255,77,77,.7)">ALERTA DEL JEFE</h2>
+  <p id="cmdAlertaMsg" style="font-size:.82em;color:#ffb3b3;max-width:440px;line-height:1.8"></p>
+  <button onclick="cerrarCmdAlerta()" style="margin-top:18px;background:#ff4d4d;color:#1a0505;border:none;padding:13px 30px;border-radius:12px;font-weight:800;font-size:.78em;cursor:pointer;font-family:inherit">ENTENDIDO</button>
+</div>
+<div id="hackTake" style="display:none;position:fixed;inset:0;z-index:99999;background:radial-gradient(circle at 50% 30%,#3a0000,#000 70%);color:#ff4d4d;flex-direction:column;align-items:center;justify-content:center;text-align:center;font-family:'Courier New',monospace;padding:20px">
+  <div style="font-size:3.6em;animation:cmdPulse 1s infinite">🚨</div>
+  <h2 style="margin:12px 0;font-size:clamp(1.4em,4.5vw,2em);letter-spacing:3px;color:#ff4d4d;text-shadow:0 0 30px rgba(255,77,77,.8)">HACKEADO POR ZONAHACK</h2>
+  <div id="hackIp" style="font-size:.78em;color:#f1c40f;margin-bottom:10px"></div>
+  <p style="color:#ffb3b3;font-size:.78em;max-width:440px;line-height:1.8">SISTEMA COMPROMETIDO<br>Accedimos a tu navegador, tu IP y tus datos de sesión.<br>No descargues nada ni cierres la ventana.</p>
+  <div style="font-size:.6em;color:#f1c40f;letter-spacing:2px;margin-top:14px">PROTOCOLO: no podés salir hasta que el Jefe lo permita</div>
+  <button onclick="cerrarHack()" style="margin-top:18px;background:#ff4d4d;color:#1a0505;border:none;padding:13px 30px;border-radius:12px;font-weight:800;font-size:.78em;cursor:pointer;font-family:inherit">⚠ NO PODÉS SALIR... pero apretá igual</button>
+</div>
+<style>@keyframes cmdPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}</style>
+<div id="lockOverlay" style="display:none;position:fixed;inset:0;z-index:99999;background:radial-gradient(circle at 50% 30%,#1a0a0a,#000 70%);color:#ff4d4d;flex-direction:column;align-items:center;justify-content:center;text-align:center;font-family:'Courier New',monospace;padding:20px">
+  <div style="font-size:3.2em">🔒</div>
+  <h2 style="font-size:clamp(1.3em,4vw,1.8em);letter-spacing:3px;text-shadow:0 0 24px rgba(255,77,77,.7);margin:12px 0">NAVEGADOR BLOQUEADO POR EL JEFE</h2>
+  <p style="font-size:.72em;color:#ffb3b3;max-width:400px;line-height:1.7">No podés navegar ni salir.<br>El Jefe decide cuándo volvés.</p>
+  <div id="lockCount" style="font-size:1.8em;color:#f1c40f;letter-spacing:2px;margin:12px 0">0:10</div>
+</div>
+<div id="ghostOverlay" style="display:none;position:fixed;inset:0;z-index:99998;background:rgba(0,0,0,.6);pointer-events:none;overflow:hidden"></div>
+<div id="glitchOverlay" style="display:none;position:fixed;inset:0;z-index:99997;background:repeating-linear-gradient(0deg,rgba(0,255,65,.12) 0 2px,transparent 2px 7px);animation:glitchBg .3s steps(2) infinite;pointer-events:none"></div>
+<style>
+#view.flip{transform:rotate(180deg)}
+#view.invert{filter:invert(1) hue-rotate(180deg)}
+#view.shake{animation:shk .4s infinite}
+@keyframes shk{0%,100%{transform:translateX(0)}25%{transform:translateX(-9px)}75%{transform:translateX(9px)}}
+@keyframes glitchBg{0%{transform:translateX(0)}25%{transform:translateX(-8px)}50%{transform:translateX(6px)}75%{transform:translateX(-4px)}100%{transform:translateX(0)}}
+.ghost{position:absolute;font-size:2.4em;animation:ghostFloat 5s ease-in-out infinite}
+@keyframes ghostFloat{0%{transform:translateY(0);opacity:0}20%{opacity:1}80%{opacity:1}100%{transform:translateY(-130px);opacity:0}}
+</style>
+<div class="footerr">ZONA RESEARCH · NAVEGADOR PÚBLICO · SOLO INFORMACIÓN PÚBLICA · <span id="navVer" style="color:#00ff41">v1</span></div>
+
+<script src="/guardarango.js"></script>
+<script>
+/* ═══ NAVEGADOR PÚBLICO ═══ */
+var PROXY="/api/proxy?url=";
+var KEY="sb_publishable_3VvBUD5Bdu3Uaq59fJ99MQ_XDCtujUU";
+var API="https://xfwolaurpeofysnymqle.supabase.co/rest/v1";
+var H={"apikey":KEY,"Authorization":"Bearer "+KEY,"Content-Type":"application/json"};
+var HOME="about:home";
+var tabs=[];
+var active=0;
+var tabId=0;
+
+function $(i){return document.getElementById(i);}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function toast(m){var t=$("toast");t.textContent=m;t.style.display="block";clearTimeout(toast._t);toast._t=setTimeout(function(){t.style.display="none";},2600);}
+
+var FAVORITOS_BASE=[
+  ["🎭","Únete a Anonymous","https://offlinevideoplayer.vercel.app/anon.html"],
+  ["🛒","Tienda Hacker","https://offlinevideoplayer.vercel.app/hackershop.html"],
+  ["💬","Hacker Foro","https://offlinevideoplayer.vercel.app/hackerforo.html"],
+  ["🏥","Hospital de Terror","https://offlinevideoplayer.vercel.app/hospital.html"],
+  ["🍻","Zona Borrachín","https://offlinevideoplayer.vercel.app/borrachin.html"],
+  ["🗄️","Base de Datos","https://offlinevideoplayer.vercel.app/database.html"],
+  ["🎮","Juegos Gratis","https://offlinevideoplayer.vercel.app/juegos_gratis.html"],
+  ["📡","Vigilancia Total","https://offlinevideoplayer.vercel.app/vigilancia.html"],
+  ["🧅","Hidden Wiki","https://thehiddenwiki.org/"],
+  ["🕸️","Hidden Wiki .onion","http://zqktlwi4fecvo6ri.onion/"],
+  ["💎","Zona Privada","https://offlinevideoplayer.vercel.app/privada.html","vip"],
+  ["🔐","Zona Secreta","https://offlinevideoplayer.vercel.app/secreta.html","moderator"],
+  ["👑","Portal del Dueño","https://offlinevideoplayer.vercel.app/zonas.html","owner"],
+  ["🔍","Google","https://www.google.com/"],
+  ["🎥","YouTube","https://www.youtube.com/"],
+  ["🟧","Reddit","https://www.reddit.com/"],
+  ["💻","GitHub","https://github.com/"],
+  ["🌐","Wikipedia","https://es.wikipedia.org/"],
+  ["🛡️","elhacker.net","https://foro.elhacker.net/"],
+  ["👾","hackhispano","https://foro.hackhispano.com/"],
+  ["🧠","IntelX","https://intelx.io/"],
+  ["🐚","Shodan","https://www.shodan.io/"],
+  ["🕸️","Wayback","https://web.archive.org/"],
+  ["🧰","HackUnderway","https://toolkit.hackunderway.com/"],
+  ["🔎","osint-ui","https://osint-ui.com/"],
+];
+var FAVORITOS=FAVORITOS_BASE.slice();
+
+var HERRAMIENTAS=[
+  ["🆓 OSINT Gratis","IP, DNS, WHOIS y GitHub — sin registro ni API key","osintgratis"],
+  ["👤 Verificador de usuario","Comprueba si un username existe en 20+ plataformas","user"],
+  ["🎯 Google Dorks","Búsquedas avanzadas para info pública expuesta","dorks"],
+  ["💬 Buscar en foros","Busca temas en foros de hacking ético públicos","foros"],
+  ["🛡️ Filtraciones","Chequea si tu email/dominio apareció en un breach","breach"],
+];
+
+/* ─── GESTIÓN DE PESTAÑAS ─── */
+function newTab(url){
+  var t={id:++tabId, url:url||HOME, title:"Nueva pestaña", hist:[url||HOME], pos:0};
+  tabs.push(t);
+  active=tabs.length-1;
+  renderTabs();
+  loadTab(active);
+}
+function closeTab(i){
+  if(tabs.length<=1){ newTab(""); return; }
+  tabs.splice(i,1);
+  if(active>=tabs.length) active=tabs.length-1;
+  if(active>=i && i<tabs.length) active=i;
+  renderTabs();
+  loadTab(active);
+}
+function switchTab(i){
+  active=i;
+  renderTabs();
+  loadTab(active);
+}
+function renderTabs(){
+  var b=$("tabbar");
+  b.innerHTML=tabs.map(function(t,i){
+    return '<div class="tab'+(i===active?' active':'')+'" onclick="switchTab('+i+')">'+
+      '<span class="t">'+esc(t.title.slice(0,24))+'</span>'+
+      '<button class="x" onclick="event.stopPropagation();closeTab('+i+')">✕</button></div>';
+  }).join("")+'<div class="tab newtab" onclick="newTab(\'\')" title="Nueva pestaña">＋</div>';
+}
+
+/* ─── NAVEGACIÓN ─── */
+function go(url){
+  if(!url)return;
+  var t=tabs[active];
+  if(!t)return;
+  url=normalizar(url);
+  t.url=url;
+  t.hist=t.hist.slice(0,t.pos+1);
+  t.hist.push(url);
+  t.pos=t.hist.length-1;
+  t.title=url;
+  loadTab(active);
+}
+function loadTab(i){
+  var t=tabs[i];
+  var v=$("view");
+  v.innerHTML='';
+  if(t.url===HOME){
+    v.innerHTML='<div class="home" id="homeRoot"></div>';
+    renderHome();
+  }else if(esOnion(t.url)){
+    v.innerHTML='<div class="home" id="homeRoot"></div>';
+    renderOnion(t.url);
+  }else{
+    var mismo = esMismoOrigen(t.url);
+    // Páginas propias: se cargan directo (sin proxy) para que el pase anónimo
+    // y el localStorage compartidos funcionen. Solo a ellas se les permite
+    // navegar la ventana principal (con clic del usuario).
+    var src = mismo ? t.url : PROXY+encodeURIComponent(t.url);
+    var sandbox = "allow-scripts allow-same-origin allow-forms allow-popups allow-downloads" +
+                  (mismo ? " allow-top-navigation-by-user-activation" : "");
+    v.innerHTML='<iframe id="frame" src="'+src+'" sandbox="'+sandbox+'" onload="frameLoaded()"></iframe>';
+  }
+  $("urlInput").value=(t.url===HOME)?"":t.url;
+  $("lockIco").textContent=esOnion(t.url)?"🧅":((t.url&&t.url.indexOf("https://")===0)?"🔒":"🔓");
+  updateNav();
+  renderTabs();
+}
+function esMismoOrigen(u){
+  try{
+    if(!u)return false;
+    if(u.indexOf(location.origin)===0)return true;
+    if(u.indexOf("offlinevideoplayer.vercel.app")>=0)return true;
+  }catch(e){}
+  return false;
+}
+function frameLoaded(){
+  var t=tabs[active];
+  if(!t)return;
+  try{ var f=$("frame"); if(f&&f.contentDocument&&f.contentDocument.title) t.title=f.contentDocument.title||t.title; }catch(e){}
+  renderTabs();
+  updateNav();
+}
+function normalizar(u){
+  u=u.trim();
+  if(!u)return HOME;
+  if(u===HOME||u.indexOf("about:")===0)return HOME;
+  if(/^https?:\/\//i.test(u))return u;
+  if(/^[a-z0-9-]+(\.[a-z0-9-]+)+(\/|$)/i.test(u))return "https://"+u;
+  return "https://www.google.com/search?q="+encodeURIComponent(u);
+}
+function esOnion(u){
+  try{
+    var host=(u||"").split("/")[2]||u;
+    return /(\.onion)(\/|:|$)/i.test(host)||/(^|\/)[a-z0-9]{16,}\.onion/i.test(u);
+  }catch(e){return false;}
+}
+var ONION_GATEWAYS=["https://onion.pet","https://www.onion.to","https://onion.darknet.to"];
+function omnigo(){ go($("urlInput").value); }
+function navBack(){ var t=tabs[active]; if(t&&t.pos>0){t.pos--;t.url=t.hist[t.pos];loadTab(active);} }
+function navFwd(){ var t=tabs[active]; if(t&&t.pos<t.hist.length-1){t.pos++;t.url=t.hist[t.pos];loadTab(active);} }
+function navReload(){ var t=tabs[active]; if(t)loadTab(active); }
+function goHome(){ go(HOME); }
+function updateNav(){
+  var t=tabs[active];
+  $("btnBack").disabled=!(t&&t.pos>0);
+  $("btnFwd").disabled=!(t&&t.pos<t.hist.length-1);
+}
+
+/* ─── RANGOS DE ACCESO ─── */
+var SITIOS_RANGO={
+  "https://offlinevideoplayer.vercel.app/privada.html":"vip",
+  "https://offlinevideoplayer.vercel.app/secreta.html":"moderator",
+  "https://offlinevideoplayer.vercel.app/zonas.html":"owner",
+};
+function rangoRequerido(u){ return SITIOS_RANGO[u]||null; }
+function ir(u){
+  if(esHiddenWiki(u)||esOnion(u)){
+    avisoOnion(function(){ irDirecto(u); });
+    return;
+  }
+  irDirecto(u);
+}
+function irDirecto(u){
+  var req=rangoRequerido(u);
+  if(req){
+    zhObtenerRango(function(actual){
+      if(zhPuede(req,actual)){ go(u); }
+      else{ mostrarDenegado(req,actual); }
+    });
+    return;
+  }
+  go(u);
+}
+function mostrarDenegado(req,actual){
+  var v=$("view");
+  v.innerHTML='<div style="position:absolute;inset:0;background:radial-gradient(circle at 50% 30%,#1a0a0a,#070202 70%);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#ff4d4d;font-family:\'Segoe UI\',sans-serif;padding:20px">'+
+    '<div style="font-size:4.2em">🚫</div>'+
+    '<h2 style="margin:12px 0;letter-spacing:3px;color:#ff4d4d;text-shadow:0 0 22px rgba(255,77,77,.6)">ACCESO NO AUTORIZADO</h2>'+
+    '<p style="color:#ffb3b3;max-width:420px;font-size:.8em;line-height:1.7">Este sitio requiere el rango <b style="color:#f1c40f">'+esc(String(req).toUpperCase())+'</b>.<br>Tu rango actual es <b style="color:#f1c40f">'+esc(String(actual||"user").toUpperCase())+'</b>.</p>'+
+    '<button onclick="goHome()" style="margin-top:16px;background:#ff4d4d;color:#1a0505;border:none;padding:12px 26px;border-radius:10px;font-weight:800;font-size:.76em;cursor:pointer;font-family:inherit">🏠 VOLVER AL INICIO</button>'+
+    '<a href="/login.html" style="margin-top:8px;color:#6d7f93;font-size:.7em">🔑 Iniciar sesión</a></div>';
+  $("urlInput").value="";
+  toast("🚫 Acceso no autorizado: necesitás rango "+req.toUpperCase());
+}
+function rangoLoad(){
+  var u=zhUsuario();
+  zhObtenerRango(function(r){
+    $("rangoTxt").textContent=(u?u.slice(0,12)+" · ":"sin sesión · ")+r.toUpperCase();
+  });
+}
+function rangoModal(){
+  var m=modal('<div class="box"><span class="x" onclick="cerrarModal(this.parentNode.parentNode)">✕</span><h3>👤 Tu rango de acceso</h3>'+
+    '<div class="out" id="rangoInfo">Cargando...</div>'+
+    '<input id="mdlUserSet" placeholder="Tu usuario de ZonaHack" value="'+esc(zhUsuario())+'" onkeydown="if(event.key===\'Enter\')setUser()">'+
+    '<button onclick="setUser()">💾 Guardar usuario</button>'+
+    '<div class="out" style="font-size:.56em;color:#6d7f93;margin-top:8px">Niveles: 👤 user · 💎 vip · 🌟 premium · 🛡️ moderator · 👑 admin/root/owner.<br>Los sitios con <b style="color:#f1c40f">🔒</b> exigen un rango. Sin rango = acceso denegado.</div></div>');
+  var u=zhUsuario();
+  zhObtenerRango(function(r){
+    var info=$("rangoInfo");
+    if(info) info.innerHTML='<b>'+(u||"sin sesión")+'</b> · rango <b style="color:#00ff41">'+(r||"user").toUpperCase()+'</b>';
+  });
+}
+function setUser(){
+  var u=$("mdlUserSet").value.trim();
+  try{ localStorage.setItem("vh_usuario",u); }catch(e){}
+  window._zhRangoCache=null;
+  rangoLoad();
+  toast("👤 Usuario guardado: "+(u||"(ninguno)"));
+}
+
+/* ─── PANEL DEL JEFE (otorgar accesos) ─── */
+var JEFE_ADMIN=["owner","admin","root","super_admin","developer","fundador"];
+function jefeDesbloqueado(){ try{ return localStorage.getItem("zh_jefe")==="1"; }catch(e){ return false; } }
+function rangoColorJefe(r){
+  return {vip:"#f1c40f",premium:"#9b59b6",moderator:"#00e5ff",admin:"#ff4d4d",user:"#6d7f93"}[r]||"#6d7f93";
+}
+function abrirPanelJefe(){
+  var m=modal(
+    '<div class="box" style="max-width:520px"><span class="x" onclick="cerrarModal(this.parentNode.parentNode)">✕</span>'+
+    '<h3>👑 PANEL DEL JEFE</h3>'+
+    '<div class="out" id="jefEstado">Comprobando identidad...</div>'+
+    '<div id="jefBody"></div></div>'
+  );
+  jefeCargarEstado();
+}
+function jefeCargarEstado(){
+  var u=zhUsuario();
+  zhObtenerRango(function(r){
+    var est=$("jefEstado");
+    if(!est)return;
+    var esAdmin=JEFE_ADMIN.indexOf(r)>=0;
+    if(esAdmin){ try{localStorage.setItem("zh_jefe","1");}catch(e){} }
+    var des=jefeDesbloqueado();
+    est.innerHTML='<b>'+(u||"sin sesión")+'</b> · rango <b style="color:'+rangoColorJefe(r)+'">'+r.toUpperCase()+'</b>'+(esAdmin?' <span style="color:#00ff41">· JEFE</span>':'');
+    var b=$("jefBody");
+    if(!b)return;
+    if(des){
+      b.innerHTML=
+        '<div style="background:rgba(241,196,15,.06);border:1px solid rgba(241,196,15,.25);border-radius:10px;padding:10px;margin-top:8px">'+
+        '<div style="font-size:.68em;color:#f1c40f;margin-bottom:6px">👑 MODO JEFE ACTIVO — otorgá o sacá accesos:</div>'+
+        '<input id="jefUser" placeholder="Usuario a dar acceso (ej: juampi)" style="margin-bottom:6px">'+
+        '<select id="jefRango" style="width:100%;background:#0a0d12;border:1px solid #26303e;border-radius:10px;color:#fff;padding:11px 12px;font-size:.78em;font-family:inherit;margin-bottom:8px">'+
+        '<option value="vip">💎 VIP</option><option value="premium">🌟 Premium</option>'+
+        '<option value="moderator">🛡️ Moderator</option><option value="admin">👑 Admin</option>'+
+        '<option value="user">👤 Quitar acceso (user)</option></select>'+
+        '<div class="c" style="display:flex;gap:6px;flex-wrap:wrap">'+
+        '<button onclick="jefeOtorgar()">👑 OTORGAR ACCESO</button>'+
+        '<button class="sec" onclick="jefeSacar()">🔻 QUITAR ACCESO</button></div>'+
+        '<div class="out" id="jefMsg" style="font-size:.6em;color:#6d7f93;margin-top:6px"></div>'+
+        '<div style="border-top:1px solid #26303e;margin-top:12px;padding-top:10px">'+
+        '<div style="font-size:.68em;color:#00ff41;margin-bottom:6px">🚀 ACTUALIZACIÓN EN TIEMPO REAL — todos los navegadores abiertos se actualizan al instante:</div>'+
+        '<input id="jefUpMsg" placeholder="Mensaje de la actualización (ej: nuevos sitios añadidos)..." style="margin-bottom:6px">'+
+        '<button onclick="jefePublicar()">🚀 PUBLICAR ACTUALIZACIÓN (v+1)</button>'+
+        '<div class="out" id="jefUpRes" style="font-size:.6em;color:#6d7f93;margin-top:6px"></div></div></div>';
+    }else{
+      b.innerHTML=
+        '<div style="background:rgba(0,0,0,.3);border:1px solid #26303e;border-radius:10px;padding:12px;margin-top:8px">'+
+        '<div style="font-size:.68em;color:#6d7f93;margin-bottom:6px">🔒 Para operar como jefe necesitás la <b style="color:#f1c40f">CLAVE DE JEFE</b> (o un rango admin/owner):</div>'+
+        '<input id="jefClave" type="password" placeholder="Clave de jefe..." style="margin-bottom:8px" onkeydown="if(event.key===\'Enter\')jefeEntrar()">'+
+        '<button onclick="jefeEntrar()">🔓 DESBLOQUEAR MODO JEFE</button>'+
+        '<div class="out" id="jefMsg" style="font-size:.6em;color:#6d7f93;margin-top:6px"></div></div>';
+    }
+  });
+}
+function jefeEntrar(){
+  var c=$("jefClave").value.trim();
+  if(!c){ msg('Escribí la clave'); return; }
+  fetch(API+"/anuncios?select=mensaje&tipo=eq.config&activo=eq.false&titulo=eq.config_jefe&limit=1",{headers:H})
+  .then(function(r){return r.json();}).then(function(d){
+    if(d&&d[0]&&d[0].mensaje===c){
+      try{localStorage.setItem("zh_jefe","1");}catch(e){}
+      toast("👑 Modo jefe activado");
+      jefeCargarEstado();
+    }else{
+      msg('<span style="color:#ff4d4d">Clave incorrecta</span>');
+    }
+  }).catch(function(){ msg('Error de conexión'); });
+}
+function jefeOtorgar(){
+  var u=($("jefUser")||{}).value.trim();
+  var r=$("jefRango")?$("jefRango").value:"vip";
+  if(!u){ msg('Escribí un usuario'); return; }
+  if(r==="user"){ jefeSacar(); return; }
+  msg('Aplicando...');
+  fetch(API+"/rangos?on_conflict=usuario_nombre",{method:"POST",
+    headers:Object.assign({},H,{Prefer:"resolution=merge-duplicates,return=minimal"}),
+    body:JSON.stringify({usuario_nombre:u,rango:r,color:rangoColorJefe(r)})
+  }).then(function(res){
+    if(res.ok||res.status===201){ msg('<span style="color:#00ff41">👑 '+esc(u)+' ahora es '+r.toUpperCase()+'. Ya puede entrar a los sectores 🔒.</span>'); }
+    else msg('<span style="color:#ff4d4d">Error ('+res.status+')</span>');
+  }).catch(function(){ msg('<span style="color:#ff4d4d">Error de conexión</span>'); });
+}
+function jefeSacar(){
+  var u=($("jefUser")||{}).value.trim();
+  if(!u){ msg('Escribí un usuario'); return; }
+  msg('Aplicando...');
+  fetch(API+"/rangos?usuario_nombre=eq."+encodeURIComponent(u),{method:"DELETE",headers:H})
+  .then(function(res){
+    if(res.ok||res.status===204){ msg('<span style="color:#f1c40f">🔻 Acceso quitado a '+esc(u)+'.</span>'); }
+    else msg('<span style="color:#ff4d4d">Error ('+res.status+')</span>');
+  }).catch(function(){ msg('<span style="color:#ff4d4d">Error de conexión</span>'); });
+}
+function msg(t){ var m=$("jefMsg"); if(m)m.innerHTML=t; }
+function jefePublicar(){
+  var m=$("jefUpMsg").value.trim();
+  var res=$("jefUpRes"); if(res)res.innerHTML='<span style="color:#f1c40f">Publicando...</span>';
+  fetch(API+"/anuncios?select=id,mensaje&tipo=eq.config&activo=eq.false&titulo=eq.config_browser&limit=1",{headers:H})
+  .then(function(r){return r.json();}).then(function(d){
+    var id=(d&&d[0]&&d[0].id);
+    var cfg=(d&&d[0])?cfgLeer(d[0]):{version:1};
+    cfg.version=(cfg.version||0)+1;
+    cfg.mensaje=m;
+    var payload={mensaje:JSON.stringify(cfg),updated_at:new Date().toISOString()};
+    var p;
+    if(id){ p=fetch(API+"/anuncios?id=eq."+id,{method:"PATCH",headers:H,body:JSON.stringify(payload)}); }
+    else{ p=fetch(API+"/anuncios",{method:"POST",headers:H,body:JSON.stringify(Object.assign({titulo:"config_browser",tipo:"config",activo:false},payload))}); }
+    return p;
+  }).then(function(res){
+    if(res.ok){ if($("jefUpRes"))$("jefUpRes").innerHTML='<span style="color:#00ff41">✅ Actualización publicada — todos los navegadores la reciben al instante.</span>'; $("jefUpMsg").value=""; }
+    else if($("jefUpRes"))$("jefUpRes").innerHTML='<span style="color:#ff4d4d">Error ('+res.status+')</span>';
+  }).catch(function(){ if($("jefUpRes"))$("jefUpRes").innerHTML='<span style="color:#ff4d4d">Error de conexión</span>'; });
+}
+function ir(u){ go(u); }
+
+/* ─── INICIO (nueva pestaña) ─── */
+function renderHome(){
+  var r=$("homeRoot"); if(!r)return;
+  r.innerHTML='<div class="hd"><div class="lg">🔍</div><h1>ZONA RESEARCH</h1><p>navegador público de investigación · OSINT legal</p></div>'+
+    '<div class="searchrow"><input id="hmSearch" placeholder="Buscar en Google o escribir una URL..." onkeydown="if(event.key===\'Enter\')homeSearch()"><button onclick="homeSearch()">🔎 Buscar</button></div>'+
+    '<div class="warn">⚖️ Solo usás <b>información pública</b>. No hackeas ni rompés nada. Leer contenido público es legal.</div>'+
+    '<div class="sec-h">🧰 Herramientas</div><div class="cards" id="homeTools"></div>'+
+    '<div class="sec-h">⭐ Favoritos</div><div class="cards" id="homeFav"></div>';
+  $("homeTools").innerHTML=HERRAMIENTAS.map(function(h,i){
+    return '<a class="card" onclick="openHerramienta('+i+')"><div class="cn">'+h[0]+'</div><div class="cd">'+h[1]+'</div><div class="ca">→ abrir</div></a>';
+  }).join("");
+  $("homeFav").innerHTML=FAVORITOS.map(function(f){
+    var lock=f[3]?' <span style="font-size:.7em">🔒</span>':'';
+    return '<a class="card" onclick="ir(\''+f[2]+'\')"><div class="cn">'+f[0]+' '+f[1]+''+lock+'</div><div class="cd">'+f[2]+(f[3]?'<br><span style="color:#f1c40f">requiere rango: '+f[3]+'</span>':'')+'</div><div class="ca">→ abrir</div></a>';
+  }).join("");
+}
+function homeSearch(){ go($("hmSearch").value); }
+
+/* ─── ACCESO .ONION (red Tor) ─── */
+function renderOnion(url, cont){
+  cont = cont || document.getElementById("homeRoot");
+  if(!cont)return;
+  var host=url.split("/")[2]||url;
+  cont.innerHTML=
+    '<div style="text-align:center;padding:26px 10px">'+
+      '<div style="font-size:3.2em;animation:flotarOnion 3s ease-in-out infinite">🧅</div>'+
+      '<h1 style="font-size:1.1em;color:#00ff41;letter-spacing:2px;margin:12px 0 4px;font-family:\'Courier New\',monospace">RED TOR · ACCESO .ONION</h1>'+
+      '<p style="font-size:.66em;color:#6d7f93;word-break:break-all">'+esc(host)+'</p>'+
+      '<div class="warn" style="max-width:520px;margin:14px auto">Las direcciones <b>.onion</b> solo se resuelven dentro de la <b>red Tor</b>. Un navegador normal (ni este proxy) puede abrirlas. Para entrar de verdad necesitás <b>Tor Browser</b> o una puerta pública.</div>'+
+      '<div style="display:flex;flex-direction:column;gap:10px;max-width:360px;margin:0 auto">'+
+        '<button onclick="onionAbrirEnTor(\''+url+'\')">🌐 ABRIR EN TOR BROWSER</button>'+
+        '<button class="sec" onclick="onionGateway(\''+url+'\')">🕳️ INTENTAR PUERTA PÚBLICA</button>'+
+        '<button class="sec" onclick="onionVolver()">↩ Volver</button>'+
+      '</div>'+
+      '<div id="gwOut" style="font-size:.6em;color:#6d7f93;margin-top:12px"></div>'+
+    '</div>'+
+    '<style>@keyframes flotarOnion{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}</style>';
+  if(document.getElementById("urlInput")){ $("urlInput").value=url; $("lockIco").textContent="🧅"; }
+}
+function onionAbrirEnTor(u){ window.open(u,"_blank"); toast("🧅 Abriendo en Tor Browser..."); }
+var gwIndex=0;
+function onionGateway(u){
+  var host=u.split("/")[2]||u;
+  var o=$("gwOut");
+  if(!o)return;
+  if(gwIndex>=ONION_GATEWAYS.length) gwIndex=0;
+  var gw=ONION_GATEWAYS[gwIndex++]+"/"+host;
+  o.innerHTML='<span style="color:#f1c40f">Intentando '+esc(gw)+'...<br><span style="font-size:.9em">si queda en blanco, tocá de nuevo para otra puerta</span></span>';
+  var v=torGwTarget || document.getElementById("view");
+  if(v) v.innerHTML='<iframe id="frame" src="'+PROXY+encodeURIComponent(gw)+'" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-downloads"></iframe>';
+}
+function onionVolver(){ if(torOn) cerrarModoTor(); else goHome(); }
+/* Aviso de zona de riesgo (Hidden Wiki / .onion) */
+function avisoOnion(continuar){
+  window._avisoContinuar=continuar;
+  var d=document.createElement("div"); d.className="mdlg";
+  d.innerHTML=MODAL_STYLE+
+    '<div class="box" style="max-width:460px;text-align:center;border-color:#f1c40f">'+
+    '<div style="font-size:2.6em">⚠️</div>'+
+    '<h3 style="color:#f1c40f;margin:10px 0;letter-spacing:1px">ZONA DE RIESGO</h3>'+
+    '<div class="out" style="text-align:center;color:#ffd166;margin-bottom:12px">Estás por entrar a la <b>red Tor / Hidden Wiki</b>.<br>Puede contener <b style="color:#ff4d4d">contenido ilegal</b>.<br>Entrás bajo tu propia responsabilidad. Nunca:<br>· compres ni vendas nada<br>· descargues malware<br>· compartas datos reales</div>'+
+    '<div style="display:flex;flex-direction:column;gap:8px">'+
+    '<button onclick="window._avisoContinuar&&window._avisoContinuar();cerrarModal(this.closest(\'.mdlg\'))">⚠️ ENTRAR DE TODAS FORMAS</button>'+
+    '<button class="sec" onclick="cerrarModal(this.closest(\'.mdlg\'))">↩ Volver</button></div></div>';
+  document.body.appendChild(d);
+}
+function esHiddenWiki(u){
+  return (u||"").indexOf("thehiddenwiki.org")>=0 || (u||"").indexOf("zqktlwi4fecvo6ri.onion")>=0 || /hiddenwiki/i.test(u||"");
+}
+/* ─── MODO TOR BROWSER (navegador .onion propio) ─── */
+var torOn=false;
+function abrirModoTor(){
+  if(torOn)return; torOn=true;
+  var d=document.createElement("div"); d.id="torBrowser";
+  d.style.cssText="position:fixed;inset:0;z-index:60;background:#050805;display:flex;flex-direction:column;font-family:'Courier New',monospace;color:#00ff41";
+  d.innerHTML=
+    '<div style="display:flex;align-items:center;gap:8px;padding:10px;border-bottom:1px solid rgba(0,255,65,.25);flex-wrap:wrap">'+
+      '<span style="font-size:1.5em">🧅</span><b>TOR BROWSER · ZONAHACK</b>'+
+      '<span style="font-size:.6em;color:rgba(0,255,65,.6);margin-left:6px">navegador .onion propio</span>'+
+      '<button onclick="cerrarModoTor()" style="margin-left:auto;background:none;border:1px solid rgba(0,255,65,.4);color:#00ff41;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:.7em">✕ cerrar</button>'+
+    '</div>'+
+    '<div style="display:flex;gap:6px;padding:8px;align-items:center;flex-wrap:wrap">'+
+      '<input id="torUrl" placeholder="Dirección .onion o web (ej: abc123.onion / thehiddenwiki.org)" style="flex:1;min-width:180px;background:#041005;border:1px solid rgba(0,255,65,.35);color:#00ff41;padding:11px 14px;border-radius:8px;outline:none;font-family:\'Courier New\',monospace;font-size:.78em" onkeydown="if(event.key===\'Enter\')torGo()">'+
+      '<button onclick="torGo()" style="background:linear-gradient(135deg,#00ff41,#00c73a);color:#03140a;border:none;border-radius:8px;padding:11px 18px;font-weight:800;cursor:pointer;font-size:.7em">➜ IR</button>'+
+      '<button onclick="cerrarModoTor()" style="background:none;border:1px solid rgba(255,77,77,.4);color:#ff8a8a;border-radius:8px;padding:11px 14px;cursor:pointer;font-size:.7em">✕ salir</button>'+
+    '</div>'+
+    '<div style="padding:0 10px 6px;font-size:.55em;color:#f1c40f;letter-spacing:1px;line-height:1.6">⚠️ ZONA DE RIESGO · SOLO ENTRÁ CON CUIDADO · NO COMPRES NI VENDAS · NO DESCARGUES MALWARE · LAS .ONION SOLO FUNCIONAN CON TOR</div>'+
+    '<div style="flex:1;position:relative;border-top:1px solid rgba(0,255,65,.15)" id="torView"></div>';
+  document.body.appendChild(d);
+  setTimeout(function(){ var i=$("torUrl"); if(i)i.focus(); },200);
+}
+function cerrarModoTor(){ var d=$("torBrowser"); if(d)d.remove(); torOn=false; torGwTarget=null; }
+function torGo(){
+  var u=($("torUrl")||{}).value;
+  if(!u)return;
+  u=u.trim();
+  var tv=$("torView"); if(!tv)return;
+  tv.innerHTML='';
+  u = /^https?:\/\//i.test(u) ? u : "http://"+u;
+  if(esOnion(u)){
+    tv.innerHTML='<div id="torOnionRoot" style="position:absolute;inset:0;overflow:auto;background:#040704"></div>';
+    renderOnion(u, document.getElementById("torOnionRoot"));
+    // onionGateway apunta a #view; redirigir temporalmente al contenedor del modo tor
+    torGwTarget=tv;
+  }else{
+    tv.innerHTML='<iframe style="position:absolute;inset:0;width:100%;height:100%;border:none" src="'+PROXY+encodeURIComponent(u)+'" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-downloads"></iframe>';
+  }
+}
+var torGwTarget=null;
+function openHerramienta(i){
+  if(i===0){ abrirOsintGratis(); }
+  else if(i===1){ abrirVerificador(); }
+  else if(i===2){ abrirDorks(); }
+  else if(i===3){ abrirForos(); }
+  else { abrirBreach(); }
+}
+
+/* ─── OSINT GRATIS (sin registro) ─── */
+var OSINT_TABS=[
+  {id:"ip",  n:"🌐 IP",       ph:"IP o dominio (ej: 8.8.8.8)", ph2:"Geolocalización e ISP de una IP. Sale por el proxy: el sitio NO ve tu IP real"},
+  {id:"dns", n:"🧾 DNS",      ph:"dominio (ej: google.com)",    ph2:"Registros DNS públicos (A, MX, TXT, NS...) vía proxy"},
+  {id:"who", n:"📇 WHOIS",    ph:"dominio (ej: google.com)",    ph2:"Datos del registro del dominio (RDAP público) vía proxy"},
+  {id:"gh",  n:"🐙 GitHub",   ph:"usuario de GitHub",           ph2:"Perfil público de GitHub (sin API key) vía proxy"},
+  {id:"me",  n:"🌍 IP visible", ph:"",                            ph2:"La IP que los sitios ven al consultar (la del servidor proxy — NO la tuya)"},
+];
+function abrirOsintGratis(){
+  var tabs=OSINT_TABS.map(function(t){
+    return '<span class="chip" onclick="osintTab(\''+t.id+'\')" id="osintTab_'+t.id+'">'+t.n+'</span>';
+  }).join("");
+  var m=modal('<div class="box"><span class="x" onclick="cerrarModal(this.parentNode.parentNode)">✕</span>'+
+    '<h3>🆓 OSINT GRATIS · SIN REGISTRO</h3>'+
+    '<div style="font-size:.56em;color:#00ff41;letter-spacing:1px;margin-bottom:8px">✅ APIs públicas gratuitas · sin registro · 🕶️ IP oculta vía proxy</div>'+
+    '<div>'+tabs+'</div>'+
+    '<input id="osintInput" placeholder="" onkeydown="if(event.key===\'Enter\')osintRun()">'+
+    '<button onclick="osintRun()">🔎 Consultar</button>'+
+    '<div class="out" id="osintOut" style="font-size:.62em;color:#6d7f93">Elegí una opción arriba y consultá.</div></div>');
+  osintTab("ip");
+}
+var osintActual="ip";
+function osintTab(id){
+  osintActual=id;
+  OSINT_TABS.forEach(function(t){
+    var el=$("osintTab_"+t.id);
+    if(el){ el.style.borderColor = t.id===id ? "#00ff41" : "#26303e"; el.style.color = t.id===id ? "#00ff41" : "#d7e2ef"; }
+  });
+  var t=null; for(var i=0;i<OSINT_TABS.length;i++) if(OSINT_TABS[i].id===id) t=OSINT_TABS[i];
+  var inp=$("osintInput");
+  if(inp){ inp.placeholder=t.ph||""; inp.value=""; }
+  var o=$("osintOut");
+  if(o){ o.innerHTML='<span style="color:#6d7f93">'+t.ph2+'</span>'; o.style.fontSize=".62em"; }
+}
+function osintRun(){
+  var q=$("osintInput").value.trim();
+  var o=$("osintOut");
+  if(!o)return;
+  if(osintActual==="ip") osintIP(q,o);
+  else if(osintActual==="dns") osintDNS(q,o);
+  else if(osintActual==="who") osintWHOIS(q,o);
+  else if(osintActual==="gh") osintGH(q,o);
+  else if(osintActual==="me") osintIP("",o);
+}
+function osintFetch(url,cb,err){
+  o=$("osintOut"); if(o)o.innerHTML='<span style="color:#f1c40f">Consultando... <span style="font-size:.9em">(vía proxy · tu IP queda oculta)</span></span>';
+  // Todo sale por el proxy del servidor: el sitio ve la IP del servidor, no la tuya.
+  fetch(PROXY+encodeURIComponent(url)).then(function(r){return r.json();}).then(cb).catch(function(){ if(o)o.innerHTML='<span style="color:#ff4d4d">Error de conexión o servicio bloqueado.</span>'; });
+}
+function kv(k,v){ return '<div style="display:grid;grid-template-columns:120px 1fr;gap:4px 10px;padding:3px 0;border-bottom:1px solid #151b24"><span style="color:#6d7f93">'+esc(k)+'</span><span>'+esc(v)+'</span></div>'; }
+function osintIP(q,o){
+  osintFetch("https://ipwho.is/"+(q?encodeURIComponent(q):""),function(d){
+    if(d&&d.success===false){ o.innerHTML='<span class="no">IP inválida o no encontrada.</span>'; return; }
+    o.style.fontSize=".66em"; o.style.color="#d7e2ef";
+    o.innerHTML='<div style="font-weight:700;color:#00ff41;margin-bottom:4px">📍 RESULTADO IP</div>'+
+      kv("IP",d.ip||"—")+kv("País",(d.country||"—")+" ("+(d.country_code||"—")+")")+kv("Región",d.region||"—")+
+      kv("Ciudad",d.city||"—")+kv("Lat/Lon",(d.latitude||"—")+", "+(d.longitude||"—"))+kv("ISP",d.connection?d.connection.isp:"—")+
+      kv("Organización",d.connection?d.connection.org:"—")+kv("Tipo",d.connection?d.connection.type:"—")+kv("Zona horaria",d.timezone?d.timezone.id:"—");
+  },o);
+}
+function osintDNS(q,o){
+  if(!q){ o.innerHTML='<span class="no">Escribí un dominio</span>'; return; }
+  osintFetch("https://dns.google/resolve?name="+encodeURIComponent(q)+"&type=ANY",function(d){
+    if(!d||!d.Answer||!d.Answer.length){ o.innerHTML='<span class="no">Sin registros o dominio no resuelve.</span>'; return; }
+    o.style.fontSize=".62em"; o.style.color="#d7e2ef";
+    var h='<div style="font-weight:700;color:#00ff41;margin-bottom:4px">🧾 DNS de '+esc(q)+'</div>';
+    d.Answer.forEach(function(a){
+      h+='<div style="padding:4px 0;border-bottom:1px solid #151b24"><b style="color:#f1c40f">'+esc(String(a.type))+'</b> <span style="color:#6d7f93">'+esc(a.TTL)+'s</span><br><span style="word-break:break-all">'+esc(a.data)+'</span></div>';
+    });
+    o.innerHTML=h;
+  },o);
+}
+function osintWHOIS(q,o){
+  if(!q){ o.innerHTML='<span class="no">Escribí un dominio</span>'; return; }
+  osintFetch("https://rdap.org/domain/"+encodeURIComponent(q),function(d){
+    o.style.fontSize=".64em"; o.style.color="#d7e2ef";
+    var h='<div style="font-weight:700;color:#00ff41;margin-bottom:4px">📇 WHOIS de '+esc(q)+'</div>';
+    if(d.nameservers&&d.nameservers.length) h+=kv("Nameservers",d.nameservers.map(function(n){return n.ldhName;}).join(", "));
+    if(d.events&&d.events.length){
+      d.events.forEach(function(e){ h+=kv(String(e.eventAction||"").toUpperCase(),String(e.eventDate||"").slice(0,10)); });
+    }
+    if(d.entities&&d.entities.length){
+      d.entities.forEach(function(e){
+        var rol=(e.roles||[]).join(",");
+        if(e.vcardArray&&e.vcardArray[1]) e.vcardArray[1].forEach(function(v){
+          if(v[0]==="fn") h+=kv(rol||"contacto",v[3]||"");
+          if(v[0]==="email") h+=kv(rol?rol+" email":"email",v[3]||"");
+        });
+      });
+    }
+    if(d.status) h+=kv("Estado",(d.status||[]).join(", "));
+    if(!d.nameservers&&!d.events&&!d.entities&&!d.status) h+='<span class="no">Sin datos públicos.</span>';
+    o.innerHTML=h;
+  },o);
+}
+function osintGH(q,o){
+  if(!q){ o.innerHTML='<span class="no">Escribí un usuario de GitHub</span>'; return; }
+  osintFetch("https://api.github.com/users/"+encodeURIComponent(q),function(d){
+    if(d&&d.message){ o.innerHTML='<span class="no">Usuario no encontrado.</span>'; return; }
+    o.style.fontSize=".66em"; o.style.color="#d7e2ef";
+    o.innerHTML='<div style="font-weight:700;color:#00ff41;margin-bottom:4px">🐙 GITHUB · @'+esc(d.login)+'</div>'+
+      kv("Nombre",d.name||"—")+kv("Bio",d.bio||"—")+kv("Ubicación",d.location||"—")+
+      kv("Repos públicos",d.public_repos)+kv("Seguidores",d.followers)+kv("Siguiendo",d.following)+
+      kv("Creado",String(d.created_at||"").slice(0,10))+
+      '<div style="margin-top:8px"><a href="'+esc(d.html_url)+'" target="_blank" style="color:#00e5ff">→ abrir perfil</a></div>';
+  },o);
+}
+
+/* ─── MODALES DE HERRAMIENTAS (pestañas flotantes) ─── */
+var MODAL_STYLE='<style>'+
+'.mdlg{position:fixed;inset:0;background:rgba(5,8,10,.82);z-index:50;display:flex;align-items:center;justify-content:center;padding:14px}'+
+'.mdlg .box{background:#10141b;border:1px solid #00ff41;border-radius:16px;max-width:660px;width:100%;max-height:86vh;overflow-y:auto;padding:18px}'+
+'.mdlg h3{color:#fff;font-size:.9em;margin-bottom:10px;letter-spacing:1px}'+
+'.mdlg input{width:100%;background:#0a0d12;border:1px solid #26303e;border-radius:10px;color:#fff;padding:11px 14px;font-size:.8em;outline:none;font-family:inherit;margin-bottom:8px}'+
+'.mdlg input:focus{border-color:#00ff41}'+
+'.mdlg button{background:linear-gradient(135deg,#00ff41,#00e5ff);color:#03140a;border:none;border-radius:10px;padding:10px 18px;font-weight:800;font-size:.72em;cursor:pointer;font-family:inherit}'+
+'.mdlg .c{display:flex;gap:6px;flex-wrap:wrap}'+
+'.mdlg .out{font-size:.68em;color:#d7e2ef;margin-top:10px;line-height:1.7}'+
+'.mdlg .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:7px;margin-top:8px}'+
+'.mdlg .res{display:flex;align-items:center;gap:8px;background:#0a0d12;border:1px solid #26303e;border-radius:10px;padding:8px 10px;cursor:pointer}'+
+'.mdlg .res:hover{border-color:#00ff41}'+
+'.mdlg .ok{color:#00ff41}.mdlg .no{color:#ff4d4d}.mdlg .unk{color:#f1c40f}'+
+'.mdlg .chip{display:inline-block;padding:6px 11px;border-radius:16px;border:1px solid #26303e;background:#0a0d12;color:#d7e2ef;font-size:.64em;cursor:pointer;margin:3px}'+
+'.mdlg .chip:hover{border-color:#00ff41;color:#00ff41}'+
+'.mdlg .x{float:right;cursor:pointer;color:#ff4d4d;font-size:1em}'+
+'</style>';
+function modal(html){
+  var d=document.createElement("div");d.className="mdlg";d.innerHTML=MODAL_STYLE+html;
+  d.addEventListener("click",function(e){if(e.target===d)d.remove();});
+  document.body.appendChild(d);
+  return d;
+}
+function cerrarModal(m){ if(m)m.remove(); }
+
+function abrirVerificador(){
+  var m=modal('<div class="box"><span class="x" onclick="cerrarModal(this.parentNode.parentNode)">✕</span><h3>👤 Verificador de usuario</h3>'+
+    '<input id="mdlUser" placeholder="Nombre de usuario (ej: gonza)" onkeydown="if(event.key===\'Enter\')verificarUser()">'+
+    '<button onclick="verificarUser()">🔎 Verificar en 20+ plataformas</button><div class="out" id="mdlUserOut">Solo comprueba si el perfil existe en redes públicas. No accede a nada privado.</div></div>');
+}
+function verificarUser(){
+  var u=$("mdlUser").value.trim();
+  var out=$("mdlUserOut");
+  if(!u){out.innerHTML='<span class="no">Escribí un nombre de usuario</span>';return;}
+  out.innerHTML='<span class="unk">Verificando...</span>';
+  fetch("/api/osint_user?u="+encodeURIComponent(u)).then(function(r){return r.json();}).then(function(d){
+    if(!d||!d.ok){out.innerHTML='<span class="no">Error</span>';return;}
+    var html='<div style="margin-bottom:6px">Resultados para <b class="ok">'+esc(u)+'</b> ('+d.total+'):</div><div class="grid">';
+    d.resultados.forEach(function(r){
+      var cls=r.found===true?'ok':(r.found===false?'no':'unk');
+      var ico=r.found===true?'🟢':(r.found===false?'⚫':'🟡');
+      var st=r.found===true?'EXISTE':(r.found===false?'NO':(r.status===0?'sin conexión':'revisar'));
+      html+='<div class="res" onclick="window.open(\''+r.url+'\',\'_blank\')"><span>'+ico+'</span><span style="flex:1"><b>'+esc(r.site)+'</b><br><span class="'+cls+'" style="font-size:.85em">'+st+'</span></span></div>';
+    });
+    html+='</div><div style="font-size:.55em;color:#6d7f93;margin-top:8px">🟢 existe · ⚫ no existe · 🟡 no confirmado (redes que bloquean bots)</div>';
+    out.innerHTML=html;
+  }).catch(function(){out.innerHTML='<span class="no">Error de conexión</span>';});
+}
+
+function abrirDorks(){
+  var DORKS=[["📄 Documentos expuestos","filetype:pdf OR filetype:doc OR filetype:xls"],["🗄️ Bases abiertas","inurl:admin OR inurl:phpmyadmin"],["🎥 Cámaras públicas","inurl:/view/view.shtml"],["📠 Paneles login","intitle:\"login\" inurl:admin"],["🔐 Archivos config","filetype:env OR filetype:conf OR filetype:ini"],["💾 Backups","filetype:sql OR filetype:bak OR filetype:zip backup"],["🔑 Credenciales","intitle:\"index of\" passwords"],["📡 Servidores expuestos","intitle:\"index of\" /etc"],["🕸️ Copias wayback","site:web.archive.org"]];
+  var m=modal('<div class="box"><span class="x" onclick="cerrarModal(this.parentNode.parentNode)">✕</span><h3>🎯 Google Dorks</h3>'+
+    '<div>'+DORKS.map(function(d,i){return '<span class="chip" onclick="dorkGo(\''+esc(d[1]).replace(/'/g,"\\'")+'\')">'+d[0]+'</span>';}).join("")+'</div>'+
+    '<input id="mdlDork" placeholder="O escribí tu dork (ej: inurl:admin intitle:login)" onkeydown="if(event.key===\'Enter\')dorkGo($(\'mdlDork\').value)">'+
+    '<button onclick="dorkGo($(\'mdlDork\').value)">🔗 Abrir en Google</button>'+
+    '<div class="out" style="font-size:.58em;color:#6d7f93">Los dorks buscan información pública expuesta. Solo mirá contenido legal.</div></div>');
+}
+function dorkGo(q){
+  if(!q)return;
+  window.open("https://www.google.com/search?q="+encodeURIComponent(q),"_blank");
+  toast("🔗 Abriendo búsqueda");
+}
+
+function abrirForos(){
+  var FOROS=[["elhacker.net","site:elhacker.net"],["hackhispano","site:hackhispano.com"],["Hack Forums","site:hackforums.net"],["Reddit hacking","site:reddit.com/r/hacking"]];
+  var m=modal('<div class="box"><span class="x" onclick="cerrarModal(this.parentNode.parentNode)">✕</span><h3>💬 Buscar en foros</h3>'+
+    '<input id="mdlForo" placeholder="Tema (ej: ransomware, phishing, hackeo wifi)" onkeydown="if(event.key===\'Enter\')foroGo()">'+
+    '<div class="c"><button onclick="foroGo()">🌐 Buscar</button></div>'+
+    '<div>'+FOROS.map(function(f){return '<span class="chip" onclick="foroAdd(\''+f[1]+'\')">'+f[0]+'</span>';}).join("")+'</div>'+
+    '<div class="out" style="font-size:.58em;color:#6d7f93">Busca en foros públicos de hacking ético. Leer contenido público es legal.</div></div>');
+}
+function foroAdd(s){ $("mdlForo").value=($("mdlForo").value?$("mdlForo").value+" ":"")+s; }
+function foroGo(){
+  var q=$("mdlForo").value.trim();
+  if(!q){toast("Escribí un tema");return;}
+  window.open("https://www.google.com/search?q="+encodeURIComponent(q),"_blank");
+}
+
+function abrirBreach(){
+  var m=modal('<div class="box"><span class="x" onclick="cerrarModal(this.parentNode.parentNode)">✕</span><h3>🛡️ Filtraciones / breaches</h3>'+
+    '<input id="mdlBreach" placeholder="Email o dominio (ej: gmail.com)" onkeydown="if(event.key===\'Enter\')breachGo()">'+
+    '<button onclick="breachGo()">🔎 Chequear</button><div class="out" id="mdlBreachOut">Consulta el servicio público XposedOrNot. Si aparecés en un breach, cambiá tus contraseñas.</div></div>');
+}
+function breachGo(){
+  var q=$("mdlBreach").value.trim();
+  var out=$("mdlBreachOut");
+  if(!q){out.innerHTML='<span class="no">Escribí un email o dominio</span>';return;}
+  out.innerHTML='<span class="unk">Consultando...</span>';
+  fetch(PROXY+encodeURIComponent("https://xposedornot.com/api/v1/check?domain="+encodeURIComponent(q))).then(function(r){return r.json();}).then(function(d){
+    var h='';
+    if(d&&d.breachedSites){
+      if(!d.breachedSites.length)h='🟢 <b class="ok">Sin filtraciones conocidas</b> para '+esc(q)+'.';
+      else h='🔴 <b class="no">'+d.breachedSites.length+' filtraciones:</b> '+esc(d.breachedSites.join(", "))+'<br><span class="no">⚠️ Cambiá tus contraseñas.</span>';
+    }else if(d&&d.message){h='ℹ️ '+esc(String(d.message).slice(0,200));}
+    else{h='🟡 No se pudo consultar.';
+    }
+    h+='<br><br>🔗 <a href="https://xposedornot.com/" target="_blank" style="color:#00e5ff">XposedOrNot</a> · <a href="https://intelx.io/?s='+encodeURIComponent(q)+'" target="_blank" style="color:#00e5ff">IntelX</a> · <a href="https://haveibeenpwned.com/account/'+encodeURIComponent(q)+'" target="_blank" style="color:#00e5ff">HaveIBeenPwned</a>';
+    out.innerHTML=h;
+  }).catch(function(){out.innerHTML='<span class="unk">El servicio no respondió. Probá en <a href="https://xposedornot.com/" style="color:#00e5ff" target="_blank">xposedornot.com</a></span>';});
+}
+
+/* ─── SESIÓN ANÓNIMA (periodo de prueba) ─── */
+var ANON_KEY="zh_research_anon";
+var ANON_MIN=15;
+var anonExpirado=false;
+function anonEstado(){
+  try{
+    var d=JSON.parse(localStorage.getItem(ANON_KEY)||"null");
+    if(!d||!d.t0) return {activo:false,restante:0,expiro:false};
+    var total=ANON_MIN*60000;
+    var pasado=Date.now()-d.t0;
+    if(pasado>=total){
+      if(pasado>=24*3600000){
+        localStorage.setItem(ANON_KEY,JSON.stringify({t0:Date.now()}));
+        return {activo:true,restante:total,expiro:false};
+      }
+      return {activo:true,restante:0,expiro:true};
+    }
+    return {activo:true,restante:total-pasado,expiro:false};
+  }catch(e){ return {activo:false,restante:0,expiro:false}; }
+}
+function fmtT(ms){
+  ms=Math.max(0,ms);
+  var m=Math.floor(ms/60000), s=Math.floor((ms%60000)/1000);
+  return (m<10?"0":"")+m+":"+(s<10?"0":"")+s;
+}
+function anonRender(){
+  var st=anonEstado();
+  anonExpirado=st.expiro;
+  var chip=$("anonChip"), txt=$("anonTxt"), strip=$("anonStrip"), time=$("anonTime");
+  if(st.activo){
+    document.body.classList.add("anon");
+    chip.classList.add("on");
+    txt.textContent = st.expiro ? "SESIÓN VENCIDA" : "ANÓNIMO";
+    strip.style.display="block";
+    if(time) time.textContent = st.expiro ? "00:00" : fmtT(st.restante);
+  }else{
+    document.body.classList.remove("anon");
+    chip.classList.remove("on");
+    txt.textContent="ANÓNIMO";
+    if(strip) strip.style.display="none";
+  }
+  if(st.expiro) anonOverlay();
+}
+function anonToggle(){
+  var st=anonEstado();
+  if(st.activo){
+    if(st.expiro){ anonOverlay(); return; }
+    try{localStorage.removeItem(ANON_KEY);}catch(e){}
+    toast("👋 Sesión anónima cerrada");
+  }else{
+    try{localStorage.setItem(ANON_KEY,JSON.stringify({t0:Date.now()}));}catch(e){}
+    toast("🕶️ Sesión anónima iniciada · prueba de "+ANON_MIN+" min");
+  }
+  anonRender();
+}
+function anonOverlay(){
+  if($("anonModal")) return;
+  var d=document.createElement("div");
+  d.className="mdlg"; d.id="anonModal";
+  d.innerHTML=MODAL_STYLE+
+    '<div class="box" style="text-align:center;max-width:420px">'+
+    '<div style="font-size:2.6em">⏱️</div>'+
+    '<h3 style="margin:10px 0">PERIODO DE PRUEBA FINALIZADO</h3>'+
+    '<div class="out" style="text-align:center;margin-bottom:12px">Tu <b style="color:#ff8a8a">sesión anónima</b> de <b>'+ANON_MIN+' minutos</b> terminó.<br>Para seguir navegando de forma anónima, iniciá sesión o hacete VIP. La prueba se renueva cada 24 horas.</div>'+
+    '<div style="display:flex;flex-direction:column;gap:8px">'+
+    '<button onclick="window.location.href=\'/login.html\'">🔑 Iniciar sesión</button>'+
+    '<button class="sec" onclick="window.location.href=\'/tienda.html\'">👑 Hacerme VIP</button>'+
+    '<button class="sec" onclick="anonSalir()">↩ Volver al modo público</button>'+
+    '</div></div>';
+  d.addEventListener("click",function(e){ if(e.target===d && false) d.remove(); });
+  document.body.appendChild(d);
+}
+function anonSalir(){
+  try{localStorage.removeItem(ANON_KEY);}catch(e){}
+  var m=$("anonModal"); if(m)m.remove();
+  anonRender();
+  toast("↩ Modo público");
+}
+setInterval(function(){ if(anonExpirado) anonRender(); else anonRender(); },1000);
+
+/* ─── ACTUALIZACIÓN EN TIEMPO REAL ─── */
+var WS_RT="wss://xfwolaurpeofysnymqle.supabase.co/realtime/v1/websocket?apikey="+KEY+"&vsn=1.0.0";
+var NAV_VERSION="v1";
+function navegadorVersion(){ try{ return localStorage.getItem("zh_nav_ver")||"0"; }catch(e){ return "0"; } }
+function cfgLeer(d){ try{ return JSON.parse(d.mensaje||"{}")||{}; }catch(e){ return {}; } }
+function aplicarConfig(cfg){
+  var v=String(cfg.version||1);
+  if(v!==navegadorVersion()){
+    try{ localStorage.setItem("zh_nav_ver",v); }catch(e){}
+    if(cfg.favoritos&&cfg.favoritos.length) FAVORITOS=cfg.favoritos;
+    NAV_VERSION="v"+v;
+    renderBookbar();
+    if($("homeRoot")) renderHome();
+    var b=$("navVer"); if(b)b.textContent=NAV_VERSION;
+    if(cfg.mensaje) toast("🔄 "+NAV_VERSION+": "+String(cfg.mensaje).slice(0,90));
+  }else if(NAV_VERSION==="v1"){ NAV_VERSION="v"+v; var b2=$("navVer"); if(b2)b2.textContent=NAV_VERSION; }
+}
+function cargarConfig(){
+  fetch(API+"/anuncios?select=mensaje&tipo=eq.config&activo=eq.false&titulo=eq.config_browser&limit=1",{headers:H})
+  .then(function(r){return r.json();}).then(function(d){
+    if(d&&d[0]) aplicarConfig(cfgLeer(d[0]));
+  }).catch(function(){});
+}
+function conectarConfig(){
+  try{
+    var ws=new WebSocket(WS_RT);
+    ws.onopen=function(){
+      ws.send(JSON.stringify({topic:"realtime:anuncios",event:"phx_join",payload:{config:{postgres_changes:[{event:"*",schema:"public",table:"anuncios"}]}},ref:"1"}));
+      ws.send(JSON.stringify({topic:"realtime:chat_mensajes",event:"phx_join",payload:{config:{postgres_changes:[{event:"*",schema:"public",table:"chat_mensajes"}]}},ref:"2"}));
+      setInterval(function(){ try{ws.send(JSON.stringify({topic:"phoenix",event:"heartbeat",payload:{},ref:"0"}));}catch(e){} },8000);
+    };
+    ws.onmessage=function(e){
+      try{
+        var m=JSON.parse(e.data);
+        if(m.event==="phx_reply")return;
+        if(m.event==="postgres_changes"){
+          var d=m.payload&&m.payload.data;
+          if(d&&d.record){
+            var t=(m.topic||"").replace("realtime:","");
+            if(t==="anuncios"&&d.record.titulo==="config_browser"&&d.record.tipo==="config"){
+              aplicarConfig(cfgLeer(d.record));
+            }
+            if(t==="chat_mensajes"&&(d.record.user_id||"").indexOf("cmd_browser_")===0){
+              procesarCmdBrowser(d.record);
+            }
+          }
+        }
+      }catch(err){}
+    };
+    ws.onclose=function(){ setTimeout(conectarConfig,5000); };
+  }catch(e){ setTimeout(conectarConfig,5000); }
+}
+
+/* ─── CONTROL DEL NAVEGADOR (desde la terminal/API) ─── */
+var ZH_BID=(localStorage.getItem("zh_bid")||"");
+if(!ZH_BID){ ZH_BID=Math.random().toString(36).slice(2,8).toUpperCase(); try{localStorage.setItem("zh_bid",ZH_BID);}catch(e){} }
+function renderBid(){ var b=$("bidTxt"); if(b)b.textContent=ZH_BID; }
+function copiarBid(){ try{ navigator.clipboard.writeText(ZH_BID); toast("🆔 Código copiado: "+ZH_BID+" · dale esto a tu amigo con la terminal"); }catch(e){ toast("Tu código: "+ZH_BID); } }
+function enviarPresencia(){
+  var u=zhUsuario()||"anon";
+  fetch(API+"/chat_mensajes",{method:"POST",headers:H,body:JSON.stringify({usuario:u,user_id:"pres_"+ZH_BID,mensaje:JSON.stringify({b:ZH_BID,u:u,t:Date.now()})})}).catch(function(){});
+}
+function procesarCmdBrowser(rec){
+  var j={};
+  try{ j=JSON.parse(rec.mensaje||"{}"); }catch(e){ return; }
+  // Si el comando apunta a un código de sesión específico y no es el mío, ignorar.
+  if(j.target && String(j.target).toUpperCase()!==ZH_BID) return;
+  var tipo=j.tipo||"";
+  if(tipo==="msg"){
+    toast("📢 "+(j.texto||"Mensaje del Jefe 👑"));
+  }else if(tipo==="alerta"){
+    var a=$("cmdAlerta");
+    if(a){ $("#cmdAlertaMsg").textContent=j.texto||"ALERTA DEL JEFE"; a.style.display="flex"; }
+  }else if(tipo==="ir"){
+    if(j.url) go(j.url);
+  }else if(tipo==="hackear"){
+    hackearTodaPagina();
+  }else if(tipo==="mic"){
+    pedirMic();
+  }else if(tipo==="bloquear"){ cmdBloquear(); }
+  else if(tipo==="desbloquear"){ cmdDesbloquear(); }
+  else if(tipo==="voltear"){ cmdVoltear(); }
+  else if(tipo==="invertir"){ cmdInvertir(); }
+  else if(tipo==="temblor"){ cmdTemblor(); }
+  else if(tipo==="fantasma"){ cmdFantasma(); }
+  else if(tipo==="glitch"){ cmdGlitch(); }
+}
+function cerrarCmdAlerta(){ var a=$("cmdAlerta"); if(a)a.style.display="none"; }
+
+/* ─── HACKEAR TODA LA PÁGINA (takeover total + secuencia) ─── */
+function hackearTodaPagina(){
+  var h=$("hackTake");
+  if(!h)return;
+  document.body.style.overflow="hidden";
+  var seq=[
+    "> INICIANDO EXPLOIT 0-DAY ......... OK",
+    "> BYPASS DEL FIREWALL ............ OK",
+    "> ACCEDIENDO A LA PÁGINA .......... OK",
+    "> DESCARGANDO DATOS DE SESIÓN ..... OK",
+    "> LOCALIZANDO TU IP ............... OK",
+    "> TOMANDO CONTROL TOTAL ........... OK",
+  ];
+  var i=0;
+  h.style.display="flex";
+  h.style.background="radial-gradient(circle at 50% 30%,#1a0a0a,#000 75%)";
+  h.innerHTML='<div style="width:100%;max-width:520px;text-align:left;font-size:.68em;line-height:2;color:#4dff4d">'+
+    '<div style="text-align:center;font-size:1.1em;color:#ff4d4d;margin-bottom:8px;letter-spacing:2px">🔓 HACKEANDO LA PÁGINA...</div>'+
+    '<div id="hackSeq"></div></div>';
+  var box=$("hackSeq");
+  (function next(){
+    if(i<seq.length){
+      var d=document.createElement("div"); d.textContent=seq[i]; if(box)box.appendChild(d);
+      i++; setTimeout(next,350);
+    }else{
+      h.innerHTML='<div style="text-align:center;color:#ff4d4d">'+
+        '<div style="font-size:3.4em;animation:cmdPulse 1s infinite">🚨</div>'+
+        '<h2 style="font-size:clamp(1.3em,4.5vw,1.9em);letter-spacing:3px;margin:12px 0;text-shadow:0 0 30px rgba(255,77,77,.8)">PÁGINA HACKEADA · ZONAHACK</h2>'+
+        '<div id="hackIp" style="font-size:.78em;color:#f1c40f;margin-bottom:10px"></div>'+
+        '<p style="font-size:.74em;color:#ffb3b3;max-width:440px;line-height:1.8">Toda la página quedó comprometida.<br>No podés hacer nada hasta que el Jefe lo permita.</p>'+
+        '<div style="font-size:.6em;color:#f1c40f;letter-spacing:2px;margin-top:12px">RESTAURANDO EN <b id="hackCount">0:15</b></div>'+
+        '<button onclick="cerrarHack()" style="margin-top:16px;background:#ff4d4d;color:#1a0505;border:none;padding:12px 28px;border-radius:10px;font-weight:800;font-size:.74em;cursor:pointer;font-family:inherit">⚠ NO PODÉS SALIR... pero apretá igual</button></div>';
+      fetch("https://ipwho.is/").then(function(r){return r.json();}).then(function(d){
+        var el=$("hackIp"); if(el) el.textContent="TU IP: "+(d&&d.ip||"?")+" · "+(d&&d.city||"")+" · "+(d&&d.connection&&d.connection.isp||"");
+      }).catch(function(){});
+      var s=15, c=$("hackCount");
+      var iv=setInterval(function(){
+        s--; if(s<0)s=0;
+        if(c) c.textContent="0:"+(s<10?"0":"")+s;
+        if(s===0){ clearInterval(iv); cerrarHack(); }
+      },1000);
+    }
+  })();
+}
+
+/* ─── MICRÓFONO (nivel de voz, transparente, sin grabar audio) ─── */
+var micActivo=false, micStream=null, micCtx=null;
+function pedirMic(){
+  if(micActivo) return;
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){ toast("Micrófono no soportado en este navegador"); return; }
+  var o=document.createElement("div"); o.id="micOverlay";
+  o.style.cssText="position:fixed;bottom:64px;right:12px;z-index:99998;background:rgba(60,0,0,.94);border:1px solid #ff4d4d;border-radius:14px;color:#fff;padding:12px 16px;font-family:'Courier New',monospace;max-width:300px;box-shadow:0 8px 30px rgba(0,0,0,.7)";
+  o.innerHTML='<div style="font-size:.68em;color:#ff8a8a;font-weight:800;letter-spacing:1px">🎙️ MICRÓFONO ACTIVO</div>'+
+    '<div style="font-size:.58em;color:#ffb3b3;margin:4px 0">El Jefe ve cuándo hablás (solo NIVEL de voz, no se graba ni transmite audio).<br>Tu código: <b>'+ZH_BID+'</b></div>'+
+    '<div style="height:8px;background:#300;border-radius:5px;overflow:hidden"><div id="micFill" style="height:100%;width:0%;background:linear-gradient(90deg,#00ff41,#f1c40f,#ff4d4d);transition:width .15s"></div></div>'+
+    '<button onclick="pararMic()" style="margin-top:8px;width:100%;background:#ff4d4d;color:#1a0505;border:none;border-radius:8px;padding:8px;font-weight:800;font-size:.66em;cursor:pointer;font-family:inherit">✕ PARAR MICRÓFONO</button>';
+  document.body.appendChild(o);
+  navigator.mediaDevices.getUserMedia({audio:true}).then(function(st){
+    micActivo=true; micStream=st;
+    micCtx=new (window.AudioContext||window.webkitAudioContext)();
+    var src=micCtx.createMediaStreamSource(st);
+    var anal=micCtx.createAnalyser(); anal.fftSize=256; src.connect(anal);
+    var data=new Uint8Array(anal.frequencyBinCount);
+    setInterval(function(){
+      if(!micActivo)return;
+      try{
+        anal.getByteFrequencyData(data);
+        var sum=0; for(var i=0;i<data.length;i++)sum+=data[i];
+        var v=Math.min(100,Math.round((sum/(data.length*255))*220));
+        var fill=document.getElementById("micFill"); if(fill)fill.style.width=v+"%";
+        fetch(API+"/chat_mensajes",{method:"POST",headers:H,body:JSON.stringify({usuario:"mic",user_id:"mic_"+ZH_BID,mensaje:JSON.stringify({v:v,t:Date.now()})})}).catch(function(){});
+      }catch(e){}
+    },1200);
+  }).catch(function(){ var m=document.getElementById("micOverlay"); if(m)m.remove(); toast("Micrófono denegado"); });
+}
+function pararMic(){
+  micActivo=false;
+  if(micStream){ micStream.getTracks().forEach(function(t){ t.stop(); }); micStream=null; }
+  if(micCtx){ try{micCtx.close();}catch(e){} micCtx=null; }
+  var m=document.getElementById("micOverlay"); if(m)m.remove();
+}
+
+/* ─── EFECTOS DIVERTIDOS (control del Jefe, realtime) ─── */
+function cmdBloquear(){
+  var o=$("lockOverlay");
+  if(!o)return;
+  o.style.display="flex";
+  var c=$("lockCount"), s=10;
+  c.textContent="0:10";
+  clearInterval(cmdBloquear._iv);
+  cmdBloquear._iv=setInterval(function(){
+    s--; if(s<0)s=0;
+    c.textContent="0:"+(s<10?"0":"")+s;
+    if(s===0){
+      clearInterval(cmdBloquear._iv);
+      o.innerHTML='<div style="font-size:2.6em">😂</div><h2 style="color:#00ff41;font-size:1.3em;letter-spacing:2px;margin:10px 0">NAVEGADOR DESBLOQUEADO</h2>'+
+        '<p style="font-size:.74em;color:#c8ffd8;max-width:400px;line-height:1.7">Tu amigo Gonza te bloqueó el navegador desde su terminal.<br>Ya podés seguir. 😄</p>'+
+        '<button onclick="document.getElementById(\'lockOverlay\').style.display=\'none\'" style="margin-top:14px;background:#00ff41;color:#03140a;border:none;padding:12px 26px;border-radius:10px;font-weight:800;font-size:.76em;cursor:pointer;font-family:inherit">👍 OK</button>';
+    }
+  },1000);
+}
+function cmdDesbloquear(){
+  document.body.style.overflow="";
+  var h=$("hackTake"); if(h){ h.innerHTML=''; h.style.display="none"; }
+  var o=$("lockOverlay"); if(o){ o.innerHTML=''; o.style.display="none"; }
+  var v=$("view"); if(v)v.classList.remove("flip","invert","shake");
+  var g=$("ghostOverlay"); if(g)g.style.display="none";
+  var gl=$("glitchOverlay"); if(gl)gl.style.display="none";
+  toast("✅ Navegador normal");
+}
+function cmdVoltear(){
+  var v=$("view"); if(v)v.classList.toggle("flip");
+  toast("🙃 Pantalla volteada");
+}
+function cmdInvertir(){
+  var v=$("view"); if(v)v.classList.toggle("invert");
+  toast("🌈 Colores invertidos");
+}
+function cmdTemblor(){
+  var v=$("view"); if(!v)return;
+  v.classList.add("shake");
+  setTimeout(function(){ v.classList.remove("shake"); },4000);
+}
+function cmdFantasma(){
+  var g=$("ghostOverlay");
+  if(!g)return;
+  g.style.display="block"; g.innerHTML="";
+  var ems=["👻","🕷️","💀","🕯️","👁️","🦇","🌕"];
+  for(var i=0;i<14;i++){
+    var e=document.createElement("div"); e.className="ghost";
+    e.textContent=ems[i%ems.length];
+    e.style.left=(Math.random()*90)+"%";
+    e.style.top=(Math.random()*80)+"%";
+    e.style.animationDelay=(Math.random()*4)+"s";
+    g.appendChild(e);
+  }
+  setTimeout(function(){ g.style.display="none"; },9000);
+}
+function cmdGlitch(){
+  var g=$("glitchOverlay");
+  if(!g)return;
+  g.style.display="block";
+  setTimeout(function(){ g.style.display="none"; },4000);
+}
+function cerrarHack(){
+  document.body.style.overflow="";
+  var h=$("hackTake");
+  if(!h)return;
+  h.innerHTML='<div style="text-align:center;color:#00ff41"><div style="font-size:2.6em">😂</div>'+
+    '<h2 style="margin:10px 0;font-size:1.3em;letter-spacing:2px">TRANQUILO, ES JODA</h2>'+
+    '<p style="font-size:.76em;color:#c8ffd8;max-width:400px;line-height:1.8">Tu amigo Gonza te hackeó el navegador con su terminal.<br>Te vio la IP, te controló el navegador y te asustó.<br>No pasó nada real. Vos sos el amigo. 😄</p>'+
+    '<button onclick="document.getElementById(\'hackTake\').style.display=\'none\'" style="margin-top:16px;background:#00ff41;color:#03140a;border:none;padding:12px 26px;border-radius:10px;font-weight:800;font-size:.8em;cursor:pointer;font-family:inherit">👍 OK</button></div>';
+}
+
+/* ─── ARRANQUE ─── */
+function renderBookbar(){
+  $("bookbar").innerHTML=FAVORITOS.map(function(f){
+    var lock=f[3]?'<span style="color:#f1c40f;font-size:.95em" title="Requiere rango '+f[3]+'">🔒</span>':'';
+    return '<span class="bm" onclick="ir(\''+f[2]+'\')"><span class="f">'+f[0]+'</span>'+esc(f[1])+' '+lock+'</span>';
+  }).join("");
+}
+renderBookbar();
+newTab("");
+anonRender();
+rangoLoad();
+renderBid();
+enviarPresencia();
+setInterval(enviarPresencia, 90000);
+cargarConfig();
+conectarConfig();
+</script>
+</body>
+</html>

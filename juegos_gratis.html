@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<title>🎮 Juegos Gratis · ZonaHack</title>
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/icon_96.png" type="image/png">
+<meta name="theme-color" content="#00ff41">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:radial-gradient(circle at 15% 10%,rgba(0,255,65,.05),transparent 50%),radial-gradient(circle at 85% 85%,rgba(0,229,255,.05),transparent 50%),#06080d;color:#d7e2ef;font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh}
+.wrap{max-width:1020px;margin:0 auto;padding:14px}
+.hdr{display:flex;align-items:center;gap:10px;padding-bottom:10px;border-bottom:1px solid rgba(0,255,65,.2)}
+.hdr .logo{font-size:1.6em}
+.hdr h1{font-size:1em;letter-spacing:2px;font-family:'Courier New',monospace;color:#00ff41;text-shadow:0 0 12px rgba(0,255,65,.4)}
+.hdr span{font-size:.56em;color:#6d7f93;letter-spacing:1px}
+.hdr a{margin-left:auto;color:#00ff41;text-decoration:none;font-size:.7em;border:1px solid rgba(0,255,65,.25);padding:5px 10px;border-radius:8px}
+.hero{text-align:center;padding:16px;border:1px solid rgba(0,255,65,.14);border-radius:16px;margin:12px 0;background:rgba(0,20,0,.3)}
+.hero .big{font-size:2.2em}
+.hero h2{color:#00ff41;letter-spacing:2px;font-size:1em;margin:6px 0;text-shadow:0 0 16px rgba(0,255,65,.5)}
+.hero p{font-size:.62em;color:#6d7f93;line-height:1.7}
+.badge{display:inline-block;margin-top:8px;background:rgba(0,255,65,.08);border:1px solid rgba(0,255,65,.25);color:#00ff41;font-size:.56em;padding:4px 12px;border-radius:16px;letter-spacing:1px}
+.searchrow{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.searchrow input{flex:1;min-width:180px;background:#0a0d12;border:1px solid rgba(0,255,65,.2);border-radius:10px;color:#fff;padding:12px 14px;font-size:.8em;outline:none;font-family:inherit}
+.searchrow input:focus{border-color:#00ff41}
+.searchrow button{background:linear-gradient(135deg,#00ff41,#00e5ff);color:#03140a;border:none;border-radius:10px;padding:12px 18px;font-weight:800;font-size:.72em;cursor:pointer;font-family:inherit}
+.searchrow button.sec{background:#0a0d12;border:1px solid rgba(0,255,65,.25);color:#00ff41;font-weight:600}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.chip{padding:7px 13px;border-radius:18px;border:1px solid rgba(0,255,65,.2);background:rgba(0,255,65,.04);color:rgba(0,255,65,.7);font-size:.62em;cursor:pointer;font-family:inherit;transition:.15s}
+.chip:hover{color:#00ff41;border-color:#00ff41}
+.chip.on{background:rgba(0,255,65,.15);border-color:#00ff41;color:#00ff41;font-weight:700}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:11px}
+.game{background:rgba(13,17,23,.92);border:1px solid rgba(0,255,65,.12);border-radius:14px;overflow:hidden;cursor:pointer;transition:.16s;animation:fadeIn .25s both}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.game:hover{border-color:#00ff41;transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.game .th{aspect-ratio:16/9;background:linear-gradient(135deg,#0a1420,#0d1a0d);display:flex;align-items:center;justify-content:center;font-size:2.6em;position:relative}
+.game .th .playov{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0);opacity:0;transition:.2s;font-size:1.1em}
+.game:hover .th .playov{opacity:1;background:rgba(0,0,0,.35)}
+.game .playov span{width:44px;height:44px;border-radius:50%;background:#00ff41;color:#03140a;display:flex;align-items:center;justify-content:center;box-shadow:0 0 20px rgba(0,255,65,.5)}
+.game .bd{padding:9px 11px}
+.game .nm{font-size:.74em;color:#fff;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.game .ct{font-size:.58em;color:#00ff41;margin-top:3px}
+.empty{background:rgba(13,17,23,.8);border:1px solid rgba(0,255,65,.12);border-radius:14px;padding:36px;text-align:center;color:#6d7f93;font-size:.7em}
+/* player overlay */
+#player{display:none;position:fixed;inset:0;z-index:100;background:#05070a;flex-direction:column}
+#player .ph{display:flex;align-items:center;gap:8px;padding:9px 12px;background:#0a0d12;border-bottom:1px solid var(--border,#1c2531);flex-wrap:wrap}
+#player .ph b{flex:1;font-size:.74em;color:#00ff41;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#player .ph button{background:#0a0d12;border:1px solid rgba(0,255,65,.3);color:#00ff41;border-radius:8px;padding:8px 13px;font-size:.66em;cursor:pointer;font-family:inherit}
+#player .ph button.x{color:#ff6b6b;border-color:rgba(255,77,77,.4)}
+#player iframe{flex:1;border:none;background:#fff}
+#player .ph .warn{font-size:.56em;color:#f1c40f;width:100%}
+.foot{text-align:center;font-size:.56em;color:#6d7f93;letter-spacing:1px;margin-top:16px;padding-bottom:20px}
+.toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#0a0d12;border:1px solid #00ff41;color:#00ff41;padding:10px 18px;border-radius:12px;font-size:.66em;z-index:99;display:none;max-width:90vw;text-align:center}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="hdr">
+    <div class="logo">🎮</div>
+    <div><h1>JUEGOS GRATIS</h1><span>BUSCAR Y JUGAR DENTRO DE LA WEB</span></div>
+    <a href="/">←</a>
+  </div>
+
+  <div class="hero">
+    <div class="big">🎮</div>
+    <h2>JUEGOS GRATIS · SIN INSTALAR · DENTRO DE ZONAHACK</h2>
+    <p>Buscá y jugá juegos gratuitos embebidos, sin salir de la página. Fuente: CrazyGames (100% gratis y legal).</p>
+    <span class="badge">🎮 100% GRATIS · EMBEBIDOS EN LA WEB</span>
+  </div>
+
+  <div class="searchrow">
+    <input id="busq" placeholder="🔎 Buscar juego (ej: basketball, slope, billar...)" onkeydown="if(event.key==='Enter')buscarCat()">
+    <button onclick="buscarCat()">🔎 Buscar</button>
+    <button class="sec" onclick="buscarCrazy()">🌐 Buscar más en CrazyGames</button>
+  </div>
+
+  <div class="chips" id="chips"></div>
+
+  <div class="searchrow" style="margin-top:4px">
+    <input id="linkInp" placeholder="📋 Pegá un link de juego (ej: crazygames.com/game/slope) para embekerlo..." onkeydown="if(event.key==='Enter')embedLink()">
+    <button onclick="embedLink()">▶ Embeber</button>
+  </div>
+
+  <div id="grid" class="grid"></div>
+  <div class="foot">ZONAHACK · JUEGOS GRATIS · CRAZYGAMES · EMBEBIDOS</div>
+</div>
+
+<div id="player">
+  <div class="ph"><b id="pTitulo">Jugando...</b>
+    <button onclick="exterior()">🌐 Externo</button>
+    <button class="x" onclick="cerrarPlayer()">✕ Cerrar</button>
+    <span class="warn">Si el juego no carga, tocá "🌐 Externo" para abrirlo.</span>
+  </div>
+  <iframe id="pFrame" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-downloads allow-presentation"></iframe>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ═══ JUEGOS GRATIS — embebidos de CrazyGames ═══ */
+var CATS=["Todos","Acción","Deportes","Clásicos","Habilidad"];
+var JUEGOS=[
+  {n:"Run 3",e:"🏃",c:"Habilidad",s:"run-3"},
+  {n:"Basketball Stars",e:"🏀",c:"Deportes",s:"basketball-stars"},
+  {n:"Curve Ball 3D",e:"⚽",c:"Deportes",s:"curve-ball-3d"},
+  {n:"Papa's Burgeria",e:"🍔",c:"Clásicos",s:"papa-s-burgeria"},
+  {n:"8 Ball Billiards",e:"🎱",c:"Clásicos",s:"8-ball-billiards-classic"},
+  {n:"Slope",e:"🛹",c:"Habilidad",s:"slope"},
+  {n:"Moto X3M",e:"🏍️",c:"Acción",s:"moto-x3m"},
+  {n:"Tunnel Rush",e:"🚇",c:"Habilidad",s:"tunnel-rush"},
+  {n:"1v1.LOL",e:"🔫",c:"Acción",s:"1v1-lol"},
+  {n:"Stickman Hook",e:"🪝",c:"Habilidad",s:"stickman-hook"},
+  {n:"Rocket Soccer Derby",e:"🥅",c:"Deportes",s:"rocket-soccer-derby"},
+  {n:"Snow Rider 3D",e:"⛷️",c:"Habilidad",s:"snow-rider-3d"},
+];
+var catAct="Todos";
+function $(i){return document.getElementById(i);}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function toast(m){var t=$("toast");t.textContent=m;t.style.display="block";clearTimeout(t._x);t._x=setTimeout(function(){t.style.display="none";},2600);}
+
+function renderChips(){
+  $("chips").innerHTML=CATS.map(function(c){
+    return '<button class="chip'+(c===catAct?' on':'')+'" onclick="setCat(\''+c+'\')">'+c+'</button>';
+  }).join("");
+}
+function setCat(c){ catAct=c; render(); }
+function buscarCat(){ render(); }
+function render(){
+  var q=($("busq").value||"").toLowerCase();
+  var list=JUEGOS.filter(function(j){
+    var okCat=(catAct==="Todos")||j.c===catAct;
+    var okQ=!q||(j.n+" "+j.c+" "+j.e).toLowerCase().indexOf(q)>=0;
+    return okCat&&okQ;
+  });
+  if(!list.length){ $("grid").innerHTML='<div class="empty">🎮 No se encontró ningún juego'+(q?' para "'+esc(q)+'"':'')+'.<br><br>Probá buscarlo en CrazyGames con "🌐 Buscar más".</div>'; return; }
+  $("grid").innerHTML=list.map(function(j){
+    return '<div class="game" onclick="jugar(\''+j.s+'\',\''+esc(j.n).replace(/'/g,"\\'")+'\')">'+
+      '<div class="th">'+j.e+'<div class="playov"><span>▶</span></div></div>'+
+      '<div class="bd"><div class="nm">'+esc(j.n)+'</div><div class="ct">'+j.c+'</div></div></div>';
+  }).join("");
+}
+function embedUrl(slug){ return "https://www.crazygames.com/embed/"+encodeURIComponent(slug); }
+function jugar(slug,titulo){
+  $("pTitulo").textContent=titulo||slug;
+  $("pFrame").src=embedUrl(slug);
+  $("player").style.display="flex";
+  document.body.style.overflow="hidden";
+}
+window.jugar=jugar;
+function exterior(){ var f=$("pFrame"); if(f&&f.src&&f.src.indexOf("crazygames")>=0) window.open(f.src,"_blank"); }
+function cerrarPlayer(){ $("player").style.display="none"; $("pFrame").src="about:blank"; document.body.style.overflow=""; }
+function buscarCrazy(){
+  var q=($("busq").value||"").trim();
+  var url=q?("https://www.crazygames.com/search/"+encodeURIComponent(q)):"https://www.crazygames.com/";
+  $("pTitulo").textContent="CrazyGames · buscar";
+  $("pFrame").src="/api/proxy?url="+encodeURIComponent(url);
+  $("player").style.display="flex"; document.body.style.overflow="hidden";
+  toast("🌐 Abriendo CrazyGames — encontrá un juego y pegá su link abajo para embeberlo");
+}
+function embedLink(){
+  var u=($("linkInp").value||"").trim();
+  if(!u){ toast("Pegá un link de CrazyGames"); return; }
+  var m=u.match(/crazygames\.com\/(?:game|embed)\/([a-z0-9-]+)/i);
+  var slug=m?m[1]:(u.split("/").pop()||"");
+  if(!slug){ toast("No pude sacar el slug del juego"); return; }
+  $("linkInp").value="";
+  jugar(slug,slug.replace(/-/g," "));
+  toast("▶ Jugando: "+slug.replace(/-/g," "));
+}
+renderChips();
+render();
+</script>
+</body>
+</html>

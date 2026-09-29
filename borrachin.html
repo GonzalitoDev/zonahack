@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<title>🍻 Zona Borrachín · ZonaHack</title>
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/icon_96.png" type="image/png">
+<meta name="theme-color" content="#ff9d00">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:radial-gradient(circle at 20% 10%,#2a1200,transparent 50%),radial-gradient(circle at 80% 90%,#1a002a,transparent 50%),#0a0805;color:#ffe9c9;font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;overflow-x:hidden}
+.confetti{position:fixed;top:-12px;z-index:1;width:8px;height:14px;pointer-events:none;animation:cfFall linear forwards;border-radius:2px}
+@keyframes cfFall{to{transform:translateY(110vh) rotate(720deg);opacity:.2}}
+.wrap{position:relative;z-index:2;max-width:980px;margin:0 auto;padding:16px}
+.hdr{display:flex;align-items:center;gap:10px;padding-bottom:10px;border-bottom:1px solid rgba(255,157,0,.3)}
+.hdr .logo{font-size:1.7em;filter:drop-shadow(0 0 10px rgba(255,157,0,.5));animation:bamboleo 3s ease-in-out infinite}
+@keyframes bamboleo{0%,100%{transform:rotate(-8deg)}50%{transform:rotate(8deg)}}
+.hdr h1{font-size:1em;letter-spacing:2px;color:#ffd166;text-shadow:0 0 14px rgba(255,157,0,.5)}
+.hdr .sub{font-size:.56em;color:rgba(255,233,201,.5);letter-spacing:2px}
+.hdr a{margin-left:auto;color:#ffd166;text-decoration:none;font-size:.7em;border:1px solid rgba(255,157,0,.3);padding:5px 10px;border-radius:8px}
+.hero{text-align:center;padding:20px 10px;border:1px solid rgba(255,157,0,.16);border-radius:18px;margin:12px 0;background:rgba(20,12,0,.4)}
+.hero .big{font-size:2.8em;animation:flot 3s ease-in-out infinite}
+@keyframes flot{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+.hero h2{font-size:clamp(1.2em,4vw,1.8em);letter-spacing:3px;margin:8px 0;color:#ffd166;text-shadow:0 0 20px rgba(255,157,0,.6);background:linear-gradient(90deg,#ff9d00,#ff4d8d,#c135ff);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{font-size:.64em;color:rgba(255,233,201,.6);line-height:1.8}
+.badge{display:inline-block;margin-top:8px;background:rgba(255,157,0,.08);border:1px solid rgba(255,157,0,.35);color:#ffd166;font-size:.56em;padding:4px 14px;border-radius:20px;letter-spacing:1px}
+.warn{background:rgba(0,255,65,.05);border:1px solid rgba(0,255,65,.2);color:#9fe6b0;font-size:.58em;line-height:1.7;padding:9px 12px;border-radius:10px;margin:10px 0;text-align:center}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin-top:12px}
+.card{background:linear-gradient(160deg,rgba(255,157,0,.05),rgba(193,53,255,.04));border:1px solid rgba(255,157,0,.18);border-radius:16px;padding:16px;transition:.18s;animation:fadeIn .3s both}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.card:hover{border-color:rgba(255,157,0,.45);box-shadow:0 0 24px rgba(255,157,0,.12);transform:translateY(-3px)}
+.card .cn{font-size:.8em;color:#ffd166;font-weight:800;letter-spacing:1px;margin-bottom:10px}
+.card p{font-size:.62em;color:rgba(255,233,201,.55);line-height:1.7;margin-bottom:10px}
+button{background:linear-gradient(135deg,#ff9d00,#ff4d8d);color:#1a0a00;border:none;border-radius:11px;padding:12px 18px;font-weight:800;font-size:.72em;cursor:pointer;font-family:inherit;letter-spacing:1px;transition:.15s}
+button:hover{transform:scale(1.03);box-shadow:0 0 18px rgba(255,157,0,.4)}
+button.sec{background:#15100a;border:1px solid rgba(255,157,0,.35);color:#ffd166;font-weight:600}
+button:disabled{opacity:.45;cursor:default;transform:none}
+input{width:100%;background:#14100a;border:1px solid rgba(255,157,0,.3);color:#ffe9c9;padding:11px 13px;border-radius:10px;font-size:.76em;outline:none;font-family:inherit;margin-bottom:8px}
+input:focus{border-color:#ff9d00}
+.out{font-size:.7em;color:#ffd166;line-height:1.8;margin-top:10px;min-height:20px;border-top:1px dashed rgba(255,157,0,.2);padding-top:8px}
+.meter{height:22px;background:#14100a;border:1px solid rgba(255,157,0,.3);border-radius:12px;overflow:hidden;margin:10px 0}
+.meter span{display:block;height:100%;background:linear-gradient(90deg,#00ff41,#ffd166,#ff4d8d,#ff0044);transition:width .4s;width:0%}
+.nivel{font-size:.66em;color:#ffd166;margin-bottom:6px}
+.tazo{font-size:1.6em;animation:girar .6s linear infinite}
+@keyframes girar{to{transform:rotate(360deg)}}
+.foot{text-align:center;font-size:.52em;color:rgba(255,233,201,.4);letter-spacing:2px;padding:18px 0 22px}
+.toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#1a1005;border:1px solid #ff9d00;color:#ffd166;padding:10px 18px;border-radius:12px;font-size:.66em;z-index:99;display:none;max-width:90vw;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hdr">
+    <div class="logo">🍻</div>
+    <div>
+      <h1>ZONA BORRACHÍN</h1>
+      <div class="sub">EL RINCÓN DE LOS QUE NO SE ACUERDAN</div>
+    </div>
+    <a href="/">←</a>
+  </div>
+
+  <div class="hero">
+    <div class="big">🥴</div>
+    <h2>BIENVENIDO A LA ZONA BORRACHÍN</h2>
+    <p>Acá no se estudia, no se trabaja y no se habla de cosas serias.<br>Se toma, se banca el chupómetro y se dicen frases que mañana vas a negar.</p>
+    <span class="badge">🍺 +18 SOLO PORQUE SÍ · BEBÉ CON MODERACIÓN</span>
+  </div>
+
+  <div class="warn">⚠️ Todo esto es joda. El alcohol es para mayores y siempre con moderación. Si te emborrachaste de verdad, no manejes y tomá agua. El Tío Gonza te quiere sano.</div>
+
+  <div class="grid">
+    <div class="card">
+      <div class="cn">🍺 CHUPÓMETRO</div>
+      <p>Tomá tragos y mirá tu nivel de borrachera. Cuidado con el apagón.</p>
+      <div class="nivel" id="nivelTxt">SOBRIO (0%)</div>
+      <div class="meter"><span id="alcohol"></span></div>
+      <div style="display:flex;gap:8px">
+        <button onclick="tomar()" id="btnTomar">🍺 TOMAR</button>
+        <button class="sec" onclick="reset()">🚿 AGUA</button>
+      </div>
+      <div class="out" id="chupOut">Hacé clic en TOMAR cuando quieras.</div>
+    </div>
+
+    <div class="card">
+      <div class="cn">💬 FRASES DE BORRACHO</div>
+      <p>Generador de frases que solo tienen sentido con alcohol en sangre.</p>
+      <button onclick="frase()">🎲 GENERAR FRASE</button>
+      <div class="out" id="fraseOut">"Yo manejo bien borracho... un poquito no es nada..."</div>
+    </div>
+
+    <div class="card">
+      <div class="cn">🎭 ALIAS DE BORRACHO</div>
+      <p>Poné tu nombre y descubrí tu alias de borracho profesional.</p>
+      <input id="aliasInp" placeholder="Tu nombre..." onkeydown="if(event.key==='Enter')alias()">
+      <button onclick="alias()">✨ DESCUBRIR ALIAS</button>
+      <div class="out" id="aliasOut">Escribí tu nombre para ser bautizado.</div>
+    </div>
+
+    <div class="card">
+      <div class="cn">🚔 TEST DE SOBRIEDAD</div>
+      <p>Vamos a ver si estás apto para manejar. Caminá en línea recta.</p>
+      <button onclick="testSobriedad()">🚶 HACER EL TEST</button>
+      <div class="out" id="testOut">El que esté sobrio que lo demuestre.</div>
+    </div>
+  </div>
+
+  <div class="foot">ZONA BORRACHÍN · ZONAHACK · SI TE GUSTÓ, TOMÁ AGUA 🚿</div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+function $(i){return document.getElementById(i);}
+function toast(m){var t=$("toast");t.textContent=m;t.style.display="block";clearTimeout(t._x);t._x=setTimeout(function(){t.style.display="none";},2800);}
+function confeti(){
+  var cols=["#ff9d00","#ff4d8d","#c135ff","#ffd166","#00ff41"];
+  for(var i=0;i<40;i++){
+    var p=document.createElement("div");p.className="confetti";
+    p.style.left=Math.random()*100+"vw";
+    p.style.background=cols[i%cols.length];
+    p.style.animationDuration=(1.4+Math.random()*1.6)+"s";
+    p.style.animationDelay=(Math.random()*0.6)+"s";
+    document.body.appendChild(p);
+    (function(el){setTimeout(function(){el.remove();},3400);})(p);
+  }
+}
+
+/* ─── CHUPÓMETRO ─── */
+var nivel=0;
+var NIVELES=[
+  [0,"SOBRIO — ¿qué hacés acá?"],
+  [10,"CONTENTO — arrancó bien la noche 🍺"],
+  [25,"CALUROSO — todos son tus amigos 🥰"],
+  [40,"CANTANDO — soltá la garganta 🎤"],
+  [55,"FILOSÓFICO — 'la vida es un trago largo'"],
+  [70,"DADO VUELTA — el piso se mueve 🌊"],
+  [85,"AMOROSO — 'te quiero mucho'"],
+  [100,"APAGÓN — nos vemos mañana 😵💫"],
+];
+function estadoActual(){
+  var e=NIVELES[0];
+  for(var i=0;i<NIVELES.length;i++) if(nivel>=NIVELES[i][0]) e=NIVELES[i];
+  return e;
+}
+function tomar(){
+  if(nivel>=100){ toast("😵 Ya estás en apagón. No podés tomar más."); return; }
+  nivel=Math.min(100,nivel+Math.floor(Math.random()*12)+5);
+  $("alcohol").style.width=nivel+"%";
+  var e=estadoActual();
+  $("nivelTxt").textContent=e[1]+" ("+nivel+"%)";
+  var msgs=["¡Salud! 🍻","Otro más, va que va 🥴","Este es el último... prometo","A la salud del vecino 🍺"];
+  $("chupOut").textContent=msgs[Math.floor(Math.random()*msgs.length)];
+  if(nivel>=100){ confeti(); toast("😵💫 APAGÓN. No se acuerda de nada."); $("btnTomar").disabled=true; }
+}
+function reset(){
+  nivel=0;
+  $("alcohol").style.width="0%";
+  $("nivelTxt").textContent="SOBRIO (0%)";
+  $("chupOut").textContent="🚿 Agua fresca. Renaciste.";
+  $("btnTomar").disabled=false;
+}
+
+/* ─── FRASES DE BORRACHO ─── */
+var FRASES=[
+  "Che, yo te re amo... te amo a vos, y a vos, y a ese árbol.",
+  "¿Sabías que... mmm... no, no me acuerdo lo que iba a decir.",
+  "Yo no estoy borracho, la calle está torcida.",
+  "Mañana temprano... ¿qué es mañana?",
+  "Tranqui, yo manejo... ayer también decía eso.",
+  "Lo importante no es ganar... lo importante es tomar otro trago.",
+  "¿Vos también ves doble? Buenísimo, así somos más.",
+  "Yo con dos tragos ya canto como Freddie Mercury (y los vecinos lo saben).",
+  "¿Falta mucho para llegar? Digo, para llegar a la heladera.",
+  "Che, te presento a mi amigo... este es Mi Amigo y este es Mi Otro Amigo.",
+  "El fernet con hielo es un invento de la NASA, no me discutas.",
+  "Yo tengo un plan... y el plan es otro trago.",
+];
+function frase(){
+  var f=FRASES[Math.floor(Math.random()*FRASES.length)];
+  $("fraseOut").textContent='"'+f+'"';
+  toast("🍻 ¡Salud!");
+}
+
+/* ─── ALIAS DE BORRACHO ─── */
+var PREF=["El Rey del","La Bruja del","Capitán","Doña","El Comandante de la","La Reina del","Don","El Caballero del","La Dama del","El Lobo del"];
+var SUF=["Fernet","Vodka","Gancia","Cerveza","Champagne","Ron","Whisky","vino tinto","Sidra","Clericó","aperol","espumante"];
+function alias(){
+  var n=$("aliasInp").value.trim();
+  var a=(PREF[Math.floor(Math.random()*PREF.length)]+" "+SUF[Math.floor(Math.random()*SUF.length)]);
+  $("aliasOut").innerHTML=n?"<b>"+esc(n)+"</b> fue bautizado como:<br><b style='font-size:1.3em;color:#ffd166'>🍺 "+esc(a)+"</b>":"Escribí tu nombre primero, che.";
+  if(n){ confeti(); toast("🎉 ¡Bautizado!"); }
+}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+
+/* ─── TEST DE SOBRIEDAD ─── */
+function testSobriedad(){
+  $("testOut").textContent="🚶 Caminá en línea recta...";
+  setTimeout(function(){
+    var fail=Math.random()<0.85;
+    if(fail){ $("testOut").innerHTML="🚔 <b>NO APTO.</b> Te fuiste para el costado. <br><span style='color:#ff4d8d'>Andá a tomar agua. Se acabó la noche.</span>"; confeti(); }
+    else{ $("testOut").innerHTML="✅ <b>APTO.</b> Increíble... ¿estás seguro que no sos un robot?"; }
+  },1200);
+}
+</script>
+</body>
+</html>

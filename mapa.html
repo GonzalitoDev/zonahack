@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>🗺️ Mapa de ZonaHack · Bienvenido</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#07090e;--card:rgba(13,17,23,.9);--border:#1c2531;--text:#d7e2ef;--muted:#6d7f93;--accent:#00ff41;--green:#2ee6a8;--gold:#f1c40f;--cyan:#00e5ff;--violet:#7a5cff}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh}
+.bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.orb{position:absolute;border-radius:50%;filter:blur(90px);opacity:.32;animation:flotar 18s ease-in-out infinite}
+.orb1{width:480px;height:480px;background:radial-gradient(circle,rgba(0,255,65,.18),transparent 70%);top:-180px;right:-130px}
+.orb2{width:520px;height:520px;background:radial-gradient(circle,rgba(122,92,255,.18),transparent 70%);bottom:-210px;left:-170px;animation-delay:-7s}
+@keyframes flotar{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(20px,-14px) scale(1.08)}}
+.header{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border);background:rgba(7,9,14,.92);backdrop-filter:blur(10px);position:sticky;top:0;z-index:100}
+.logo{width:40px;height:40px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px;background:linear-gradient(135deg,rgba(0,255,65,.25),rgba(122,92,255,.25));border:1px solid rgba(0,255,65,.4)}
+.ttl{flex:1;min-width:0}
+.ttl h1{font-size:.95em;letter-spacing:2px;font-weight:900;font-family:'Courier New',monospace;color:#fff;background:linear-gradient(90deg,#00ff41,#00e5ff,#00ff41);background-size:200%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:brillo 5s linear infinite}
+@keyframes brillo{to{background-position:200%}}
+.ttl span{font-size:.6em;color:var(--muted)}
+.back{color:var(--accent);text-decoration:none;font-size:.7em;padding:6px 10px;border:1px solid var(--border);border-radius:8px}
+.hero{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:34px 16px 6px;text-align:center}
+.hero .big{font-size:1.7em;font-weight:900;letter-spacing:2px;color:#fff;font-family:'Courier New',monospace}
+.hero .big span{color:var(--accent)}
+.hero p{color:var(--muted);font-size:.78em;margin-top:8px;line-height:1.7}
+.hero .badges{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+.badge{border:1px solid var(--border);border-radius:16px;padding:6px 14px;font-size:.62em;color:var(--muted);background:rgba(0,0,0,.3)}
+.badge b{color:var(--accent)}
+.container{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:20px 16px 50px}
+.sec{margin-top:26px}
+.sec h2{font-size:.85em;color:var(--accent);letter-spacing:1px;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.sec h2::after{content:'';flex:1;height:1px;background:var(--border)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.c{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;cursor:pointer;text-decoration:none;color:var(--text);display:block;transition:.15s}
+.c:hover{transform:translateY(-3px);border-color:rgba(0,255,65,.4);box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.c .ic{font-size:1.6em}
+.c .t{font-size:.82em;font-weight:800;color:#fff;margin-top:6px}
+.c .d{font-size:.66em;color:var(--muted);margin-top:3px;line-height:1.5}
+.c .tag{display:inline-block;margin-top:7px;font-size:.56em;color:var(--accent);border:1px solid rgba(0,255,65,.25);border-radius:8px;padding:2px 8px}
+.new{position:relative}
+.new::after{content:'NUEVO';position:absolute;top:-6px;right:-6px;background:linear-gradient(135deg,#ffca28,#ff8c00);color:#2a1400;font-size:.5em;font-weight:900;padding:2px 7px;border-radius:8px;letter-spacing:.5px}
+.footer{position:relative;z-index:1;text-align:center;padding:20px;color:var(--muted);font-size:.62em}
+</style>
+</head>
+<body>
+<div class="bg"><div class="orb orb1"></div><div class="orb orb2"></div></div>
+
+<div class="header">
+  <div class="logo">🗺️</div>
+  <div class="ttl"><h1>MAPA DE ZONAHACK</h1><span>todo lo que hay · una sola página</span></div>
+  <a href="/" class="back">←</a>
+</div>
+
+<div class="hero">
+  <div class="big">BIENVENIDO A <span>ZONAHACK</span> 🏆</div>
+  <p>Películas, series, juegos, chat, Firebase, Discord, hosting y mucho más.<br>Elegí una categoría y explorá todo lo que hay.</p>
+  <div class="badges">
+    <div class="badge">🎬 <b>+100</b> películas</div>
+    <div class="badge">🔥 <b>Firebase</b> conectado</div>
+    <div class="badge">💬 <b>Discord</b> bot</div>
+    <div class="badge">🎮 <b>Juegos</b></div>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="sec">
+    <h2>🎬 CINE Y PELÍCULAS</h2>
+    <div class="grid">
+      <a class="c" href="/"><div class="ic">🔍</div><div class="t">Buscar</div><div class="d">Buscá cualquier video en YouTube desde ZonaHack.</div><span class="tag">Principal</span></a>
+      <a class="c" href="/videohub.html"><div class="ic">🎬</div><div class="t">VideoHub</div><div class="d">Catálogo legal con metadatos y dominio público.</div><span class="tag">Legal</span></a>
+      <a class="c" href="/agregar_pelicula.html"><div class="ic">➕</div><div class="t">Subidor</div><div class="d">Subí películas: YouTube, lote y dominio público.</div><span class="tag">Admin</span></a>
+      <a class="c" href="/peliculas_firebase.html"><div class="ic">🎬</div><div class="t">Películas en Firebase</div><div class="d">Catálogo sincronizado a Firebase, reproducí directo.</div><span class="tag">Firebase</span></a>
+      <a class="c" href="/cartelera.html"><div class="ic">🍿</div><div class="t">Cartelera</div><div class="d">Próximos estrenos de cine.</div></a>
+      <a class="c" href="/vertodos.html"><div class="ic">👥</div><div class="t">Ver Juntos</div><div class="d">Mirá videos en sincronía con amigos.</div></a>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h2>📺 SERIES Y ANIMACIÓN</h2>
+    <div class="grid">
+      <a class="c" href="/dibujitos.html"><div class="ic">🧸</div><div class="t">Dibujitos</div><div class="d">Dibujos animados y Backyardigans.</div></a>
+      <a class="c" href="/anime.html"><div class="ic">🍥</div><div class="t">Anime</div><div class="d">Top, temporada y buscador de anime.</div></a>
+      <a class="c" href="/alejoyvalentina.html"><div class="ic">🍟</div><div class="t">Alejo y Valentina</div><div class="d">Los capítulos de la serie.</div></a>
+      <a class="c" href="/terror_analogico.html"><div class="ic">📼</div><div class="t">Terror Analógico</div><div class="d">Historias y videos de terror.</div></a>
+      <a class="c" href="/memes.html"><div class="ic">😂</div><div class="t">Memes</div><div class="d">Memes y sonidos para compartir.</div></a>
+      <a class="c" href="/cursos.html"><div class="ic">🎓</div><div class="t">Cursos</div><div class="d">Cursos y tutoriales.</div></a>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h2>🎮 JUEGOS</h2>
+    <div class="grid">
+      <a class="c new" href="/juego.html"><div class="ic">🪙</div><div class="t">Atrapamonedas</div><div class="d">Atrapá monedas, evitá bombas. Ranking en Firebase.</div><span class="tag">Nuevo</span></a>
+      <a class="c new" href="/casino.html"><div class="ic">🎰</div><div class="t">Casino</div><div class="d">Tragamonedas, Blackjack, Ruleta y Dados. Sin dinero real.</div><span class="tag">Nuevo</span></a>
+      <a class="c" href="/juegos.html"><div class="ic">💻</div><div class="t">Hackerman</div><div class="d">Juegos y terminal hacker.</div></a>
+      <a class="c" href="/auto_al_piso.html"><div class="ic">🏎️</div><div class="t">Auto al Piso</div><div class="d">Carreras.</div></a>
+      <a class="c" href="/nasa.html"><div class="ic">🚀</div><div class="t">Cohete NASA</div><div class="d">Simulador de cohete realista.</div></a>
+      <a class="c" href="/builder.html"><div class="ic">🧊</div><div class="t">Builder de Juegos</div><div class="d">Creá tus propios juegos.</div></a>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h2>💬 COMUNIDAD</h2>
+    <div class="grid">
+      <a class="c new" href="/chat.html"><div class="ic">💬</div><div class="t">Chat General</div><div class="d">Chat en vivo, archivos pesados y botones divertidos.</div><span class="tag">Nuevo</span></a>
+      <a class="c" href="/foros.html"><div class="ic">🗣️</div><div class="t">Foros & Tools</div><div class="d">Foros y herramientas de comunidad.</div></a>
+      <a class="c" href="/deepweb.html"><div class="ic">🕸️</div><div class="t">Deep Web</div><div class="d">Noticias y foros del lado oscuro.</div></a>
+      <a class="c new" href="/discord.html"><div class="ic">💬</div><div class="t">Discord ZonaHack</div><div class="d">Bot zonahackbot, mensajes y avisos a tu Discord.</div><span class="tag">Nuevo</span></a>
+      <a class="c new" href="/robot.html"><div class="ic">🤖</div><div class="t">Robot Scraper</div><div class="d">Lee cualquier página y te responde sobre su contenido, sin APIs.</div><span class="tag">Nuevo</span></a>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h2>🔥 FIREBASE</h2>
+    <div class="grid">
+      <a class="c" href="/firebase.html"><div class="ic">🔥</div><div class="t">Firebase en vivo</div><div class="d">Contador, datos y chat en tiempo real.</div><span class="tag">Demo</span></a>
+      <a class="c" href="/firebase_datos.html"><div class="ic">🗄️</div><div class="t">Centro de Datos</div><div class="d">Sincronizá 22 tablas de ZonaHack a Firebase.</div><span class="tag">Sincroniza</span></a>
+      <a class="c" href="/logs.html"><div class="ic">📋</div><div class="t">Logs en vivo</div><div class="d">Visitas y errores del sitio en Firebase.</div><span class="tag">Admin</span></a>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h2>🧰 HERRAMIENTAS</h2>
+    <div class="grid">
+      <a class="c" href="/herramientas.html"><div class="ic">🧰</div><div class="t">Tools</div><div class="d">Herramientas variadas.</div></a>
+      <a class="c" href="/conversor.html"><div class="ic">🎬</div><div class="t">Conversor MP4</div><div class="d">Convertí videos.</div></a>
+      <a class="c" href="/programacion.html"><div class="ic">💻</div><div class="t">Programación</div><div class="d">Aprendé a programar.</div></a>
+      <a class="c" href="/psicologia.html"><div class="ic">🧠</div><div class="t">Psicología</div><div class="d">Contenido de psicología.</div></a>
+      <a class="c" href="/scanner.html"><div class="ic">🛡️</div><div class="t">Escáner</div><div class="d">Escáner de seguridad.</div></a>
+      <a class="c" href="/jsdelivr.html"><div class="ic">📦</div><div class="t">Panel jsDelivr</div><div class="d">Gestión de archivos.</div></a>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h2>🏪 TIENDA Y CUENTA</h2>
+    <div class="grid">
+      <a class="c" href="/perfil.html"><div class="ic">📊</div><div class="t">Perfil</div><div class="d">Tu perfil y estadísticas.</div></a>
+      <a class="c" href="/monedas.html"><div class="ic">🪙</div><div class="t">Monedas</div><div class="d">Ganá y gastá monedas ZonaHack.</div></a>
+      <a class="c" href="/monedas_tienda.html"><div class="ic">🛍️</div><div class="t">Tienda de monedas</div><div class="d">Canjeá tus monedas.</div></a>
+      <a class="c" href="/tienda.html"><div class="ic">🛒</div><div class="t">Tienda</div><div class="d">Compras y sorteos.</div></a>
+      <a class="c" href="/soporte.html"><div class="ic">🎫</div><div class="t">Soporte</div><div class="d">Pedí ayuda.</div></a>
+      <a class="c" href="/premium.html"><div class="ic">💎</div><div class="t">Premium</div><div class="d">Demos y contenido premium.</div></a>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h2>📡 HOSTING Y APPS</h2>
+    <div class="grid">
+      <a class="c" href="/hosting.html"><div class="ic">📡</div><div class="t">Hosting 24/7</div><div class="d">Hosting de páginas con base de datos.</div></a>
+      <a class="c" href="/apps.html"><div class="ic">📱</div><div class="t">Zona de Apps</div><div class="d">Apps hechas por Gonza (PC y Android).</div><span class="tag">GONZA</span></a>
+      <a class="c" href="/descargar_apk.html"><div class="ic">🤖</div><div class="t">APK</div><div class="d">Descargá las apps Android.</div></a>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h2>⚙️ SISTEMA</h2>
+    <div class="grid">
+      <a class="c" href="/actualizaciones.html"><div class="ic">🔄</div><div class="t">Actualizaciones</div><div class="d">Novedades del sitio.</div></a>
+      <a class="c" href="/llamagonza.html"><div class="ic">🟢</div><div class="t">Llama a Gonza</div><div class="d">Llamá a Gonza.</div></a>
+      <a class="c" href="/lan.html"><div class="ic">🌐</div><div class="t">Zona LAN</div><div class="d">Control remoto.</div></a>
+      <a class="c" href="/panel_admin.html"><div class="ic">👑</div><div class="t">Panel Admin</div><div class="d">Administración del sitio.</div><span class="tag">Admin</span></a>
+      <a class="c" href="/legal.html"><div class="ic">⚖️</div><div class="t">Aviso Legal</div><div class="d">Transparencia y legalidad.</div></a>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">ZONAHACK 🏆 · hecho por Gonza · todos los derechos reservados</div>
+<script src="/logger_zh.js?v=2026"></script>
+</body>
+</html>

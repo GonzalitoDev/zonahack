@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>🔍 Foros & Tools · Ciberseguridad</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#060907;--card:rgba(255,255,255,.03);--border:rgba(0,255,65,.10);--border2:rgba(0,255,65,.18);
+  --text:#d6e4dc;--muted:rgba(214,228,220,.45);--accent:#00ff41;--gold:#f1c40f}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh}
+.bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:.5;animation:flotar 16s ease-in-out infinite}
+.orb1{width:460px;height:460px;background:radial-gradient(circle,rgba(0,255,65,.2),transparent 70%);top:-180px;right:-120px}
+.orb2{width:500px;height:500px;background:radial-gradient(circle,rgba(122,92,255,.14),transparent 70%);bottom:-200px;left:-160px;animation-delay:-6s}
+@keyframes flotar{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(20px,-14px) scale(1.08)}}
+.header{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border);
+  background:rgba(6,9,7,.85);backdrop-filter:blur(10px);position:sticky;top:0;z-index:100}
+.logo{width:40px;height:40px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  font-size:20px;background:linear-gradient(135deg,rgba(0,255,65,.22),rgba(122,92,255,.15));border:1px solid var(--border2)}
+.ttl{flex:1;min-width:0}
+.ttl h1{font-size:.95em;color:var(--accent);letter-spacing:1.5px;font-family:'Courier New',monospace;
+  text-shadow:0 0 10px rgba(0,255,65,.25);white-space:nowrap}
+.ttl span{font-size:.62em;color:var(--gold);letter-spacing:2px}
+.back{color:var(--accent);text-decoration:none;font-size:.72em;padding:7px 12px;border:1px solid var(--border2);border-radius:10px;transition:.2s;white-space:nowrap}
+.back:hover{background:rgba(0,255,65,.08)}
+.container{max-width:960px;margin:0 auto;padding:18px 16px 40px;position:relative;z-index:1}
+.hero{text-align:center;padding:20px 16px 6px}
+.hero .big{font-size:48px;filter:drop-shadow(0 0 20px rgba(0,255,65,.3))}
+.hero h2{font-size:1.5em;font-weight:900;margin-top:6px;color:#fff;letter-spacing:1px;font-family:'Courier New',monospace;
+  background:linear-gradient(90deg,#fff,#00ff41,#fff);background-size:200%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:brillo 5s linear infinite}
+@keyframes brillo{to{background-position:200%}}
+.hero .hecha{margin-top:6px;font-size:.7em;color:var(--gold)}
+.hero .hecha b{color:#fff}
+/* BUSCADOR */
+.buscador{max-width:560px;margin:18px auto 6px;display:flex;gap:8px}
+.buscador input{flex:1;background:var(--card);border:1px solid var(--border2);border-radius:12px;color:var(--text);
+  padding:13px 16px;font-size:.85em;font-family:inherit;outline:none;transition:.2s}
+.buscador input:focus{border-color:var(--accent);box-shadow:0 0 18px rgba(0,255,65,.18)}
+.buscador button{background:linear-gradient(135deg,#00ff41,#00c73a);color:#03140a;border:none;border-radius:12px;
+  padding:13px 22px;font-weight:800;font-size:.8em;cursor:pointer;font-family:inherit;transition:.2s}
+.buscador button:hover{box-shadow:0 0 20px rgba(0,255,65,.35)}
+.buscador button:active{transform:scale(.96)}
+.chips{display:flex;gap:7px;padding:10px 4px;overflow-x:auto;flex-wrap:wrap;justify-content:center}
+.chip{white-space:nowrap;padding:6px 13px;border-radius:20px;border:1px solid var(--border2);
+  background:rgba(0,255,65,.05);color:var(--muted);font-size:.68em;cursor:pointer;transition:.2s;font-family:inherit}
+.chip:hover{color:var(--text);border-color:rgba(0,255,65,.4)}
+/* TABS */
+.tabs{display:flex;gap:8px;margin:14px 0 10px;flex-wrap:wrap}
+.tab{padding:7px 15px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--muted);
+  font-size:.72em;cursor:pointer;font-family:inherit;transition:.2s}
+.tab.on{background:rgba(0,255,65,.12);border-color:rgba(0,255,65,.4);color:var(--accent);font-weight:700}
+/* RESULTADOS */
+.sec-titulo{font-size:.72em;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin:16px 0 8px;display:flex;align-items:center;gap:8px}
+.sec-titulo::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(241,196,15,.25),transparent)}
+.repo{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:9px;transition:.2s}
+.repo:hover{border-color:var(--border2);box-shadow:0 6px 22px rgba(0,0,0,.35)}
+.repo .rn{font-size:.85em;font-weight:700;color:#fff}
+.repo .rn a{color:#fff;text-decoration:none}
+.repo .rn a:hover{color:var(--accent)}
+.repo .rd{font-size:.7em;color:var(--muted);margin-top:4px;line-height:1.5}
+.repo .rm{margin-top:8px;display:flex;gap:12px;flex-wrap:wrap;font-size:.64em;color:var(--muted)}
+.repo .rm b{color:var(--gold)}
+.hn{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:8px;transition:.2s}
+.hn:hover{border-color:var(--border2)}
+.hn .ht{font-size:.8em;color:#fff;font-weight:600;line-height:1.4}
+.hn .ht a{color:#fff;text-decoration:none}
+.hn .ht a:hover{color:var(--accent)}
+.hn .hm{margin-top:5px;font-size:.62em;color:var(--muted);display:flex;gap:12px}
+.hn .hm b{color:var(--green2,#2ecc71)}
+/* DIRECTORIO */
+.dir-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px}
+.dir{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:15px;transition:.25s;display:flex;gap:12px;align-items:flex-start}
+.dir:hover{border-color:rgba(0,255,65,.35);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.dir .d-ico{font-size:1.8em;flex-shrink:0}
+.dir .d-nom{font-size:.82em;font-weight:700;color:#fff}
+.dir .d-cat{font-size:.56em;color:var(--accent);border:1px solid rgba(0,255,65,.2);padding:1px 7px;border-radius:10px;width:fit-content;margin-top:3px;letter-spacing:.5px}
+.dir .d-desc{font-size:.66em;color:var(--muted);margin-top:5px;line-height:1.5}
+.dir .d-link{margin-top:7px;font-size:.68em;color:var(--accent);text-decoration:none;font-weight:700}
+.dir .d-link:hover{text-decoration:underline}
+/* ESTADOS */
+.empty{text-align:center;color:var(--muted);padding:40px 20px;font-size:.8em}
+.empty .big{font-size:40px;margin-bottom:8px}
+.spinner{width:34px;height:34px;margin:40px auto;border-radius:50%;border:3px solid var(--border);border-top-color:var(--accent);animation:giro .7s linear infinite}
+@keyframes giro{to{transform:rotate(360deg)}}
+.footer{text-align:center;margin-top:26px;font-size:.6em;color:var(--gold);letter-spacing:1px}
+</style>
+</head>
+<body>
+<div class="bg"><div class="orb orb1"></div><div class="orb orb2"></div></div>
+
+<div class="header">
+  <div class="logo">🔍</div>
+  <div class="ttl">
+    <h1>FOROS & TOOLS · CIBERSEGURIDAD</h1>
+    <span>HECHA POR GONZA</span>
+  </div>
+  <a href="/apps.html" class="back">← Apps</a>
+</div>
+
+<div class="container">
+  <div class="hero">
+    <div class="big">🛠️</div>
+    <h2>BUSCADOR DE FOROS Y TOOLS</h2>
+    <div class="hecha">⚡ Hecha por <b>GONZA</b></div>
+  </div>
+
+  <div class="buscador">
+    <input id="q" placeholder="Buscá una tool o tema… ej: nmap, phishing, wifi, osint" value="nmap">
+    <button onclick="buscar()">🔍</button>
+  </div>
+  <div class="chips" id="chips"></div>
+
+  <div class="tabs">
+    <button class="tab on" data-v="todo" onclick="setVista('todo')">🌐 Todo</button>
+    <button class="tab" data-v="tools" onclick="setVista('tools')">🛠️ Tools (GitHub)</button>
+    <button class="tab" data-v="foros" onclick="setVista('foros')">💬 Discusiones</button>
+    <button class="tab" data-v="directorio" onclick="setVista('directorio')">📚 Directorio</button>
+  </div>
+
+  <div id="estado"><div class="spinner"></div></div>
+  <div id="resultados"></div>
+  <div class="footer">ZONAHACK · FOROS & TOOLS · HECHA POR GONZA</div>
+</div>
+
+<script>
+var q="nmap", vista="todo";
+function $(id){return document.getElementById(id);}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+
+var POPULARES=["nmap","wireshark","burp suite","metasploit","john the ripper","hydra","hashcat","gobuster","osint","phishing"];
+
+function buildChips(){
+  $("chips").innerHTML=POPULARES.map(function(t){
+    return '<button class="chip" data-t="'+esc(t)+'">'+esc(t)+'</button>';
+  }).join("");
+  $("chips").querySelectorAll(".chip").forEach(function(b){
+    b.addEventListener("click",function(){
+      q=b.getAttribute("data-t");
+      $("q").value=q;
+      buscar();
+    });
+  });
+}
+
+function setVista(v){
+  vista=v;
+  document.querySelectorAll(".tab").forEach(function(t){t.classList.toggle("on",t.getAttribute("data-v")===v);});
+  render();
+}
+
+function mostrarEstado(html){ $("estado").innerHTML=html; }
+
+async function buscar(){
+  q=$("q").value.trim();
+  if(!q) return;
+  mostrarEstado('<div class="spinner"></div>');
+  $("resultados").innerHTML="";
+  var [gh, hn] = await Promise.all([
+    fetch("https://api.github.com/search/repositories?q="+encodeURIComponent(q)+"&sort=stars&order=desc&per_page=12",{headers:{'Accept':'application/vnd.github+json'}}).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}),
+    fetch("https://hn.algolia.com/api/v1/search?query="+encodeURIComponent(q)+"&tags=story&hitsPerPage=12").then(function(r){return r.ok?r.json():null;}).catch(function(){return null;})
+  ]);
+  window._gh=gh; window._hn=hn;
+  mostrarEstado("");
+  render();
+}
+
+function render(){
+  var gh=window._gh, hn=window._hn;
+  var out="";
+  if(vista==="directorio"){ $("resultados").innerHTML=directorioHTML(); return; }
+
+  if(gh && gh.items && gh.items.length){
+    out+='<div class="sec-titulo">🛠️ Tools encontradas (GitHub) · '+gh.total_count+'</div>'+
+      gh.items.slice(0,8).map(function(r){
+        return '<div class="repo"><div class="rn"><a href="'+esc(r.html_url)+'" target="_blank" rel="noopener">'+esc(r.full_name)+'</a></div>'+
+          (r.description?'<div class="rd">'+esc(r.description.slice(0,180))+'</div>':'')+
+          '<div class="rm"><span>⭐ <b>'+fmtNum(r.stargazers_count)+'</b></span>'+
+          (r.language?'<span>💻 '+esc(r.language)+'</span>':'')+
+          (r.forks_count?'<span>⑂ '+fmtNum(r.forks_count)+'</span>':'')+
+          '</div></div>';
+      }).join("");
+  }
+  if(hn && hn.hits && hn.hits.length){
+    out+='<div class="sec-titulo">💬 Discusiones en foros (Hacker News) · '+fmtNum(hn.nbHits)+'</div>'+
+      hn.hits.slice(0,8).map(function(h){
+        var url=h.url||h.story_url||("https://news.ycombinator.com/item?id="+h.objectID);
+        return '<div class="hn"><div class="ht"><a href="'+esc(url)+'" target="_blank" rel="noopener">'+esc(h.title)+'</a></div>'+
+          '<div class="hm"><span>▲ <b>'+(h.points||0)+'</b></span><span>💬 '+(h.num_comments||0)+'</span>'+
+          '<span>⏱ '+(h.created_at||'').slice(0,10)+'</span></div></div>';
+      }).join("");
+  }
+  if(!out){
+    out='<div class="empty"><div class="big">🔍</div>No se encontró nada para "'+esc(q)+'". Probá otra búsqueda o mirá el directorio.</div>';
+  }
+  $("resultados").innerHTML=out;
+}
+
+function fmtNum(n){ return String(n==null?0:n).replace(/\B(?=(\d{3})+(?!\d))/g,"."); }
+
+var DIRECTORIO=[
+  {ico:"🐉",nom:"HackForums",cat:"Foro",desc:"El foro de hacking más grande del mundo: tools, exploits y discusiones.",url:"https://hackforums.net"},
+  {ico:"🔴",nom:"Reddit r/netsec",cat:"Comunidad",desc:"Noticias y discusión técnica de seguridad de redes.",url:"https://www.reddit.com/r/netsec/"},
+  {ico:"🛡️",nom:"Reddit r/cybersecurity",cat:"Comunidad",desc:"Comunidad general de ciberseguridad en español e inglés.",url:"https://www.reddit.com/r/cybersecurity/"},
+  {ico:"💀",nom:"Reddit r/hacking",cat:"Comunidad",desc:"Trucos, tools y tutoriales de hacking ético.",url:"https://www.reddit.com/r/hacking/"},
+  {ico:"🎓",nom:"Reddit r/oscp",cat:"Comunidad",desc:"Estudiantes y certificados OSCP: labs, tools y consejos.",url:"https://www.reddit.com/r/oscp/"},
+  {ico:"🕹️",nom:"Reddit r/tryhackme",cat:"Comunidad",desc:"Plataforma de aprendizaje con salas y herramientas.",url:"https://www.reddit.com/r/tryhackme/"},
+  {ico:"💣",nom:"Exploit-DB",cat:"Base de datos",desc:"Exploits y vulnerabilidades documentadas.",url:"https://www.exploit-db.com/"},
+  {ico:"🏴",nom:"HackTheBox",cat:"Plataforma",desc:"Máquinas vulnerables para practicar pentesting.",url:"https://www.hackthebox.com/"},
+  {ico:"🎯",nom:"TryHackMe",cat:"Plataforma",desc:"Salas guiadas de ciberseguridad para principiantes.",url:"https://tryhackme.com/"},
+  {ico:"🦈",nom:"Wireshark Forums",cat:"Foro",desc:"Foro oficial de la tool de análisis de tráfico Wireshark.",url:"https://ask.wireshark.org/"},
+  {ico:"🐙",nom:"GitHub Security Lab",cat:"Comunidad",desc:"Bugs, research y herramientas de seguridad de GitHub.",url:"https://securitylab.github.com/"},
+  {ico:"🔐",nom:"XSS.is",cat:"Foro",desc:"Foro técnico de hacking web, exploits y técnicas.",url:"https://xss.is/"}
+];
+
+function directorioHTML(){
+  return '<div class="sec-titulo">📚 Directorio de foros y comunidades</div>'+
+    '<div class="dir-grid">'+DIRECTORIO.map(function(d){
+      return '<div class="dir"><div class="d-ico">'+d.ico+'</div><div style="min-width:0">'+
+        '<div class="d-nom">'+esc(d.nom)+'</div>'+
+        '<div class="d-cat">'+esc(d.cat)+'</div>'+
+        '<div class="d-desc">'+esc(d.desc)+'</div>'+
+        '<a class="d-link" href="'+esc(d.url)+'" target="_blank" rel="noopener">Abrir →</a>'+
+        '</div></div>';
+    }).join("")+'</div>';
+}
+
+$("q").addEventListener("keydown",function(e){ if(e.key==="Enter") buscar(); });
+buildChips();
+buscar();
+</script>
+</body>
+</html>

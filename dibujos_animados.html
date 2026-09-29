@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>🎨 Dibujos Animados — ZonaHack</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0a;color:#c8d6e5;font-family:'Courier New',monospace;min-height:100vh}
+.header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid rgba(0,255,65,.08);background:#050505;position:sticky;top:0;z-index:100}
+.header h1{color:#00ff41;font-size:.85em;letter-spacing:1px}
+.back{color:#00ff41;text-decoration:none;font-size:.65em;padding:4px 8px;border:1px solid rgba(255,255,255,.1);border-radius:3px}
+.container{max-width:860px;margin:0 auto;padding:12px}
+.card{border:1px solid rgba(0,255,65,.07);border-radius:8px;padding:12px;margin-bottom:10px;background:#0d0f0d}
+.toolbar{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+.toolbar button,.toolbar label{padding:6px 11px;border:1px solid rgba(0,255,65,.15);border-radius:7px;background:rgba(0,255,65,.04);color:#00ff41;font-size:.68em;cursor:pointer;font-family:'Courier New',monospace;transition:.15s}
+.toolbar button:hover{background:rgba(0,255,65,.1)}
+.toolbar button.on{background:rgba(0,255,65,.18);border-color:#00ff41}
+.toolbar input[type=color]{width:34px;height:34px;border:1px solid rgba(0,255,65,.2);border-radius:6px;background:#111;cursor:pointer;padding:2px}
+.toolbar input[type=range]{width:80px}
+.canvas-wrap{display:flex;align-items:center;justify-content:center;background:#000;border:1px solid rgba(0,255,65,.1);border-radius:8px;padding:8px;position:relative}
+canvas#animCanvas{background:#fff;border-radius:4px;touch-action:none;max-width:100%;height:auto;cursor:crosshair}
+.timeline{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:10px}
+.timeline button{padding:6px 10px;border:1px solid rgba(0,255,65,.15);border-radius:7px;background:rgba(0,255,65,.04);color:#00ff41;font-size:.66em;cursor:pointer;font-family:'Courier New',monospace}
+.timeline button:hover{background:rgba(0,255,65,.1)}
+.frames{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.frame{width:58px;border:1px solid rgba(255,255,255,.12);border-radius:5px;overflow:hidden;cursor:pointer;position:relative;background:#000}
+.frame.active{border-color:#00ff41;box-shadow:0 0 8px rgba(0,255,65,.3)}
+.frame canvas{width:100%;height:44px;display:block}
+.frame .fn{position:absolute;top:2px;left:2px;background:rgba(0,0,0,.7);color:#fff;font-size:.55em;padding:1px 4px;border-radius:3px}
+.frame .del{position:absolute;top:2px;right:2px;background:rgba(231,76,60,.8);color:#fff;border:none;border-radius:3px;font-size:.5em;padding:1px 5px;cursor:pointer;display:none}
+.frame:hover .del{display:block}
+.status{text-align:center;font-size:.62em;color:rgba(255,255,255,.4);margin:6px 0;min-height:14px}
+.hint{font-size:.6em;color:rgba(255,255,255,.25);text-align:center;line-height:1.7}
+</style>
+</head>
+<body>
+<div class="header">
+  <a href="/" class="back">←</a>
+  <h1>🎨 DIBUJOS ANIMADOS</h1>
+  <a href="/" class="back">Volver</a>
+</div>
+<div class="container">
+  <div class="card">
+    <div class="toolbar">
+      <input type="color" id="color" value="#00ff41">
+      <label>Tamaño <input type="range" id="size" min="1" max="40" value="6" style="vertical-align:middle"></label>
+      <button id="btnEraser" onclick="eraser()">🧽 Borrador</button>
+      <button onclick="clearFrame()">🗑 Limpiar</button>
+      <button onclick="undo()">↩ Deshacer</button>
+      <button id="btnOnion" onclick="onion()">👻 Onion skin</button>
+      <span style="flex:1"></span>
+      <button onclick="nuevaAnimacion()">✨ Nueva animación</button>
+    </div>
+    <div class="canvas-wrap">
+      <canvas id="animCanvas" width="480" height="320"></canvas>
+    </div>
+    <div class="status" id="status">Cuadro 1 de 1 · Dibujá, agregá cuadros y reproducí</div>
+    <div class="timeline">
+      <button onclick="addFrame()">➕ Cuadro</button>
+      <button onclick="dupFrame()">⧉ Duplicar</button>
+      <button onclick="delFrame()">🗑 Borrar</button>
+      <span style="flex:1"></span>
+      <button onclick="prevFrame()">⏮</button>
+      <button id="btnPlay" onclick="playPause()">▶ Reproducir</button>
+      <button onclick="nextFrame()">⏭</button>
+      <span style="flex:1"></span>
+      <label>FPS <input type="range" id="fps" min="2" max="30" value="10" style="vertical-align:middle"> <span id="fpsVal">10</span></label>
+    </div>
+    <div class="frames" id="frames"></div>
+  </div>
+  <div class="card">
+    <div class="toolbar" style="margin-bottom:0">
+      <span style="color:#00ff41;font-size:.7em">⬇ EXPORTAR:</span>
+      <button onclick="exportarPNG()">🖼 PNG (cuadro actual)</button>
+      <button onclick="exportarZIP()">📦 ZIP (todos los cuadros)</button>
+      <button onclick="exportarGIF()">🎞 GIF animado</button>
+    </div>
+    <div class="hint">Dibujá con el mouse o el dedo. Cada cuadro es una pose. Con "Onion skin" ves el cuadro anterior medio transparente para animar mejor.</div>
+  </div>
+</div>
+
+<script src="/jszip.min.js"></script>
+<script>
+var cv=document.getElementById("animCanvas"),ctx=cv.getContext("2d");
+var W=480,H=320,color="#00ff41",size=6,erase=false,onionOn=false;
+var frames=[],cur=0,playing=false,playTimer=null;
+function newFrame(){var c=document.createElement("canvas");c.width=W;c.height=H;var x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,W,H);return c;}
+function init(){frames=[newFrame()];cur=0;render();updateTimeline();}
+function drawFrame(){
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle="#fff";ctx.fillRect(0,0,W,H);
+  if(onionOn&&cur>0){
+    ctx.globalAlpha=0.25;ctx.drawImage(frames[cur-1],0,0);ctx.globalAlpha=1;
+  }
+  ctx.drawImage(frames[cur],0,0);
+}
+function render(){drawFrame();updateTimeline();}
+function updateTimeline(){
+  var box=document.getElementById("frames");box.innerHTML="";
+  frames.forEach(function(f,i){
+    var d=document.createElement("div");d.className="frame"+(i===cur?" active":"");
+    var c=document.createElement("canvas");c.width=116;c.height=88;c.getContext("2d").drawImage(f,0,0,116,88);
+    c.onclick=function(){cur=i;if(playing)stop();render();};
+    var n=document.createElement("span");n.className="fn";n.textContent=(i+1);
+    var del=document.createElement("button");del.className="del";del.textContent="✕";del.onclick=function(e){e.stopPropagation();if(frames.length>1){frames.splice(i,1);if(cur>=frames.length)cur=frames.length-1;render();}};
+    d.appendChild(c);d.appendChild(n);d.appendChild(del);box.appendChild(d);
+  });
+  document.getElementById("status").textContent="Cuadro "+(cur+1)+" de "+frames.length+(playing?" · REPRODUCIENDO":"");
+}
+// dibujo con pointer events
+var drawing=false,lastX=0,lastY=0;
+cv.addEventListener("pointerdown",function(e){drawing=true;var p=pos(e);lastX=p.x;lastY=p.y;drawTo(p.x,p.y,true);});
+cv.addEventListener("pointermove",function(e){if(!drawing)return;var p=pos(e);drawTo(p.x,p.y,false);lastX=p.x;lastY=p.y;});
+window.addEventListener("pointerup",function(){if(drawing){drawing=false;undoStack.push(frames[cur].toDataURL());if(undoStack.length>30)undoStack.shift();}});
+function pos(e){var r=cv.getBoundingClientRect();var sx=W/r.width,sy=H/r.height;return{x:(e.clientX-r.left)*sx,y:(e.clientY-r.top)*sy};}
+var undoStack=[];
+function drawTo(x,y,start){
+  var c=frames[cur].getContext("2d");
+  c.globalCompositeOperation=erase?"destination-out":"source-over";
+  c.strokeStyle=erase?"rgba(0,0,0,1)":color;
+  c.fillStyle=erase?"rgba(0,0,0,1)":color;
+  c.lineWidth=size;c.lineCap="round";c.lineJoin="round";
+  if(start){c.beginPath();c.arc(x,y,size/2,0,Math.PI*2);c.fill();}
+  else{c.beginPath();c.moveTo(lastX,lastY);c.lineTo(x,y);c.stroke();}
+  drawFrame();
+}
+function eraser(){erase=!erase;document.getElementById("btnEraser").classList.toggle("on",erase);}
+function onion(){onionOn=!onionOn;document.getElementById("btnOnion").classList.toggle("on",onionOn);render();}
+function clearFrame(){var c=frames[cur].getContext("2d");c.fillStyle="#fff";c.fillRect(0,0,W,H);undoStack.push(frames[cur].toDataURL());render();}
+function undo(){if(!undoStack.length)return;var u=undoStack.pop();var img=new Image();img.onload=function(){var c=frames[cur].getContext("2d");c.clearRect(0,0,W,H);c.drawImage(img,0,0);render();};img.src=u;}
+function addFrame(){frames.splice(cur+1,0,newFrame());cur++;render();}
+function dupFrame(){var c=document.createElement("canvas");c.width=W;c.height=H;c.getContext("2d").drawImage(frames[cur],0,0);frames.splice(cur+1,0,c);cur++;render();}
+function delFrame(){if(frames.length<=1)return;frames.splice(cur,1);if(cur>=frames.length)cur=frames.length-1;render();}
+function prevFrame(){if(cur>0){cur--;if(playing){stop();}render();}}
+function nextFrame(){if(cur<frames.length-1){cur++;if(playing){stop();}render();}}
+function playPause(){playing?stop():play();}
+function play(){playing=true;document.getElementById("btnPlay").textContent="⏸ Pausar";var f=parseInt(document.getElementById("fps").value);playTimer=setInterval(function(){cur=(cur+1)%frames.length;render();},1000/f);}
+function stop(){playing=false;clearInterval(playTimer);document.getElementById("btnPlay").textContent="▶ Reproducir";updateTimeline();}
+document.getElementById("fps").oninput=function(){document.getElementById("fpsVal").textContent=this.value;};
+document.getElementById("color").oninput=function(){color=this.value;erase=false;document.getElementById("btnEraser").classList.remove("on");};
+document.getElementById("size").oninput=function(){size=parseInt(this.value);};
+function nuevaAnimacion(){if(!confirm("Borrar todos los cuadros y empezar de nuevo?"))return;init();}
+function exportarPNG(){var a=document.createElement("a");a.href=frames[cur].toDataURL("image/png");a.download="cuadro_"+(cur+1)+".png";a.click();}
+function exportarZIP(){
+  if(typeof JSZip==="undefined"){alert("Biblioteca ZIP no disponible");return;}
+  var z=new JSZip();
+  frames.forEach(function(f,i){z.file("cuadro_"+(i+1)+".png",f.toDataURL("image/png").split(",")[1],{base64:true});});
+  z.generateAsync({type:"blob"}).then(function(b){var a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="animacion.zip";a.click();});
+}
+// ─── GIF ANIMADO (codificador GIF89a + LZW) ───
+function exportarGIF(){
+  var fps=parseInt(document.getElementById("fps").value);
+  var delay=Math.max(1,Math.round(100/fps));
+  var gif=new Uint8Array(gifBuild(frames,delay));
+  var blob=new Blob([gif],{type:"image/gif"});
+  var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="animacion.gif";a.click();
+}
+function gifBuild(frames,delay){
+  var w=frames[0].width,h=frames[0].height;
+  // paleta web-safe 216 + grises = 256
+  var pal=[];
+  for(var r=0;r<6;r++)for(var g=0;g<6;g++)for(var b=0;b<6;b++)pal.push([r*51,g*51,b*51]);
+  for(var i=0;i<40;i++){var v=Math.round(i*255/39);pal.push([v,v,v]);}
+  var parts=[];
+  parts.push(strU("GIF89a"));
+  parts.push(num(w,2));parts.push(num(h,2));
+  parts.push(0x87);parts.push(0);parts.push(0); // gct flag + 256 colores
+  for(var p=0;p<pal.length;p++)parts.push([pal[p][0],pal[p][1],pal[p][2]]);
+  for(var f=0;f<frames.length;f++){
+    var c=frames[f].getContext("2d");
+    var img=c.getImageData(0,0,w,h).data;
+    var idx=new Uint8Array(w*h);
+    for(var i2=0;i2<w*h;i2++){
+      var rr=img[i2*4],gg=img[i2*4+1],bb=img[i2*4+2],aa=img[i2*4+3];
+      if(aa<128){idx[i2]=255;continue;} // transparente -> gris 255
+      idx[i2]=nearest(rr,gg,bb,pal);
+    }
+    // GCE
+    parts.push([0x21,0xF9,0x04,0x00]);parts.push(num(delay,2));parts.push([0x00,0x00]);
+    // descriptor
+    parts.push([0x2C]);parts.push(num(0,2));parts.push(num(0,2));parts.push(num(w,2));parts.push(num(h,2));parts.push([0x00]);
+    // LZW
+    var lzw=lzwEncode(idx,w);
+    parts.push([lzw.length&0xFF,Math.ceil(lzw.length/255)]);
+    for(var k=0;k<lzw.length;k+=255)parts.push(lzw.subarray(k,Math.min(k+255,lzw.length)));
+    parts.push([0x00]);
+  }
+  parts.push([0x3B]);
+  // unir
+  var total=0;parts.forEach(function(x){total+=x.length;});
+  var out=new Uint8Array(total);var o=0;
+  parts.forEach(function(x){out.set(x,o);o+=x.length;});
+  return out;
+}
+function nearest(r,g,b,pal){var best=0,bd=1e9;for(var i=0;i<pal.length;i++){var dr=r-pal[i][0],dg=g-pal[i][1],db=b-pal[i][2];var d=dr*dr+dg*dg+db*db;if(d<bd){bd=d;best=i;}}return best;}
+function strU(s){var a=new Uint8Array(s.length);for(var i=0;i<s.length;i++)a[i]=s.charCodeAt(i);return a;}
+function num(n,l){var a=new Uint8Array(l);for(var i=0;i<l;i++){a[i]=n&0xFF;n=n>>8;}return a;}
+function lzwEncode(data,width){
+  var out=[];var bitCache=0,bitCnt=0;
+  function putCode(code){bitCache|=(code<<bitCnt);bitCnt+=9;while(bitCnt>=8){out.push(bitCache&0xFF);bitCache>>=8;bitCnt-=8;}}
+  var dict={},next=258;
+  putCode(256); // clear
+  var curPix=-1;
+  for(var i=0;i<data.length;i++){
+    var k=data[i];
+    if(curPix<0){curPix=k;}
+    else{
+      var key=curPix+","+k;
+      if(dict[key]!==undefined){curPix=dict[key];}
+      else{
+        putCode(curPix);
+        if(next<512){dict[key]=next++;} // fijo en 9 bits: tope 512
+        curPix=k;
+      }
+    }
+  }
+  if(curPix>=0)putCode(curPix);
+  putCode(257); // end
+  if(bitCnt>0)out.push(bitCache&0xFF);
+  return new Uint8Array(out);
+}
+init();
+</script>
+</body>
+</html>

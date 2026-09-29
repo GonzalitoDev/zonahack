@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<title>ðŸ“¡ Retransmitir PÃ¡gina Â· ZonaHack</title>
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/icon_96.png" type="image/png">
+<meta name="theme-color" content="#00ff41">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:radial-gradient(circle at 20% 10%,rgba(0,255,65,.05),transparent 50%),#07090e;color:#d7e2ef;font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh}
+.wrap{max-width:900px;margin:0 auto;padding:14px}
+.hdr{display:flex;align-items:center;gap:10px;padding-bottom:10px;border-bottom:1px solid rgba(0,255,65,.2)}
+.hdr .logo{font-size:1.6em}
+.hdr h1{font-size:1em;letter-spacing:2px;font-family:'Courier New',monospace;color:#00ff41;text-shadow:0 0 12px rgba(0,255,65,.4)}
+.hdr span{font-size:.56em;color:#6d7f93}
+.hdr a{margin-left:auto;color:#00ff41;text-decoration:none;font-size:.7em;border:1px solid rgba(0,255,65,.25);padding:5px 10px;border-radius:8px}
+.hero{text-align:center;padding:14px;border:1px solid rgba(0,255,65,.14);border-radius:16px;margin:12px 0;background:rgba(0,20,0,.3)}
+.hero .big{font-size:2em}
+.hero h2{color:#00ff41;letter-spacing:2px;font-size:1em;margin:6px 0}
+.hero p{font-size:.6em;color:#6d7f93}
+.stage{background:rgba(13,17,23,.92);border:1px solid rgba(0,255,65,.15);border-radius:16px;padding:16px;text-align:center}
+video{width:100%;max-width:720px;background:#000;border:1px solid rgba(0,255,65,.25);border-radius:12px;display:block;margin:0 auto}
+.codigo{font-size:2.6em;letter-spacing:6px;color:#00ff41;font-family:'Courier New',monospace;margin:12px 0;text-shadow:0 0 18px rgba(0,255,65,.5)}
+.btn{background:linear-gradient(135deg,#00ff41,#00e5ff);color:#03140a;border:none;border-radius:12px;padding:14px 24px;font-weight:800;font-size:.8em;cursor:pointer;font-family:inherit;margin:6px}
+.btn.stop{background:linear-gradient(135deg,#ff4d4d,#ff0044);color:#fff}
+.btn.sec{background:#0a0d12;border:1px solid rgba(0,255,65,.3);color:#00ff41;font-weight:600}
+.count{font-size:.7em;color:#00ff41;margin:10px 0}
+.count b{font-size:1.4em}
+.link{font-size:.66em;color:#6d7f93;margin-top:6px;word-break:break-all}
+.foot{text-align:center;font-size:.56em;color:#6d7f93;letter-spacing:1px;margin-top:16px;padding-bottom:20px}
+.toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#0a0d12;border:1px solid #00ff41;color:#00ff41;padding:10px 18px;border-radius:12px;font-size:.66em;z-index:99;display:none;max-width:90vw;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hdr">
+    <div class="logo">ðŸ“¡</div>
+    <div><h1>RETRANSMITIR PÃGINA</h1><span>COMPARTÃ TU PANTALLA EN VIVO</span></div>
+    <a href="/">â†</a>
+  </div>
+  <div class="hero">
+    <div class="big">ðŸ“¡</div>
+    <h2>RETRANSMITIR EN VIVO</h2>
+    <p>CompartÃ­ tu pantalla (o una pestaÃ±a) en tiempo real. Los demÃ¡s entran con tu cÃ³digo y la ven.</p>
+  </div>
+  <div class="stage">
+    <div id="pre" style="font-size:.72em;color:#6d7f93;padding:20px">ðŸŽ¬ TodavÃ­a no estÃ¡s transmitiendo.<br><br>
+      <button class="btn" onclick="iniciar()">ðŸ“¡ INICIAR RETRANSMISIÃ“N</button>
+    </div>
+    <div id="live" style="display:none">
+      <video id="local" autoplay muted playsinline></video>
+      <div class="codigo" id="codigo">------</div>
+      <div class="count">ðŸ‘ï¸ Viendo: <b id="viewers">0</b></div>
+      <div class="link" id="link"></div>
+      <button class="btn stop" onclick="detener()">â¹ DETENER</button>
+    </div>
+  </div>
+  <div class="foot">ZONAHACK Â· RETRANSMISIÃ“N EN VIVO Â· WEBRTC ðŸ“¡</div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* â•â•â• RETRANSMISIÃ“N â€” WebRTC + seÃ±alizaciÃ³n por Supabase â•â•â• */
+var KEY="sb_publishable_3VvBUD5Bdu3Uaq59fJ99MQ_XDCtujUU";
+var API="https://xfwolaurpeofysnymqle.supabase.co/rest/v1";
+var WS="wss://xfwolaurpeofysnymqle.supabase.co/realtime/v1/websocket?apikey="+KEY+"&vsn=1.0.0";
+var H={"apikey":KEY,"Authorization":"Bearer "+KEY,"Content-Type":"application/json"};
+var STUN=[{urls:"stun:stun.l.google.com:19302"},{urls:"turn:5fae371f-39e5-4c16-9b04-658e273c947c.clouding.host:3478",username:"gonza",credential:"gonza2026"},{urls:"turn:5fae371f-39e5-4c16-9b04-658e273c947c.clouding.host:3478?transport=tcp",username:"gonza",credential:"gonza2026"}];
+var stream=null, ws=null, hb=null, code="";
+var pcs={}, viewers=0;
+
+function $(i){return document.getElementById(i);}
+function toast(m){var t=$("toast");t.textContent=m;t.style.display="block";clearTimeout(t._x);t._x=setTimeout(function(){t.style.display="none";},2600);}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function enviar(tipo, vid, obj){
+  var uid="rtc_"+tipo+"_"+code+"_"+vid;
+  fetch(API+"/chat_mensajes",{method:"POST",headers:H,body:JSON.stringify({usuario:"rtc",user_id:uid,mensaje:JSON.stringify(obj)})}).catch(function(){});
+}
+
+function iniciar(){
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getDisplayMedia){ toast("Tu navegador no soporta compartir pantalla"); return; }
+  navigator.mediaDevices.getDisplayMedia({video:{frameRate:{ideal:24}},audio:true}).then(function(st){
+    stream=st;
+    $("pre").style.display="none"; $("live").style.display="block";
+    $("local").srcObject=st;
+    code=Math.random().toString(36).slice(2,8).toUpperCase();
+    $("codigo").textContent=code;
+    $("link").textContent="ðŸ”— CompartÃ­ este link: /ver.html?c="+code+" (o el cÃ³digo "+code+")";
+    conectar();
+    toast("ðŸ“¡ TransmisiÃ³n iniciada Â· CÃ³digo: "+code);
+    // si deja de compartir
+    st.getVideoTracks()[0].onended=function(){ detener(); };
+  }).catch(function(){ toast("Cancelaste compartir pantalla"); });
+}
+
+function crearPC(vid){
+  try{ if(pcs[vid]){ pcs[vid].close(); } }catch(e){}
+  var pc=new RTCPeerConnection({iceServers:STUN});
+  pcs[vid]=pc;
+  (stream.getTracks()).forEach(function(t){ try{pc.addTrack(t,stream);}catch(e){} });
+  pc.onicecandidate=function(e){ if(e.candidate) enviar("i",vid,{candidate:e.candidate,from:"s"}); };
+  pc.onconnectionstatechange=function(){
+    if(pc.connectionState==="disconnected"||pc.connectionState==="failed"){ try{pc.close();}catch(e){} delete pcs[vid]; contar(); }
+  };
+  pc.createOffer().then(function(offer){ return pc.setLocalDescription(offer); }).then(function(){
+    enviar("o",vid,{sdp:pc.localDescription});
+  }).catch(function(){});
+}
+
+function procesar(msg, uid){
+  var m=uid.split("_"); // rtc, tipo, code, vid
+  if(m.length<4) return;
+  var tipo=m[1], vid=m[3];
+  if(uid.indexOf("rtc_"+tipo+"_"+code+"_")!==0) return;
+  try{ var d=JSON.parse(msg.mensaje||"{}"); }catch(e){ return; }
+  if(tipo==="j"){ crearPC(vid); contar(); }
+  else if(tipo==="a"){ var pc=pcs[vid]; if(pc&&d.sdp){ pc.setRemoteDescription(d.sdp).catch(function(){}); } }
+  else if(tipo==="i"){ if(d.from==="v"){ var pc2=pcs[vid]; if(pc2&&d.candidate){ pc2.addIceCandidate(d.candidate).catch(function(){}); } } }
+}
+function contar(){
+  viewers=Object.keys(pcs).length;
+  $("viewers").textContent=viewers;
+}
+function conectar(){
+  try{ if(ws)ws.close(); }catch(e){}
+  try{
+    ws=new WebSocket(WS);
+    ws.onopen=function(){
+      ws.send(JSON.stringify({topic:"realtime:chat_mensajes",event:"phx_join",payload:{config:{postgres_changes:[{event:"*",schema:"public",table:"chat_mensajes"}]}},ref:"1"}));
+      hb=setInterval(function(){ try{ws.send(JSON.stringify({topic:"phoenix",event:"heartbeat",payload:{},ref:"0"}));}catch(e){} },8000);
+    };
+    ws.onmessage=function(e){
+      try{
+        var m=JSON.parse(e.data);
+        if(m.event!=="postgres_changes")return;
+        var d=m.payload&&m.payload.data;
+        if(d&&d.type==="INSERT"&&d.record&&(d.record.user_id||"").indexOf("rtc_"+code)===0){
+          procesar(d.record, d.record.user_id);
+        }
+      }catch(err){}
+    };
+    ws.onclose=function(){ if(hb)clearInterval(hb); setTimeout(conectar,3000); };
+  }catch(e){ setTimeout(conectar,3000); }
+}
+function detener(){
+  if(stream){ stream.getTracks().forEach(function(t){ t.stop(); }); stream=null; }
+  Object.keys(pcs).forEach(function(v){ try{pcs[v].close();}catch(e){} });
+  pcs={};
+  if(hb)clearInterval(hb);
+  if(ws)try{ws.close();}catch(e){}
+  $("pre").style.display="block"; $("live").style.display="none";
+  toast("â¹ RetransmisiÃ³n detenida");
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<script>
+// El asistente usa APIs del VPS (ia_chat, memoria, estado...). Si se abre desde
+// Vercel (donde esas APIs no existen), redirigir al VPS para que funcione todo.
+(function(){
+  try{
+    if(location.hostname.indexOf("5fae371f")<0 && location.hostname!=="localhost"){
+      location.replace("https://5fae371f-39e5-4c16-9b04-658e273c947c.clouding.host/asistente.html");
+    }
+  }catch(e){}
+})();
+</script>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<title>🤖 Asistente Personal · ZonaHack</title>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#2ee6a8">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Asistente">
+<link rel="apple-touch-icon" href="/icon_zh_192.png">
+<link rel="icon" type="image/png" href="/icon_zh_192.png">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#07090e;--card:rgba(13,17,23,.92);--border:#1c2531;--border2:rgba(46,230,168,.18);--text:#d7e2ef;--muted:#6d7f93;--accent:#2ee6a8;--violet:#7a5cff;--gold:#f1c40f}
+html{scrollbar-color:rgba(46,230,168,.3) transparent}
+body{background:radial-gradient(1200px 600px at 80% -10%,rgba(46,230,168,.08),transparent 60%),radial-gradient(1000px 700px at 10% 110%,rgba(122,92,255,.1),transparent 60%),var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;height:100vh;height:100dvh;display:flex;flex-direction:column;overflow:hidden}
+::selection{background:rgba(46,230,168,.3)}
+::-webkit-scrollbar{width:9px;height:9px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(46,230,168,.22);border-radius:20px;border:2px solid transparent;background-clip:padding-box}
+::-webkit-scrollbar-thumb:hover{background:rgba(46,230,168,.4);background-clip:padding-box;border:2px solid transparent}
+.bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.orb{position:absolute;border-radius:50%;filter:blur(90px);opacity:.35;animation:flotar 18s ease-in-out infinite}
+.orb1{width:480px;height:480px;background:radial-gradient(circle,rgba(46,230,168,.22),transparent 70%);top:-170px;right:-120px}
+.orb2{width:520px;height:520px;background:radial-gradient(circle,rgba(122,92,255,.22),transparent 70%);bottom:-200px;left:-160px;animation-delay:-7s}
+.orb3{width:340px;height:340px;background:radial-gradient(circle,rgba(0,229,255,.12),transparent 70%);top:40%;left:55%;animation-delay:-11s}
+@keyframes flotar{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(20px,-14px) scale(1.08)}}
+.wrap{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;min-height:0}
+
+/* ═══ HEADER ═══ */
+.header{display:flex;align-items:center;gap:6px;padding:10px 14px;border-bottom:1px solid var(--border);background:rgba(8,11,17,.82);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+.logo{width:40px;height:40px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px;background:linear-gradient(135deg,rgba(46,230,168,.3),rgba(122,92,255,.3));border:1px solid rgba(46,230,168,.5);box-shadow:0 0 18px rgba(46,230,168,.25);animation:logoPulso 4s ease-in-out infinite}
+@keyframes logoPulso{0%,100%{box-shadow:0 0 14px rgba(46,230,168,.2)}50%{box-shadow:0 0 26px rgba(46,230,168,.45)}}
+.ttl{flex:1;min-width:0;padding:0 4px}
+.ttl h1{font-size:.92em;letter-spacing:2px;font-weight:900;font-family:'Courier New',monospace;color:#fff;text-shadow:0 0 14px rgba(46,230,168,.35)}
+.ttl span{font-size:.6em;color:var(--muted)}
+.hbtn{background:transparent;border:1px solid transparent;border-radius:11px;width:38px;height:38px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.02em;cursor:pointer;font-family:inherit;color:var(--muted);transition:all .15s}
+.hbtn:hover{background:rgba(46,230,168,.1);border-color:var(--border2);color:var(--text);transform:translateY(-1px)}
+.hbtn:active{transform:translateY(0) scale(.94)}
+.hbtn.activo{background:rgba(46,230,168,.16);border-color:rgba(46,230,168,.55);color:var(--accent);box-shadow:0 0 12px rgba(46,230,168,.25)}
+.hsep{width:1px;height:26px;background:linear-gradient(180deg,transparent,var(--border),transparent);flex-shrink:0;margin:0 3px}
+.btn-jarvis{background:linear-gradient(135deg,#2ee6a8,#00e5ff);color:#03140a;border:none;border-radius:12px;padding:9px 14px;font-weight:800;font-size:.66em;cursor:pointer;font-family:inherit;flex-shrink:0;box-shadow:0 0 16px rgba(46,230,168,.35);transition:.15s}
+.btn-jarvis:hover{transform:translateY(-1px);box-shadow:0 0 24px rgba(46,230,168,.55)}
+.back{color:var(--accent);text-decoration:none;font-size:1.05em;width:38px;height:38px;display:flex;align-items:center;justify-content:center;border:1px solid var(--border);border-radius:11px;transition:.15s;flex-shrink:0}
+.back:hover{border-color:var(--accent);box-shadow:0 0 12px rgba(46,230,168,.25)}
+
+/* ═══ SUGERENCIAS ═══ */
+.sug{display:flex;gap:6px;padding:8px 14px;flex-wrap:wrap;border-bottom:1px solid var(--border);background:rgba(8,11,17,.5)}
+.sug button,.sug a{border:1px solid var(--border);border-radius:16px;background:rgba(13,17,23,.7);color:var(--muted);font-size:.62em;padding:6px 12px;cursor:pointer;font-family:inherit;transition:.12s;text-decoration:none;display:inline-flex;align-items:center;gap:4px}
+.sug button:hover{border-color:var(--accent);color:var(--accent);box-shadow:0 0 10px rgba(46,230,168,.15)}
+.sug a:hover{border-color:var(--accent);color:var(--accent)}
+.sug a.c-accent{border-color:rgba(46,230,168,.4);color:var(--accent);background:rgba(46,230,168,.08)}
+.sug a.c-gold{border-color:rgba(241,196,15,.4);color:var(--gold);background:rgba(241,196,15,.08)}
+.sug a.c-violet{border-color:rgba(122,92,255,.4);color:var(--violet);background:rgba(122,92,255,.08)}
+.sug a.c-blue{border-color:rgba(0,229,255,.4);color:#00e5ff;background:rgba(0,229,255,.08)}
+.sug a.c-red{border-color:rgba(255,77,77,.4);color:#ff6b6b;background:rgba(255,77,77,.08)}
+.sug a.c-orange{border-color:rgba(255,157,0,.4);color:#ffd166;background:rgba(255,157,0,.08)}
+.sug a.c-card{border-color:rgba(46,230,168,.25);color:var(--accent);background:var(--card)}
+
+/* ═══ MENSAJES ═══ */
+.msgs{flex:1;overflow-y:auto;padding:18px 16px;display:flex;flex-direction:column;gap:14px;-webkit-overflow-scrolling:touch;scroll-behavior:smooth}
+.msg{display:flex;gap:9px;max-width:88%;animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.msg.bot{align-self:flex-start}
+.msg.user{align-self:flex-end;flex-direction:row-reverse}
+.avatar{width:36px;height:36px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:17px;background:linear-gradient(135deg,rgba(46,230,168,.22),rgba(122,92,255,.22));border:1px solid rgba(46,230,168,.4);box-shadow:0 0 12px rgba(46,230,168,.14)}
+.msg.user .avatar{background:linear-gradient(135deg,rgba(122,92,255,.28),rgba(46,230,168,.2));border-color:rgba(122,92,255,.45)}
+.bubble{min-width:0;max-width:100%;padding:10px 14px;border-radius:14px;font-size:.84em;line-height:1.6;word-break:break-word;white-space:pre-wrap;box-shadow:0 4px 18px rgba(0,0,0,.28)}
+.msg.bot .bubble{border-top-left-radius:4px;background:linear-gradient(165deg,rgba(18,24,34,.92),rgba(11,15,21,.94));border:1px solid var(--border)}
+.msg.user .bubble{border-top-right-radius:4px;background:linear-gradient(165deg,rgba(46,230,168,.15),rgba(122,92,255,.15));border:1px solid rgba(46,230,168,.3)}
+.who{font-size:.6em;font-weight:800;letter-spacing:.5px;margin-bottom:5px;display:flex;align-items:baseline;gap:7px}
+.msg.bot .who{color:var(--accent)}
+.msg.user .who{color:var(--violet);justify-content:flex-end}
+.who .time{font-weight:400;font-size:.92em;color:var(--muted);opacity:.75}
+.cuerpo{min-width:0}
+.typing{display:inline-block;width:8px;height:8px;background:var(--accent);border-radius:50%;margin-right:4px;animation:tp 1s infinite}
+@keyframes tp{0%,100%{opacity:.2}50%{opacity:1}}
+
+/* ═══ INPUT ═══ */
+.input-bar{display:flex;gap:8px;padding:10px 14px;padding-bottom:calc(10px + env(safe-area-inset-bottom));border-top:1px solid var(--border);background:rgba(8,11,17,.9);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.input-bar input{flex:1;background:rgba(13,17,23,.85);border:1px solid var(--border);border-radius:14px;color:var(--text);padding:13px 15px;font-size:.85em;outline:none;font-family:inherit;transition:border-color .15s,box-shadow .15s}
+.input-bar input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(46,230,168,.12)}
+.input-bar input::placeholder{color:var(--muted);opacity:.7}
+.input-bar button{background:linear-gradient(135deg,#2ee6a8,#7a5cff);color:#03140a;border:none;border-radius:14px;padding:13px 20px;font-weight:800;font-size:.78em;cursor:pointer;font-family:inherit;box-shadow:0 0 14px rgba(46,230,168,.2);transition:.15s}
+.input-bar button:hover{transform:translateY(-1px);box-shadow:0 0 22px rgba(46,230,168,.4)}
+.input-bar .ico{background:rgba(13,17,23,.85);border:1px solid var(--border);color:var(--text);border-radius:14px;padding:13px 15px;font-size:.95em;cursor:pointer;font-family:inherit;flex-shrink:0;transition:.15s}
+.input-bar .ico:hover{border-color:var(--border2)}
+.input-bar .ico.activo{background:rgba(255,90,90,.3);border-color:rgba(255,90,90,.4)}
+.input-bar .ico.hablar{background:rgba(46,230,168,.12);border-color:rgba(46,230,168,.3)}
+.aviso{text-align:center;font-size:.55em;color:var(--muted);padding:4px}
+.pcbtn{background:var(--card);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:8px 12px;font-size:.66em;cursor:pointer;font-family:inherit;transition:.12s}
+.pcbtn:hover{border-color:var(--accent);color:var(--accent);box-shadow:0 0 8px rgba(46,230,168,.12)}
+.mood{background:rgba(13,17,23,.7);border:1px solid var(--border);border-radius:14px;color:var(--muted);padding:6px 11px;font-size:.62em;cursor:pointer;font-family:inherit;transition:.12s}
+.mood:hover{border-color:var(--accent);color:var(--accent);box-shadow:0 0 8px rgba(46,230,168,.12)}
+.mood.on{color:#03140a;background:var(--accent);border-color:var(--accent);font-weight:800;box-shadow:0 0 14px rgba(46,230,168,.4)}
+/* ── Bloques de código con copiar ── */
+.code-wrap{margin:8px 0;border:1px solid var(--border);border-radius:10px;overflow:hidden;background:#0a0d12}
+.code-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 10px;background:rgba(255,255,255,.04);border-bottom:1px solid var(--border)}
+.code-head span{font-size:.6em;color:var(--muted);font-family:monospace;text-transform:uppercase;letter-spacing:1px}
+.code-head button{background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--accent);padding:4px 10px;font-size:.62em;cursor:pointer;font-family:inherit}
+.code-head button:hover{border-color:var(--accent)}
+.code-wrap pre{margin:0;padding:10px 12px;overflow-x:auto;font-size:.74em;line-height:1.5}
+.code-wrap code{font-family:Consolas,'Courier New',monospace;color:#e6edf3;white-space:pre;display:block}
+/* ── MODO JARVIS ── */
+#jarvis{display:none;position:fixed;inset:0;z-index:600;background:radial-gradient(circle at 50% 40%,#0a1a22 0%,#07090e 70%);flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:20px}
+.jarvis-ring{width:170px;height:170px;border-radius:50%;border:3px solid rgba(46,230,168,.25);position:relative;display:flex;align-items:center;justify-content:center;animation:ring 2.4s ease-in-out infinite}
+.jarvis-ring::before,.jarvis-ring::after{content:'';position:absolute;inset:-12px;border-radius:50%;border:2px solid rgba(46,230,168,.15);animation:ring2 3s linear infinite}
+.jarvis-ring::after{inset:-26px;animation:ring2 3.6s linear infinite reverse}
+@keyframes ring{0%,100%{box-shadow:0 0 30px rgba(46,230,168,.25)}50%{box-shadow:0 0 80px rgba(46,230,168,.55)}}
+@keyframes ring2{0%{opacity:.2;transform:scale(.85)}50%{opacity:.7}100%{opacity:.2;transform:scale(1.1)}}
+#jarvisIco{font-size:2.4em;filter:drop-shadow(0 0 16px rgba(46,230,168,.8))}
+#jarvisStatus{font-size:.8em;letter-spacing:2px;color:var(--accent);font-weight:800;text-align:center}
+#jarvisSub{max-width:90%;font-size:.72em;color:var(--muted);text-align:center;line-height:1.6;min-height:22px;word-break:break-word}
+.jarvis-btn{background:linear-gradient(135deg,#2ee6a8,#00e5ff);color:#03140a;border:none;border-radius:60px;width:88px;height:88px;font-size:1.8em;cursor:pointer;font-family:inherit;box-shadow:0 0 40px rgba(46,230,168,.5);transition:.15s}
+.jarvis-btn:active{transform:scale(.93)}
+.jarvis-salir{margin-top:6px;background:none;border:1px solid var(--border);border-radius:12px;color:var(--muted);padding:8px 16px;font-size:.68em;cursor:pointer;font-family:inherit}
+
+/* ═══ MÓVIL / PWA ═══ */
+@media (max-width:640px){
+  .header{flex-wrap:wrap;gap:6px;padding:10px 12px}
+  .header .ttl{width:100%;order:-1}
+  .ttl h1{font-size:.85em}
+  .back{margin-left:auto}
+  /* sugerencias y ánimos: scroll horizontal en una fila (sin wrap) */
+  .sug,#moodBar{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding:8px 12px}
+  .sug::-webkit-scrollbar,#moodBar::-webkit-scrollbar{display:none}
+  .sug button,.sug a,#moodBar .mood{flex-shrink:0}
+  .sug span{display:none}
+  #dlBtn{display:none}
+  /* mensajes */
+  .msgs{padding:12px 10px;gap:10px}
+  .msg{max-width:92%}
+  .bubble{font-size:.86em;padding:9px 12px}
+  .avatar{width:30px;height:30px;font-size:15px}
+  /* input grande, sin zoom iOS */
+  .input-bar{padding:9px 10px;padding-bottom:calc(9px + env(safe-area-inset-bottom));gap:6px}
+  .input-bar input{font-size:16px;padding:13px 12px;min-height:46px}
+  .input-bar button,.input-bar .ico{min-height:46px;padding:0 16px;font-size:.8em}
+  .input-bar .ico{padding:0 14px}
+  .aviso{font-size:.52em;padding:6px;padding-bottom:calc(6px + env(safe-area-inset-bottom))}
+  /* paneles */
+  #pcPanel,#estadoPanel,#memoriaPanel,#historialPanel{padding:10px 12px}
+  .memoria input{width:100%!important;margin-bottom:6px}
+  /* modo jarvis */
+  #jarvis{padding:16px}
+  .jarvis-ring{width:150px;height:150px}
+  .jarvis-btn{width:84px;height:84px}
+}
+
+/* ═══ TABLETS / ESCRITORIO ═══ */
+@media (min-width:700px){
+  .wrap{max-width:920px;margin:0 auto;width:100%;border-left:1px solid var(--border);border-right:1px solid var(--border);box-shadow:0 0 60px rgba(0,0,0,.35)}
+  .msg{max-width:75%}
+  .input-bar input{font-size:1em}
+  .sug,#moodBar{justify-content:center}
+}
+
+/* ═══ PC / DESKTOP: solo usa el ancho, mantiene los tamaños base ═══ */
+@media (min-width:900px){
+  .wrap{max-width:1040px}
+}
+</style>
+</head>
+<body>
+<div class="bg"><div class="orb orb1"></div><div class="orb orb2"></div><div class="orb orb3"></div></div>
+
+<div class="wrap" id="chatWrap">
+  <div class="header">
+    <div class="logo">🤖</div>
+    <div class="ttl"><h1>ASISTENTE PERSONAL</h1><span id="verTxt">tu IA · en tu VPS</span></div>
+    <button class="hbtn" id="ownerBtn" onclick="toggleOwner()" title="Modo jefe (solo Gonza)">👑</button>
+    <button class="hbtn" id="vozBtn" onclick="toggleVozGenero()" title="Voz: masculina">👨</button>
+    <button class="hbtn" id="codBtn" onclick="toggleLeerCodigo()" title="No leer el código en voz alta">🔇</button>
+    <span class="hsep"></span>
+    <button class="hbtn" id="histBtn" onclick="toggleHistorial()" title="Historial de chats">🕓</button>
+    <button class="hbtn" id="memBtn" onclick="toggleMemoria()" title="Memoria del asistente">💾</button>
+    <button class="hbtn" id="estadoBtn" onclick="toggleEstado()" title="Estado del sistema">📊</button>
+    <button class="hbtn" id="pcBtn" onclick="togglePc()" style="display:none" title="Mi PC">💻</button>
+    <span class="hsep"></span>
+    <button class="btn-jarvis" onclick="toggleJarvis()">🎙️ Jarvis</button>
+    <a href="/" class="back">←</a>
+  </div>
+
+  <div class="sug" id="sug">
+    <button onclick="preg('Resumime qué es ZonaHack')">💡 ¿Qué es ZonaHack?</button>
+    <button onclick="preg('Dame una idea para una app')">💭 Idea de app</button>
+    <button onclick="preg('Escribime un poema corto')">✍️ Poema</button>
+    <button onclick="preg('Contame un chiste')">😄 Chiste</button>
+    <button onclick="preg('¿Cómo estás hoy?')">😊 Cómo estás</button>
+    <button onclick="pedirImagen()">🎨 Imagen</button>
+    <button onclick="pedirFoto()">🖼️ Analizar foto</button>
+    <button onclick="pedirResumen()">📄 Resumir</button>
+    <button onclick="pedirScrape()">🌐 Scrapear</button>
+    <button onclick="pedirCancion()">🎵 Canción</button>
+  </div>
+
+  <div class="sug" id="sugZonas" style="border-top:1px dashed var(--border);padding-top:8px">
+    <span style="font-size:.6em;color:var(--accent);letter-spacing:1px;display:block;margin-bottom:6px">🧭 ZONAS DE ZONAHACK</span>
+    <a href="/lenguaje.html" class="c-accent">⌘ ZonaLang</a>
+    <a href="/peliculas_libres.html" class="c-blue">🎞️ Pelis Libres</a>
+    <a href="/research.html" class="c-gold">🔍 Research</a>
+    <a href="/hackerforo.html" class="c-accent">💬 Hacker Foro</a>
+    <a href="/hospital.html" class="c-red">🏥 Hospital Terror</a>
+    <a href="/borrachin.html" class="c-orange">🍻 Borrachín</a>
+    <a href="/hackershop.html" class="c-gold">🛒 Tienda Hacker</a>
+    <a href="/chat_onion.html" class="c-violet">💬 Chat .onion</a>
+    <a href="/anon.html" class="c-red">🎭 Anonymous</a>
+    <a href="/deepweb.html" class="c-violet">🕸️ Deepweb</a>
+    <span style="flex:1"></span>
+    <a href="/zonas.html" class="c-gold">👑 Portal Dueño</a>
+    <span style="flex-basis:100%"></span>
+    <a href="/gonza.html" class="c-accent">🔔 Avisar a Gonza</a>
+    <a href="/AvisoGonza.apk" class="c-violet">📥 APK Notificaciones</a>
+    <a href="/AsistenteZonaHack.apk" class="c-accent">📱 APK Asistente</a>
+    <a href="/ZonaHackApp.apk" class="c-gold">🎬 APK ZonaHack</a>
+    <a href="/Asistente-Setup-1.0.1.exe" id="dlBtn" class="c-card">💻 Instalar en PC</a>
+  </div>
+
+  <div id="pcPanel" style="display:none;padding:10px 14px;border-bottom:1px solid var(--border);background:rgba(46,230,168,.04)">
+    <div style="font-size:.62em;color:var(--accent);margin-bottom:8px">💻 CONTROL DE MI PC · <span id="pcStatus">revisando...</span></div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <button class="pcbtn" onclick="pcAction('hora')">🕐 Hora</button>
+      <button class="pcbtn" onclick="pcAction('info')">💻 Info del PC</button>
+      <button class="pcbtn" onclick="pcAction('abrir','notas')">📝 Notas</button>
+      <button class="pcbtn" onclick="pcAction('abrir','calc')">🔢 Calculadora</button>
+      <button class="pcbtn" onclick="pcAction('abrir','carpetas')">📂 Carpetas</button>
+      <button class="pcbtn" onclick="pcMensaje()">💬 Mensaje</button>
+      <button class="pcbtn" onclick="pcAction('bloquear')">🔒 Bloquear</button>
+      <button class="pcbtn" onclick="pcApagar()">⏻ Apagar</button>
+      <button class="pcbtn" onclick="pcAction('cancelar_apagado')">⏹️ Cancelar apagado</button>
+    </div>
+    <div style="font-size:.56em;color:var(--muted);margin-top:6px">Podés pedirlo también escribiendo: "abrí el bloc de notas", "decime la hora", "info del pc"</div>
+  </div>
+
+  <div id="estadoPanel" style="display:none;padding:12px 14px;border-bottom:1px solid var(--border);background:rgba(7,9,14,.5)">
+    <div style="font-size:.62em;color:var(--accent);margin-bottom:10px">📊 ESTADO DEL SISTEMA <span id="estadoFecha" style="color:var(--muted)"></span></div>
+    <div id="estadoBody" style="font-size:.7em;line-height:1.9;font-family:monospace">Consultando...</div>
+    <button class="pcbtn" onclick="estado()" style="margin-top:8px">🔄 Refrescar</button>
+  </div>
+
+  <div id="memoriaPanel" style="display:none;padding:12px 14px;border-bottom:1px solid var(--border);background:rgba(7,9,14,.5)">
+    <div style="font-size:.62em;color:var(--accent);margin-bottom:10px">💾 MEMORIA DEL ASISTENTE</div>
+    <div id="memoriaBody" style="font-size:.7em;line-height:1.8;font-family:monospace">Cargando...</div>
+    <div style="margin-top:8px">
+      <input type="text" id="memInput" style="width:65%;padding:4px;font-size:.7em;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text)" placeholder="Qué querés que recuerde...">
+      <button class="pcbtn" onclick="memoriza();return false" style="padding:4px 10px;font-size:.7em;">Guardar</button>
+      <span style="font-size:.6em;color:var(--muted);margin-left:8px">(usá /memorizar <lo que querés> por voz)</span>
+    </div>
+    <div style="margin-top:8px;font-size:.65em;color:var(--muted)">
+      <b>Categorías:</b> preferencias / hechos / comandos
+    </div>
+    <button class="pcbtn" onclick="memoriaLog();return false" style="margin-top:8px;font-size:.65em">📋 Log de administrador</button>
+    <div id="memoriaLogBody" style="display:none;margin-top:8px;font-size:.62em;line-height:1.7;font-family:monospace;max-height:180px;overflow:auto"></div>
+  </div>
+
+  <div id="historialPanel" style="display:none;padding:12px 14px;border-bottom:1px solid var(--border);background:rgba(7,9,14,.5)">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+      <div style="flex:1;font-size:.62em;color:var(--accent)">🕓 HISTORIAL DE CHATS</div>
+      <button class="pcbtn" onclick="nuevoChat()">➕ Nuevo chat</button>
+    </div>
+    <div id="historialBody" style="font-size:.72em;max-height:220px;overflow:auto"></div>
+  </div>
+
+  <div id="moodBar" style="display:flex;gap:6px;padding:8px 14px;flex-wrap:wrap;border-bottom:1px solid var(--border);background:rgba(7,9,14,.4)">
+    <span style="font-size:.6em;color:var(--muted);display:flex;align-items:center">😊 Ánimo:</span>
+    <button class="mood" data-m="jarvis" onclick="setMood('jarvis',this)">🤖 JARVIS</button>
+    <button class="mood" data-m="gracioso" onclick="setMood('gracioso',this)">😄 Gracioso</button>
+    <button class="mood" data-m="romantico" onclick="setMood('romantico',this)">💖 Romántico</button>
+    <button class="mood" data-m="energetico" onclick="setMood('energetico',this)">🔥 Enérgico</button>
+    <button class="mood" data-m="relajado" onclick="setMood('relajado',this)">😎 Relajado</button>
+    <button class="mood" data-m="misterioso" onclick="setMood('misterioso',this)">🕶️ Misterioso</button>
+    <button class="mood" data-m="sarcastico" onclick="setMood('sarcastico',this)">😏 Sarcástico</button>
+    <button class="mood" data-m="hacker" onclick="setMood('hacker',this)">💻 Hacker Ético</button>
+  </div>
+
+  <div class="msgs" id="msgs"></div>
+
+  <div class="input-bar">
+    <button class="ico" id="micBtn" title="🎤 Hablar (dictado por voz)" onclick="toggleVoz()">🎤</button>
+    <input id="inp" placeholder="Escribile a tu asistente..." onkeydown="if(event.key==='Enter')enviar()">
+    <button onclick="enviar()">ENVIAR</button>
+    <button class="ico hablar" id="hablarBtn" title="🔊 Leer respuestas en voz alta" onclick="toggleHablar()">🔊</button>
+  </div>
+  <div class="aviso">Asistente con IA (OpenRouter) · privado en tu VPS</div>
+</div>
+
+<div id="jarvis">
+  <div class="jarvis-ring"><div id="jarvisIco">🎙️</div></div>
+  <div id="jarvisStatus">LISTO · tocá el botón para hablar</div>
+  <div id="jarvisSub"></div>
+  <button class="jarvis-btn" onclick="jarvisTap()" title="Hablar">🎙️</button>
+  <button class="jarvis-salir" onclick="toggleJarvis()">✕ Salir del modo Jarvis</button>
+</div>
+
+<script>
+var hist=[];  // memoria: pares usuario/asistente
+function $(id){return document.getElementById(id);}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function addHTML(html,quien,guardar){
+  var box=$("msgs");
+  var d=document.createElement("div");d.className="msg "+(quien==='user'?'user':'bot');
+  var ava=quien==='user'?'🧑':'🤖';
+  var ahora=new Date();
+  var hora=("0"+ahora.getHours()).slice(-2)+":"+("0"+ahora.getMinutes()).slice(-2);
+  var quienTxt=quien==='user'?'TÚ':'ASISTENTE';
+  d.innerHTML='<div class="avatar">'+ava+'</div><div class="bubble"><div class="who">'+quienTxt+'<span class="time">'+hora+'</span></div><div class="cuerpo">'+html+'</div></div>';
+  box.appendChild(d);box.scrollTop=box.scrollHeight;
+  if(guardar!==false) guardarMsg(html,quien);
+  return d;
+}
+
+// ─── HISTORIAL DE CONVERSACIONES (persistente en este dispositivo) ───
+var HIST_KEY="zh_chats", HIST_MAX_CHATS=40;
+var chatActualId=localStorage.getItem("zh_chat_actual")||null;
+function stripHtml(h){
+  return String(h||"").replace(/<[^>]+>/g," ")
+    .replace(/&amp;/g,"&").replace(/&lt;/g,"<").replace(/&gt;/g,">")
+    .replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/\s+/g," ").trim();
+}
+function cargarChats(){
+  try{ var c=JSON.parse(localStorage.getItem(HIST_KEY)); return Array.isArray(c)?c:[]; }catch(e){ return []; }
+}
+function guardarChats(chats){ try{ localStorage.setItem(HIST_KEY,JSON.stringify(chats)); }catch(e){} }
+function chatVacio(){ return {id:"c"+Date.now()+Math.floor(Math.random()*1000),titulo:"Nuevo chat",fecha:Date.now(),mensajes:[]}; }
+function obtenerChatActual(chats){
+  var c=chats.filter(function(x){return x.id===chatActualId;})[0];
+  if(!c){
+    c=chatVacio();
+    chats.unshift(c);
+    chatActualId=c.id;
+    localStorage.setItem("zh_chat_actual",chatActualId);
+    guardarChats(chats);
+  }
+  return c;
+}
+function guardarMsg(html,quien){
+  var chats=cargarChats();
+  var c=obtenerChatActual(chats);
+  var texto=stripHtml(html);
+  c.mensajes.push({html:html,quien:quien,texto:texto,t:Date.now()});
+  c.fecha=Date.now();
+  if(quien==='user'&&(!c.titulo||c.titulo==='Nuevo chat')) c.titulo=texto.slice(0,40)||'Nuevo chat';
+  if(c.mensajes.length>200) c.mensajes=c.mensajes.slice(-200);
+  chats=[c].concat(chats.filter(function(x){return x.id!==c.id;}));
+  if(chats.length>HIST_MAX_CHATS) chats=chats.slice(0,HIST_MAX_CHATS);
+  guardarChats(chats);
+}
+function restaurarChatActual(){
+  var chats=cargarChats();
+  var c=obtenerChatActual(chats);
+  $("msgs").innerHTML="";
+  hist=[];
+  if(c.mensajes.length){
+    c.mensajes.forEach(function(m){
+      addHTML(m.html,m.quien,false);
+      hist.push((m.quien==='user'?"Usuario: ":"Asistente: ")+(m.texto||stripHtml(m.html)).slice(0,600));
+    });
+    if(hist.length>16) hist=hist.slice(-16);
+  } else {
+    addHTML('¡Bienvenido, señor! 👋 Soy tu asistente de IA estilo JARVIS, corriendo en tu propio VPS. Preguntame lo que quieras — recuerdo la conversación. 😊','bot');
+  }
+}
+function toggleHistorial(){
+  var p=$("historialPanel");
+  p.style.display=p.style.display==="none"?"block":"none";
+  $("histBtn").classList.toggle("activo", p.style.display==="block");
+  if(p.style.display==="block") renderHistorialLista();
+}
+function renderHistorialLista(){
+  var chats=cargarChats();
+  var body=$("historialBody");
+  if(!chats.length){ body.innerHTML='<div style="color:var(--muted)">Todavía no hay chats guardados.</div>'; return; }
+  body.innerHTML=chats.map(function(c){
+    var activo=c.id===chatActualId;
+    var fecha=new Date(c.fecha).toLocaleString('es-AR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+    return '<div style="display:flex;align-items:center;gap:6px;padding:6px 4px;border-bottom:1px solid var(--border)'+(activo?';background:rgba(46,230,168,.08)':'')+'">'+
+      '<div style="flex:1;min-width:0;cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" onclick="abrirChat(\''+c.id+'\')">'+
+        (activo?'▶ ':'')+esc(c.titulo||'Nuevo chat')+
+        '<div style="font-size:.85em;color:var(--muted)">'+esc(fecha)+' · '+c.mensajes.length+' msjs</div>'+
+      '</div>'+
+      '<button class="pcbtn" onclick="borrarChat(\''+c.id+'\');event.stopPropagation()" title="Borrar">🗑️</button>'+
+    '</div>';
+  }).join('');
+}
+function abrirChat(id){
+  chatActualId=id;
+  localStorage.setItem("zh_chat_actual",chatActualId);
+  restaurarChatActual();
+  toggleHistorial();
+}
+function borrarChat(id){
+  if(!confirm("¿Borrar este chat para siempre?")) return;
+  var chats=cargarChats().filter(function(x){return x.id!==id;});
+  guardarChats(chats);
+  if(id===chatActualId){ chatActualId=null; localStorage.removeItem("zh_chat_actual"); restaurarChatActual(); }
+  renderHistorialLista();
+}
+function nuevoChat(){
+  chatActualId=null;
+  localStorage.removeItem("zh_chat_actual");
+  restaurarChatActual();
+  renderHistorialLista();
+}
+
+// ─── Renderizar respuestas: texto plano + bloques de código con COPIAR ───
+function limpiarTextoPlano(s){
+  return String(s||"")
+    .replace(/\*\*(.+?)\*\*/g, '$1')
+    .replace(/(^|[^*])\*([^*\n]+)\*(?!\*)/g, '$1$2')
+    .replace(/^#{1,6}\s*/gm, '')
+    .replace(/^[-*+]\s+/gm, '')
+    .replace(/^>\s*/gm, '')
+    .replace(/[`~]/g, '')
+    .replace(/\|/g, ' ')
+    .trim();
+}
+function renderRespuesta(texto){
+  var html="", last=0, m;
+  var re=/```([a-z0-9+#-]*)\n?([\s\S]*?)```/g;
+  while((m=re.exec(texto))){
+    html+=esc(limpiarTextoPlano(texto.slice(last,m.index)));
+    var lang=m[1]||"código", code=m[2].replace(/\n$/,"");
+    html+='<div class="code-wrap"><div class="code-head"><span>'+esc(lang)+'</span>'+
+      '<div><button onclick="copiarCodigo(this)" data-c="'+encodeURIComponent(code)+'">📋 Copiar</button> '+
+      '<button onclick="descargarZip(this)" data-c="'+encodeURIComponent(code)+'" data-l="'+esc(lang)+'">📦 ZIP</button></div></div>'+
+      '<pre><code>'+esc(code)+'</code></pre></div>';
+    last=m.index+m[0].length;
+  }
+  html+=esc(limpiarTextoPlano(texto.slice(last)));
+  return html;
+}
+function copiarCodigo(btn){
+  var code=decodeURIComponent(btn.getAttribute("data-c"));
+  function ok(){ btn.textContent="✅ Copiado!"; setTimeout(function(){ btn.textContent="📋 Copiar"; },1600); }
+  if(navigator.clipboard){ navigator.clipboard.writeText(code).then(ok,function(){ ok(); }); }
+  else {
+    var ta=document.createElement("textarea"); ta.value=code; document.body.appendChild(ta); ta.select();
+    try{ document.execCommand("copy"); }catch(e){}
+    document.body.removeChild(ta); ok();
+  }
+}
+
+// ─── DESCARGAR CÓDIGO EN .ZIP (sin librerías) ───
+function _crc32(u8){
+  var t=_crc32.t||(_crc32.t=(function(){
+    var a=[]; for(var n=0;n<256;n++){ var c=n; for(var k=0;k<8;k++) c=c&1?0xEDB88320^(c>>>1):c>>>1; a[n]=c>>>0; } return a;
+  })());
+  var c=0xFFFFFFFF;
+  for(var i=0;i<u8.length;i++) c=t[(c^u8[i])&0xFF]^(c>>>8);
+  return (c^0xFFFFFFFF)>>>0;
+}
+function _utf8(s){
+  var t=unescape(encodeURIComponent(s)), b=new Uint8Array(t.length);
+  for(var i=0;i<t.length;i++) b[i]=t.charCodeAt(i);
+  return b;
+}
+function _u32(n){ return [n&0xFF,(n>>>8)&0xFF,(n>>>16)&0xFF,(n>>>24)&0xFF]; }
+function _u16(n){ return [n&0xFF,(n>>>8)&0xFF]; }
+function zipDescargar(nombre, contenido){
+  var data=_utf8(contenido), name=_utf8(nombre), crc=_crc32(data);
+  var lh=[].concat([0x50,0x4B,0x03,0x04],_u16(20),_u16(0),_u16(0),_u16(0),_u16(0),_u32(crc),_u32(data.length),_u32(data.length),_u16(name.length),_u16(0));
+  var cd=[].concat([0x50,0x4B,0x01,0x02],_u16(20),_u16(20),_u16(0),_u16(0),_u16(0),_u16(0),_u32(crc),_u32(data.length),_u32(data.length),_u16(name.length),_u16(0),_u16(0),_u16(0),_u16(0),_u32(0),_u32(0));
+  var cdOff=lh.length+name.length+data.length, cdSize=cd.length+name.length;
+  var eocd=[].concat([0x50,0x4B,0x05,0x06],_u16(0),_u16(0),_u16(1),_u16(1),_u32(cdSize),_u32(cdOff),_u16(0));
+  var out=new Uint8Array(cdOff+cdSize+eocd.length), o=0;
+  lh.forEach(function(b){out[o++]=b;}); name.forEach(function(b){out[o++]=b;});
+  data.forEach(function(b){out[o++]=b;}); cd.forEach(function(b){out[o++]=b;});
+  name.forEach(function(b){out[o++]=b;}); eocd.forEach(function(b){out[o++]=b;});
+  var blob=new Blob([out],{type:"application/zip"});
+  var a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download=(nombre||"codigo")+".zip";
+  document.body.appendChild(a); a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); },1000);
+}
+function descargarZip(btn){
+  var code=decodeURIComponent(btn.getAttribute("data-c"));
+  var lang=(btn.getAttribute("data-l")||"").toLowerCase();
+  var nombre="codigo.txt";
+  if(lang.indexOf("python")>=0||lang==="py") nombre="codigo.py";
+  else if(lang.indexOf("js")>=0||lang.indexOf("javascript")>=0) nombre="codigo.js";
+  else if(lang.indexOf("html")>=0) nombre="index.html";
+  else if(lang.indexOf("css")>=0) nombre="estilo.css";
+  else if(lang.indexOf("sh")>=0||lang.indexOf("bash")>=0) nombre="script.sh";
+  else if(lang.indexOf("json")>=0) nombre="datos.json";
+  else if(lang.indexOf("sql")>=0) nombre="consulta.sql";
+  else if(lang.indexOf("php")>=0) nombre="codigo.php";
+  else if(lang.indexOf("java")>=0) nombre="Codigo.java";
+  else if(lang.indexOf("md")>=0) nombre="README.md";
+  zipDescargar(nombre, code);
+  btn.textContent="✅ ZIP!";
+  setTimeout(function(){ btn.textContent="📦 ZIP"; },1600);
+}
+function preg(t){ enviarTexto(t); }
+function enviarTexto(t){
+  if(!t.trim())return;
+  addHTML(esc(t),'user');
+  // ── RECONOCIMIENTO + ESCANEO DE PÁGINAS (hacker ético) ──
+  var urlM=t.match(/https?:\/\/[^\s]+/);
+  if(urlM){ reconocerPagina(urlM[0], t); return; }
+  // ── GENERAR IMAGEN ──
+  var img=detectarImagen(t);
+  if(img){ generarImagen(img); return; }
+  // ── APRENDER (memoria) ──
+  var mre=/record[áa] que\s+(.+)|aprend[ée] que\s+(.+)|guard[áa] que\s+(.+)|memoriz[áa] que\s+(.+)/i;
+  var mm=t.match(mre);
+  if(mm){
+    var fact=(mm[1]||mm[2]||mm[3]||mm[4]||"").trim();
+    if(fact){
+      var d=addHTML('<span class="typing"></span> Aprendiendo...','bot',false);
+      fetch("/api/memoria?action=set&fact="+encodeURIComponent(fact))
+      .then(function(r){return r.json();}).then(function(res){
+        d.remove();
+        if(res&&res.ok) addHTML("🧠 Aprendido y guardado: <b>"+esc(fact)+"</b>. Lo voy a recordar siempre.",'bot');
+        else addHTML("😢 No pude guardarlo.",'bot');
+      }).catch(function(){ d.remove(); addHTML("😢 Error.",'bot'); });
+      return;
+    }
+  }
+  // ── HABILIDADES RÁPIDAS ──
+  var r=habilidadRapida(t);
+  if(r){ if(r!=="__MEM__") addHTML("✨ "+esc(r),'bot'); return; }
+  // comando de PC (funciona desde web/VPS con el AgentePC en la computadora)
+  var pc=detectarPc(t);
+  if(pc){
+    if(!pcToken){ addHTML("🖥️ Primero emparejá tu PC: ejecutá <b>agente_pc.bat</b> en la PC y después tocá 💻 Mi PC → 🔐 Emparejar.",'bot'); return; }
+    var d=addHTML('<span class="typing"></span><span class="typing"></span> Enviando a tu PC...','bot',false);
+    var u="/api/pc?action="+pc.action+"&token="+encodeURIComponent(pcToken)+(pc.extra?"&app="+encodeURIComponent(pc.extra):"");
+    fetch(u).then(function(r){return r.json();}).then(function(res){
+      d.remove();
+      if(res&&res.ok) addHTML("💻 "+esc(res.respuesta||"hecho"),'bot');
+      else if(res&&res.error==="PERMISO") addHTML("🖥️ Necesitás emparejar tu PC (💻 Mi PC → 🔐 Emparejar).",'bot');
+      else addHTML("💻 "+esc(res&&res.error||"no se pudo"),'bot');
+    }).catch(function(){ d.remove(); addHTML("💻 Error de conexión.",'bot'); });
+    return;
+  }
+  hist.push("Usuario: "+t);
+  if(hist.length>16) hist=hist.slice(-16);
+  var d=addHTML('<span class="typing"></span><span class="typing"></span><span class="typing"></span> Pensando...','bot',false);
+  var ctx=hist.slice(0,-1).join("\n");
+  var infoP = lastPage ? "&info="+encodeURIComponent(lastPage.texto.slice(0,3000))+"&fuente="+encodeURIComponent(lastPage.url) : "";
+  fetch("/api/ia_chat?q="+encodeURIComponent(t)+"&ctx="+encodeURIComponent(ctx)+"&mood="+encodeURIComponent(mood)+infoP+(esOwner?"&clave_owner="+encodeURIComponent(ownerClave):"")+"&usuario="+encodeURIComponent(zhUsuario))
+  .then(function(r){return r.json();}).then(function(res){
+    d.remove();
+    if(res&&res.ok){
+      var html=renderRespuesta(res.respuesta);
+      if(res.estudio&&res.fuente){
+        html+='<div style="font-size:.6em;color:var(--muted);margin-top:6px;border-top:1px solid var(--border);padding-top:5px">📎 Estudié de: <a href="'+esc(res.fuente)+'" target="_blank" rel="noopener" style="color:var(--accent)">'+esc(res.fuente)+'</a></div>';
+      }
+      addHTML(html,'bot');
+      hist.push("Asistente: "+res.respuesta.slice(0,600));
+      if(hist.length>16) hist=hist.slice(-16);
+      hablarRespuesta(res.respuesta);
+    }else{
+      addHTML("😢 "+(res&&res.error||'Error. Probá de nuevo.'),'bot');
+    }
+  }).catch(function(){ d.remove(); addHTML("😢 Error de conexión.",'bot'); });
+}
+function enviar(){ var v=$("inp").value.trim(); if(!v)return; $("inp").value=""; enviarTexto(v); }
+
+// ─── VOZ ───
+var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+var NATIVO = !!(window.NativeSpeech);
+var reconociendo=false, hablar=true, voz=null;
+function toggleVoz(){
+  if(NATIVO){ vozNat(); return; }
+  if(!SR){ alert("Tu navegador no soporta dictado por voz. Usá Chrome o Edge, y con HTTPS (el micrófono necesita conexión segura)."); return; }
+  if(reconociendo){ voz.stop(); return; }
+  voz=new SR();
+  voz.lang="es-ES"; voz.interimResults=true; voz.continuous=false;
+  voz.onresult=function(e){
+    var t="";
+    for(var i=e.resultIndex;i<e.results.length;i++) t+=e.results[i][0].transcript;
+    $("inp").value=t;
+  };
+  voz.onend=function(){
+    reconociendo=false; $("micBtn").classList.remove("activo");
+    var v=$("inp").value.trim();
+    if(v){ enviar(); }
+  };
+  voz.onerror=function(){ reconociendo=false; $("micBtn").classList.remove("activo"); };
+  reconociendo=true; $("micBtn").classList.add("activo");
+  try{ voz.start(); }catch(e){ reconociendo=false; $("micBtn").classList.remove("activo"); }
+}
+// dictado con el puente nativo (dentro de la app APK)
+function vozNat(){
+  if(reconociendo){ try{ window.NativeSpeech.detener(); }catch(e){} finalizarVozNat(); return; }
+  window.onNativeSpeechResult = function(t){
+    $("inp").value=t;
+    finalizarVozNat();
+    if(t && t.trim()){ enviar(); }
+  };
+  window.onNativeSpeechError = function(e){ finalizarVozNat(); };
+  reconociendo=true; $("micBtn").classList.add("activo");
+  try{ window.NativeSpeech.escuchar(); }catch(e){ finalizarVozNat(); }
+}
+function finalizarVozNat(){
+  reconociendo=false; $("micBtn").classList.remove("activo");
+}
+function toggleHablar(){
+  hablar=!hablar;
+  $("hablarBtn").classList.toggle("hablar", hablar);
+  if(!hablar && "speechSynthesis" in window) speechSynthesis.cancel();
+}
+// ─── VOZ SIN CORTES (lee por fragmentos) ───
+function hablarTexto(texto, fin){
+  if(NATIVO){
+    if(!hablar){ if(fin)fin(); return; }
+    try{
+      window.NativeSpeech.hablar(texto);
+      if(fin) setTimeout(fin, Math.min(60000, 1500 + (texto||"").length*45));
+    }catch(e){ if(fin)fin(); }
+    return;
+  }
+  if(!("speechSynthesis" in window)){ if(fin)fin(); return; }
+  speechSynthesis.cancel();
+  var frases=(texto||"").split(/(?<=[.!?…])\s+|\n/).map(function(f){return f.trim();}).filter(Boolean);
+  var chunks=[], cur="";
+  frases.forEach(function(f){
+    if((cur+" "+f).length>220 && cur){ chunks.push(cur); cur=f; }
+    else cur = cur ? cur+" "+f : f;
+  });
+  if(cur) chunks.push(cur);
+  if(!chunks.length){ if(fin)fin(); return; }
+  var idx=0;
+  function paso(){
+    if(idx>=chunks.length){ if(fin)fin(); return; }
+    var u=new SpeechSynthesisUtterance(chunks[idx]);
+    u.lang="es-ES";
+    var voz=obtenerVoz(); if(voz) u.voice=voz;
+    u.rate=1.05;
+    u.onend=function(){ idx++; paso(); };
+    u.onerror=function(){ idx++; paso(); };
+    speechSynthesis.speak(u);
+  }
+  paso();
+}
+
+// quita los bloques de código de un texto (para no leerlos en voz alta)
+// y también líneas que claramente son código (aunque no tengan ```)
+function sinCodigo(texto){
+  var t=String(texto||"");
+  t=t.replace(/```[a-z0-9+#-]*\n?[\s\S]*?```/g,' ');
+  t=t.replace(/`[^`\n]+`/g,' ');
+  var lineas=t.split('\n');
+  var out=[];
+  for(var i=0;i<lineas.length;i++){
+    var tr=lineas[i].trim();
+    if(!tr){ out.push(''); continue; }
+    if(/[;{}]$/.test(tr)) continue;
+    if(/^(def |class |function |const |let |var |import |from |return |print\(|console\.|echo |SELECT |CREATE |INSERT |UPDATE |DELETE |public |private |protected |void |int |string |bool |if \(|for \(|while \(|#include|package |namespace |<\/?[a-z]|=>|::)/.test(tr)) continue;
+    out.push(tr);
+  }
+  return out.join(' ').replace(/\s{2,}/g,' ').trim();
+}
+
+function hablarRespuesta(texto){
+  if(!hablar) return;
+  var t = leerCodigo ? texto : sinCodigo(texto);
+  if(!t) return; // todo era código: no se lee nada
+  if(NATIVO){ hablarTexto(t); return; }
+  if(!("speechSynthesis" in window)) return;
+  hablarTexto(t);
+}
+
+// ─── CONTROL: leer o no el código en voz alta ───
+var leerCodigo = localStorage.getItem("zh_leer_codigo")==="1";
+function toggleLeerCodigo(){
+  leerCodigo=!leerCodigo;
+  localStorage.setItem("zh_leer_codigo", leerCodigo?"1":"0");
+  $("codBtn").textContent = leerCodigo ? "🔊" : "🔇";
+  $("codBtn").title = leerCodigo ? "Leer el código en voz alta" : "No leer el código en voz alta";
+  addHTML(leerCodigo?"🔊 Ahora SÍ leo el código en voz alta.":"🔇 Ahora NO leo el código en voz alta.",'bot');
+}
+$("codBtn").textContent = leerCodigo ? "🔊" : "🔇";
+
+// ─── VOZ HOMBRE / MUJER ───
+var vozGenero=localStorage.getItem("zh_voz_genero")||"masculina";
+var VOZ_MUJER=["helena","marta","laura","monica","zira","female","feminine","paulina","sabina","marisol","elsa","eva","lucia","silvia"];
+var VOZ_HOMBRE=["pablo","miguel","enrique","raul","jorge","david","javier","alvaro","gonzalo","male","andres","pedro","manolo"];
+function obtenerVoz(){
+  var vs=window.speechSynthesis?speechSynthesis.getVoices():[];
+  if(!vs.length) return null;
+  var es=vs.filter(function(v){ return v.lang&&v.lang.toLowerCase().indexOf("es")===0; });
+  var base=es.length?es:vs;
+  var prefer = vozGenero==="femenina" ? VOZ_MUJER : VOZ_HOMBRE;
+  for(var i=0;i<base.length;i++){
+    var nm=(base[i].name||"").toLowerCase();
+    for(var j=0;j<prefer.length;j++){ if(nm.indexOf(prefer[j])>=0) return base[i]; }
+  }
+  return base[0]||null;
+}
+function toggleVozGenero(){
+  vozGenero = vozGenero==="femenina" ? "masculina" : "femenina";
+  localStorage.setItem("zh_voz_genero",vozGenero);
+  $("vozBtn").textContent = vozGenero==="femenina" ? "👩" : "👨";
+  $("vozBtn").title = vozGenero==="femenina" ? "Voz: femenina" : "Voz: masculina";
+  addHTML("🗣️ Voz cambiada a "+(vozGenero==="femenina"?"femenina (ella)":"masculina (él)")+".",'bot');
+}
+$("vozBtn").textContent = vozGenero==="femenina" ? "👩" : "👨";
+if("speechSynthesis" in window) speechSynthesis.onvoiceschanged=function(){};
+
+// ─── MODO JARVIS (solo voz) ───
+var jarvisOn=false, jarvisEsc=false, jarvisHablando=false;
+function jst(t){ $("jarvisStatus").textContent=t; }
+function toggleJarvis(){
+  jarvisOn=!jarvisOn;
+  $("jarvis").style.display=jarvisOn?"flex":"none";
+  $("chatWrap").style.display=jarvisOn?"none":"flex";
+  if(jarvisOn){
+    jst("🎙️ ACTIVANDO MICRÓFONO...");
+    $("jarvisSub").textContent="";
+    // micrófono automático (la primera vez el navegador pedirá permiso)
+    setTimeout(jarvisTap, 800);
+  }else{
+    if("speechSynthesis" in window) speechSynthesis.cancel();
+    jarvisEsc=false; jarvisHablando=false;
+  }
+}
+function jarvisTap(){
+  if(jarvisHablando){ if("speechSynthesis" in window) speechSynthesis.cancel(); return; }
+  if(jarvisEsc) return;
+  if(!SR){ jst("⚠️ Dictado no soportado. Usá Chrome/Edge con HTTPS."); return; }
+  var rec=new SR();
+  rec.lang="es-ES"; rec.continuous=false; rec.interimResults=false;
+  jarvisEsc=true;
+  jst("🎙️ ESCUCHANDO...");
+  $("jarvisSub").textContent="";
+  rec.onresult=function(e){
+    var t="";
+    for(var i=0;i<e.results.length;i++) t+=e.results[i][0].transcript;
+    jarvisProcesar(t);
+  };
+  rec.onend=function(){
+    jarvisEsc=false;
+    if(!jarvisHablando) jst("LISTO · tocá para hablar");
+  };
+  rec.onerror=function(){
+    jarvisEsc=false;
+    jst("⚠️ No te escuché · tocá para reintentar");
+  };
+  try{ rec.start(); }catch(e){ jarvisEsc=false; jst("⚠️ Error de micrófono"); }
+}
+function jarvisProcesar(texto){
+  if(!(texto||"").trim()){ jst("LISTO · tocá para hablar"); return; }
+  $("jarvisSub").textContent=texto.trim();
+  jst("🧠 PROCESANDO...");
+  fetch("/api/ia_chat?q="+encodeURIComponent(texto)+"&mood="+encodeURIComponent(mood)+(esOwner?"&clave_owner="+encodeURIComponent(ownerClave):"")+"&usuario="+encodeURIComponent(zhUsuario))
+  .then(function(r){return r.json();}).then(function(res){
+    if(res&&res.ok){
+      jarvisHablando=true;
+      jst("🗣️ HABLANDO...");
+      $("jarvisSub").textContent=res.respuesta;
+      hablarJarvis(res.respuesta);
+    }else{
+      jst("😢 No pude procesar · tocá para hablar");
+    }
+  }).catch(function(){
+    jst("😢 Error de conexión · tocá para reintentar");
+  });
+}
+function hablarJarvis(texto){
+  if(!("speechSynthesis" in window) && !NATIVO){ jarvisHablando=false; jst("LISTO · tocá para hablar"); return; }
+  var prose = sinCodigo(texto);
+  if(!prose){ jarvisHablando=false; jst("🎙️ ESCUCHANDO DE NUEVO..."); setTimeout(jarvisTap,900); return; }
+  hablarTexto(prose, function(){ jarvisHablando=false; jst("🎙️ ESCUCHANDO DE NUEVO..."); setTimeout(jarvisTap,900); });
+}
+
+// Instalar como app (PWA) + actualización automática
+if("serviceWorker" in navigator){
+  window.addEventListener("load",function(){
+    navigator.serviceWorker.register("/sw_asistente.js").catch(function(){});
+  });
+  // cuando un nuevo service worker toma control (actualización), recargá = siempre lo último
+  navigator.serviceWorker.addEventListener("controllerchange",function(){ window.location.reload(); });
+}
+
+// ─── PANEL DE ESTADO ───
+function toggleEstado(){
+  var p=$("estadoPanel");
+  p.style.display=p.style.display==="none"?"block":"none";
+  $("estadoBtn").classList.toggle("activo", p.style.display==="block");
+  if(p.style.display==="block"){ estado(); if(!window._estInt) window._estInt=setInterval(estado,15000); }
+  else { if(window._estInt){ clearInterval(window._estInt); window._estInt=null; } }
+}
+
+// ─── MEMORIA ───
+function toggleMemoria(){
+  var p=$("memoriaPanel");
+  p.style.display=p.style.display==="none"?"block":"none";
+  $("memBtn").classList.toggle("activo", p.style.display==="block");
+  if(p.style.display==="block"){ memoriza(); }
+}
+
+function memoriza(){
+  var fact = prompt("Contame algo que querés que la IA recuerde siempre:\n\nEj: 'Mi color favorito es el verde' o 'Soy alérgico a los gatos'");
+  if(!fact) return;
+  fact = fact.trim();
+  if(fact.length<3){ alert("Demasiado corto"); return; }
+  // Preguntar categoría opcional
+  var cat = prompt("Categoría (enter para 'hechos'):\n1. preferencias\n2. hechos\n3. comandos\nO escribir una nueva categoría").trim();
+  var catKey = cat ? (cat=== "1" ? "preferencias" : cat=== "2" ? "hechos" : cat=== "3" ? "comandos" : "otro_"+cat) : "hechos";
+  fetch("/api/memoria?action=set&fact="+encodeURIComponent(fact)+"&clave="+encodeURIComponent(fact.substring(0,20).replace(/[^a-z0-9]/g,''))+"&categoria="+encodeURIComponent(catKey), {method: "GET"}).then(function(r){return r.json();}).then(function(d){
+    if(d&&d.ok){ addHTML("🧠 Guardado: " + (fact.substring(0,30) + (fact.length>30?"…":"")) + " → categoría " + d.categoria, 'bot'); }
+    else addHTML("❌ No se pudo guardar la memoria", 'bot');
+  });
+}
+
+// ─── LOG DE ADMINISTRADOR (memoria) ───
+function memoriaLog(){
+  var body=$("memoriaLogBody");
+  body.style.display = body.style.display==="none" ? "block" : "none";
+  if(body.style.display!=="block") return;
+  body.textContent="Cargando...";
+  fetch("/api/memoria?action=log").then(function(r){return r.json();}).then(function(d){
+    if(!d||!d.ok){ body.textContent="Error al leer el log"; return; }
+    var log=d.log||[];
+    if(!log.length){ body.textContent="📋 Todavía no hay operaciones registradas."; return; }
+    var lineas = log.map(function(e){
+      return "["+e.fecha+"] "+e.accion.toUpperCase()+" · "+(e.categoria||"-")+" · "+esc(e.clave||"")+(e.fact?" · "+esc(e.fact):"")+" · IP "+esc(e.ip||"");
+    });
+    body.textContent = "📋 LOG DE MEMORIA ("+log.length+" ops, últimas "+log.length+"):\n\n"+lineas.join("\n");
+  }).catch(function(){ body.textContent="Error de conexión al leer el log."; });
+}
+function estado(){
+  fetch("/api/estado?cb="+Date.now()).then(function(r){return r.json();}).then(function(d){
+    if(!d) return;
+    $("estadoFecha").textContent="· "+esc(d.fecha||"");
+    var rows=[
+      ["🖥️ Servidor (VPS)", d.servidor||"?"],
+      ["🧠 Qwen 0.5B (principal)", d.modelos&&d.modelos["qwen-0.5b"]||"?"],
+      ["🔁 Qwen Q2 (respaldo)", d.modelos&&d.modelos["qwen-0.5b-q2"]||"?"],
+      ["🔄 SmolLM2 (respaldo)", d.modelos&&d.modelos["smollm2-360m"]||"?"],
+      ["🔄 TinyLlama (respaldo)", d.modelos&&d.modelos["tinyllama-1.1b-q2"]||"?"],
+      ["🔄 OpenRouter (inteligente)", d.openrouter||"?"],
+      ["🗃️ Memoria", d.memoria||"?"],
+      ["💬 Bot Discord", d.bot_discord||"?"]
+    ];
+    var html=rows.map(function(r){
+      var ok=String(r[1]).indexOf("✅")===0;
+      return '<div style="display:flex;justify-content:space-between;gap:10px"><span>'+r[0]+'</span><span style="color:'+(ok?'var(--accent)':'#ff5a5a')+'">'+esc(r[1])+'</span></div>';
+    }).join("");
+    if(d.link_tunel){
+      html+='<div style="margin-top:8px;padding-top:8px;border-top:1px dashed var(--border)">🔗 <b>Link de acceso (auto-regenerado):</b><br><a href="'+esc(d.link_tunel)+'" target="_blank" rel="noopener" style="color:var(--accent);word-break:break-all">'+esc(d.link_tunel)+'</a></div>';
+    }
+    if(d.link_npm){
+      html+='<div style="margin-top:8px;padding-top:8px;border-top:1px dashed var(--border)">🎛️ <b>Panel Nginx (NPM):</b><br><a href="'+esc(d.link_npm)+'" target="_blank" rel="noopener" style="color:var(--violet);word-break:break-all">'+esc(d.link_npm)+'</a></div>';
+    }
+    if(d.link_zh){
+      html+='<div style="margin-top:8px;padding-top:8px;border-top:1px dashed var(--border)">🎬 <b>ZonaHack (túnel):</b><br><a href="'+esc(d.link_zh)+'" target="_blank" rel="noopener" style="color:var(--gold);word-break:break-all">'+esc(d.link_zh)+'</a></div>';
+    }
+    if(d.link_uptime){
+      html+='<div style="margin-top:8px;padding-top:8px;border-top:1px dashed var(--border)">📈 <b>Uptime Kuma (monitor):</b><br><a href="'+esc(d.link_uptime)+'" target="_blank" rel="noopener" style="color:#38e0d0;word-break:break-all">'+esc(d.link_uptime)+'</a></div>';
+    }
+    $("estadoBody").innerHTML=html;
+  }).catch(function(){ $("estadoBody").textContent="❌ No se pudo consultar el estado."; });
+}
+var APP_VER="1.0.2";
+document.getElementById("verTxt").textContent="v"+APP_VER+" · tu IA · PC y celular";
+
+// ─── ESTILOS DE ÁNIMO ───
+var MOOD_COLOR={jarvis:"#2ee6a8",gracioso:"#ffca28",romantico:"#ff5ec4",energetico:"#ff8c42",relajado:"#38e0d0",misterioso:"#b44dff",sarcastico:"#ff5a5a",hacker:"#00ff41"};
+var mood=localStorage.getItem("zh_mood")||"jarvis";
+function pintarMood(){
+  document.querySelectorAll(".mood").forEach(function(b){ b.classList.toggle("on", b.getAttribute("data-m")===mood); });
+  var c=MOOD_COLOR[mood]||"#2ee6a8";
+  document.documentElement.style.setProperty("--accent",c);
+  document.documentElement.style.setProperty("--violet",c);
+}
+function setMood(m,btn){
+  mood=m;
+  localStorage.setItem("zh_mood",m);
+  pintarMood();
+  addHTML("😊 Ánimo cambiado a: <b>"+(btn?btn.textContent:m)+"</b>","bot");
+}
+pintarMood();
+restaurarChatActual();
+// botón de descarga siempre a la última versión
+fetch("/latest.yml").then(function(r){return r.text();}).then(function(t){
+  var m=t.match(/path:\s*([\w.\-]+)/);
+  if(m&&m[1]) document.getElementById("dlBtn").href="/"+m[1];
+}).catch(function(){});
+// nueva versión disponible -> aviso
+fetch("/manifest.json").then(function(r){return r.json();}).then(function(j){
+  if(j&&j.version&&j.version!==APP_VER){
+    var b=document.createElement("div");
+    b.style.cssText="position:fixed;top:10px;right:14px;z-index:999;background:rgba(241,196,15,.95);color:#2a1400;border-radius:10px;padding:8px 12px;font-size:.66em;font-weight:800";
+    b.textContent="🔄 Actualizá (v"+j.version+")";
+    b.onclick=function(){ location.reload(); };
+    document.body.appendChild(b);
+  }
+}).catch(function(){});
+
+var lastPage=null;  // última página reconocida
+
+// ─── RECONOCIMIENTO + ESCANEO DE PÁGINAS (hacker ético) ───
+function reconocerPagina(url, msg){
+  var d=addHTML('🕵️ Analizando la página como hacker ético...','bot',false);
+  function fetchJson(u){ return fetch(u).then(function(r){ return r.json(); }); }
+  Promise.allSettled([
+    fetchJson("/api/escaneo?url="+encodeURIComponent(url)),
+    fetchJson("/api/scrape?url="+encodeURIComponent(url))
+  ]).then(function(results){
+    d.remove();
+    var esc=results[0].status==="fulfilled"?results[0].value:null;
+    var scr=results[1].status==="fulfilled"?results[1].value:null;
+    if(esc&&esc.ok){
+      lastPage={url:url,titulo:(scr&&scr.titulo)||'',texto:(scr&&scr.texto)||''};
+      var card='💻 <b>ESCANEO DE SEGURIDAD</b> · '+esc(url)+'\n'+
+        '📊 <b>Nivel:</b> '+esc(esc.nivel)+'\n\n'+
+        esc.checks.map(function(c){ return c.texto; }).join('\n')+
+        '\n\n<small>Escáner pasivo y ético (no ataca el sitio). Después puedo analizar el contenido: "resumila", "de qué trata".</small>';
+      addHTML(card,'bot');
+    } else if(scr&&scr.ok){
+      lastPage={url:url,titulo:scr.titulo||'',texto:scr.texto||''};
+      addHTML('🌐 <b>PÁGINA RECONOCIDA</b>\n📄 <b>Título:</b> '+(scr.titulo||'?')+
+        '\n🔤 Idioma: '+(scr.lang||'?')+' · 📝 '+scr.palabras+' palabras · 🔗 '+scr.enlaces+' enlaces'+
+        '\n\n<small>No pude completar el escaneo de seguridad, pero ya conozco la página. Preguntame sobre ella.</small>','bot');
+    } else {
+      addHTML("😢 No pude analizar esa página. Probá de nuevo o con otra URL.","bot");
+    }
+  });
+}
+
+// ─── GENERACIÓN DE IMÁGENES (gratis) ───
+function detectarImagen(t){
+  var m=t.match(/gener[áa] una imagen (?:de|sobre)?\s*(.+)|cre[áa] una imagen (?:de|sobre)?\s*(.+)|dibuj[áa](?:me)?\s+(.+)|hac[eé] una imagen de\s*(.+)|imagen de\s*(.+)/i);
+  if(m) return (m[1]||m[2]||m[3]||m[4]||m[5]||"").trim();
+  return null;
+}
+function pedirImagen(){
+  var p=prompt("Describí la imagen a generar (ej: un robot en el espacio):");
+  if(p) generarImagen(p);
+}
+function generarImagen(prompt, extra){
+  var d=addHTML('🎨 Generando imagen de "<b>'+esc(prompt)+'</b>"...<br><span class="typing"></span>','bot',false);
+  var url="https://image.pollinations.ai/prompt/"+encodeURIComponent(prompt)+"?width=512&height=512&nologo=true&seed="+Math.floor(Math.random()*99999);
+  var img=new Image();
+  img.onload=function(){
+    d.remove();
+    addHTML('🎨 <b>'+esc(prompt)+'</b><br><img src="'+esc(url)+'" style="max-width:100%;border-radius:12px;border:1px solid var(--border);margin-top:6px"><br><a href="#" onclick="generarOtra(\''+encodeURIComponent(prompt).replace(/'/g,"%27")+'\');return false" style="color:var(--accent);font-size:.62em">🔄 Otra variación</a>','bot');
+  };
+  img.onerror=function(){ d.remove(); addHTML('😢 No pude generar la imagen. Probá con otra descripción.', 'bot'); };
+  img.src=url;
+}
+function generarOtra(encPrompt){
+  var prompt=decodeURIComponent(encPrompt);
+  var url="https://image.pollinations.ai/prompt/"+encodeURIComponent(prompt)+"?width=512&height=512&nologo=true&seed="+Math.floor(Math.random()*99999);
+  addHTML('🎨 <b>'+esc(prompt)+'</b> (otra)<br><img src="'+esc(url)+'" style="max-width:100%;border-radius:12px;border:1px solid var(--border);margin-top:6px"><br><a href="#" onclick="generarOtra(\''+encodeURIComponent(prompt).replace(/'/g,"%27")+'\');return false" style="color:var(--accent);font-size:.62em">🔄 Otra más</a>','bot');
+}
+
+// ─── ANALIZAR FOTO (desde el celular/PC) ───
+function pedirFoto(){
+  var input=document.createElement("input");
+  input.type="file";
+  input.accept="image/*";
+  input.onchange=function(){
+    var file=input.files[0];
+    if(!file) return;
+    if(file.size>5000000){ alert("La foto es muy grande (máx 5 MB)."); return; }
+    var reader=new FileReader();
+    reader.onload=function(){
+      var base64=reader.result; // data URL
+      var d=addHTML('🖼️ Analizando tu foto...<br><img src="'+esc(base64)+'" style="max-width:180px;border-radius:10px;border:1px solid var(--border);margin-top:6px"><br><span class="typing"></span>','bot',false);
+      fetch("/api/analizar_imagen",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({imagen:base64})})
+      .then(function(r){return r.json();}).then(function(res){
+        d.remove();
+        if(res&&res.ok) addHTML('🖼️ <b>Lo que veo en tu foto:</b><br>'+esc(res.descripcion),'bot');
+        else addHTML("😢 "+(res&&res.error||"No se pudo analizar la foto."),'bot');
+      }).catch(function(){ d.remove(); addHTML("😢 Error de conexión al analizar la foto.",'bot'); });
+    };
+    reader.readAsDataURL(file);
+  };
+  input.click();
+}
+// ─── COMPONER CANCIÓN → .mp3 ───
+function pedirCancion(){
+  var tema=prompt("🎵 ¿Sobre qué querés la canción? (ej: la pizza)");
+  if(!tema) return;
+  var estilo=prompt("¿Qué estilo? (ej: pop, rock, trap, cumbia)")||"pop";
+  var d=addHTML('🎵 Componiendo la canción sobre "<b>'+esc(tema)+'</b>" ('+esc(estilo)+')...<br><span class="typing"></span>','bot',false);
+  fetch("/api/cancion?tema="+encodeURIComponent(tema)+"&estilo="+encodeURIComponent(estilo))
+  .then(function(r){return r.json();}).then(function(res){
+    d.remove();
+    if(res&&res.ok){
+      var html='🎵 <b>'+esc(res.titulo)+'</b> ('+esc(res.tempo)+' BPM)<br><br>';
+      if(res.letra) html+='<div style="white-space:pre-wrap;font-size:.8em;line-height:1.6;margin-bottom:8px">'+esc(res.letra)+'</div>';
+      html+='<audio controls src="'+esc(res.url)+'" style="width:100%;margin-top:6px"></audio><br>'+
+        '<a href="'+esc(res.url)+'" download="'+esc(res.titulo.replace(/[^a-zA-Z0-9 ]/g,""))+'.mp3" style="color:var(--accent);font-size:.7em">⬇️ Descargar MP3</a>';
+      addHTML(html,'bot');
+    }else{
+      addHTML("😢 "+(res&&res.error||"No se pudo componer la canción."),'bot');
+    }
+  }).catch(function(){ d.remove(); addHTML("😢 Error de conexión al componer.",'bot'); });
+}
+function pedirScrape(){
+  var u=prompt("URL a scrapear (pegá el link):");
+  if(!u||!/^https?:\/\//.test(u.trim())){ alert("Pegá una URL válida (https://...)"); return; }
+  var d=addHTML('<span class="typing"></span> Scrapeando la página...','bot',false);
+  fetch("/api/scrapear?url="+encodeURIComponent(u.trim()))
+  .then(function(r){return r.json();}).then(function(res){
+    d.remove();
+    if(!res||!res.ok){ addHTML("🚫 "+(res&&res.error||"No se pudo scrapear."),'bot'); return; }
+    lastPage={url:res.url,titulo:res.titulo,texto:res.texto};
+    var card='🌐 <b>PÁGINA SCRAPPEADA</b><br>'+
+      '🔗 <b>Título:</b> '+esc(res.titulo||"?")+'<br>'+
+      (res.descripcion?'📝 <b>Desc:</b> '+esc(res.descripcion)+'<br>':'')+
+      '📄 <b>Texto:</b><br><div style="background:rgba(255,255,255,.05);border-radius:8px;padding:8px;font-size:.72em;line-height:1.6;max-height:220px;overflow:auto">'+esc(res.texto||"")+'</div>'+
+      (res.links&&res.links.length?'🔗 <b>Enlaces ('+res.links.length+'):</b><br>'+res.links.slice(0,8).map(function(l){return '· <a href="'+esc(l.url)+'" target="_blank">'+esc(l.texto||l.url)+'</a>';}).join('<br>'):'')+
+      '<br><small>Ahora puedo responderte sobre la página: escribí "resumila" o "de qué trata".</small>';
+    addHTML(card,'bot');
+  }).catch(function(){ d.remove(); addHTML("🚫 Error de conexión al scrapear.",'bot'); });
+}
+window.pedirScrape=pedirScrape;
+
+function pedirResumen(){
+  var t=prompt("Pegá un texto largo (o un link) para que lo resuma:");
+  if(!t) return;
+  var d=addHTML('<span class="typing"></span> Resumiendo...','bot',false);
+  var esUrl=/^https?:\/\//.test(t.trim());
+  var body=esUrl?JSON.stringify({}):JSON.stringify({texto:t});
+  var extra=esUrl?("?url="+encodeURIComponent(t.trim())):"";
+  fetch("/api/resumir"+extra,{method:"POST",headers:{"Content-Type":"application/json"},body:body})
+  .then(function(r){return r.json();}).then(function(res){
+    d.remove();
+    if(res&&res.ok) addHTML('📄 <b>Resumen:</b><br>'+esc(res.resumen),'bot');
+    else addHTML("😢 "+(res&&res.error||"No se pudo resumir."),'bot');
+  }).catch(function(){ d.remove(); addHTML("😢 Error de conexión al resumir.",'bot'); });
+}
+
+// ─── CONTROL DE MI PC (SOLO con permiso) ───
+var pcToken=localStorage.getItem("zh_pc_token")||"";
+
+// ─── MODO JEFE (solo Gonza) ───
+var ownerClave=localStorage.getItem("zh_owner_clave")||"";
+var esOwner=!!ownerClave;
+// nombre de usuario (para los límites de tokens por usuario)
+var zhUsuario=localStorage.getItem("vh_usuario")||localStorage.getItem("zh_usuario")||"";
+if(!zhUsuario){
+  zhUsuario=(prompt("¿Tu nombre de usuario? (para saber si tenés límite de tokens)")||"").trim().toLowerCase();
+  if(zhUsuario) localStorage.setItem("zh_usuario", zhUsuario);
+}
+function toggleOwner(){
+  if(esOwner){ esOwner=false; ownerClave=""; localStorage.removeItem("zh_owner_clave"); $("ownerBtn").classList.remove("activo"); $("ownerBtn").title="Modo jefe (solo Gonza)"; addHTML("👑 Modo invitado. El asistente ya no te trata de jefe.",'bot'); return; }
+  var c=prompt("👑 Clave de dueño (solo Gonza):");
+  if(!c) return;
+  fetch("/api/owner_verificar?clave="+encodeURIComponent(c.trim()))
+  .then(function(r){return r.json();}).then(function(d){
+    if(d&&d.ok){
+      esOwner=true; ownerClave=c.trim();
+      localStorage.setItem("zh_owner_clave", ownerClave);
+      $("ownerBtn").classList.add("activo");
+      $("ownerBtn").title="Modo jefe ACTIVO";
+      addHTML("👑 ¡Modo jefe activado! Te trato como mi señor, Gonza.",'bot');
+    }else{
+      alert("❌ Clave incorrecta. No sos el dueño.");
+    }
+  }).catch(function(){ alert("Error de conexión"); });
+}
+// inicializar botón según estado guardado
+if(esOwner){ $("ownerBtn").classList.add("activo"); $("ownerBtn").title="Modo jefe ACTIVO"; }
+function esLocal(){ return location.hostname==="localhost"||location.hostname==="127.0.0.1"||location.hostname==="[::1]"; }
+
+// ─── HABILIDADES RÁPIDAS ───
+function habilidadRapida(t){
+  var now=new Date();
+  if(/qu[eé] hora es|decime la hora|hora actual/.test(t)) return "Son las "+now.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'})+" ⏰";
+  if(/qu[eé] d[ií]a es|qu[eé] fecha|decime la fecha|qu[eé] d[ií]a es hoy/.test(t)) return "Hoy es "+now.toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long',year:'numeric'})+" 📅";
+  if(/tir[áa] una moneda|moneda al aire|tir[áa] la moneda/.test(t)) return "🎲 Tiré la moneda: ¡"+ (Math.random()<0.5?"CARA":"CRUZ") +"!";
+  if(/tir[áa] un dado|tir[áa] los dados|dado/.test(t)&&t.length<20) return "🎲 El dado salió: "+ (1+Math.floor(Math.random()*6)) +"!";
+  if(/eleg[ií] por m[ií]|ayudame a decidir|decime s[ií] o no/.test(t)) return "🤔 Mi respuesta: "+ (Math.random()<0.5?"SÍ":"NO") +".";
+  var mc=t.match(/cu[áa]nto es\s+([0-9+\-*/().\s]+)/i);
+  if(mc){
+    try{
+      var expr=mc[1].trim().replace(/[^0-9+\-*/().\s]/g,"");
+      var val=Function("return ("+expr+")")();
+      if(typeof val==="number"&&isFinite(val)) return "🧮 "+expr+" = "+val;
+    }catch(e){}
+  }
+  if(/qu[eé] sabes de m[ií]|qu[eé] aprendiste|decime lo que sabes/.test(t)){
+    fetch("/api/memoria?action=get").then(function(r){return r.json();}).then(function(d){
+      if(d&&d.ok){
+        var mem=d.memoria||{}, cats=Object.keys(mem), total=0;
+        var lines=[];
+        cats.forEach(function(c){
+          var datos=mem[c];
+          if(datos&&typeof datos==="object"&&Object.keys(datos).length){
+            var tit=c.replace("cat_","").replace("_"," ");
+            lines.push("▪ " + tit.toUpperCase());
+            Object.keys(datos).forEach(function(k){ lines.push("   • " + esc(datos[k])); total++; });
+          }
+        });
+        if(total){ addHTML("🧠 Lo que aprendí de vos ("+total+" datos):\n\n"+lines.join("\n"),'bot'); }
+        else addHTML("🧠 Todavía no me enseñaste nada. Decime por ejemplo: <i>recordá que mi color favorito es azul</i>",'bot');
+      }
+    });
+    return "__MEM__";
+  }
+  return null;
+}
+function togglePc(){
+  var p=$("pcPanel");
+  p.style.display=p.style.display==="none"?"block":"none";
+  $("pcBtn").classList.toggle("activo", p.style.display==="block");
+  if(p.style.display==="block") pcStatus();
+}
+function pcStatus(){
+  fetch("/api/pc?action=status&token="+encodeURIComponent(pcToken)).then(function(r){return r.json();}).then(function(d){
+    if(d&&d.permitido) $("pcStatus").textContent="✅ acceso permitido"+(d.pc&&d.pc!=="mi-pc"?" → "+esc(d.pc):"");
+    else $("pcStatus").innerHTML='<a href="#" onclick="pcEmparejar();return false" style="color:var(--accent)">🔐 Emparejar mi PC (ingresar código)</a>';
+  }).catch(function(){ $("pcStatus").textContent="⚠️ no disponible (modo web)"; });
+}
+function pcEmparejar(){
+  var codigo=prompt("🔐 Ingresá el CÓDIGO de empareje que muestra el AgentePC en esta computadora.\n\n(Ej: ABCD-1234)\n\nSi no lo tenés: ejecutá agente_pc.bat en la PC para verlo.").trim().toUpperCase();
+  if(!codigo) return;
+  fetch("/api/pc?action=emparejar&codigo="+encodeURIComponent(codigo)).then(function(r){return r.json();}).then(function(d){
+    if(d&&d.token){ pcToken=d.token; localStorage.setItem("zh_pc_token",pcToken); $("pcStatus").textContent="✅ emparejado → "+esc(d.pc||"mi-pc"); addHTML("🖥️ ¡PC emparejada ("+esc(d.pc||"mi-pc")+")! Ya puedo controlarla. Pedime por ejemplo: <i>abrí el bloc de notas</i>",'bot'); }
+    else $("pcStatus").innerHTML='<a href="#" onclick="pcEmparejar();return false" style="color:var(--accent)">🔐 Código no encontrado · reintentar</a>';
+  }).catch(function(){ alert("Error de conexión"); });
+}
+function pcAction(action, extra){
+  if(!pcToken){ $("pcStatus").innerHTML='<a href="#" onclick="pcEmparejar();return false" style="color:var(--accent)">🔐 Primero emparejá tu PC</a>'; return; }
+  var u="/api/pc?action="+action+"&token="+encodeURIComponent(pcToken)+(extra?"&app="+encodeURIComponent(extra):"");
+  fetch(u).then(function(r){return r.json();}).then(function(d){
+    if(d&&d.ok) addHTML("💻 "+esc(d.respuesta||"hecho"),'bot');
+    else if(d&&d.error==="PERMISO") $("pcStatus").innerHTML='<a href="#" onclick="pcEmparejar();return false" style="color:var(--accent)">🔐 Emparejá para usar</a>';
+    else addHTML("💻 "+esc(d&&d.error||"no se pudo"),'bot');
+  }).catch(function(){ addHTML("💻 Error de conexión.",'bot'); });
+}
+function pcMensaje(){
+  var t=prompt("Mensaje a mostrar en tu PC:");
+  if(t) fetch("/api/pc?action=mensaje&token="+encodeURIComponent(pcToken)+"&texto="+encodeURIComponent(t)).then(function(r){return r.json();}).then(function(d){ if(d&&d.ok) addHTML("💻 "+esc(d.respuesta),'bot'); });
+}
+function pcApagar(){
+  if(!confirm("¿Apagar la PC en 1 minuto? (después podés cancelarlo)")) return;
+  pcAction("apagar");
+}
+// detección de comandos de PC en el chat
+function detectarPc(m){
+  var t=m.toLowerCase();
+  var app=null;
+  var apps={bloc:"notas",notas:"notas",anotaciones:"notas",calculadora:"calc",calc:"calc",carpetas:"carpetas",explorador:"carpetas",chrome:"chrome",paint:"paint",consola:"cmd"};
+  for(var k in apps){ if(t.indexOf("abrí "+k)>=0||t.indexOf("abre "+k)>=0||t.indexOf("abrir "+k)>=0){ app=apps[k]; break; } }
+  if(app) return {action:"abrir",extra:app};
+  if(/decime la hora|qu[eé] hora es|qu[eé] hora hay/.test(t)) return {action:"hora"};
+  if(/info del pc|informaci[oó]n del pc|datos de la pc/.test(t)) return {action:"info"};
+  if(/bloque[ae] la pc|bloque[ae]a la pc/.test(t)) return {action:"bloquear"};
+  if(/apag[áa] la pc|apaga la pc/.test(t)) return {action:"apagar"};
+  return null;
+}
+if(esLocal()){ $("pcBtn").style.display="inline-block"; }
+let promptInstal;
+window.addEventListener("beforeinstallprompt",function(e){
+  e.preventDefault();
+  promptInstal=e;
+  var b=document.createElement("button");
+  b.textContent="📲 Instalar app";
+  b.style.cssText="position:fixed;bottom:70px;right:14px;z-index:999;background:linear-gradient(135deg,#2ee6a8,#7a5cff);color:#03140a;border:none;border-radius:12px;padding:11px 16px;font-weight:800;font-size:.72em;cursor:pointer;font-family:inherit";
+  b.onclick=function(){ promptInstal.prompt(); };
+  document.body.appendChild(b);
+});
+</script>
+<!-- (logger_zh.js eliminado: el asistente NO recopila información) -->
+</body>
+</html>

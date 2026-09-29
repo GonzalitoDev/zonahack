@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>ZonaHack - Sin conexión</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#080c24;color:#ddd;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;text-align:center}
+.offline{max-width:400px}
+.icon{width:80px;height:80px;border-radius:20px;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;font-size:36px;color:#fff;margin:0 auto 16px;box-shadow:0 4px 20px rgba(102,126,234,.3)}
+h1{font-size:1.3em;background:linear-gradient(135deg,#667eea,#764ba2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px}
+.sub{color:#888;font-size:.85em;margin-bottom:20px;line-height:1.5}
+.btn{display:inline-block;padding:10px 24px;border:none;border-radius:10px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;font-size:.85em;cursor:pointer;text-decoration:none;margin:4px}
+.btn-outline{background:none;border:1px solid #667eea44;color:#667eea}
+.reasons{font-size:.72em;color:#555;margin-top:20px;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="offline">
+<div class="icon">📡</div>
+<h1>ZonaHack</h1>
+<p class="sub">Sin conexión a internet<br><span id="offlineMsg">No pudimos conectar con el servidor</span></p>
+<button class="btn" onclick="location.reload()">🔄 Reintentar</button>
+<a class="btn btn-outline" href="/">🏠 Ir al inicio</a>
+<div class="reasons">
+📌 Revisá tu conexión WiFi o datos móviles<br>
+📌 Si tenés videos descargados, abrí la pestaña Offline<br>
+📌 La app funciona sin internet para tus videos guardados
+</div>
+</div>
+<script>
+// Verificar si volvio el internet cada 5 segundos
+setInterval(function(){
+fetch('/manifest.json',{cache:'no-store',mode:'no-cors'}).then(function(){
+location.reload();
+}).catch(function(){});
+},5000);
+</script>
+</body>
+</html>

@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<title>🐍 Snake Arcade · ZonaHack</title>
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/icon_96.png" type="image/png">
+<meta name="theme-color" content="#00ff41">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:radial-gradient(circle at 20% 10%,rgba(0,255,65,.05),transparent 50%),#07090e;color:#d7e2ef;font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh}
+.wrap{max-width:900px;margin:0 auto;padding:14px}
+.hdr{display:flex;align-items:center;gap:10px;padding-bottom:10px;border-bottom:1px solid rgba(0,255,65,.2)}
+.hdr .logo{font-size:1.5em}
+.hdr h1{font-size:1em;letter-spacing:2px;font-family:'Courier New',monospace;color:#00ff41;text-shadow:0 0 12px rgba(0,255,65,.4)}
+.hdr span{font-size:.56em;color:#6d7f93;letter-spacing:1px}
+.hdr a{margin-left:auto;color:#00ff41;text-decoration:none;font-size:.7em;border:1px solid rgba(0,255,65,.25);padding:5px 10px;border-radius:8px}
+.hero{text-align:center;padding:14px;border:1px solid rgba(0,255,65,.14);border-radius:16px;margin:12px 0;background:rgba(0,20,0,.3)}
+.hero .big{font-size:2em}
+.hero h2{color:#00ff41;letter-spacing:2px;font-size:1em;margin:6px 0;text-shadow:0 0 14px rgba(0,255,65,.5)}
+.hero p{font-size:.6em;color:#6d7f93}
+.badge{display:inline-block;margin-top:6px;background:rgba(0,255,65,.08);border:1px solid rgba(0,255,65,.25);color:#00ff41;font-size:.56em;padding:3px 10px;border-radius:16px;letter-spacing:1px}
+.main{display:grid;grid-template-columns:1fr 240px;gap:12px}
+@media(max-width:700px){.main{grid-template-columns:1fr}}
+.gamebox{background:rgba(13,17,23,.9);border:1px solid rgba(0,255,65,.15);border-radius:16px;padding:14px;text-align:center}
+#canva{width:100%;max-width:420px;aspect-ratio:1;background:#060a06;border:1px solid rgba(0,255,65,.25);border-radius:12px;display:block;margin:0 auto;touch-action:none}
+.hud{display:flex;justify-content:space-between;align-items:center;margin:10px auto;max-width:420px;font-size:.72em;color:#6d7f93;letter-spacing:1px}
+.hud b{color:#00ff41;font-size:1.1em}
+.controls{display:flex;gap:6px;justify-content:center;margin-top:10px;flex-wrap:wrap}
+.controls button{background:#0a0d12;border:1px solid rgba(0,255,65,.3);color:#00ff41;border-radius:10px;padding:12px 16px;font-size:.8em;cursor:pointer;font-family:inherit;min-width:52px}
+.controls button:hover{background:rgba(0,255,65,.1)}
+.nick{display:flex;gap:8px;align-items:center;justify-content:center;margin:10px 0;flex-wrap:wrap}
+.nick input{background:#0a0d12;border:1px solid rgba(0,255,65,.25);border-radius:8px;color:#fff;padding:8px 12px;font-size:.76em;outline:none;font-family:inherit;max-width:180px}
+.nick input:focus{border-color:#00ff41}
+.rank{background:rgba(13,17,23,.9);border:1px solid rgba(0,255,65,.15);border-radius:16px;padding:14px}
+.rank .rt{font-size:.72em;color:#f1c40f;letter-spacing:1px;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.rank .rt .dot{width:8px;height:8px;border-radius:50%;background:#00ff41;animation:rt 1.4s infinite}
+@keyframes rt{0%,100%{opacity:.2}50%{opacity:1}}
+.rank .row{display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:8px;font-size:.68em;margin-bottom:4px;background:rgba(0,255,65,.03)}
+.rank .row:nth-child(2){background:rgba(241,196,15,.08)}
+.rank .row:nth-child(3){background:rgba(200,200,200,.06)}
+.rank .row:nth-child(4){background:rgba(180,120,60,.05)}
+.rank .pos{color:#f1c40f;font-weight:800;width:22px}
+.rank .who{flex:1;color:#d7e2ef;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rank .pts{color:#00ff41;font-weight:800}
+.rank .empty{color:#6d7f93;font-size:.66em;text-align:center;padding:16px}
+.foot{text-align:center;font-size:.56em;color:#6d7f93;letter-spacing:1px;margin-top:16px;padding-bottom:18px}
+.over{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;text-align:center;font-family:'Courier New',monospace}
+.over .box{background:#0a0d12;border:1px solid #00ff41;border-radius:18px;padding:30px;max-width:380px;width:100%}
+.over h2{color:#ff4d4d;font-size:1.4em;letter-spacing:2px;margin-bottom:8px}
+.over .s{font-size:2.4em;color:#00ff41;margin:8px 0}
+.over button{background:linear-gradient(135deg,#00ff41,#00e5ff);color:#03140a;border:none;border-radius:10px;padding:13px 26px;font-weight:800;font-size:.8em;cursor:pointer;font-family:inherit;margin-top:10px}
+.toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#0a0d12;border:1px solid #00ff41;color:#00ff41;padding:10px 18px;border-radius:12px;font-size:.66em;z-index:99;display:none;max-width:90vw;text-align:center}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="hdr">
+    <div class="logo">🐍</div>
+    <div><h1>SNAKE ARCADE</h1><span>PUNTUACIÓN PÚBLICA · FIREBASE · TIEMPO REAL</span></div>
+    <a href="/">←</a>
+  </div>
+
+  <div class="hero">
+    <div class="big">🐍</div>
+    <h2>ATRAPÁ COMIDA, NO TE CHOQUES</h2>
+    <p>Jugá, sumá puntos y aparecé en el ranking público. Nadie necesita registrarse.</p>
+    <span class="badge">🌐 PÚBLICO PARA TODOS · PUNTAJES EN FIREBASE</span>
+  </div>
+
+  <div class="main">
+    <div class="gamebox">
+      <canvas id="canva" width="420" height="420"></canvas>
+      <div class="hud"><span>PUNTOS <b id="score">0</b></span><span>MEJOR <b id="best">0</b></span><span id="fbStatus" style="color:#f1c40f">📡 conectando...</span></div>
+      <div class="nick">
+        <input id="nick" placeholder="Tu nombre (para el ranking)" maxlength="16">
+        <button onclick="iniciar()" style="background:linear-gradient(135deg,#00ff41,#00e5ff);color:#03140a;border:none;border-radius:8px;padding:9px 16px;font-weight:800;font-size:.72em;cursor:pointer;font-family:inherit">▶ JUGAR</button>
+      </div>
+      <div class="controls">
+        <button onclick="dir(0,-1)">▲</button><button onclick="dir(0,1)">▼</button><button onclick="dir(-1,0)">◀</button><button onclick="dir(1,0)">▶</button>
+        <button onclick="pausa()" title="Pausa">⏸</button>
+      </div>
+    </div>
+    <div class="rank">
+      <div class="rt"><span class="dot"></span> RANKING PÚBLICO · EN VIVO</div>
+      <div id="ranking"><div class="empty">Cargando puntajes...</div></div>
+      <div style="margin-top:10px;border-top:1px solid rgba(0,255,65,.12);padding-top:8px">
+        <button onclick="adminFirebase()" id="adminBtn" style="background:#0a0d12;border:1px solid rgba(241,196,15,.35);color:#f1c40f;border-radius:8px;padding:8px 12px;font-size:.62em;cursor:pointer;font-family:inherit;width:100%">🔑 ADMIN FIREBASE</button>
+        <div id="adminPanel" style="display:none;margin-top:8px"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">ZONAHACK · SNAKE ARCADE · PUNTAJES EN FIREBASE · 🐍</div>
+</div>
+
+<div class="over" id="over">
+  <div class="box">
+    <h2>💀 GAME OVER</h2>
+    <div class="s" id="overScore">0</div>
+    <div id="overMsg" style="color:#6d7f93;font-size:.72em;font-family:'Segoe UI',sans-serif;margin-bottom:6px">Guardando puntaje...</div>
+    <button onclick="location.reload()">↻ JUGAR DE NUEVO</button>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="/firebase_zh.js"></script>
+<script>
+/* ═══ SNAKE ARCADE — público, puntajes en Firebase ═══ */
+var cv=document.getElementById("canva"),ctx=cv.getContext("2d");
+var COLS=21, CELL=cv.width/COLS;
+var serpiente, dirAct, nextDir, comida, puntos, running, timer, best=(parseInt(localStorage.getItem("zh_snake_best")||"0"));
+var nombre=(localStorage.getItem("zh_snake_nick")||"");
+function $(i){return document.getElementById(i);}
+function toast(m){var t=$("toast");t.textContent=m;t.style.display="block";clearTimeout(t._x);t._x=setTimeout(function(){t.style.display="none";},2600);}
+$("nick").value=nombre;
+$("best").textContent=best;
+
+function iniciar(){
+  nombre=($("nick").value.trim()||("Jugador-"+Math.floor(100+Math.random()*900))).slice(0,16);
+  $("nick").value=nombre;
+  localStorage.setItem("zh_snake_nick",nombre);
+  $("over").style.display="none";
+  serpiente=[{x:Math.floor(COLS/2),y:Math.floor(COLS/2)}];
+  dirAct={x:1,y:0}; nextDir={x:1,y:0};
+  puntos=0; running=true;
+  $("score").textContent=0;
+  comidaNueva();
+  if(timer)clearInterval(timer);
+  timer=setInterval(paso,110);
+}
+function comidaNueva(){
+  var ok=false;
+  while(!ok){
+    comida={x:Math.floor(Math.random()*COLS),y:Math.floor(Math.random()*COLS)};
+    ok=!serpiente.some(function(s){return s.x===comida.x&&s.y===comida.y;});
+  }
+}
+function dir(x,y){ if(running) nextDir={x:x,y:y}; }
+function pausa(){ running=!running; if(running&&!timer){} else if(!running&&timer){clearInterval(timer);timer=null;} if(running) timer=setInterval(paso,110); }
+function paso(){
+  dirAct=nextDir;
+  var h=serpiente[0];
+  var n={x:h.x+dirAct.x,y:h.y+dirAct.y};
+  // paredes
+  if(n.x<0)n.x=COLS-1; if(n.x>=COLS)n.x=0; if(n.y<0)n.y=COLS-1; if(n.y>=COLS)n.y=0;
+  // choque con el cuerpo
+  if(serpiente.some(function(s){return s.x===n.x&&s.y===n.y;})){ gameOver(); return; }
+  serpiente.unshift(n);
+  if(n.x===comida.x&&n.y===comida.y){ puntos++; $("score").textContent=puntos; comidaNueva(); }
+  else serpiente.pop();
+  dibujar();
+}
+function dibujar(){
+  ctx.fillStyle="#060a06"; ctx.fillRect(0,0,cv.width,cv.height);
+  // comida
+  ctx.fillStyle="#ff4d4d"; ctx.beginPath(); ctx.arc(comida.x*CELL+CELL/2,comida.y*CELL+CELL/2,CELL*0.4,0,Math.PI*2); ctx.fill();
+  // serpiente
+  for(var i=0;i<serpiente.length;i++){
+    ctx.fillStyle=i===0?"#00ff41":"#0d8f3c";
+    ctx.fillRect(serpiente[i].x*CELL+1,serpiente[i].y*CELL+1,CELL-2,CELL-2);
+  }
+}
+function gameOver(){
+  running=false; clearInterval(timer); timer=null;
+  $("overScore").textContent=puntos;
+  $("over").style.display="flex";
+  if(puntos>best){ best=puntos; localStorage.setItem("zh_snake_best",String(best)); $("best").textContent=best; }
+  guardar(puntos);
+}
+/* ═══ PUNTAJES EN FIREBASE (público) ═══ */
+function guardar(s){
+  var msg=$("overMsg");
+  ZHFirebase.push("juegos_scores",{u:nombre,s:s,ts:Date.now()})
+    .then(function(){ msg.textContent="✅ Puntaje guardado ("+s+" pts)."; toast("🏆 Puntaje guardado en Firebase"); refrescar(); })
+    .catch(function(){ msg.textContent="⚠ No se pudo guardar el puntaje."; });
+}
+var watch=null;
+function refrescar(){
+  ZHFirebase.get("juegos_scores").then(function(d){
+    var list=Object.keys(d||{}).map(function(k){return {u:d[k].u||"?",s:d[k].s||0,ts:d[k].ts||0};});
+    list.sort(function(a,b){return b.s-a.s;});
+    renderRank(list.slice(0,10));
+  }).catch(function(){});
+}
+function renderRank(list){
+  var el=$("ranking");
+  if(!list.length){ el.innerHTML='<div class="empty">Todavía no hay puntajes. ¡Sé el primero!</div>'; return; }
+  el.innerHTML=list.map(function(r,i){
+    return '<div class="row"><span class="pos">'+(i+1)+'</span><span class="who">'+esc(r.u)+'</span><span class="pts">'+r.s+'</span></div>';
+  }).join("");
+}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+
+/* ═══ ADMIN FIREBASE (solo dueño) ═══ */
+var ADMIN_CLAVE="wRZpEvefFSAguHde";
+var adminOk=false;
+function adminFirebase(){
+  if(adminOk){ renderAdmin(); return; }
+  var clave=prompt("👑 Clave de ADMIN FIREBASE:");
+  if(!clave) return;
+  if(clave===ADMIN_CLAVE){ adminOk=true; renderAdmin(); toast("🔑 Modo ADMIN activado"); }
+  else toast("❌ Clave incorrecta");
+}
+function renderAdmin(){
+  var p=$("adminPanel");
+  p.style.display="block";
+  p.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><b style="font-size:.62em;color:#f1c40f;letter-spacing:1px">👑 ADMIN FIREBASE</b>'+
+    '<button onclick="vaciarScores()" style="background:rgba(255,77,77,.15);border:1px solid rgba(255,77,77,.4);color:#ff6b6b;border-radius:6px;padding:5px 10px;font-size:.58em;cursor:pointer;font-family:inherit">🗑 Vaciar ranking</button></div>'+
+    '<div id="adminList" style="font-size:.62em">Cargando...</div>';
+  ZHFirebase.get("juegos_scores").then(function(d){
+    var ids=Object.keys(d||{});
+    if(!ids.length){ $("adminList").innerHTML='<div style="color:#6d7f93">Sin puntajes.</div>'; return; }
+    var html=ids.map(function(id){
+      var r=d[id];
+      return '<div style="display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.05)">'+
+        '<span style="flex:1;color:#d7e2ef">'+esc(r.u||"?")+' · <b style="color:#00ff41">'+esc(String(r.s||0))+'</b></span>'+
+        '<span style="font-size:.5em;color:#6d7f93">'+esc(String(id).slice(-6))+'</span>'+
+        '<button onclick="borrarScore(\''+esc(String(id).replace(/'/g,"\\'"))+'\')" style="background:none;border:1px solid rgba(255,77,77,.35);color:#ff6b6b;border-radius:5px;padding:2px 6px;font-size:.56em;cursor:pointer;font-family:inherit">✕</button></div>';
+    }).join("");
+    $("adminList").innerHTML=html;
+  }).catch(function(){ $("adminList").innerHTML='<div style="color:#ff6b6b">Error leyendo Firebase.</div>'; });
+}
+function borrarScore(id){
+  if(!confirm("¿Borrar ese puntaje?")) return;
+  ZHFirebase.remove("juegos_scores/"+id).then(function(){ toast("🗑 Borrado"); renderAdmin(); refrescar(); })
+  .catch(function(){ toast("Error al borrar"); });
+}
+function vaciarScores(){
+  if(!confirm("⚠ ¿VACIAR todo el ranking? No se puede deshacer.")) return;
+  ZHFirebase.remove("juegos_scores").then(function(){ toast("🗑 Ranking vaciado"); renderAdmin(); refrescar(); })
+  .catch(function(){ toast("Error al vaciar"); });
+}
+window.adminFirebase=adminFirebase;
+
+/* teclado */
+document.addEventListener("keydown",function(e){
+  if(e.key==="ArrowUp"){dir(0,-1);}
+  else if(e.key==="ArrowDown"){dir(0,1);}
+  else if(e.key==="ArrowLeft"){dir(-1,0);}
+  else if(e.key==="ArrowRight"){dir(1,0);}
+  else if(e.key===" "){e.preventDefault();pausa();}
+  else if(e.key==="Enter"){iniciar();}
+});
+/* swipe */
+var tx=0,ty=0;
+cv.addEventListener("touchstart",function(e){tx=e.touches[0].clientX;ty=e.touches[0].clientY;},{passive:true});
+cv.addEventListener("touchmove",function(e){
+  e.preventDefault();
+  var dx=e.touches[0].clientX-tx, dy=e.touches[0].clientY-ty;
+  if(Math.abs(dx)>Math.abs(dy)&&Math.abs(dx)>20){ dir(dx>0?1:-1,0); tx=e.touches[0].clientX; }
+  else if(Math.abs(dy)>20){ dir(0,dy>0?1:-1); ty=e.touches[0].clientY; }
+},{passive:false});
+
+/* Firebase init + ranking en vivo (poll 2s) */
+ZHFirebase.init(function(){
+  if(ZHFirebase.ready){ $("fbStatus").textContent="🟢 firebase OK"; $("fbStatus").style.color="#00ff41"; refrescar(); watch=ZHFirebase.on("juegos_scores",function(){ refrescar(); }); }
+  else{ $("fbStatus").textContent="🔴 firebase sin conexión"; $("fbStatus").style.color="#ff6b6b"; }
+});
+iniciar();
+</script>
+</body>
+</html>

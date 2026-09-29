@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="theme-color" content="#0a0e27">
+<title>Watch Party - VideoHub</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:sans-serif;background:#080c24;color:#e8e8e8;padding:8px;min-height:100vh;max-width:1000px;margin:0 auto}
+h1{color:#667eea;font-size:1.2em;text-align:center;margin:6px 0}
+.sub{color:#888;font-size:.7em;text-align:center;margin-bottom:6px}
+.back{color:#667eea;text-decoration:none;font-size:.76em;display:block;margin-bottom:6px}
+
+.card{background:#111639;border-radius:10px;padding:12px;margin-bottom:6px}
+.card h2{font-size:.9em;color:#667eea;margin-bottom:6px}
+.fila{display:flex;justify-content:space-between;padding:4px 0;font-size:.78em;border-bottom:1px solid rgba(255,255,255,.03)}
+.fila .lab{color:#888}
+.fila .val{color:#e8e8e8}
+
+.btn{padding:9px 16px;border:none;border-radius:7px;color:white;font-weight:600;font-size:.8em;cursor:pointer;display:inline-block;text-align:center;text-decoration:none;margin:2px}
+.btn-primary{background:linear-gradient(135deg,#667eea,#764ba2)}
+.btn-sec{background:#2ecc71}
+.btn-del{background:#e74c3c}
+.btn-warn{background:#f39c12}
+.btn-sm{padding:5px 10px;font-size:.7em}
+.btn-full{width:100%;display:block}
+
+input,select{padding:7px 10px;border-radius:6px;border:1px solid rgba(255,255,255,.08);background:#0a0e27;color:white;font-size:.78em;outline:none;width:100%;margin:2px 0}
+input:focus{border-color:#667eea}
+
+.row{display:flex;gap:4px;flex-wrap:wrap;align-items:center}
+.tag{display:inline-block;padding:2px 8px;border-radius:8px;font-size:.7em;margin:1px}
+.tag-green{background:#2ecc7133;color:#2ecc71}
+.tag-red{background:#e74c3c33;color:#e74c3c}
+.tag-yellow{background:#f39c1233;color:#f39c12}
+.tag-gold{background:#f1c40f33;color:#f1c40f}
+
+#player{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:#000;z-index:100;flex-direction:column}
+#player.active{display:flex}
+#player .top{display:flex;align-items:center;padding:4px 8px;background:rgba(0,0,0,.95);gap:5px;min-height:38px}
+#player .back{font-size:1.2em;cursor:pointer;color:white;background:none;border:none;padding:2px 5px}
+#player .ttl{flex:1;font-size:.74em;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#player .wrap{flex:1;display:flex;align-items:center;justify-content:center;background:#000;position:relative}
+#player iframe,.player-video{width:100%;height:100%;border:none}
+#player video{width:100%;max-height:100%;outline:none}
+
+.player-controls{display:flex;gap:3px;padding:3px 8px;background:rgba(0,0,0,.9);justify-content:center;flex-wrap:wrap}
+.player-controls button{padding:5px 10px;border:none;border-radius:4px;color:white;font-size:.68em;cursor:pointer;background:#333}
+.player-controls .active{background:#667eea}
+
+.estado-badge{font-size:.72em;padding:2px 8px;border-radius:8px}
+.estado-online{background:#2ecc7133;color:#2ecc71}
+.estado-offline{background:#e74c3c33;color:#e74c3c}
+.estado-sync{background:#667eea33;color:#667eea}
+
+.chat-box{height:150px;overflow-y:auto;background:#0a0e27;border-radius:6px;padding:5px;margin:3px 0;font-size:.72em}
+.chat-msg{margin:2px 0;padding:2px 4px}
+.chat-msg .nom{color:#667eea;font-weight:bold;font-size:.75em}
+.chat-msg .txt{color:#ccc;font-size:.82em}
+.chat-msg .hora{color:#555;font-size:.6em;margin-left:4px}
+.chat-input{display:flex;gap:4px}
+.chat-input input{flex:1;font-size:.72em;padding:5px 8px}
+.chat-input button{padding:5px 10px;font-size:.7em}
+
+.reacciones-bar{display:flex;gap:3px;justify-content:center;padding:3px;flex-wrap:wrap}
+.reacciones-bar button{font-size:1.1em;background:none;border:none;cursor:pointer;padding:2px 5px;transition:all .2s}
+.reacciones-bar button:active{transform:scale(1.5)}
+.reaccion-flotante{position:absolute;font-size:2em;animation:subir 2s forwards;pointer-events:none;z-index:10}
+@keyframes subir{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-100px)}}
+
+#lobby .sala-item{padding:8px;background:rgba(255,255,255,.02);border-radius:6px;margin:3px 0;cursor:pointer}
+#lobby .sala-item:active{transform:scale(.98)}
+
+.latency-bar{font-size:.65em;color:#888;text-align:center;margin:2px 0}
+
+@media(min-width:768px){
+.grid-2{display:grid;grid-template-columns:3fr 2fr;gap:8px}
+}
+</style>
+</head>
+<body>
+
+<div id="lobby">
+<h1>🎬 Watch Party</h1>
+<p class="sub">Mira videos sincronizados con tus amigos</p>
+<a class="back" href="/">&larr; Volver</a>
+
+<div class="card">
+<h2>👤 Tu nombre</h2>
+<input id="nombreInput" placeholder="Tu nombre..." maxlength="20">
+<div class="row" style="margin-top:5px">
+<button class="btn btn-primary btn-full" onclick="crearSala()">🎬 Crear sala</button>
+</div>
+</div>
+
+<div class="card">
+<h2>🔗 Unirse a sala</h2>
+<input id="codigoInput" placeholder="Codigo de sala..." maxlength="10" onkeydown="if(event.key==='Enter')unirseSala()">
+<button class="btn btn-sec btn-full" onclick="unirseSala()">Unirse</button>
+</div>
+
+<div class="card">
+<h2>🏠 Salas activas</h2>
+<div id="salasActivas"><p class="sub">Cargando...</p></div>
+</div>
+</div>
+
+<div id="salaView" style="display:none">
+<div class="row" style="justify-content:space-between;margin-bottom:4px">
+<a class="back" href="#" onclick="salirSala()">&larr; Salir</a>
+<span id="salaCodigoDisplay" style="font-size:.7em;color:#888;font-family:monospace"></span>
+</div>
+
+<div class="grid-2">
+<div>
+<div class="card" style="padding:6px">
+<div id="playerView" style="aspect-ratio:16/9;background:#000;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#555;font-size:.8em">
+🎬 Sala lista - Esperando video
+</div>
+</div>
+
+<div class="card">
+<div class="row" style="justify-content:space-between">
+<div style="font-size:.72em;color:#888" id="tiempoDisplay">00:00 / 00:00</div>
+<div style="font-size:.65em;color:#888" id="syncStatus">🔄 Sincronizado</div>
+</div>
+<div class="player-controls" id="duoControls">
+<button onclick="hostPlay()" id="btnPlay" disabled style="background:#667eea">▶</button>
+<button onclick="hostPause()" id="btnPause" disabled style="background:#f39c12">⏸</button>
+<button onclick="hostSeek(-10)" id="btnRewind" disabled>⏪ 10s</button>
+<button onclick="hostSeek(10)" id="btnForward" disabled>⏩ 10s</button>
+</div>
+</div>
+
+<div class="card">
+<div class="reacciones-bar" id="reaccionesBar">
+<button onclick="enviarReaccion('😂')">😂</button>
+<button onclick="enviarReaccion('❤️')">❤️</button>
+<button onclick="enviarReaccion('😱')">😱</button>
+<button onclick="enviarReaccion('😭')">😭</button>
+<button onclick="enviarReaccion('🔥')">🔥</button>
+<button onclick="enviarReaccion('😮')">😮</button>
+</div>
+</div>
+</div>
+
+<div>
+<div class="card">
+<h2>👥 Participantes</h2>
+<div id="participantesLista"></div>
+<div class="latency-bar" id="latenciaDisplay">Latencia: -- ms</div>
+</div>
+
+<div class="card">
+<h2>💬 Chat</h2>
+<div class="chat-box" id="chatBox"></div>
+<div class="chat-input">
+<input id="chatInput" placeholder="Escribe..." onkeydown="if(event.key==='Enter')enviarMensaje()">
+<button class="btn btn-primary btn-sm" onclick="enviarMensaje()">Enviar</button>
+</div>
+</div>
+</div>
+</div>
+
+<div id="playerOverlay" class="player" id="player">
+<div class="top">
+<button class="back" onclick="cerrarPlayer()">&larr;</button>
+<div class="ttl" id="playerTitulo">Reproduciendo</div>
+</div>
+<div class="wrap">
+<iframe id="playerFrame" allow="autoplay; encrypted-media" allowfullscreen style="display:none"></iframe>
+<video id="playerVideo" controls preload="auto" style="display:none"></video>
+<div id="reaccionesContainer" style="position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none;overflow:hidden"></div>
+</div>
+</div>
+
+<script>
+var API_URL = "https://xfwolaurpeofysnymqle.supabase.co";
+var API_KEY = "sb_publishable_3VvBUD5Bdu3Uaq59fJ99MQ_XDCtujUU";
+var HEADERS = {"apikey": API_KEY, "Authorization": "Bearer " + API_KEY, "Content-Type": "application/json"};
+var WS_URL = "wss://xfwolaurpeofysnymqle.supabase.co/realtime/v1/websocket?apikey=" + API_KEY + "&vsn=1.0.0";
+
+var salaActual = null, esHost = false, miNombre = "", ws = null;
+var playerFrame = document.getElementById("playerFrame");
+var playerVideo = document.getElementById("playerVideo");
+var playerOverlay = document.getElementById("player");
+
+function api(m, e, d) {
+    return fetch(API_URL + "/rest/v1/" + e, {method: m, headers: HEADERS, body: d ? JSON.stringify(d) : undefined})
+        .then(function(r) { return r.json().catch(function() { return []; }); });
+}
+
+function guardarNombre() {
+    miNombre = document.getElementById("nombreInput").value.trim() || "User_" + Date.now().toString(36).slice(-4);
+    localStorage.setItem("vh_duo_nombre", miNombre);
+}
+var saved = localStorage.getItem("vh_duo_nombre");
+if (saved) document.getElementById("nombreInput").value = saved;
+
+// ─── LOBBY ────────────────────────────
+function cargarSalas() {
+    api("GET", "salas?select=codigo,nombre,creador_nombre,created_at,estado&order=created_at.desc&limit=10").then(function(rows) {
+        var div = document.getElementById("salasActivas");
+        if (!rows || !rows.length) { div.innerHTML = '<p class="sub">Sin salas activas</p>'; return; }
+        div.innerHTML = rows.map(function(s) {
+            return '<div class="sala-item" onclick="document.getElementById(\'codigoInput\').value=\'' + s.codigo + '\';unirseSala()">'
+                + '<div style="font-weight:bold;font-size:.8em">' + s.nombre + '</div>'
+                + '<div style="font-size:.65em;color:#888">👤 ' + s.creador_nombre + ' | ' + s.estado + '</div></div>';
+        }).join("");
+    });
+}
+cargarSalas();
+
+// ─── CREAR / UNIR ──────────────────────
+function crearSala() {
+    guardarNombre();
+    var codigo = "DUO-" + Math.random().toString(36).slice(2, 7).toUpperCase();
+    api("POST", "salas", {codigo: codigo, nombre: "Sala de " + miNombre, creador_nombre: miNombre, estado: "idle"}).then(function() {
+        api("GET", "salas?codigo=eq." + codigo + "&select=id").then(function(salas) {
+            if (salas && salas.length > 0) {
+                var sid = salas[0].id;
+                api("POST", "sala_usuarios", {sala_id: sid, usuario_nombre: miNombre});
+                entrarSala(sid, codigo, true);
+            }
+        });
+    });
+}
+
+function unirseSala() {
+    guardarNombre();
+    var codigo = document.getElementById("codigoInput").value.trim().toUpperCase();
+    if (!codigo) return;
+    api("GET", "salas?codigo=eq." + codigo + "&select=id,nombre,creador_nombre").then(function(salas) {
+        if (!salas || !salas.length) { alert("Sala no encontrada"); return; }
+        var sid = salas[0].id;
+        api("POST", "sala_usuarios", {sala_id: sid, usuario_nombre: miNombre}).catch(function() {});
+        entrarSala(sid, codigo, false);
+    });
+}
+
+function entrarSala(sid, codigo, host) {
+    salaActual = sid;
+    esHost = host;
+    document.getElementById("lobby").style.display = "none";
+    document.getElementById("salaView").style.display = "block";
+    document.getElementById("salaCodigoDisplay").textContent = "📋 " + codigo;
+
+    conectarWS(sid);
+    actualizarSala();
+    cargarParticipantes();
+    if (host) activarControlesHost();
+}
+
+function salirSala() {
+    if (ws) ws.close();
+    if (salaActual) {
+        api("PATCH", "sala_usuarios?sala_id=eq." + salaActual + "&usuario_nombre=eq." + miNombre, {conectado: false}).catch(function() {});
+    }
+    salaActual = null;
+    esHost = false;
+    document.getElementById("lobby").style.display = "block";
+    document.getElementById("salaView").style.display = "none";
+    cerrarPlayer();
+    cargarSalas();
+}
+
+// ─── WEBSOCKET ──────────────────────────
+function conectarWS(sid) {
+    if (ws) ws.close();
+    ws = new WebSocket(WS_URL);
+    ws.onopen = function() {
+        ws.send(JSON.stringify({topic: "realtime:salas", event: "phx_join", payload: {}, ref: 1}));
+        ws.send(JSON.stringify({topic: "realtime:sala_usuarios", event: "phx_join", payload: {}, ref: 2}));
+        ws.send(JSON.stringify({topic: "realtime:sala_mensajes", event: "phx_join", payload: {}, ref: 3}));
+        ws.send(JSON.stringify({topic: "realtime:sala_reacciones", event: "phx_join", payload: {}, ref: 4}));
+    };
+    ws.onmessage = function(e) {
+        try {
+            var msg = JSON.parse(e.data);
+            var evento = msg.event;
+            if (evento === "postgres_changes") {
+                evento = (msg.payload && msg.payload.data && msg.payload.data.type) || "";
+            }
+            if (evento === "INSERT" || evento === "UPDATE" || evento === "DELETE") {
+                actualizarSala();
+                if (msg.topic && msg.topic.includes("sala_mensajes")) cargarMensajes();
+                if (msg.topic && msg.topic.includes("sala_reacciones")) mostrarReaccionEvento(msg.payload);
+            }
+        } catch (ex) {}
+    };
+    ws.onclose = function() {
+        setTimeout(function() { if (salaActual) conectarWS(salaActual); }, 2000);
+    };
+}
+
+// ─── ESTADO DE SALA ─────────────────────
+var ultimoEstado = null;
+
+function actualizarSala() {
+    if (!salaActual) return;
+    api("GET", "salas?select=id,nombre,video_id,video_titulo,estado,tiempo_actual,creador_nombre&id=eq." + salaActual).then(function(salas) {
+        if (!salas || !salas.length) return;
+        var s = salas[0];
+        ultimoEstado = s;
+        document.getElementById("salaCodigoDisplay").textContent = "📋 " + (s.codigo || "");
+        esHost = (s.creador_nombre === miNombre);
+        if (s.video_id && s.estado !== "idle") {
+            abrirPlayer(s.video_id, s.video_titulo, s.estado === "playing", s.tiempo_actual || 0);
+        }
+        if (esHost) activarControlesHost(); else desactivarControlesHost();
+    });
+    cargarParticipantes();
+    cargarMensajes();
+}
+
+function cargarParticipantes() {
+    if (!salaActual) return;
+    api("GET", "sala_usuarios?select=usuario_nombre,conectado&sala_id=eq." + salaActual + "&order=conectado.desc").then(function(users) {
+        if (!users) return;
+        var h = "";
+        users.forEach(function(u) {
+            var online = u.conectado ? '<span class="estado-badge estado-online">🟢 Online</span>' : '<span class="estado-badge estado-offline">🔴 Offline</span>';
+            var hostIcon = (u.usuario_nombre === (ultimoEstado ? ultimoEstado.creador_nombre : "")) ? ' 👑' : '';
+            h += '<div class="fila"><span class="lab">' + u.usuario_nombre + hostIcon + '</span><span class="val">' + online + '</span></div>';
+        });
+        document.getElementById("participantesLista").innerHTML = h || '<p class="sub">Sin participantes</p>';
+    });
+}
+
+function activarControlesHost() {
+    document.querySelectorAll("#duoControls button").forEach(function(b) { b.disabled = false; });
+}
+
+function desactivarControlesHost() {
+    document.querySelectorAll("#duoControls button").forEach(function(b) { b.disabled = true; });
+}
+
+// ─── PLAYER ─────────────────────────────
+var ytPlayer = null;
+var syncInterval = null;
+
+function abrirPlayer(videoId, titulo, playing, tiempo) {
+    document.getElementById("playerView").innerHTML = '<div id="ytContainer" style="width:100%;height:100%"></div>';
+    document.getElementById("playerView").style.background = "transparent";
+    document.getElementById("tiempoDisplay").textContent = "Cargando...";
+
+    // Cargar YouTube API
+    if (typeof YT === "undefined") {
+        var tag = document.createElement("script");
+        tag.src = "https://www.youtube.com/iframe_api";
+        var firstScript = document.getElementsByTagName("script")[0];
+        firstScript.parentNode.insertBefore(tag, firstScript);
+        window.onYouTubeIframeAPIReady = function() { crearPlayerYT(videoId, playing, tiempo); };
+    } else {
+        crearPlayerYT(videoId, playing, tiempo);
+    }
+}
+
+function crearPlayerYT(videoId, playing, tiempo) {
+    if (ytPlayer) { ytPlayer.loadVideoById(videoId, playing ? (tiempo || 0) : 0); return; }
+    ytPlayer = new YT.Player("ytContainer", {
+        height: "100%", width: "100%",
+        videoId: videoId,
+        playerVars: {autoplay: playing ? 1 : 0, controls: 1, modestbranding: 1, rel: 0},
+        events: {
+            onReady: function(e) {
+                if (playing) e.target.playVideo();
+                if (tiempo > 0) e.target.seekTo(tiempo, true);
+                if (!esHost) iniciarSync();
+            },
+            onStateChange: function(e) {
+                if (esHost && e.data === 1) { // Playing
+                    api("PATCH", "salas?id=eq." + salaActual, {estado: "playing", tiempo_actual: ytPlayer.getCurrentTime()});
+                }
+                if (esHost && e.data === 2) { // Paused
+                    api("PATCH", "salas?id=eq." + salaActual, {estado: "pausado", tiempo_actual: ytPlayer.getCurrentTime()});
+                }
+                if (!esHost) {
+                    if (e.data === YT.PlayerState.PLAYING) { /* OK, sincronizado */ }
+                }
+            }
+        }
+    });
+}
+
+// ─── CONTROLES HOST ─────────────────────
+function hostPlay() {
+    if (!esHost || !ytPlayer) return;
+    ytPlayer.playVideo();
+    api("PATCH", "salas?id=eq." + salaActual, {estado: "playing"});
+}
+
+function hostPause() {
+    if (!esHost || !ytPlayer) return;
+    ytPlayer.pauseVideo();
+    api("PATCH", "salas?id=eq." + salaActual, {estado: "pausado"});
+}
+
+function hostSeek(segundos) {
+    if (!esHost || !ytPlayer) return;
+    var t = Math.max(0, ytPlayer.getCurrentTime() + segundos);
+    ytPlayer.seekTo(t, true);
+    api("PATCH", "salas?id=eq." + salaActual, {estado: "playing", tiempo_actual: t});
+}
+
+// ─── SINCRONIZACION ─────────────────────
+function iniciarSync() {
+    if (syncInterval) clearInterval(syncInterval);
+    syncInterval = setInterval(function() {
+        if (!salaActual || !ytPlayer || esHost) return;
+        api("GET", "salas?select=estado,tiempo_actual&id=eq." + salaActual).then(function(s) {
+            if (!s || !s.length) return;
+            var r = s[0];
+            var tActual = ytPlayer.getCurrentTime() || 0;
+            var tServer = r.tiempo_actual || 0;
+            var diff = Math.abs(tActual - tServer);
+            document.getElementById("syncStatus").textContent = "🔄 " + (diff < 1 ? "Sincronizado" : "Ajustando...");
+            if (diff > 2) { // Diferencia grande -> ajustar
+                ytPlayer.seekTo(tServer, true);
+            } else if (diff > 0.5 && r.estado === "playing") { // Diferencia media -> ajustar velocidad
+                ytPlayer.setPlaybackRate(tActual < tServer ? 1.05 : 0.95);
+                setTimeout(function() { if (ytPlayer) ytPlayer.setPlaybackRate(1); }, 1000);
+            }
+            if (r.estado === "pausado" && ytPlayer.getPlayerState() === 1) ytPlayer.pauseVideo();
+            if (r.estado === "playing" && ytPlayer.getPlayerState() === 2) ytPlayer.playVideo();
+            // Actualizar tiempo
+            var mins = Math.floor(tServer / 60);
+            var secs = Math.floor(tServer % 60);
+            document.getElementById("tiempoDisplay").textContent = mins + ":" + (secs < 10 ? "0" : "") + secs;
+        });
+    }, 2000);
+}
+
+// ─── CHAT ───────────────────────────────
+function cargarMensajes() {
+    if (!salaActual) return;
+    api("GET", "sala_mensajes?sala_id=eq." + salaActual + "&order=created_at.asc&limit=50").then(function(msgs) {
+        if (!msgs || !msgs.length) return;
+        var box = document.getElementById("chatBox");
+        box.innerHTML = msgs.map(function(m) {
+            return '<div class="chat-msg"><span class="nom">' + m.usuario_nombre + ':</span> <span class="txt">' + escHtml(m.mensaje) + '</span></div>';
+        }).join("");
+        box.scrollTop = box.scrollHeight;
+    });
+}
+
+function enviarMensaje() {
+    var input = document.getElementById("chatInput");
+    var txt = input.value.trim();
+    if (!txt || !salaActual) return;
+    api("POST", "sala_mensajes", {sala_id: salaActual, usuario_nombre: miNombre, mensaje: txt});
+    input.value = "";
+}
+
+// ─── REACCIONES ─────────────────────────
+function enviarReaccion(emoji) {
+    if (!salaActual) return;
+    api("POST", "sala_reacciones", {sala_id: salaActual, usuario_nombre: miNombre, reaccion: emoji});
+    mostrarReaccionLocal(emoji);
+}
+
+function mostrarReaccionLocal(emoji) {
+    var container = document.getElementById("reaccionesContainer");
+    var el = document.createElement("div");
+    el.className = "reaccion-flotante";
+    el.textContent = emoji;
+    el.style.left = Math.random() * 80 + 10 + "%";
+    el.style.top = Math.random() * 60 + 10 + "%";
+    container.appendChild(el);
+    setTimeout(function() { el.remove(); }, 2000);
+}
+
+function mostrarReaccionEvento(payload) {
+    if (payload && payload.reaccion) mostrarReaccionLocal(payload.reaccion);
+}
+
+// ─── PLAYER OVERLAY ─────────────────────
+function cerrarPlayer() {
+    playerFrame.style.display = "none";
+    playerVideo.style.display = "none";
+    playerOverlay.classList.remove("active");
+}
+
+function escHtml(s) {
+    var d = document.createElement("div");
+    d.textContent = s || "";
+    return d.innerHTML;
+}
+
+// Inicializar
+cargarSalas();
+</script>
+<script src="/errores.js" defer></script>
+<script src="/update_check.js" defer></script>
+</body>
+</html>

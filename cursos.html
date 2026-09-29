@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>🎓 Cursos — ZonaHack</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0a;color:#c8d6e5;font-family:'Courier New',monospace;min-height:100vh}
+.header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid rgba(0,255,65,.08);background:#050505;position:sticky;top:0;z-index:100}
+.header h1{color:#00ff41;font-size:.85em;letter-spacing:1px}
+.back{color:#00ff41;text-decoration:none;font-size:.65em;padding:4px 8px;border:1px solid rgba(255,255,255,.1);border-radius:3px}
+.container{max-width:860px;margin:0 auto;padding:12px}
+.search{display:flex;gap:5px;margin:8px 0}
+.search input{flex:1;padding:10px 12px;border:1px solid rgba(0,255,65,.12);border-radius:8px;background:#0a0a0a;color:#c8d6e5;font-size:.8em;outline:none;font-family:'Courier New',monospace}
+.search input:focus{border-color:#00ff41}
+.search button{padding:10px 18px;border:1px solid rgba(0,255,65,.2);border-radius:8px;background:rgba(0,255,65,.08);color:#00ff41;font-weight:bold;font-size:.75em;cursor:pointer;font-family:'Courier New',monospace}
+.chips{display:flex;gap:5px;flex-wrap:wrap;margin:6px 0}
+.chips button{padding:6px 11px;border:1px solid rgba(0,255,65,.12);border-radius:18px;background:rgba(0,255,65,.03);color:rgba(0,255,65,.7);font-size:.66em;cursor:pointer;font-family:'Courier New',monospace;transition:.15s}
+.chips button:hover{background:rgba(0,255,65,.1);color:#00ff41;border-color:#00ff41}
+.status{text-align:center;font-size:.62em;color:rgba(255,255,255,.35);margin:6px 0;min-height:16px}
+#player{display:none;margin-bottom:12px}
+#player.active{display:block}
+#player iframe{width:100%;aspect-ratio:16/9;border:none;border-radius:8px;background:#000}
+.player-title{font-size:.75em;color:#00ff41;margin:6px 2px 2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px}
+.card{background:#0d0f0d;border:1px solid rgba(0,255,65,.08);border-radius:8px;overflow:hidden;cursor:pointer;transition:.2s}
+.card:hover{border-color:#00ff41;box-shadow:0 0 14px rgba(0,255,65,.12);transform:translateY(-2px)}
+.card img{width:100%;aspect-ratio:16/9;object-fit:cover;background:#111;display:block}
+.card .t{font-size:.7em;padding:6px 8px;color:#ddd;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;min-height:2.4em}
+.card .c{font-size:.6em;color:rgba(0,255,65,.4);padding:0 8px 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.empty{text-align:center;color:rgba(255,255,255,.15);padding:40px;font-size:.8em}
+.spin{width:22px;height:22px;border:2px solid rgba(0,255,65,.15);border-top-color:#00ff41;border-radius:50%;animation:spin .7s linear infinite;margin:10px auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hero{text-align:center;padding:12px;border:1px solid rgba(0,255,65,.1);border-radius:10px;background:rgba(0,255,65,.03);margin-bottom:8px}
+.hero h2{color:#00ff41;font-size:.9em}
+.hero p{font-size:.64em;color:rgba(255,255,255,.4);margin-top:4px}
+</style>
+</head>
+<body>
+<div class="header">
+  <a href="/" class="back">←</a>
+  <h1>🎓 CURSOS GRATIS</h1>
+  <a href="/" class="back">Volver</a>
+</div>
+<div class="container">
+  <div class="hero">
+    <h2>🎓 Cursos en español (gratis y legales)</h2>
+    <p>Scrappeamos cursos oficiales de YouTube y Archive.org de cualquier tema. Buscá lo que quieras aprender.</p>
+  </div>
+
+  <div class="search">
+    <input id="q" placeholder="Ej: curso de programación, cocina, inglés, diseño..." onkeydown="if(event.key==='Enter')buscar()">
+    <button onclick="buscar()">🔍 Buscar</button>
+  </div>
+  <div class="chips" id="chips">
+    <button onclick="buscarT('programacion en español')">💻 Programación</button>
+    <button onclick="buscarT('ingles en español')">🗣️ Idiomas</button>
+    <button onclick="buscarT('cocina en español')">🍳 Cocina</button>
+    <button onclick="buscarT('guitarra en español')">🎸 Música</button>
+    <button onclick="buscarT('diseño grafico en español')">🎨 Diseño</button>
+    <button onclick="buscarT('marketing en español')">📈 Marketing</button>
+    <button onclick="buscarT('finanzas en español')">💰 Finanzas</button>
+    <button onclick="buscarT('fotografia en español')">📷 Fotografía</button>
+    <button onclick="buscarT('ejercicio fitness en español')">🏋️ Fitness</button>
+  </div>
+  <div class="status" id="status">Elegí un tema o buscá un curso...</div>
+
+  <div class="hero" style="margin-top:10px">
+    <h2>📚 Cursos guardados</h2>
+    <p>Catálogo de cursos ya scrapedos (verificados y reproducibles)</p>
+  </div>
+  <div class="grid" id="guardados"></div>
+
+  <div id="player">
+    <iframe id="playerFrame" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
+    <div class="player-title" id="playerTitle"></div>
+  </div>
+
+  <div class="grid" id="grid"></div>
+</div>
+
+<script>
+var SB="https://xfwolaurpeofysnymqle.supabase.co/rest/v1";
+var KEY="sb_publishable_3VvBUD5Bdu3Uaq59fJ99MQ_XDCtujUU";
+var H={"apikey":KEY,"Authorization":"Bearer "+KEY};
+function esc(s){return (s||"").replace(/[&<>"]/g,function(m){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m];});}
+
+function buscar(){
+  var q=document.getElementById("q").value.trim();
+  if(!q)return;
+  buscarT("curso de "+q+" en español");
+}
+function buscarT(tema){
+  document.getElementById("status").textContent='🔍 Buscando: '+tema;
+  document.getElementById("grid").innerHTML='<div class="spin"></div>';
+  fetch("/api/search_multi?q="+encodeURIComponent(tema)+"&guardar=1&cat=Curso&limit=24&_="+Date.now())
+  .then(function(r){return r.json();})
+  .then(function(d){
+    var arr=(d&&d.results)||[];
+    if(!arr.length){document.getElementById("grid").innerHTML='<div class="empty">No se encontraron cursos para ese tema.</div>';document.getElementById("status").textContent="Sin resultados";return;}
+    document.getElementById("status").textContent=arr.length+" cursos ("+(d.guardadas||0)+" guardados)";
+    document.getElementById("grid").innerHTML=arr.map(function(v){
+      var vid=v.id||"";
+      return '<div class="card" onclick="reproducir(\''+esc(vid)+'\',\''+esc(v.title)+'\')">'+
+        (v.thumb?'<img src="'+esc(v.thumb)+'" loading="lazy">':'<div style="aspect-ratio:16/9;background:#111;display:flex;align-items:center;justify-content:center;font-size:1.6em">🎓</div>')+
+        '<div class="t">'+esc(v.title)+'</div>'+
+        '<div class="c">'+esc(v.channel||'Curso')+'</div></div>';
+    }).join("");
+  })
+  .catch(function(){document.getElementById("grid").innerHTML='<div class="empty">Error al buscar cursos.</div>';document.getElementById("status").textContent="Error";});
+}
+
+function reproducir(vid,titulo){
+  if(!vid)return;
+  var p=document.getElementById("player");
+  p.classList.add("active");
+  document.getElementById("playerFrame").src="https://www.youtube-nocookie.com/embed/"+encodeURIComponent(vid)+"?autoplay=1&rel=0&modestbranding=1";
+  document.getElementById("playerTitle").textContent="▶ "+(titulo||"Curso");
+  document.getElementById("player").scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+// Cargar un tema por defecto al entrar
+setTimeout(function(){buscarT("curso de programacion en español");},600);
+
+// ─── CATÁLOGO DE CURSOS GUARDADOS (desde la DB) ───
+function cargarGuardados(){
+  var el=document.getElementById("guardados");
+  fetch(SB+"/videos?select=id,titulo,url,thumbnail&categoria=eq.Curso&order=created_at.desc&limit=40",{headers:H})
+  .then(function(r){return r.json();}).then(function(d){
+    if(!d||!d.length){ el.innerHTML='<div class="empty">Todavía no hay cursos guardados. Buscá uno arriba y se guarda solo.</div>'; return; }
+    el.innerHTML=d.map(function(v){
+      return '<div class="card" onclick="reproducir(\''+esc(v.url)+'\',\''+esc(v.titulo)+'\')">'+
+        (v.thumbnail?'<img src="'+esc(v.thumbnail)+'" loading="lazy" onerror="this.onerror=null;this.src=\'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==\'">':'<div style="aspect-ratio:16/9;background:#111;display:flex;align-items:center;justify-content:center;font-size:1.6em">🎓</div>')+
+        '<div class="t">'+esc(v.titulo)+'</div>'+
+        '<div class="c">Curso</div></div>';
+    }).join("");
+  }).catch(function(){ el.innerHTML='<div class="empty">Error al cargar guardados</div>'; });
+}
+cargarGuardados();
+</script>
+</body>
+</html>

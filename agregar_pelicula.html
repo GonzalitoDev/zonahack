@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>🎬 Subidor de Películas · ZonaHack</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0a;color:#c8d6e5;font-family:'Courier New',monospace;min-height:100vh}
+.header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid rgba(0,255,65,.1);background:#0a0a0a;position:sticky;top:0;z-index:100}
+.header h1{color:#00ff41;font-size:.95em;letter-spacing:1px}
+.back{color:#00ff41;text-decoration:none;font-size:.65em;padding:4px 8px;border:1px solid rgba(0,255,65,.1);border-radius:3px}
+.container{max-width:640px;margin:0 auto;padding:12px}
+.status{text-align:center;font-size:.65em;color:rgba(200,214,229,.3);margin:6px 0;min-height:16px}
+.card{border:1px solid rgba(0,255,65,.06);border-radius:6px;padding:14px;margin-bottom:10px;background:#0d0d0d}
+.card h3{color:#00ff41;font-size:.75em;margin-bottom:8px;letter-spacing:1px}
+label{display:block;font-size:.6em;color:rgba(200,214,229,.35);margin:6px 0 2px}
+input,select,textarea{padding:7px 10px;border:1px solid rgba(0,255,65,.08);border-radius:4px;background:#0a0a0a;color:#c8d6e5;font-size:.65em;outline:none;width:100%;font-family:'Courier New',monospace}
+input:focus,textarea:focus{border-color:rgba(0,255,65,.18)}
+textarea{resize:vertical;min-height:50px}
+.btn{padding:8px 16px;border:1px solid rgba(0,255,65,.12);border-radius:4px;background:rgba(0,255,65,.04);color:#00ff41;cursor:pointer;font-size:.65em;font-family:'Courier New',monospace;transition:.15s;margin-top:6px}
+.btn:hover{border-color:rgba(0,255,65,.22)}
+.btn-success{border-color:rgba(0,255,65,.2);background:rgba(0,255,65,.08)}
+.btn-del{border-color:rgba(231,76,60,.12);color:#e74c3c}
+.btn-mini{padding:4px 9px;font-size:.6em}
+.fila{display:flex;gap:6px}
+.fila>div{flex:1}
+.preview{border:1px solid rgba(0,255,65,.1);border-radius:4px;overflow:hidden;margin-top:8px;background:#000;display:none}
+.preview iframe{width:100%;aspect-ratio:16/9;border:0;display:block}
+.preview .tag{position:absolute;font-size:.55em;color:#00ff41;padding:2px 6px;background:rgba(0,0,0,.7)}
+.hint{font-size:.55em;color:rgba(200,214,229,.2);margin-top:4px;line-height:1.6}
+.grid-mini{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:4px;margin-top:6px}
+.mini-card{border:1px solid rgba(0,255,65,.05);border-radius:4px;overflow:hidden;cursor:pointer;background:#0a0a0a;transition:.15s;position:relative}
+.mini-card:hover{border-color:rgba(0,255,65,.1)}
+.mini-card img{width:100%;aspect-ratio:16/9;object-fit:cover;background:#000}
+.mini-card .mi{font-size:.55em;padding:4px;color:rgba(200,214,229,.5);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mini-card .dup{position:absolute;top:3px;right:3px;background:rgba(231,76,60,.9);color:#fff;font-size:.5em;padding:1px 5px;border-radius:3px}
+.stats{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+.stat{flex:1;min-width:70px;text-align:center;border:1px solid rgba(0,255,65,.06);border-radius:4px;padding:8px 4px;background:#0d0d0d}
+.stat b{display:block;font-size:1.2em;color:#00ff41}
+.stat span{font-size:.55em;color:rgba(200,214,229,.3);text-transform:uppercase;letter-spacing:1px}
+.list-item{display:flex;align-items:center;gap:8px;padding:6px;border:1px solid rgba(0,255,65,.04);border-radius:4px;margin-bottom:4px;background:#0a0a0a}
+.list-item img{width:64px;aspect-ratio:16/9;object-fit:cover;border-radius:3px;background:#000;flex-shrink:0}
+.list-item .li-info{flex:1;min-width:0;font-size:.6em}
+.list-item .li-info .li-t{color:rgba(200,214,229,.7);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.list-item .li-info .li-c{color:rgba(0,255,65,.35);font-size:.9em}
+.list-item button{padding:3px 8px;border:1px solid rgba(231,76,60,.1);border-radius:3px;background:transparent;color:#e74c3c;cursor:pointer;font-size:.55em;font-family:'Courier New',monospace}
+.list-item .ver-btn{border-color:rgba(0,255,65,.1);color:#00ff41}
+.sec{font-size:.68em;color:#f1c40f;margin:10px 0 4px}
+.sec .cnt{color:rgba(200,214,229,.25);font-size:.85em}
+.batch-progress{font-size:.6em;color:#00ff41;margin-top:6px;min-height:14px}
+</style>
+</head>
+<body style="display:none">
+<div class="header">
+  <a href="/" class="back">←</a>
+  <h1>🎬 SUBIDOR DE PELÍCULAS</h1>
+  <div style="width:40px"></div>
+</div>
+<div class="container">
+  <div class="status" id="statusMsg">Subí películas y aparecen automáticamente en la página</div>
+
+  <div class="stats" id="statsBox">
+    <div class="stat"><b id="stTotal">0</b><span>Total</span></div>
+    <div class="stat"><b id="stPelis">0</b><span>Películas</span></div>
+    <div class="stat"><b id="stSeries">0</b><span>Series</span></div>
+    <div class="stat"><b id="stEps">0</b><span>Capítulos</span></div>
+  </div>
+
+  <div class="card">
+    <h3>➕ Nueva película / serie</h3>
+    <div class="fila">
+      <div>
+        <label>Tipo</label>
+        <select id="tipoItem" onchange="cambiarTipo()">
+          <option value="pelicula">🎬 Película</option>
+          <option value="serie">📺 Serie (capítulo)</option>
+        </select>
+      </div>
+      <div>
+        <label>Categoría</label>
+        <input id="categoria" list="catsList" placeholder="Ej: Acción">
+        <datalist id="catsList">
+          <option>Película</option><option>Comedia</option><option>Acción</option><option>Terror</option>
+          <option>Drama</option><option>Documental</option><option>Serie</option><option>Anime</option>
+          <option>Infantil</option><option>Favorita</option><option>Novela</option><option>Musical</option>
+          <option>Ciencia Ficción</option><option>Romance</option><option>VIP Exclusivo</option>
+        </datalist>
+      </div>
+    </div>
+    <label id="lblTitulo">Título</label>
+    <input id="titulo" placeholder="Ej: Mi película favorita (2024)">
+    <div id="serieExtra" style="display:none">
+      <div class="fila">
+        <div><label>Nombre de la serie</label><input id="serieNom" placeholder="Ej: Breaking Bad"></div>
+        <div style="flex:.6"><label>Temporada</label><input id="temp" type="number" min="1" value="1" style="text-align:center"></div>
+        <div style="flex:.6"><label>Episodio</label><input id="ep" type="number" min="1" value="1" style="text-align:center"></div>
+      </div>
+    </div>
+    <label>URL o ID de YouTube</label>
+    <input id="url" placeholder="https://www.youtube.com/watch?v=XXXXX o solo el ID" oninput="previewVideo()">
+    <div class="preview" id="previewBox"></div>
+    <button class="btn btn-success" onclick="agregarPeli()">💾 Guardar</button>
+    <div class="hint">Con pegar el ID del video (11 caracteres) alcanza. Si es serie, agregá nombre, temporada y episodio.</div>
+  </div>
+
+  <div class="card">
+    <h3>📥 Subir en lote (varias URLs a la vez)</h3>
+    <label>Pegá una URL por línea</label>
+    <textarea id="batchUrls" placeholder="https://www.youtube.com/watch?v=AAA
+https://www.youtube.com/watch?v=BBB
+https://youtu.be/CCC"></textarea>
+    <label>Categoría para todas</label>
+    <input id="batchCat" list="catsList" placeholder="Ej: Acción">
+    <div class="fila">
+      <div><button class="btn btn-success" style="width:100%" onclick="subirLote()">📥 Subir todas</button></div>
+      <div><button class="btn" style="width:100%" onclick="document.getElementById('batchUrls').value=''">🧹 Limpiar</button></div>
+    </div>
+    <div class="batch-progress" id="batchProgress"></div>
+    <div class="hint">Las que ya existen se detectan y se saltan automáticamente. Cada línea puede ser: link completo, youtu.be o solo el ID.</div>
+  </div>
+
+  <div class="card">
+    <h3>🎞️ Importar legal de internet (dominio público / Creative Commons)</h3>
+    <label>Buscar películas de dominio público en Archive.org</label>
+    <div class="fila">
+      <input id="archQ" placeholder="Ej: Nosferatu, Metropolis, King Kong 1933..." onkeydown="if(event.key==='Enter')buscarArchivo()">
+      <div style="flex:0"><button class="btn" style="margin-top:0" onclick="buscarArchivo()">🔍</button></div>
+    </div>
+    <div class="grid-mini" id="archResults"></div>
+    <label style="margin-top:8px">O pegá el link directo de Archive.org</label>
+    <div class="fila">
+      <input id="archUrl" placeholder="https://archive.org/details/nosferatu1922">
+      <div style="flex:0"><button class="btn" style="margin-top:0" onclick="agregarLinkArchivo()">➕</button></div>
+    </div>
+    <div class="hint">Contenido de dominio público o licencia Creative Commons (legal, sin copyright). Se reproduce con el embed oficial de Archive.org.</div>
+  </div>
+
+  <div class="card">
+    <h3>🔍 Agregar desde el buscador de YouTube</h3>
+    <label>Buscar</label>
+    <div class="fila">
+      <input id="buscarYt" placeholder="Ej: película argentina completa..." onkeydown="if(event.key==='Enter')buscarYT()">
+      <div style="flex:0"><button class="btn" style="margin-top:0" onclick="buscarYT()">🔍</button></div>
+    </div>
+    <div class="grid-mini" id="ytResults"></div>
+  </div>
+
+  <div class="card">
+    <h3>📦 Mi contenido (películas + series)</h3>
+    <div id="misPelis"><div style="font-size:.6em;color:rgba(200,214,229,.2);padding:10px;text-align:center">Cargando...</div></div>
+  </div>
+</div>
+
+<script src="/firebase_zh.js"></script>
+<script>
+var SUPABASE = "https://xfwolaurpeofysnymqle.supabase.co/rest/v1";
+var KEY = "sb_publishable_3VvBUD5Bdu3Uaq59fJ99MQ_XDCtujUU";
+var H = {"apikey":KEY,"Authorization":"Bearer "+KEY,"Content-Type":"application/json"};
+
+// ─── SOLO ADMINS ────────────────────────
+function verificarAdmin(){
+  var user = localStorage.getItem('vh_usuario')||'anon';
+  fetch(SUPABASE+"/rangos?select=rango&usuario_nombre=eq."+encodeURIComponent(user)+"&limit=1",{headers:H})
+  .then(function(r){return r.json();}).then(function(d){
+    var rango = d&&d.length?d[0].rango:'';
+    if(['admin','fundador','super_admin','root','owner','developer'].indexOf(rango)>=0 || localStorage.getItem('vh_admin_pass')){
+      document.body.style.display='block'; cargarMisPelis();
+    }else denegado();
+  }).catch(function(){ if(localStorage.getItem('vh_admin_pass')){ document.body.style.display='block'; cargarMisPelis(); } else denegado(); });
+}
+function denegado(){
+  document.body.innerHTML='<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;flex-direction:column;gap:10px;padding:20px;text-align:center;background:#0a0a0a;color:#c8d6e5;font-family:\'Courier New\',monospace"><div style="font-size:3em">⛔</div><h2>Acceso denegado</h2><p style="color:rgba(200,214,229,.3);font-size:.8em">Solo administradores pueden usar el subidor.</p><a href="/" style="color:#00ff41">Volver al inicio</a></div>';
+}
+
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(m){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m];});}
+function stx(m){var el=document.getElementById('statusMsg');el.innerHTML=m;setTimeout(function(){el.innerHTML='Listo para subir';},3000);}
+
+// Guarda la película también en Firebase (colección 'peliculas')
+function guardarEnFirebase(titulo, url, thumb, cat){
+  try{
+    if(!window.ZHFirebase) return;
+    ZHFirebase.set('peliculas/'+url, {titulo:titulo||'', url:url||'', thumbnail:thumb||'', categoria:cat||'', ts:Date.now()}).catch(function(){});
+  }catch(e){}
+}
+
+// Aviso a Discord si está activado (Discord → Avisos automáticos)
+function notificarDiscord(msg){
+  try{
+    if(localStorage.getItem('zh_disc_pelis')==='1'){
+      var dest=(localStorage.getItem('zh_disc_destino')||'').trim();
+      fetch('/api/discord_send?mensaje='+encodeURIComponent('🎬 '+msg)+(dest?'&destino='+encodeURIComponent(dest):'')).catch(function(){});
+    }
+  }catch(e){}
+}
+
+function extractId(url){
+  if(!url) return '';
+  url=url.trim();
+  var m;
+  m=url.match(/[?&]v=([A-Za-z0-9_-]{11})/); if(m) return m[1];
+  m=url.match(/youtu\.be\/([A-Za-z0-9_-]{11})/); if(m) return m[1];
+  m=url.match(/\/embed\/([A-Za-z0-9_-]{11})/); if(m) return m[1];
+  m=url.match(/^([A-Za-z0-9_-]{11})$/); if(m) return m[1];
+  return '';
+}
+
+function cambiarTipo(){
+  var esSerie = document.getElementById('tipoItem').value === 'serie';
+  document.getElementById('serieExtra').style.display = esSerie ? 'block' : 'none';
+  document.getElementById('lblTitulo').textContent = esSerie ? 'Título del capítulo (opcional)' : 'Título';
+}
+
+// ─── VISTA PREVIA ───────────────────────
+function previewVideo(){
+  var vid = extractId(document.getElementById('url').value);
+  var box = document.getElementById('previewBox');
+  if(vid.length>=11){
+    box.style.display='block';
+    box.innerHTML='<iframe src="https://www.youtube-nocookie.com/embed/'+vid+'" allow="accelerometer;autoplay;encrypted-media;gyroscope;picture-in-picture" allowfullscreen></iframe>';
+  } else { box.style.display='none'; box.innerHTML=''; }
+}
+
+// ─── EXISTE? ────────────────────────────
+function existeVid(vid){
+  return fetch(SUPABASE+'/videos?select=id,titulo&url=eq.'+vid+'&limit=1',{headers:H})
+    .then(function(r){return r.json();}).then(function(d){ return d&&d.length?d[0]:null; })
+    .catch(function(){ return null; });
+}
+
+function agregarPeli(){
+  var url = document.getElementById('url').value.trim();
+  var vid = extractId(url);
+  if(!vid){ stx('<span style="color:#e74c3c">URL o ID inválido</span>'); return; }
+  var cat = document.getElementById('categoria').value.trim() || 'Película';
+  var esSerie = document.getElementById('tipoItem').value === 'serie';
+
+  existeVid(vid).then(function(dup){
+    if(dup){ stx('<span style="color:#f1c40f">⚠️ Ya existe: '+esc((dup.titulo||'').slice(0,40))+'</span>'); return; }
+    var tit='';
+    if(esSerie){
+      var serieNom = document.getElementById('serieNom').value.trim();
+      if(!serieNom){ stx('<span style="color:#e74c3c">Ingresa el nombre de la serie</span>'); return; }
+      var temp = document.getElementById('temp').value || '1';
+      var ep = document.getElementById('ep').value || '1';
+      var epTit = document.getElementById('titulo').value.trim();
+      tit = serieNom + ' - S'+('0'+temp).slice(-2)+'E'+('0'+ep).slice(-2) + (epTit ? ' - '+epTit : '');
+      cat = cat === 'Película' ? 'Serie' : cat;
+    } else {
+      tit = document.getElementById('titulo').value.trim();
+      if(!tit){ stx('<span style="color:#e74c3c">Ingresa el título</span>'); return; }
+    }
+    var thumb = 'https://i.ytimg.com/vi/'+vid+'/hqdefault.jpg';
+    fetch(SUPABASE+'/videos', {method:'POST', headers:Object.assign({},H,{"Prefer":"return=minimal"}), body:JSON.stringify({titulo:tit, url:vid, tipo:'youtube', thumbnail:thumb, categoria:cat})})
+    .then(function(r){
+      if(r.ok || r.status===201){
+        stx('<span style="color:#00ff41">✅ Subida: '+esc(tit.slice(0,50))+'</span>');
+        guardarEnFirebase(tit, vid, thumb, cat);
+        notificarDiscord('Se subió la película: '+tit.slice(0,60));
+        document.getElementById('titulo').value='';
+        document.getElementById('url').value='';
+        document.getElementById('serieNom').value='';
+        previewVideo(); cargarMisPelis();
+      } else stx('<span style="color:#e74c3c">Error al guardar</span>');
+    }).catch(function(){ stx('<span style="color:#e74c3c">Error de conexión</span>'); });
+  });
+}
+
+// ─── SUBIR EN LOTE ──────────────────────
+function subirLote(){
+  var raw = document.getElementById('batchUrls').value;
+  var lines = raw.split('\n').map(function(l){return l.trim();}).filter(Boolean);
+  var ids = lines.map(extractId).filter(function(i){return i.length===11;});
+  if(!ids.length){ stx('<span style="color:#e74c3c">No hay links válidos</span>'); return; }
+  var cat = document.getElementById('batchCat').value.trim() || 'Película';
+  var prog = document.getElementById('batchProgress');
+  var agregadas=0, existentes=0, errores=0, i=0;
+
+  function paso(){
+    if(i>=ids.length){
+      prog.innerHTML='✅ Terminado: '+agregadas+' subidas · '+existentes+' ya existían'+(errores?' · '+errores+' errores':'');
+      stx('<span style="color:#00ff41">📥 Lote terminado: '+agregadas+' subidas</span>');
+      cargarMisPelis();
+      return;
+    }
+    var vid = ids[i++];
+    prog.innerHTML='Subiendo '+(i)+'/'+ids.length+'…';
+    existeVid(vid).then(function(dup){
+      if(dup){ existentes++; paso(); }
+      else {
+        var tit='';
+        fetch('https://noembed.com/embed?url=https://www.youtube.com/watch?v='+vid).then(function(r){return r.json();})
+        .then(function(d){ tit = (d.title||'Video')+' (YouTube)'; })
+        .catch(function(){ tit='Video (YouTube)'; })
+        .then(function(){
+          fetch(SUPABASE+'/videos', {method:'POST', headers:Object.assign({},H,{"Prefer":"return=minimal"}), body:JSON.stringify({titulo:tit, url:vid, tipo:'youtube', thumbnail:'https://i.ytimg.com/vi/'+vid+'/hqdefault.jpg', categoria:cat})})
+          .then(function(r){ if(r.ok||r.status===201){ agregadas++; guardarEnFirebase(tit, vid, 'https://i.ytimg.com/vi/'+vid+'/hqdefault.jpg', cat); notificarDiscord('Lote: se subió '+vid); } else errores++; paso(); })
+          .catch(function(){ errores++; paso(); });
+        });
+      }
+    }).catch(function(){ errores++; paso(); });
+  }
+  paso();
+}
+
+// ─── BUSCADOR YOUTUBE ───────────────────
+function buscarYT(){
+  var q = document.getElementById('buscarYt').value.trim();
+  if(!q) return;
+  var el = document.getElementById('ytResults');
+  el.innerHTML = '<div style="font-size:.55em;color:rgba(200,214,229,.2);grid-column:1/-1;text-align:center;padding:10px">Buscando...</div>';
+  fetch('/api/search?q='+encodeURIComponent(q)).then(function(r){return r.json();}).then(function(d){
+    var items = (d.results||[]).slice(0,8);
+    if(!items.length){ el.innerHTML='<div style="font-size:.55em;color:rgba(200,214,229,.2);grid-column:1/-1;text-align:center;padding:10px">Sin resultados</div>'; return; }
+    Promise.all(items.map(function(v){ return existeVid(v.id).then(function(dup){ v.dup = !!dup; return v; }); })).then(function(list){
+      el.innerHTML = list.map(function(v){
+        return '<div class="mini-card" onclick="agregarDesdeYT(\''+v.id+'\',\''+esc(v.title).replace(/'/g,"\\'")+'\',\''+esc(v.thumb)+'\')">'
+          +(v.dup?'<span class="dup">ya está</span>':'')
+          +'<img src="'+esc(v.thumb)+'" loading="lazy"><div class="mi">'+esc((v.title||'').slice(0,35))+'</div></div>';
+      }).join('');
+    });
+  }).catch(function(){ el.innerHTML='<div style="font-size:.55em;color:rgba(200,214,229,.2);grid-column:1/-1;text-align:center;padding:10px">Error</div>'; });
+}
+
+function agregarDesdeYT(vid, tit, thumb){
+  existeVid(vid).then(function(dup){
+    if(dup){ stx('<span style="color:#f1c40f">⚠️ Ese video ya está</span>'); return; }
+    fetch(SUPABASE+'/videos', {method:'POST', headers:Object.assign({},H,{"Prefer":"return=minimal"}), body:JSON.stringify({titulo:tit, url:vid, tipo:'youtube', thumbnail:thumb, categoria:'Película'})})
+    .then(function(){
+      stx('<span style="color:#00ff41">✅ Subida: '+esc(tit.slice(0,40))+'</span>');
+      guardarEnFirebase(tit, vid, thumb, 'Película');
+      notificarDiscord('Se subió desde el buscador: '+tit.slice(0,60));
+      cargarMisPelis();
+    }).catch(function(){ stx('<span style="color:#e74c3c">Error</span>'); });
+  });
+}
+
+// ─── ARCHIVE.ORG (dominio público / CC, legal) ─────
+function escArch(t){return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,"\\'");}
+
+function buscarArchivo(){
+  var q = document.getElementById('archQ').value.trim();
+  if(!q){ return; }
+  var el = document.getElementById('archResults');
+  el.innerHTML = '<div style="font-size:.55em;color:rgba(200,214,229,.2);grid-column:1/-1;text-align:center;padding:10px">Buscando en Archive.org…</div>';
+  var url = 'https://archive.org/advancedsearch.php?q='+encodeURIComponent(q)+'+AND+mediatype%3Amovies&fl[]=identifier&fl[]=title&fl[]=year&rows=18&sort[]=downloads+desc&output=json';
+  fetch(url).then(function(r){return r.json();}).then(function(d){
+    var docs = ((d.response && d.response.docs) || []).filter(function(v){
+      var id = v.identifier || '';
+      if(id.indexOf('youtube-')===0) return false;      // rips de YouTube, no dominio público
+      if(/[\(\)\[\]]/.test(id)) return false;            // ids raros/compilaciones
+      return true;
+    });
+    if(!docs.length){ el.innerHTML='<div style="font-size:.55em;color:rgba(200,214,229,.2);grid-column:1/-1;text-align:center;padding:10px">Sin resultados legales</div>'; return; }
+    el.innerHTML = docs.slice(0,12).map(function(v){
+      var id = v.identifier || '';
+      if(!id) return '';
+      return '<div class="mini-card" onclick="agregarArchivo(\''+id+'\',\''+escArch(v.title||'')+'\')"><img src="https://archive.org/services/img/'+id+'" loading="lazy" onerror="this.style.opacity=.15"><div class="mi">'+esc((v.title||'').slice(0,35))+'</div></div>';
+    }).join('');
+  }).catch(function(){ el.innerHTML='<div style="font-size:.55em;color:rgba(200,214,229,.2);grid-column:1/-1;text-align:center;padding:10px">Error al buscar</div>'; });
+}
+
+function agregarArchivo(id, tit){
+  var vid = 'ia_'+id;
+  existeVid(vid).then(function(dup){
+    if(dup){ stx('<span style="color:#f1c40f">⚠️ Ese contenido ya está</span>'); return; }
+    var t = tit || id;
+    fetch(SUPABASE+'/videos', {method:'POST', headers:Object.assign({},H,{"Prefer":"return=minimal"}), body:JSON.stringify({titulo:t, url:vid, tipo:'archive', thumbnail:'https://archive.org/services/img/'+id, categoria:'Clásico'})})
+    .then(function(r){
+      if(r.ok || r.status===201){
+        stx('<span style="color:#00ff41">✅ Importada (dominio público): '+esc(t.slice(0,40))+'</span>');
+        guardarEnFirebase(t, vid, 'https://archive.org/services/img/'+id, 'Clásico');
+        notificarDiscord('Se importó (dominio público): '+t.slice(0,60));
+        cargarMisPelis();
+      } else stx('<span style="color:#e74c3c">Error al guardar</span>');
+    }).catch(function(){ stx('<span style="color:#e74c3c">Error de conexión</span>'); });
+  });
+}
+
+function agregarLinkArchivo(){
+  var u = document.getElementById('archUrl').value.trim();
+  if(!u){ return; }
+  var m = u.match(/archive\.org\/details\/([A-Za-z0-9_.-]+)/);
+  var id = m ? m[1] : u.replace(/^https?:\/\//,'').replace(/^archive\.org\//,'').split('/')[0];
+  id = (id||'').replace(/[^A-Za-z0-9_.-]/g,'');
+  if(!id){ stx('<span style="color:#e74c3c">Link inválido</span>'); return; }
+  document.getElementById('archUrl').value='';
+  agregarArchivo(id, id);
+}
+
+// ─── LISTA + ESTADÍSTICAS ───────────────
+function cargarMisPelis(){
+  var el = document.getElementById('misPelis');
+  fetch(SUPABASE+'/videos?select=id,titulo,url,thumbnail,categoria&order=created_at.desc&limit=100', {headers:H})
+  .then(function(r){return r.json();}).then(function(d){
+    if(!d || !d.length){ el.innerHTML='<div style="font-size:.6em;color:rgba(200,214,229,.2);padding:10px;text-align:center">Sin contenido todavía. ¡Subí el primero!</div>'; return; }
+    var series = {}, pelis = [];
+    d.forEach(function(v){
+      var esSerie = (v.categoria === 'Serie') || /- S\d+E\d+/.test(v.titulo || '');
+      if(esSerie){
+        var base = (v.titulo||'').replace(/ - S\d+E\d+.*$/, '');
+        if(!series[base]) series[base] = [];
+        series[base].push(v);
+      } else pelis.push(v);
+    });
+
+    var html='';
+    Object.keys(series).forEach(function(nom){
+      var eps = series[nom].sort(function(a,b){return (a.titulo||'').localeCompare(b.titulo||'');});
+      html += '<div class="sec">📺 '+esc(nom)+' <span class="cnt">('+eps.length+' caps)</span></div>';
+      eps.forEach(function(v){
+        html += itemRow(v);
+      });
+    });
+    if(pelis.length){
+      html += '<div class="sec" style="color:#00ff41">🎬 Películas <span class="cnt">('+pelis.length+')</span></div>';
+      pelis.forEach(function(v){ html += itemRow(v); });
+    }
+
+    el.innerHTML = html;
+
+    // stats
+    var nEps=0; Object.keys(series).forEach(function(n){nEps+=series[n].length;});
+    document.getElementById('stTotal').textContent = d.length;
+    document.getElementById('stPelis').textContent = pelis.length;
+    document.getElementById('stSeries').textContent = Object.keys(series).length;
+    document.getElementById('stEps').textContent = nEps;
+  }).catch(function(){ el.innerHTML='<div style="font-size:.6em;color:rgba(200,214,229,.2);padding:10px;text-align:center">Error al cargar</div>'; });
+}
+
+function itemRow(v){
+  return '<div class="list-item"><img src="'+esc(v.thumbnail||'')+'" loading="lazy" onerror="this.style.opacity=.15">'
+    +'<div class="li-info"><div class="li-t">'+esc((v.titulo||'').slice(0,60))+'</div><div class="li-c">'+esc(v.categoria||'')+'</div></div>'
+    +'<button class="ver-btn" onclick="window.location.href=\'/?q='+encodeURIComponent(v.titulo||'')+'\'">Ver</button>'
+    +'<button onclick="eliminarPeli('+v.id+')">✕</button></div>';
+}
+
+function eliminarPeli(id){
+  if(!confirm('¿Eliminar este contenido?')) return;
+  fetch(SUPABASE+'/videos?id=eq.'+id, {method:'DELETE', headers:H}).then(function(){
+    stx('<span style="color:#e74c3c">Eliminado</span>'); cargarMisPelis();
+  });
+}
+
+verificarAdmin();
+</script>
+<script src="/errores.js" defer></script>
+<script src="/update_check.js" defer></script>
+</body>
+</html>

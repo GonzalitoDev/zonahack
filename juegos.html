@@ -1,0 +1,1315 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>ZonaHack - Juegos</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:sans-serif;background:#080c24;color:#e8e8e8;padding:10px;max-width:900px;margin:0 auto;text-align:center;min-height:100vh}
+h1{color:#667eea;font-size:1.3em;margin:8px 0}
+.sub{color:#888;font-size:.7em;margin-bottom:8px}
+.back{color:#667eea;text-decoration:none;font-size:.78em;display:block;margin-bottom:8px}
+.juego-card{background:#111639;border-radius:10px;padding:15px;margin:5px 0;cursor:pointer;border:1px solid rgba(255,255,255,.03);display:flex;align-items:center;gap:10px}
+.juego-card:active{transform:scale(.98)}
+.juego-card .ico{font-size:2em;min-width:45px;text-align:center}
+.juego-card .info{flex:1;text-align:left}
+.juego-card .nom{font-size:.85em;font-weight:bold}
+.juego-card .desc{font-size:.68em;color:#888}
+.juego-card .score{font-size:.75em;color:#f1c40f;font-weight:bold}
+#gameArea{display:none}
+#gameArea .top{display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-wrap:wrap;padding:5px;background:#111639;border-radius:8px}
+#gameArea .top button{padding:6px 12px;border:none;border-radius:5px;color:white;font-weight:600;font-size:.72em;cursor:pointer}
+canvas{background:#0f1430;border-radius:6px;max-width:100%;touch-action:none;display:block;margin:0 auto}
+.controles{display:none;flex-wrap:wrap;justify-content:center;gap:4px;margin:6px auto;max-width:280px}
+.controles.show{display:flex}
+.ctrl-btn{width:64px;height:64px;border-radius:12px;border:none;background:#111639;color:#ddd;font-size:1.3em;display:flex;align-items:center;justify-content:center;cursor:pointer;touch-action:manipulation;user-select:none;-webkit-user-select:none;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.ctrl-btn:active{background:#667eea44;transform:scale(.92)}
+.ctrl-row{display:flex;gap:4px;justify-content:center;width:100%}
+.ctrl-label{font-size:.6em;color:#555;text-align:center;margin:2px 0}
+#score{color:#f1c40f;font-size:.95em;font-weight:bold;flex:1;text-align:right}
+#gameInfo{font-size:.72em;color:#888;margin:4px 0;min-height:18px}
+.ranking{font-size:.7em;color:#555;margin-top:3px}
+.ranking span{color:#f1c40f}
+@media(min-width:768px){canvas{max-width:400px}}
+</style>
+</head>
+<body>
+<h1>🎮 Juegos</h1>
+<p class="sub">Todos los juegos funcionan sin descargar nada</p>
+<a class="back" href="/">&larr; Volver</a>
+
+<div id="menuJuegos"></div>
+
+<div id="gameArea">
+<div class="top">
+<button class="btn-close" style="background:#e74c3c" onclick="cerrarJuego()">✕</button>
+<button class="btn-restart" style="background:#f39c12" onclick="reiniciarJuego()">🔄</button>
+<button style="background:#667eea;font-size:.65em;padding:4px 8px" onclick="alternarControles()">🖐️ Tocar</button>
+<span id="score">0</span>
+</div>
+<canvas id="gameCanvas"></canvas>
+<div id="gameInfo">Usa las flechas del teclado o toca la pantalla</div>
+<div id="ranking" class="ranking"></div>
+<div class="controles" id="controles">
+<div class="ctrl-row"><button class="ctrl-btn" id="btnUp" onpointerdown="ctrlPress('up')">▲</button></div>
+<div class="ctrl-row"><button class="ctrl-btn" id="btnLeft" onpointerdown="ctrlPress('left')">◀</button>
+<button class="ctrl-btn" id="btnDown" onpointerdown="ctrlPress('down')">▼</button>
+<button class="ctrl-btn" id="btnRight" onpointerdown="ctrlPress('right')">▶</button>
+<button class="ctrl-btn" id="btnAction" onpointerdown="ctrlPress('action')" style="background:#2ecc71">A</button></div>
+<div class="ctrl-row"><button class="ctrl-btn" id="btnAction2" onpointerdown="ctrlPress('action2')" style="background:#e74c3c;width:48px;height:48px;font-size:.9em;border-radius:50%">B</button></div>
+</div>
+</div>
+
+<a href="/nes.html" style="display:block;margin-top:8px;padding:10px;background:#111639;border-radius:8px;color:#e74c3c;text-decoration:none;font-size:.82em">
+🕹️ NES Emulator - Cargá tus propios ROMs
+</a>
+
+<script src="/firebase_zh.js"></script>
+<script>
+var API_URL = "https://xfwolaurpeofysnymqle.supabase.co";
+var API_KEY = "sb_publishable_3VvBUD5Bdu3Uaq59fJ99MQ_XDCtujUU";
+var HEADERS = {"apikey": API_KEY, "Authorization": "Bearer " + API_KEY, "Content-Type": "application/json"};
+var usuario = localStorage.getItem('vh_usuario') || 'anon';
+var juegoActual = '', puntaje = 0, record = 0, gameLoop = null;
+var canvas = document.getElementById('gameCanvas'), ctx = canvas.getContext('2d');
+var rankingDiv = document.getElementById('ranking');
+
+var JUEGOS = [
+    {id:'tetris', ico:'🧱', nom:'Tetris', desc:'Armá filas completas con las piezas', pl:'PC+Android'},
+    {id:'snake', ico:'🐍', nom:'Snake', desc:'Atrapá la comida sin chocar', pl:'PC+Android'},
+    {id:'invaders', ico:'👾', nom:'Space Invaders', desc:'Dispará a los invasores', pl:'PC+Android'},
+    {id:'clicker', ico:'👆', nom:'Clicker', desc:'La mayor cantidad de clicks en 10s', pl:'Android'},
+    {id:'reflejos', ico:'⚡', nom:'Reflejos', desc:'Tocá cuando cambie a verde', pl:'Android'},
+    {id:'pong', ico:'🏓', nom:'Pong', desc:'Golpeá la pelota con la paleta', pl:'PC'},
+    {id:'game2048', ico:'🔢', nom:'2048', desc:'Uní los números hasta llegar a 2048', pl:'Android'},
+    {id:'memoria', ico:'🃏', nom:'Memoria', desc:'Encontrá los pares de cartas', pl:'Android'},
+    {id:'laberinto', ico:'🌀', nom:'Laberinto', desc:'Salí del laberinto tocando', pl:'Android'},
+    {id:'flappy', ico:'🐤', nom:'Flappy Bird', desc:'Tocá para volar sin chocar', pl:'PC+Android'},
+    {id:'tateti', ico:'❌', nom:'Ta Te Ti', desc:'Ganale a la IA en el clasico', pl:'PC+Android'},
+    {id:'simon', ico:'🔴', nom:'Simon Dice', desc:'Recordá la secuencia de colores', pl:'Android'},
+    {id:'piedrapapel', ico:'✂️', nom:'Piedra Papel', desc:'El clasico contra la IA', pl:'Android'},
+    {id:'reaccion', ico:'🎯', nom:'Reaccion', desc:'Tocá los objetivos en tiempo', pl:'Android'},
+    {id:'serpiente2', ico:'🐍', nom:'Serpiente II', desc:'La serpiente que nunca muere', pl:'Android'},
+    {id:'velocidad', ico:'🏎️', nom:'Velocidad', desc:'Cambiá de carril sin chocar', pl:'PC+Android'},
+    {id:'puzzle8', ico:'🧩', nom:'Puzzle 8', desc:'Ordená los numeros', pl:'Android'},
+    {id:'memoria2', ico:'🃏', nom:'Memoria 2', desc:'Pares con mas cartas', pl:'Android'},
+    {id:'hackerman', ico:'💻', nom:'Hackerman', desc:'Escribí los códigos para hackear sistemas - EXCLUSIVO ZonaHack', pl:'PC+Android'},
+];
+
+function mostrarMenu() {
+    var div = document.getElementById('menuJuegos');
+    div.innerHTML = JUEGOS.map(function(j) {
+        var pl = j.pl === 'PC+Android' ? '<span style="font-size:.55em;color:#00ff41;border:1px solid rgba(0,255,65,.08);padding:1px 5px;border-radius:3px;margin-left:4px">PC+Android</span>'
+             : j.pl === 'PC' ? '<span style="font-size:.55em;color:#3498db;border:1px solid rgba(52,152,219,.08);padding:1px 5px;border-radius:3px;margin-left:4px">PC</span>'
+             : '<span style="font-size:.55em;color:#f1c40f;border:1px solid rgba(241,196,15,.08);padding:1px 5px;border-radius:3px;margin-left:4px">Android</span>';
+        return '<div class="juego-card" onclick="iniciarJuego(\''+j.id+'\')">'
+            + '<div class="ico">'+j.ico+'</div>'
+            + '<div class="info"><div class="nom">'+j.nom+pl+'</div><div class="desc">'+j.desc+'</div></div>'
+            + '<div class="score" id="rec_'+j.id+'">-</div></div>';
+    }).join('');
+    cargarRecords();
+}
+mostrarMenu();
+
+function api(m, e, d) {
+    return fetch(API_URL+"/rest/v1/"+e, {method:m, headers:HEADERS, body:d?JSON.stringify(d):undefined})
+    .then(function(r){return r.json().catch(function(){return[]})});
+}
+
+function cargarRecords() {
+    api("GET", "juegos_puntuaciones?select=juego,puntuacion,usuario_nombre&order=puntuacion.desc&limit=30")
+    .then(function(d) {
+        if (!d || !d.length) return;
+        var mejores = {};
+        d.forEach(function(r) {
+            if (!mejores[r.juego] || r.puntuacion > mejores[r.juego].p) {
+                mejores[r.juego] = {p: r.puntuacion, u: r.usuario_nombre};
+            }
+        });
+        Object.keys(mejores).forEach(function(k) {
+            var el = document.getElementById('rec_'+k);
+            if (el) el.textContent = '🏆 '+mejores[k].p;
+        });
+    });
+}
+
+function guardarPuntaje(juego, puntos) {
+    var nivel = 1;
+    if(juego==='hackerman') nivel = hack.nivel || 1;
+    // Guardar en la base de datos
+    api("POST", "juegos_puntuaciones", {usuario_nombre: usuario, juego: juego, puntuacion: puntos, nivel: nivel});
+    guardarPuntajeFirebase(juego, puntos, nivel);
+    try{ if(window.ZHRango) ZHRango.sumar(5, "Jugaste "+juego); }catch(e){}
+    // Guardar mejor puntaje local automaticamente
+    try{
+      var key = "vh_best_"+juego;
+      var prev = parseInt(localStorage.getItem(key))||0;
+      if(puntos>prev) localStorage.setItem(key, puntos);
+    }catch(e){}
+    cargarRecords();
+}
+
+// Espejo en Firestore: un documento por juego+usuario con su mejor puntaje.
+function guardarPuntajeFirebase(juego, puntos, nivel){
+  if(!window.ZHFirebase || !usuario || usuario==='anon') return;
+  var docId = juego+'_'+usuario;
+  ZHFirebase.get('juegos_puntuaciones/'+docId).then(function(actual){
+    if(actual && actual.puntuacion>=puntos) return;
+    return ZHFirebase.set('juegos_puntuaciones/'+docId, {usuario:usuario, juego:juego, puntuacion:puntos, nivel:nivel||1, ts:Date.now()});
+  }).catch(function(){});
+}
+
+function mostrarRanking(juego) {
+    api("GET", "juegos_puntuaciones?juego=eq."+juego+"&order=puntuacion.desc&limit=5")
+    .then(function(d) {
+        if (!d || !d.length) { rankingDiv.innerHTML = ''; return; }
+        rankingDiv.innerHTML = '🏆 Ranking: '+d.map(function(r,i){return (i+1)+'. '+r.usuario_nombre+': '+r.puntuacion;}).join(' | ');
+    });
+}
+
+function iniciarJuego(id) {
+    juegoActual = id; puntaje = 0; record = 0;
+    detenerLoops();
+    document.getElementById('menuJuegos').style.display = 'none';
+    document.getElementById('gameArea').style.display = 'block';
+    canvas.width = Math.min(320, window.innerWidth - 30);
+    canvas.height = canvas.width;
+    document.getElementById('score').textContent = '0';
+    document.getElementById('gameInfo').textContent = 'Cargando...';
+    rankingDiv.innerHTML = '';
+
+    if (id === 'tetris') iniciarTetris();
+    else if (id === 'snake') iniciarSnake();
+    else if (id === 'invaders') iniciarInvaders();
+    else if (id === 'clicker') iniciarClicker();
+    else if (id === 'reflejos') iniciarReflejos();
+    else if (id === 'pong') iniciarPong();
+    else if (id === 'game2048') iniciar2048();
+    else if (id === 'memoria') iniciarMemoria();
+    else if (id === 'laberinto') iniciarLaberinto();
+    else if (id === 'flappy') iniciarFlappy();
+    else if (id === 'tateti') iniciarTaTeTi();
+    else if (id === 'simon') iniciarSimon();
+    else if (id === 'piedrapapel') iniciarPiedraPapel();
+    else if (id === 'reaccion') iniciarReaccion();
+    else if (id === 'serpiente2') iniciarSerpiente2();
+    else if (id === 'velocidad') iniciarVelocidad();
+    else if (id === 'puzzle8') iniciarPuzzle8();
+    else if (id === 'memoria2') iniciarMemoria2();
+    else if (id === 'hackerman') iniciarHackerman();
+    // Auto-mostrar controles tactiles en dispositivos touch
+    if (('ontouchstart' in window) || (navigator.maxTouchPoints > 0)) {
+        if (!controlesVisibles) alternarControles();
+    }
+}
+
+// ─── LOOP CENTRAL: un solo gameLoop para todos los juegos ───
+var loopPrincipal = null;
+function detenerLoops() {
+    if (loopPrincipal) { clearInterval(loopPrincipal); loopPrincipal = null; }
+    if (tetrisLoop) { clearInterval(tetrisLoop); tetrisLoop = null; }
+    if (invLoop) { clearInterval(invLoop); invLoop = null; }
+    if (flappy && flappy.flappyLoop) { clearInterval(flappy.flappyLoop); flappy.flappyLoop = null; }
+    if (simon && simon.simonLoop) { clearInterval(simon.simonLoop); simon.simonLoop = null; }
+}
+function iniciarLoop(fn, ms) { detenerLoops(); loopPrincipal = setInterval(fn, ms); return loopPrincipal; }
+
+// ─── CONTROL TACTIL ────────────────────
+var controlesVisibles = false;
+function alternarControles() {
+controlesVisibles = !controlesVisibles;
+document.getElementById('controles').className = 'controles' + (controlesVisibles ? ' show' : '');
+}
+function ctrlPress(dir) {
+if (!juegoActual) return;
+if (juegoActual === 'tetris') tetrisCtrl(dir);
+else if (juegoActual === 'snake') snakeCtrl(dir);
+else if (juegoActual === 'invaders') invCtrl(dir);
+else if (juegoActual === 'pong') pongCtrl(dir);
+else if (juegoActual === 'clicker') { if (dir==='action') canvas.onclick && canvas.onclick(); }
+else if (juegoActual === 'reflejos') { if (dir==='action') canvas.onclick && canvas.onclick(); }
+else if (juegoActual === 'game2048') {
+if (dir==='up'||dir==='down'||dir==='left'||dir==='right'){
+document.dispatchEvent(new KeyboardEvent('keydown',{key:{up:'ArrowUp',down:'ArrowDown',left:'ArrowLeft',right:'ArrowRight'}[dir]}));
+}
+}
+else if (juegoActual === 'memoria') { if (dir==='action'&&canvas.onclick) canvas.onclick({clientX:canvas.width/2+20,clientY:canvas.height/2}); }
+else if (juegoActual === 'laberinto') {
+if(canvas.onclick&&labPos){
+if(dir==='up'&&labPos.x>0)canvas.onclick({clientX:(labPos.y+0.5)*(canvas.width/10),clientY:(labPos.x-0.5)*(canvas.height/10)});
+if(dir==='down'&&labPos.x<9)canvas.onclick({clientX:(labPos.y+0.5)*(canvas.width/10),clientY:(labPos.x+1.5)*(canvas.height/10)});
+if(dir==='left'&&labPos.y>0)canvas.onclick({clientX:(labPos.y-0.5)*(canvas.width/10),clientY:(labPos.x+0.5)*(canvas.height/10)});
+if(dir==='right'&&labPos.y<9)canvas.onclick({clientX:(labPos.y+1.5)*(canvas.width/10),clientY:(labPos.x+0.5)*(canvas.height/10)});
+}
+}
+else if (juegoActual === 'flappy') { if (dir==='action') flappyCtrl(); }
+else if (juegoActual === 'tateti') { if (dir==='action'&&canvas.onclick) canvas.onclick({clientX:canvas.width/2,clientY:canvas.height/2}); }
+else if (juegoActual === 'simon') { if (dir==='action'&&canvas.onclick) canvas.onclick({clientX:canvas.width/2,clientY:canvas.height/2}); }
+else if (juegoActual === 'piedrapapel') { if (dir==='action'&&canvas.onclick) canvas.onclick({clientX:canvas.width/2,clientY:canvas.height/2}); }
+else if (juegoActual === 'reaccion') { if (dir==='action') canvas.onclick && canvas.onclick(); }
+else if (juegoActual === 'serpiente2') { if (dir==='up'&&dirS2.y===0) dirS2={x:0,y:-1}; else if (dir==='down'&&dirS2.y===0) dirS2={x:0,y:1}; else if (dir==='left'&&dirS2.x===0) dirS2={x:-1,y:0}; else if (dir==='right'&&dirS2.x===0) dirS2={x:1,y:0}; }
+else if (juegoActual === 'velocidad') { if (dir==='left') carril=Math.max(0,carril-1); else if (dir==='right') carril=Math.min(2,carril+1); }
+else if (juegoActual === 'puzzle8') { if (dir==='up'||dir==='down'||dir==='left'||dir==='right'){ document.dispatchEvent(new KeyboardEvent('keydown',{key:{up:'ArrowUp',down:'ArrowDown',left:'ArrowLeft',right:'ArrowRight'}[dir]})); } }
+else if (juegoActual === 'memoria2') { if (dir==='action'&&canvas.onclick) canvas.onclick({clientX:canvas.width/2+20,clientY:canvas.height/2}); }
+}
+
+// ─── TECLADO UNICO (sin acumular listeners) ───
+var teclaHandler = null;
+document.addEventListener('keydown', function(e){
+  if (teclaHandler) teclaHandler(e);
+});
+function setTeclaHandler(fn){ teclaHandler = fn; }
+function tetrisCtrl(d) {
+if (d==='left') moverPieza(-1,0);
+if (d==='right') moverPieza(1,0);
+if (d==='down') moverPieza(0,1);
+if (d==='up'||d==='action') rotarPieza();
+dibujarTetris();
+}
+function snakeCtrl(d) {
+if (d==='up'&&dirSnake.y===0) dirSnake={x:0,y:-1};
+if (d==='down'&&dirSnake.y===0) dirSnake={x:0,y:1};
+if (d==='left'&&dirSnake.x===0) dirSnake={x:-1,y:0};
+if (d==='right'&&dirSnake.x===0) dirSnake={x:1,y:0};
+}
+function invCtrl(d) {
+if (d==='left') playerInv.x = Math.max(0, playerInv.x-1);
+if (d==='right') playerInv.x = Math.min(Math.floor(canvas.width/(canvas.width/8))-1, playerInv.x+1);
+if (d==='action') { balasInv.push({x:playerInv.x+0.5, y:playerInv.y}); }
+dibujarInvaders(canvas.width/8);
+}
+function pongCtrl(d) {
+if (d==='up') pong.p1y=Math.max(0,pong.p1y-15);
+if (d==='down') pong.p1y=Math.min(canvas.height-40,pong.p1y+15);
+if (d==='action') pong.p2y=Math.max(0,pong.p2y-15);
+if (d==='action2') pong.p2y=Math.min(canvas.height-40,pong.p2y+15);
+}
+// ─── SWIPE EN CANVAS ────────────────────
+var swipeX=0,swipeY=0;
+canvas.addEventListener('touchstart',function(e){var t=e.touches[0];swipeX=t.clientX;swipeY=t.clientY;},{passive:true});
+canvas.addEventListener('touchmove',function(e){e.preventDefault();},{passive:false});
+canvas.addEventListener('touchend',function(e){
+var dx=e.changedTouches[0].clientX-swipeX;
+var dy=e.changedTouches[0].clientY-swipeY;
+if(!juegoActual)return;
+// Solo swipes direccionales; los taps los maneja canvas.onclick
+if(Math.abs(dx)<10&&Math.abs(dy)<10)return;
+if(Math.abs(dx)>Math.abs(dy)){ctrlPress(dx>0?'right':'left');}
+else{ctrlPress(dy>0?'down':'up');}
+},{passive:true});
+
+function cerrarJuego() {
+    detenerLoops();
+    setTeclaHandler(null);
+    canvas.onclick = null;
+    document.getElementById('gameArea').style.display = 'none';
+    document.getElementById('menuJuegos').style.display = 'block';
+    juegoActual = '';
+}
+function reiniciarJuego() { if (juegoActual) iniciarJuego(juegoActual); }
+
+// ═══════════════ TETRIS ═══════════════
+var tetris, piezaActual, tetrisLoop;
+
+function iniciarTetris() {
+    detenerLoops();
+    var size = canvas.width / 10;
+    tetris = Array.from({length:20}, function(){return Array(10).fill(0)});
+    piezaActual = generarPieza();
+    puntaje = 0;
+    mostrarRanking('tetris');
+
+    setTeclaHandler(tetrisKey);
+
+    tetrisLoop = setInterval(function() {
+        if (!moverPieza(0,1)) {
+            colocarPieza();
+            eliminarFilas();
+            piezaActual = generarPieza();
+            if (colision(piezaActual.pieza, piezaActual.x, piezaActual.y)) {
+                clearInterval(tetrisLoop); tetrisLoop=null;
+                document.getElementById('gameInfo').textContent = 'Game Over! Puntaje: '+puntaje;
+                guardarPuntaje('tetris', puntaje);
+                mostrarRanking('tetris');
+                return;
+            }
+        }
+        dibujarTetris();
+    }, 400);
+}
+
+var PIEZAS = [
+    {pieza:[[1,1],[1,1]], color:'#f1c40f'},  // O
+    {pieza:[[1,1,1,1]], color:'#2ecc71'},     // I
+    {pieza:[[1,1,1],[0,1,0]], color:'#9b59b6'}, // T
+    {pieza:[[1,1,1],[1,0,0]], color:'#e74c3c'}, // L
+    {pieza:[[1,1,1],[0,0,1]], color:'#3498db'}, // J
+    {pieza:[[1,1,0],[0,1,1]], color:'#e67e22'}, // S
+    {pieza:[[0,1,1],[1,1,0]], color:'#1abc9c'}, // Z
+];
+
+function generarPieza() {
+    var p = JSON.parse(JSON.stringify(PIEZAS[Math.floor(Math.random()*PIEZAS.length)]));
+    p.x = Math.floor((10 - p.pieza[0].length)/2);
+    p.y = 0;
+    return p;
+}
+
+function colision(pieza, x, y) {
+    for (var i=0;i<pieza.length;i++)
+        for (var j=0;j<pieza[i].length;j++)
+            if (pieza[i][j] && (tetris[y+i] === undefined || tetris[y+i][x+j] === undefined || tetris[y+i][x+j])) return true;
+    return false;
+}
+
+function moverPieza(dx, dy) {
+    if (!colision(piezaActual.pieza, piezaActual.x+dx, piezaActual.y+dy)) {
+        piezaActual.x += dx; piezaActual.y += dy; return true;
+    }
+    return false;
+}
+
+function rotarPieza() {
+    var p = piezaActual.pieza;
+    var rot = p[0].map(function(_,i){return p.map(function(r){return r[i]}).reverse()});
+    if (!colision(rot, piezaActual.x, piezaActual.y)) piezaActual.pieza = rot;
+}
+
+function colocarPieza() {
+    var p = piezaActual;
+    for (var i=0;i<p.pieza.length;i++)
+        for (var j=0;j<p.pieza[i].length;j++)
+            if (p.pieza[i][j]) tetris[p.y+i][p.x+j] = p.color;
+}
+
+function eliminarFilas() {
+    for (var i=tetris.length-1; i>=0; i--) {
+        if (tetris[i].every(function(c){return c!==0})) {
+            tetris.splice(i,1);
+            tetris.unshift(Array(10).fill(0));
+            puntaje += 10;
+            document.getElementById('score').textContent = puntaje;
+            i++;
+        }
+    }
+}
+
+function dibujarTetris() {
+    ctx.fillStyle = '#0f1430'; ctx.fillRect(0,0,canvas.width,canvas.height);
+    var size = canvas.width / 10;
+    for (var y=0;y<tetris.length;y++) for (var x=0;x<tetris[y].length;x++) {
+        if (tetris[y][x]) { ctx.fillStyle = tetris[y][x]; ctx.fillRect(x*size, y*size, size-1, size-1); }
+    }
+    var p = piezaActual;
+    for (var i=0;i<p.pieza.length;i++) for (var j=0;j<p.pieza[i].length;j++) {
+        if (p.pieza[i][j]) { ctx.fillStyle = p.color; ctx.fillRect((p.x+j)*size, (p.y+i)*size, size-1, size-1); }
+    }
+}
+
+function tetrisKey(e) {
+    if (e.key === 'ArrowLeft') moverPieza(-1,0);
+    if (e.key === 'ArrowRight') moverPieza(1,0);
+    if (e.key === 'ArrowDown') moverPieza(0,1);
+    if (e.key === 'ArrowUp') rotarPieza();
+    dibujarTetris();
+}
+
+var tetrisTouchX, tetrisTouchY;
+function tetrisTouch(e) {
+    var t = e.touches[0]; tetrisTouchX = t.clientX; tetrisTouchY = t.clientY;
+    canvas.addEventListener('touchend', function(e2) {
+        var dx = e2.changedTouches[0].clientX - tetrisTouchX;
+        var dy = e2.changedTouches[0].clientY - tetrisTouchY;
+        if (Math.abs(dx) > Math.abs(dy)) { if (dx>0) moverPieza(1,0); else moverPieza(-1,0); }
+        else { if (dy>0) moverPieza(0,1); else rotarPieza(); }
+        dibujarTetris();
+    }, {once:true});
+}
+
+// ═══════════════ SNAKE ═══════════════
+var snake, dirSnake, foodSnake, gameOverSnake;
+
+function iniciarSnake() {
+    detenerLoops();
+    var size = canvas.width / 15; var cols = Math.floor(canvas.width / size);
+    snake = [{x:5,y:5}]; dirSnake = {x:1,y:0}; puntaje = 0; gameOverSnake = false;
+    mostrarRanking('snake');
+    generarComida(cols);
+    setTeclaHandler(snakeKey);
+    gameLoop = setInterval(function() {
+        if (gameOverSnake) return;
+        var head = {x:snake[0].x+dirSnake.x, y:snake[0].y+dirSnake.y};
+        if (head.x<0||head.x>=cols||head.y<0||head.y>=cols||snake.some(function(s){return s.x===head.x&&s.y===head.y})) {
+            gameOverSnake = true;
+            document.getElementById('gameInfo').textContent = 'Game Over! Puntaje: '+puntaje;
+            guardarPuntaje('snake', puntaje); mostrarRanking('snake'); clearInterval(gameLoop); gameLoop=null; return;
+        }
+        snake.unshift(head);
+        if (head.x===foodSnake.x&&head.y===foodSnake.y) { puntaje++; document.getElementById('score').textContent=puntaje; generarComida(cols); }
+        else snake.pop();
+        dibujarSnake(size, cols);
+    }, 150);
+    document.getElementById('gameInfo').textContent = 'Usa las flechas';
+}
+
+function generarComida(cols) {
+    foodSnake = {x:Math.floor(Math.random()*cols), y:Math.floor(Math.random()*cols)};
+    if (snake.some(function(s){return s.x===foodSnake.x&&s.y===foodSnake.y})) generarComida(cols);
+}
+function dibujarSnake(size,cols) {
+    ctx.fillStyle='#0f1430'; ctx.fillRect(0,0,canvas.width,canvas.height);
+    snake.forEach(function(s,i){ctx.fillStyle=i===0?'#2ecc71':'#667eea';ctx.fillRect(s.x*size,s.y*size,size-1,size-1);});
+    ctx.fillStyle='#e74c3c'; ctx.fillRect(foodSnake.x*size,foodSnake.y*size,size-1,size-1);
+}
+function snakeKey(e) {
+    if (e.key==='ArrowUp'&&dirSnake.y===0)dirSnake={x:0,y:-1};
+    if (e.key==='ArrowDown'&&dirSnake.y===0)dirSnake={x:0,y:1};
+    if (e.key==='ArrowLeft'&&dirSnake.x===0)dirSnake={x:-1,y:0};
+    if (e.key==='ArrowRight'&&dirSnake.x===0)dirSnake={x:1,y:0};
+}
+
+// ═══════════════ INVADERS ══════════════
+var invaders, playerInv, balasInv, dirInv, invLoop;
+
+function iniciarInvaders() {
+    detenerLoops();
+    var cols = 8; var size = canvas.width / cols;
+    invaders = []; playerInv = {x:Math.floor(cols/2)-1,y:Math.floor(canvas.height/size)-2};
+    balasInv = []; dirInv = 1; puntaje = 0;
+    mostrarRanking('invaders');
+    for (var i=0;i<3;i++) for (var j=0;j<cols;j++) invaders.push({x:j,y:i});
+    setTeclaHandler(invKey);
+    invLoop = setInterval(function() {
+        var mover = false;
+        invaders.forEach(function(inv) {
+            inv.x += dirInv * 0.5;
+            if (inv.x >= cols-1 || inv.x <= 0) mover = true;
+        });
+        if (mover) { dirInv *= -1; invaders.forEach(function(inv){inv.y+=0.5;}); }
+        if (invaders.some(function(inv){return inv.y*size>=playerInv.y*size})) {
+            clearInterval(invLoop); invLoop=null; document.getElementById('gameInfo').textContent='Game Over! Puntaje: '+puntaje;
+            guardarPuntaje('invaders', puntaje); mostrarRanking('invaders'); return;
+        }
+        balasInv.forEach(function(b){b.y-=1;});
+        balasInv = balasInv.filter(function(b){return b.y>0;});
+        invaders = invaders.filter(function(inv){
+            var hit = balasInv.some(function(b){return Math.abs(b.x-inv.x)<0.5&&Math.abs(b.y-inv.y)<0.5;});
+            if (hit) { puntaje+=10; document.getElementById('score').textContent=puntaje; }
+            return !hit;
+        });
+        if (!invaders.length) {
+            clearInterval(invLoop); invLoop=null; document.getElementById('gameInfo').textContent='Ganaste! Puntaje: '+puntaje;
+            guardarPuntaje('invaders', puntaje); mostrarRanking('invaders'); return;
+        }
+        dibujarInvaders(size);
+    }, 300);
+    document.getElementById('gameInfo').textContent = 'Flechas: mover, Espacio: disparar';
+}
+
+function dibujarInvaders(s) {
+    ctx.fillStyle='#0f1430'; ctx.fillRect(0,0,canvas.width,canvas.height);
+    invaders.forEach(function(inv){ctx.fillStyle='#e74c3c';ctx.fillRect(inv.x*s,inv.y*s,s-2,s-2);});
+    ctx.fillStyle='#2ecc71'; ctx.fillRect(playerInv.x*s,playerInv.y*s,s,s-2);
+    balasInv.forEach(function(b){ctx.fillStyle='#f1c40f';ctx.fillRect(b.x*s-1,b.y*s,3,6);});
+}
+
+function invKey(e) {
+    if (e.key==='ArrowLeft') playerInv.x = Math.max(0, playerInv.x-1);
+    if (e.key==='ArrowRight') playerInv.x = Math.min(Math.floor(canvas.width/(canvas.width/8))-1, playerInv.x+1);
+    if (e.key===' ') { balasInv.push({x:playerInv.x+0.5, y:playerInv.y}); e.preventDefault(); }
+    dibujarInvaders(canvas.width/8);
+}
+
+// ═══════════════ CLICKER ═══════════════
+function iniciarClicker() {
+    detenerLoops();
+    puntaje=0; var t=10;
+    mostrarRanking('clicker');
+    canvas.onclick=function(){if(t>0)puntaje++;document.getElementById('score').textContent=puntaje;};
+    gameLoop=setInterval(function(){t--;document.getElementById('score').textContent=puntaje+' - '+t+'s';if(t<=0){clearInterval(gameLoop);gameLoop=null;canvas.onclick=null;document.getElementById('gameInfo').textContent='Tiempo! Puntaje: '+puntaje;guardarPuntaje('clicker',puntaje);mostrarRanking('clicker');}},1000);
+    ctx.fillStyle='#0f1430';ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle='#667eea';ctx.font='20px sans-serif';ctx.textAlign='center';ctx.fillText('TOCA RAPIDO!',canvas.width/2,canvas.height/2);
+    document.getElementById('gameInfo').textContent='Toca el recuadro lo mas rapido posible!';
+}
+
+// ═══════════════ REFLEJOS ══════════════
+var refEstado, refStart;
+
+function iniciarReflejos() {
+    detenerLoops();
+    puntaje=0;refEstado='esperando';mostrarRanking('reflejos');
+    ctx.fillStyle='#e74c3c';ctx.fillRect(0,0,canvas.width,canvas.height);
+    document.getElementById('gameInfo').textContent='Espera el verde y toca!';
+    canvas.onclick=function(){
+        if(refEstado==='verde'){var r=Date.now()-refStart;puntaje++;document.getElementById('score').textContent=puntaje+' ('+r+'ms)';if(puntaje>=10){canvas.onclick=null;document.getElementById('gameInfo').textContent='Completado! Puntaje: '+puntaje;guardarPuntaje('reflejos',puntaje);mostrarRanking('reflejos');return;}iniciarRonda();}
+        else if(refEstado==='rojo'){canvas.onclick=null;document.getElementById('gameInfo').textContent='Muy temprano! Puntaje: '+puntaje;guardarPuntaje('reflejos',puntaje);mostrarRanking('reflejos');}
+    };
+    setTimeout(iniciarRonda,1000+Math.random()*2000);
+}
+
+function iniciarRonda() {
+    refEstado='rojo';ctx.fillStyle='#e74c3c';ctx.fillRect(0,0,canvas.width,canvas.height);
+    setTimeout(function(){refEstado='verde';refStart=Date.now();ctx.fillStyle='#2ecc71';ctx.fillRect(0,0,canvas.width,canvas.height);},1000+Math.random()*2000);
+}
+
+// ═══════════════ PONG ═══════════════
+var pong = {ball:{x:0,y:0,dx:2,dy:2},p1:0,p2:0,p1y:0,p2y:0};
+
+function iniciarPong() {
+    detenerLoops();
+    pong.ball={x:canvas.width/2,y:canvas.height/2,dx:2,dy:2};
+    pong.p1y=canvas.height/2-20;pong.p2y=pong.p1y;
+    var s=20;puntaje=0;
+    mostrarRanking('pong');
+    setTeclaHandler(pongKey);
+    gameLoop=setInterval(function(){
+        pong.ball.x+=pong.ball.dx;pong.ball.y+=pong.ball.dy;
+        if(pong.ball.y<=0||pong.ball.y>=canvas.height)pong.ball.dy*=-1;
+        if(pong.ball.x<=10&&Math.abs(pong.ball.y-pong.p1y)<40){pong.ball.dx*=-1;puntaje++;}
+        if(pong.ball.x>=canvas.width-10&&Math.abs(pong.ball.y-pong.p2y)<40){pong.ball.dx*=-1;}
+        if(pong.ball.x<0||pong.ball.x>canvas.width){
+            document.getElementById('gameInfo').textContent='Game Over! Puntaje: '+puntaje;
+            guardarPuntaje('pong',puntaje);mostrarRanking('pong');clearInterval(gameLoop);gameLoop=null;return;
+        }
+        document.getElementById('score').textContent=puntaje;
+        dibujarPong();
+    },30);
+    document.getElementById('gameInfo').textContent='J1: W/S | J2: Flechas';
+}
+
+function dibujarPong() {
+    ctx.fillStyle='#0f1430';ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle='white';ctx.fillRect(5,pong.p1y,5,40);ctx.fillRect(canvas.width-10,pong.p2y,5,40);
+    ctx.beginPath();ctx.arc(pong.ball.x,pong.ball.y,5,0,Math.PI*2);ctx.fill();
+}
+
+function pongKey(e) {
+    if(e.key==='w')pong.p1y=Math.max(0,pong.p1y-15);
+    if(e.key==='s')pong.p1y=Math.min(canvas.height-40,pong.p1y+15);
+    if(e.key==='ArrowUp')pong.p2y=Math.max(0,pong.p2y-15);
+    if(e.key==='ArrowDown')pong.p2y=Math.min(canvas.height-40,pong.p2y+15);
+}
+// ═══════════════ 2048 ═══════════════
+var tab2048, score2048, gameOver2048, win2048;
+function iniciar2048() {
+detenerLoops();
+tab2048=Array.from({length:4},function(){return Array(4).fill(0)});
+score2048=0;gameOver2048=false;win2048=false;
+mostrarRanking('game2048');
+var dirs={left:{x:0,y:-1},right:{x:0,y:1},up:{x:-1,y:0},down:{x:1,y:0}};
+setTeclaHandler(function(e){
+if(gameOver2048||win2048)return;
+var d={ArrowLeft:'left',ArrowRight:'right',ArrowUp:'up',ArrowDown:'down'}[e.key];
+if(d)mover2048(d);
+});
+function agregarNum(){var c=[];for(var i=0;i<4;i++)for(var j=0;j<4;j++)if(!tab2048[i][j])c.push({x:i,y:j});if(!c.length)return;var p=c[Math.floor(Math.random()*c.length)];tab2048[p.x][p.y]=Math.random()<.9?2:4;}
+function mover2048(d){
+var movido=false;
+function deslizar(arr){var f=arr.filter(function(v){return v});for(var i=0;i<f.length-1;i++){if(f[i]===f[i+1]){f[i]*=2;score2048+=f[i];f.splice(i+1,1);}}while(f.length<4)f.push(0);return f;}
+if(d==='left'){for(var i=0;i<4;i++){var n=deslizar(tab2048[i]);if(n.join(',')!==tab2048[i].join(','))movido=true;tab2048[i]=n;}}
+if(d==='right'){for(var i=0;i<4;i++){var n=deslizar(tab2048[i].slice().reverse()).reverse();if(n.join(',')!==tab2048[i].join(','))movido=true;tab2048[i]=n;}}
+if(d==='up'){for(var j=0;j<4;j++){var col=[];for(var i=0;i<4;i++)col.push(tab2048[i][j]);var n=deslizar(col);for(var i=0;i<4;i++){if(tab2048[i][j]!==n[i])movido=true;tab2048[i][j]=n[i];}}}
+if(d==='down'){for(var j=0;j<4;j++){var col=[];for(var i=3;i>=0;i--)col.push(tab2048[i][j]);var n=deslizar(col).reverse();for(var i=0;i<4;i++){if(tab2048[i][j]!==n[i])movido=true;tab2048[i][j]=n[i];}}}
+if(movido){agregarNum();document.getElementById('score').textContent=score2048;dibujar2048();}
+var lleno=true;for(var i=0;i<4;i++)for(var j=0;j<4;j++){if(tab2048[i][j]===2048&&!win2048){win2048=true;document.getElementById('gameInfo').textContent='Ganaste! 2048! Puntaje: '+score2048;guardarPuntaje('game2048',score2048);mostrarRanking('game2048');}if(!tab2048[i][j])lleno=false;}
+if(lleno&&!win2048){gameOver2048=true;document.getElementById('gameInfo').textContent='Game Over! Puntaje: '+score2048;guardarPuntaje('game2048',score2048);mostrarRanking('game2048');}
+}
+agregarNum();agregarNum();dibujar2048();
+document.getElementById('gameInfo').textContent='Deslizá para mover las fichas';
+}
+function dibujar2048(){
+var s=canvas.width/4;ctx.fillStyle='#0f1430';ctx.fillRect(0,0,canvas.width,canvas.height);
+var cols={0:'#0f1430',2:'#1a1050',4:'#2d1b69',8:'#e74c3c',16:'#e67e22',32:'#f1c40f',64:'#2ecc71',128:'#3498db',256:'#9b59b6',512:'#f1c40f',1024:'#e74c3c',2048:'#f1c40f'};
+for(var i=0;i<4;i++)for(var j=0;j<4;j++){
+var v=tab2048[i][j];ctx.fillStyle=cols[v]||'#333';ctx.fillRect(j*s,i*s,s-4,s-4);
+if(v){ctx.fillStyle=v>64?'white':'#ddd';ctx.font='bold '+(v>999?s/6+'px':s/4+'px')+' sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(v,j*s+s/2,i*s+s/2);}
+}
+}
+
+// ═══════════════ MEMORIA ═══════════════
+var cartasMem, cartaVolteada, paresEncontrados, intentosMem, bloqueadoMem;
+var EMOJIS=['🍎','🍊','🍋','🍇','🍓','🫐','🍑','🍒'];
+function iniciarMemoria(){
+detenerLoops();
+var nums=[].concat(EMOJIS,EMOJIS);nums.sort(function(){return Math.random()-.5});
+cartasMem=nums.map(function(e,i){return{emoji:e,volteada:false,emparejada:false,idx:i}});
+cartaVolteada=null;paresEncontrados=0;intentosMem=0;bloqueadoMem=false;
+mostrarRanking('memoria');
+canvas.onclick=function(e){
+if(bloqueadoMem)return;
+var rect=canvas.getBoundingClientRect();var s=canvas.width/4;
+var x=Math.floor((e.clientX-rect.left)/s);var y=Math.floor((e.clientY-rect.top)/s);
+if(x<0||x>=4||y<0||y>=4)return;
+var idx=y*4+x;var c=cartasMem[idx];
+if(c.emparejada||c.volteada)return;
+c.volteada=true;
+if(!cartaVolteada){cartaVolteada=c;dibujarMemoria();return;}
+intentosMem++;
+var c2=cartaVolteada;
+if(c.emoji===c2.emoji){c.emparejada=true;c2.emparejada=true;paresEncontrados++;cartaVolteada=null;document.getElementById('score').textContent=intentosMem;dibujarMemoria();if(paresEncontrados===EMOJIS.length){document.getElementById('gameInfo').textContent='Ganaste! '+intentosMem+' intentos';guardarPuntaje('memoria',Math.max(1,100-intentosMem));mostrarRanking('memoria');}return;}
+bloqueadoMem=true;setTimeout(function(){c.volteada=false;c2.volteada=false;cartaVolteada=null;bloqueadoMem=false;dibujarMemoria();},800);
+dibujarMemoria();
+};
+dibujarMemoria();
+document.getElementById('gameInfo').textContent='Tocá dos cartas iguales';
+}
+function dibujarMemoria(){
+var s=canvas.width/4;ctx.fillStyle='#0f1430';ctx.fillRect(0,0,canvas.width,canvas.height);
+for(var i=0;i<cartasMem.length;i++){
+
+var c=cartasMem[i];var x=(i%4)*s;var y=Math.floor(i/4)*s;
+if(c.emparejada||c.volteada){ctx.fillStyle='#1a1050';ctx.fillRect(x,y,s-4,s-4);ctx.font='bold '+s/2.5+'px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(c.emoji,x+s/2,y+s/2);}
+else{ctx.fillStyle='#111639';ctx.fillRect(x,y,s-4,s-4);ctx.fillStyle='#667eea33';ctx.font='bold '+s/2+'px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('?',x+s/2,y+s/2);}
+}
+}
+
+// ═══════════════ LABERINTO ═══════════════
+var labGrid,labFin,labMov,labTimer; window.labPos=null;
+function iniciarLaberinto(){
+detenerLoops();
+var size=10;window.labPos={x:0,y:0};labFin={x:size-1,y:size-1};labMov=0;
+// Generar laberinto con DFS
+labGrid=Array.from({length:size},function(){return Array(size).fill(1)});
+var stack=[{x:0,y:0}];labGrid[0][0]=0;
+while(stack.length){
+var c=stack[stack.length-1];
+var vecinos=[];
+if(c.x>1&&labGrid[c.x-2][c.y])vecinos.push({x:c.x-2,y:c.y,mx:c.x-1,my:c.y});
+if(c.x<size-2&&labGrid[c.x+2][c.y])vecinos.push({x:c.x+2,y:c.y,mx:c.x+1,my:c.y});
+if(c.y>1&&labGrid[c.x][c.y-2])vecinos.push({x:c.x,y:c.y-2,mx:c.x,my:c.y-1});
+if(c.y<size-2&&labGrid[c.x][c.y+2])vecinos.push({x:c.x,y:c.y+2,mx:c.x,my:c.y+1});
+if(!vecinos.length){stack.pop();continue;}
+var n=vecinos[Math.floor(Math.random()*vecinos.length)];
+labGrid[n.x][n.y]=0;labGrid[n.mx][n.my]=0;stack.push(n);
+}
+mostrarRanking('laberinto');
+dibujarLaberinto(size);
+document.getElementById('gameInfo').textContent='Llegá a la meta 🏁';
+canvas.onclick=function(e){
+if(labPos.x===labFin.x&&labPos.y===labFin.y)return;
+var rect=canvas.getBoundingClientRect();var s=canvas.width/size;
+var x=Math.floor((e.clientX-rect.left)/s);var y=Math.floor((e.clientY-rect.top)/s);
+if(x<0||x>=size||y<0||y>=size)return;
+if(Math.abs(x-labPos.x)+Math.abs(y-labPos.y)!==1)return;
+if(labGrid[x][y]===1)return;
+labPos={x:x,y:y};labMov++;
+document.getElementById('score').textContent=labMov;
+dibujarLaberinto(size);
+if(x===labFin.x&&y===labFin.y){
+document.getElementById('gameInfo').textContent='Ganaste! '+labMov+' movimientos';
+guardarPuntaje('laberinto',Math.max(1,100-labMov));mostrarRanking('laberinto');
+}
+};
+}
+function dibujarLaberinto(size){
+var s=canvas.width/size;ctx.fillStyle='#0f1430';ctx.fillRect(0,0,canvas.width,canvas.height);
+for(var i=0;i<size;i++)for(var j=0;j<size;j++){
+if(labGrid[i][j]){ctx.fillStyle='#111639';ctx.fillRect(j*s,i*s,s,s);}
+}
+ctx.fillStyle='#2ecc71';ctx.fillRect(labPos.y*s,labPos.x*s,s-2,s-2);
+ctx.fillStyle='#f1c40f';ctx.fillRect(labFin.y*s,labFin.x*s,s-2,s-2);
+}
+
+// ═══════════════ FLAPPY BIRD ═══════════════
+var flappy = {bird:{x:0,y:0,vy:0},pipes:[],score:0,gameOver:false,started:false,flappyLoop:null};
+function flappyCtrl(){
+if(flappy.gameOver){iniciarFlappy();return;}
+flappy.started=true;flappy.bird.vy=-8;dibujarFlappy();
+}
+function iniciarFlappy(){
+detenerLoops();
+var s=canvas.width/5;flappy={bird:{x:2*s,y:canvas.height/2,vy:0},pipes:[],score:0,gameOver:false,started:false};
+mostrarRanking('flappy');
+document.getElementById('gameInfo').textContent='Tocá o presioná Espacio para empezar';
+canvas.onclick=flappyCtrl;
+setTeclaHandler(function(e){if(e.key===' '||e.key==='ArrowUp'){e.preventDefault();flappyCtrl();}});
+flappy.flappyLoop=setInterval(function(){
+if(!flappy.started||flappy.gameOver)return;
+flappy.bird.vy+=0.5;flappy.bird.y+=flappy.bird.vy;
+if(flappy.pipes.length===0||flappy.pipes[flappy.pipes.length-1].x<canvas.width-2*s)flappy.pipes.push({x:canvas.width,y:Math.random()*(canvas.height-s*2)+s*0.5,passed:false});
+flappy.pipes.forEach(function(p){p.x-=3;});
+if(flappy.bird.y>canvas.height||flappy.bird.y<0){flappy.gameOver=true;}
+flappy.pipes=flappy.pipes.filter(function(p){
+if(!p.passed&&p.x+s/2<flappy.bird.x){p.passed=true;flappy.score++;document.getElementById('score').textContent=flappy.score;}
+if(p.x+s/2>flappy.bird.x-s/4&&p.x-s/2<flappy.bird.x+s/4){
+if(flappy.bird.y-s/4<p.y||flappy.bird.y+s/4>p.y+s)flappy.gameOver=true;
+}
+return p.x>-s;
+});
+if(flappy.gameOver){
+clearInterval(flappy.flappyLoop);flappy.flappyLoop=null;
+document.getElementById('gameInfo').textContent='Game Over! Puntaje: '+flappy.score;
+guardarPuntaje('flappy',flappy.score);mostrarRanking('flappy');return;
+}
+dibujarFlappy();
+},40);
+dibujarFlappy();
+}
+function dibujarFlappy(){
+var s=canvas.width/5;ctx.fillStyle='#0f1430';ctx.fillRect(0,0,canvas.width,canvas.height);
+ctx.fillStyle='#f1c40f';ctx.beginPath();ctx.arc(flappy.bird.x,flappy.bird.y,s/4,0,Math.PI*2);ctx.fill();
+ctx.fillStyle='#f39c12';ctx.beginPath();ctx.arc(flappy.bird.x+s/4,flappy.bird.y-s/6,s/8,0,Math.PI*2);ctx.fill();
+flappy.pipes.forEach(function(p){
+ctx.fillStyle='#2ecc71';ctx.fillRect(p.x-s/2,0,s/2,p.y);
+ctx.fillStyle='#27ae60';ctx.fillRect(p.x-s/2-2,p.y-5,s/2+4,10);
+ctx.fillStyle='#2ecc71';ctx.fillRect(p.x-s/2,p.y+s,canvas.height-p.y-s,s/2);
+ctx.fillStyle='#27ae60';ctx.fillRect(p.x-s/2-2,p.y+s-5,s/2+4,10);
+});
+ctx.fillStyle='#888';ctx.font='bold '+(s/2)+'px sans-serif';ctx.textAlign='center';ctx.fillText(flappy.score,canvas.width/2,40);
+}
+
+// ═══════════════ TA TE TI ═══════════════
+var tateti = {tablero:[],turno:'X',gameOver:false,jugadas:0};
+function iniciarTaTeTi(){
+tateti={tablero:Array(9).fill(null),turno:'X',gameOver:false,jugadas:0};
+mostrarRanking('tateti');
+document.getElementById('gameInfo').textContent='Tu turno (X) - Toca una casilla';
+canvas.onclick=function(e){
+if(tateti.gameOver||tateti.turno!=='X')return;
+var rect=canvas.getBoundingClientRect();var s=canvas.width/3;
+var x=Math.floor((e.clientX-rect.left)/s);var y=Math.floor((e.clientY-rect.top)/s);
+var idx=y*3+x;if(idx<0||idx>8||tateti.tablero[idx])return;
+tateti.tablero[idx]='X';tateti.jugadas++;
+if(verificarTateti('X')){tateti.gameOver=true;document.getElementById('gameInfo').textContent='Ganaste!';guardarPuntaje('tateti',10);mostrarRanking('tateti');dibujarTaTeTi();return;}
+if(tateti.jugadas>=9){tateti.gameOver=true;document.getElementById('gameInfo').textContent='Empate!';dibujarTaTeTi();return;}
+tateti.turno='O';dibujarTaTeTi();
+setTimeout(function moverIA(){
+if(tateti.gameOver)return;
+var mejores=[4,0,2,6,8,1,3,5,7];
+for(var i=0;i<mejores.length;i++){if(!tateti.tablero[mejores[i]]){tateti.tablero[mejores[i]]='O';tateti.jugadas++;break;}}
+if(verificarTateti('O')){tateti.gameOver=true;document.getElementById('gameInfo').textContent='Gano la IA!';dibujarTaTeTi();return;}
+if(tateti.jugadas>=9){tateti.gameOver=true;document.getElementById('gameInfo').textContent='Empate!';dibujarTaTeTi();return;}
+tateti.turno='X';document.getElementById('gameInfo').textContent='Tu turno (X)';dibujarTaTeTi();
+},500);
+};
+dibujarTaTeTi();
+}
+function verificarTateti(j){
+var t=tateti.tablero;
+var lineas=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+for(var i=0;i<lineas.length;i++){var l=lineas[i];if(t[l[0]]===j&&t[l[1]]===j&&t[l[2]]===j)return true;}
+return false;
+}
+function dibujarTaTeTi(){
+var s=canvas.width/3;ctx.fillStyle='#0f1430';ctx.fillRect(0,0,canvas.width,canvas.height);
+ctx.strokeStyle='#667eea44';ctx.lineWidth=2;
+for(var i=1;i<3;i++){ctx.beginPath();ctx.moveTo(i*s,0);ctx.lineTo(i*s,canvas.height);ctx.stroke();ctx.beginPath();ctx.moveTo(0,i*s);ctx.lineTo(canvas.width,i*s);ctx.stroke();}
+for(var i=0;i<9;i++){
+var x=(i%3)*s;var y=Math.floor(i/3)*s;
+if(tateti.tablero[i]==='X'){
+ctx.strokeStyle='#e74c3c';ctx.lineWidth=3;
+ctx.beginPath();ctx.moveTo(x+10,y+10);ctx.lineTo(x+s-10,y+s-10);ctx.stroke();
+ctx.beginPath();ctx.moveTo(x+s-10,y+10);ctx.lineTo(x+10,y+s-10);ctx.stroke();
+}else if(tateti.tablero[i]==='O'){
+ctx.strokeStyle='#2ecc71';ctx.lineWidth=3;
+ctx.beginPath();ctx.arc(x+s/2,y+s/2,s/2-10,0,Math.PI*2);ctx.stroke();
+}
+}
+if(tateti.gameOver){
+ctx.fillStyle='rgba(0,0,0,.7)';ctx.fillRect(0,0,canvas.width,canvas.height);
+ctx.fillStyle='#667eea';ctx.font='bold '+(s/2)+'px sans-serif';ctx.textAlign='center';ctx.fillText(tateti.turno==='X'?'Ganaste!':(tateti.jugadas>=9?'Empate!':'Perdiste!'),canvas.width/2,canvas.height/2);
+}
+}
+
+// ═══════════════ SIMON ═══════════════
+var simon = {secuencia:[],jugador:[],ronda:0,esperando:false,iluminado:-1,simonLoop:null};
+var COLORES = ['#e74c3c','#2ecc71','#3498db','#f1c40f'];
+function iniciarSimon(){
+detenerLoops();
+simon={secuencia:[],jugador:[],ronda:0,esperando:false,iluminado:-1};
+mostrarRanking('simon');
+puntaje=0;document.getElementById('score').textContent='0';
+document.getElementById('gameInfo').textContent='Espera la secuencia...';
+dibujarSimon();
+setTimeout(proximoSimon,800);
+canvas.onclick=function(e){
+if(!simon.esperando)return;
+var rect=canvas.getBoundingClientRect();var s=canvas.width/2;
+var x=Math.floor((e.clientX-rect.left)/s);var y=Math.floor((e.clientY-rect.top)/s);
+var idx=y*2+x;if(idx<0||idx>3)return;
+simon.iluminado=idx;dibujarSimon();
+setTimeout(function(){simon.iluminado=-1;dibujarSimon();},200);
+simon.jugador.push(idx);
+var j=simon.jugador.length-1;
+if(simon.secuencia[j]!==idx){
+document.getElementById('gameInfo').textContent='Perdiste! Ronda: '+simon.ronda;
+guardarPuntaje('simon',simon.ronda);mostrarRanking('simon');simon.esperando=false;return;
+}
+if(simon.jugador.length===simon.secuencia.length){
+puntaje=simon.ronda;document.getElementById('score').textContent=simon.ronda;
+simon.esperando=false;simon.ronda++;
+setTimeout(proximoSimon,600);
+}
+};
+dibujarSimon();
+}
+function proximoSimon(){
+simon.secuencia.push(Math.floor(Math.random()*4));
+simon.jugador=[];
+var i=0;
+function mostrarSig(){
+if(i>=simon.secuencia.length){
+simon.esperando=true;
+document.getElementById('gameInfo').textContent='Tu turno! Ronda '+simon.ronda;
+return;
+}
+simon.iluminado=simon.secuencia[i];dibujarSimon();
+setTimeout(function(){simon.iluminado=-1;dibujarSimon();i++;setTimeout(mostrarSig,200);},400);
+}
+setTimeout(mostrarSig,300);
+}
+function dibujarSimon(){
+var s=canvas.width/2;var r=s-4;
+for(var i=0;i<4;i++){
+var x=(i%2)*s;var y=Math.floor(i/2)*s;
+ctx.fillStyle=simon.iluminado===i?COLORES[i]:COLORES[i]+'88';
+ctx.beginPath();ctx.roundRect(x+2,y+2,r,r,8);ctx.fill();
+}
+}
+// Polyfill roundRect si no existe
+if(!CanvasRenderingContext2D.prototype.roundRect){
+CanvasRenderingContext2D.prototype.roundRect=function(x,y,w,h,r){this.moveTo(x+r,y);this.arcTo(x+w,y,x+w,y+h,r);this.arcTo(x+w,y+h,x,y+h,r);this.arcTo(x,y+h,x,y,r);this.arcTo(x,y,x+w,y,r);};
+}
+
+// ═══════════════ PIEDRA PAPEL O TIJERA ═══════════════
+var ppr = {jugadas:0,ganadas:0,empates:0,perdidas:0};
+function iniciarPiedraPapel(){
+detenerLoops();
+ppr={jugadas:0,ganadas:0,empates:0,perdidas:0};
+mostrarRanking('piedrapapel');
+var opts=['✊','✋','✌️'];
+document.getElementById('gameInfo').textContent='Toca una opcion';
+function dibujar(){
+var s=canvas.width/3;
+ctx.fillStyle='#0f1430';ctx.fillRect(0,0,canvas.width,canvas.height);
+for(var i=0;i<3;i++){
+ctx.fillStyle='#111639';ctx.fillRect(i*s+4,canvas.height/2-30,s-8,60);
+ctx.fillStyle='#e8e8e8';ctx.font='28px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+ctx.fillText(opts[i],i*s+s/2,canvas.height/2);
+}
+}
+canvas.onclick=function(e){
+var rect=canvas.getBoundingClientRect();var s=canvas.width/3;
+var x=Math.floor((e.clientX-rect.left)/s);
+if(x<0||x>2)return;
+var ia=Math.floor(Math.random()*3);
+var gano=(x===0&&ia===2)||(x===1&&ia===0)||(x===2&&ia===1);
+var empate=x===ia;
+ppr.jugadas++;
+if(empate)ppr.empates++;
+else if(gano){ppr.ganadas++;puntaje++;}
+else ppr.perdidas++;
+document.getElementById('score').textContent=puntaje;
+ctx.fillStyle='#0f1430';ctx.fillRect(0,0,canvas.width,canvas.height);
+ctx.fillStyle='#e8e8e8';ctx.font='30px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+ctx.fillText('Tu: '+opts[x]+'  IA: '+opts[ia],canvas.width/2,canvas.height/2-20);
+ctx.font='16px sans-serif';
+ctx.fillStyle=empate?'#f1c40f':(gano?'#2ecc71':'#e74c3c');
+ctx.fillText(empate?'Empate!':(gano?'Ganaste!':'Perdiste!'),canvas.width/2,canvas.height/2+20);
+setTimeout(dibujar,900);
+};
+dibujar();
+}
+
+// ═══════════════ REACCION ═══════════════
+function iniciarReaccion(){
+detenerLoops();
+puntaje=0;var tiempo=20;
+mostrarRanking('reaccion');
+function dibujar(t){
+var r=Math.floor(Math.random()*canvas.width-20),c=Math.floor(Math.random()*canvas.height-20);
+ctx.fillStyle='#0f1430';ctx.fillRect(0,0,canvas.width,canvas.height);
+ctx.fillStyle='#e74c3c';ctx.beginPath();ctx.arc(r,c,10,0,Math.PI*2);ctx.fill();
+}
+canvas.onclick=function(e){
+if(tiempo<=0)return;
+var rect=canvas.getBoundingClientRect();
+var x=e.clientX-rect.left,y=e.clientY-rect.top;
+// Simplemente contar clicks, el objetivo es tocar lo mas rapido
+puntaje++;
+document.getElementById('score').textContent=puntaje;
+dibujar();
+};
+document.getElementById('gameInfo').textContent='Toca los objetivos! 20s';
+gameLoop=setInterval(function(){
+tiempo--;
+if(tiempo<=0){
+clearInterval(gameLoop);
+document.getElementById('gameInfo').textContent='Fin! Puntaje: '+puntaje;
+guardarPuntaje('reaccion',puntaje);mostrarRanking('reaccion');
+canvas.onclick=null;
+return;
+}
+document.getElementById('gameInfo').textContent='Toca los objetivos! '+tiempo+'s';
+},1000);
+dibujar();
+}
+
+// ═══════════════ SERPIENTE II ═══════════════
+var dirS2 = {x:1,y:0};
+function iniciarSerpiente2(){
+detenerLoops();
+var s=canvas.width/15,cols=15;
+var serp=[{x:7,y:7}];dirS2={x:1,y:0};
+puntaje=0;
+mostrarRanking('serpiente2');
+function comida(){return{x:Math.floor(Math.random()*cols),y:Math.floor(Math.random()*cols)};}
+var food=comida();
+setTeclaHandler(function(e){
+if(e.key==='ArrowUp'&&dirS2.y===0)dirS2={x:0,y:-1};
+if(e.key==='ArrowDown'&&dirS2.y===0)dirS2={x:0,y:1};
+if(e.key==='ArrowLeft'&&dirS2.x===0)dirS2={x:-1,y:0};
+if(e.key==='ArrowRight'&&dirS2.x===0)dirS2={x:1,y:0};
+});
+gameLoop=setInterval(function(){
+var head={x:serp[0].x+dirS2.x,y:serp[0].y+dirS2.y};
+if(head.x<0||head.x>=cols||head.y<0||head.y>=cols||serp.some(function(z){return z.x===head.x&&z.y===head.y;})){
+clearInterval(gameLoop);gameLoop=null;
+document.getElementById('gameInfo').textContent='Game Over! Puntaje: '+puntaje;
+guardarPuntaje('serpiente2',puntaje);mostrarRanking('serpiente2');
+return;
+}
+serp.unshift(head);
+if(head.x===food.x&&head.y===food.y){puntaje++;document.getElementById('score').textContent=puntaje;food=comida();}
+else serp.pop();
+ctx.fillStyle='#0f1430';ctx.fillRect(0,0,canvas.width,canvas.height);
+serp.forEach(function(z,i){ctx.fillStyle=i===0?'#2ecc71':'#667eea';ctx.fillRect(z.x*s,z.y*s,s-1,s-1);});
+ctx.fillStyle='#e74c3c';ctx.fillRect(food.x*s,food.y*s,s-1,s-1);
+},120);
+document.getElementById('gameInfo').textContent='Usa flechas o swipe';
+}
+
+// ═══════════════ VELOCIDAD ═══════════════
+var carril = 1;
+function iniciarVelocidad(){
+detenerLoops();
+carril=1;var obstaculos=[],puntaje=0,vel=5;
+mostrarRanking('velocidad');
+setTeclaHandler(function(e){
+if(e.key==='ArrowLeft')carril=Math.max(0,carril-1);
+if(e.key==='ArrowRight')carril=Math.min(2,carril+1);
+});
+document.getElementById('gameInfo').textContent='Flechas: cambiar carril';
+gameLoop=setInterval(function(){
+// Avanzar
+obstaculos.forEach(function(o){o.y+=vel/10;});
+if(Math.random()<0.05)obstaculos.push({x:Math.floor(Math.random()*3),y:0});
+obstaculos=obstaculos.filter(function(o){return o.y<canvas.height;});
+// Colision
+if(obstaculos.some(function(o){return Math.abs(o.x-carril)<0.4&&o.y>canvas.height-40;})){
+clearInterval(gameLoop);gameLoop=null;
+document.getElementById('gameInfo').textContent='Chocaste! Puntaje: '+puntaje;
+guardarPuntaje('velocidad',puntaje);mostrarRanking('velocidad');
+return;
+}
+puntaje++;document.getElementById('score').textContent=puntaje;
+// Dibujar
+var s=canvas.width/3;
+ctx.fillStyle='#0f1430';ctx.fillRect(0,0,canvas.width,canvas.height);
+obstaculos.forEach(function(o){ctx.fillStyle='#e74c3c';ctx.fillRect(o.x*s,o.y,s-4,20);});
+ctx.fillStyle='#00ff41';ctx.fillRect(carril*s+2,canvas.height-30,s-4,25);
+},30);
+}
+
+// ═══════════════ PUZZLE 8 ═══════════════
+var puzzle={tablero:[],movimientos:0};
+function iniciarPuzzle8(){
+detenerLoops();
+var nums=[1,2,3,4,5,6,7,8,null];
+nums.sort(function(){return Math.random()-.5});
+puzzle={tablero:nums,movimientos:0};
+mostrarRanking('puzzle8');
+document.getElementById('gameInfo').textContent='Ordena los numeros 1-8';
+function dibujar(){
+var s=canvas.width/3;
+ctx.fillStyle='#0f1430';ctx.fillRect(0,0,canvas.width,canvas.height);
+for(var i=0;i<9;i++){
+var v=puzzle.tablero[i];
+var x=(i%3)*s,y=Math.floor(i/3)*s;
+if(v!==null){
+ctx.fillStyle='#111639';ctx.fillRect(x+2,y+2,s-4,s-4);
+ctx.fillStyle='#e8e8e8';ctx.font='bold '+(s/2)+'px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+ctx.fillText(v,x+s/2,y+s/2);
+}else{
+ctx.fillStyle='#0a0e27';ctx.fillRect(x+2,y+2,s-4,s-4);
+}
+}
+}
+setTeclaHandler(function(e){
+var dir={ArrowUp:-3,ArrowDown:3,ArrowLeft:-1,ArrowRight:1}[e.key];
+if(dir===undefined)return;
+var vacio=puzzle.tablero.indexOf(null);
+var idx=vacio-dir;
+if(idx<0||idx>8)return;
+puzzle.tablero[vacio]=puzzle.tablero[idx];
+puzzle.tablero[idx]=null;
+puzzle.movimientos++;
+document.getElementById('score').textContent=puzzle.movimientos;
+if(puzzle.tablero.join(',')==='1,2,3,4,5,6,7,8,'){
+document.getElementById('gameInfo').textContent='Ganaste! '+puzzle.movimientos+' movimientos';
+guardarPuntaje('puzzle8',Math.max(1,100-puzzle.movimientos));mostrarRanking('puzzle8');
+}
+dibujar();
+});
+canvas.onclick=function(e){
+var rect=canvas.getBoundingClientRect();var s=canvas.width/3;
+var x=Math.floor((e.clientX-rect.left)/s),y=Math.floor((e.clientY-rect.top)/s);
+var idx=y*3+x;
+var vacio=puzzle.tablero.indexOf(null);
+var validas=[idx-1,idx+1,idx-3,idx+3];
+if(validas.indexOf(vacio)>=0){
+puzzle.tablero[vacio]=puzzle.tablero[idx];
+puzzle.tablero[idx]=null;
+puzzle.movimientos++;
+document.getElementById('score').textContent=puzzle.movimientos;
+if(puzzle.tablero.join(',')==='1,2,3,4,5,6,7,8,'){
+document.getElementById('gameInfo').textContent='Ganaste! '+puzzle.movimientos+' movimientos';
+guardarPuntaje('puzzle8',Math.max(1,100-puzzle.movimientos));mostrarRanking('puzzle8');
+}
+}
+dibujar();
+};
+dibujar();
+}
+
+// ═══════════════ MEMORIA 2 ═══════════════
+function iniciarMemoria2(){
+detenerLoops();
+var emojis=['🍎','🍊','🍋','🍇','🍓','🫐','🍑','🍒','🥝','🍉','🍍','🥥','🍌','🍐','🥭','🍈'];
+var cards=emojis.concat(emojis);
+cards.sort(function(){return Math.random()-.5});
+puntaje=0;var volteadas=[],pares=0;
+mostrarRanking('memoria2');
+function dibujar(){
+var cols=8,s=canvas.width/cols;
+ctx.fillStyle='#0f1430';ctx.fillRect(0,0,canvas.width,canvas.height);
+for(var i=0;i<cards.length;i++){
+var x=(i%cols)*s,y=Math.floor(i/cols)*s;
+if(cards[i]!==null){
+ctx.fillStyle='#111639';ctx.fillRect(x+1,y+1,s-2,s-2);
+ctx.fillStyle='#e8e8e8';ctx.font='bold '+(s/2)+'px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+ctx.fillText(cards[i],x+s/2,y+s/2);
+}else{
+ctx.fillStyle='#0a0e27';ctx.fillRect(x+1,y+1,s-2,s-2);
+}
+}
+}
+canvas.onclick=function(e){
+var rect=canvas.getBoundingClientRect();var cols=8,s=canvas.width/cols;
+var x=Math.floor((e.clientX-rect.left)/s),y=Math.floor((e.clientY-rect.top)/s);
+var idx=y*cols+x;
+if(idx<0||idx>=cards.length||cards[idx]===null)return;
+// Marcar como volteada temporalmente
+if(volteadas.length===0){volteadas.push(idx);dibujar();return;}
+if(volteadas.length===1){
+var a=volteadas[0];
+if(cards[a]===cards[idx]&&a!==idx){
+cards[a]=null;cards[idx]=null;pares++;puntaje+=5;
+document.getElementById('score').textContent=puntaje;
+if(pares>=16){document.getElementById('gameInfo').textContent='Ganaste! Puntaje: '+puntaje;guardarPuntaje('memoria2',puntaje);mostrarRanking('memoria2');}
+}else{
+volteadas=[];
+setTimeout(dibujar,400);
+}
+volteadas=[];
+}
+dibujar();
+};
+dibujar();
+document.getElementById('gameInfo').textContent='Encontra los 16 pares';
+}
+
+// ═══════════════ HACKERMAN (EXCLUSIVO ZonaHack) ═══════════════
+var hack = {nivel:0, tiempo:0, codigo:"", escrito:"", fallos:0, activo:false, hackLoop:null, codigos:null};
+var HACK_CODIGOS = [
+  ["PASSWORD","ACCESS","LOGIN","HACK"],
+  ["BREACH","ROOT","SHELL","CRACK"],
+  ["OVERDRIVE","FIREWALL","GATEWAY","PROXY"],
+  ["ZONAHACK","TERMINAL","INJECT","BYPASS"],
+  ["MALWARE","TROJAN","ENCRYPT","DECRYPT"],
+];
+var HACK_SISTEMAS = ["BANCO CENTRAL","PENTAGON V2","NASA-SAT","CORP.CLOUD","DARKNET","ZONAHACK CORE"];
+
+function iniciarHackerman(){
+  detenerLoops();
+  hack = {nivel:0, tiempo:30, codigo:"", escrito:"", fallos:0, activo:true, codigos:null};
+  var btn=document.querySelector("#btnSpeed");if(btn)btn.style.display="none";
+  hack.nivel=1;
+  nuevoNivelHack();
+  hack.hackLoop=setInterval(function(){ tickHack(); }, 100);
+  dibujarHack();
+  document.getElementById('gameInfo').textContent='🔓 Hackea el sistema escribiendo el codigo';
+}
+
+function nuevoNivelHack(){
+  var nivelIdx = Math.min(Math.floor((hack.nivel-1)/4), HACK_CODIGOS.length-1);
+  var lista = HACK_CODIGOS[nivelIdx] || HACK_CODIGOS[0];
+  hack.codigo = lista[Math.floor(Math.random()*lista.length)];
+  hack.escrito = "";
+  hack.tiempo = 30;
+}
+
+function tickHack(){
+  if(!hack.activo) return;
+  hack.tiempo -= 0.1;
+  if(hack.tiempo<=0){
+    gameOverHack("💀 TIEMPO AGOTADO - EL SISTEMA TE DETECTO");
+    return;
+  }
+  dibujarHack();
+}
+
+function hackTecla(car){
+  if(!hack.activo) return;
+  if(car && car.length===1){
+    var esperado = hack.codigo.charAt(hack.escrito.length);
+    if(car.toUpperCase() === esperado){
+      hack.escrito += car.toUpperCase();
+      if(hack.escrito === hack.codigo){
+        hack.nivel++;
+        if(hack.nivel > HACK_CODIGOS.length*4){
+          gameOverHack("🏆 FELICITACIONES! HACKEASTE TODO EL SISTEMA");
+          return;
+        }
+        nuevoNivelHack();
+        document.getElementById('gameInfo').textContent='✅ SISTEMA HACKEADO! Nivel '+hack.nivel;
+      }
+    }else{
+      hack.fallos++;
+      if(hack.fallos%5===0 && hack.tiempo>5) hack.tiempo -= 3;
+    }
+    dibujarHack();
+  }
+}
+
+function gameOverHack(msg){
+  hack.activo=false;
+  clearInterval(hack.hackLoop); hack.hackLoop=null;
+  var puntos = (hack.nivel-1)*100;
+  document.getElementById('gameInfo').textContent = msg + ' | Puntaje: '+puntos;
+  guardarPuntaje('hackerman', puntos);
+  mostrarRanking('hackerman');
+  // Logros automaticos
+  autoLogroHack(puntos, hack.nivel);
+}
+
+// Logros automaticos de Hackerman
+function autoLogroHack(puntos, nivel){
+  try{
+    var usuario = localStorage.getItem('vh_usuario') || 'anon';
+    var logros = [];
+    if(nivel>=3) logros.push({logro:'PRIMER HACK', juego:'hackerman'});
+    if(nivel>=8) logros.push({logro:'HACKER NOVATO', juego:'hackerman'});
+    if(nivel>=15) logros.push({logro:'HACKER EXPERTO', juego:'hackerman'});
+    if(nivel>=24) logros.push({logro:'MASTER HACKER', juego:'hackerman'});
+    if(puntos>=2000) logros.push({logro:'LEYENDA HACKER', juego:'hackerman'});
+    var logrosPrevios = [];
+    try{logrosPrevios = JSON.parse(localStorage.getItem('vh_logros_hack')||'[]');}catch(e){}
+    logros.forEach(function(l){
+      // Verificar si ya lo tiene (local)
+      if(logrosPrevios.indexOf(l.logro)>=0) return;
+      // Intentar guardar en DB (si no existe la tabla, falla silencioso y queda en local)
+      try{
+        fetch(API_URL+"/rest/v1/juegos_logros",{method:'POST',headers:{'apikey':API_KEY,'Authorization':'Bearer '+API_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},
+          body:JSON.stringify({usuario_nombre:usuario, logro:l.logro, juego:l.juego})}).catch(function(){});
+      }catch(e){}
+      // Guardar local siempre (respaldo automatico)
+      logrosPrevios.push(l.logro);
+      localStorage.setItem('vh_logros_hack', JSON.stringify(logrosPrevios));
+      // Notificar logro
+      if(document.getElementById('gameInfo')){
+        var gi=document.getElementById('gameInfo');
+        gi.textContent='🏆 LOGRO: '+l.logro+'!';
+        setTimeout(function(){gi.textContent='💻 HACKERMAN';},1500);
+      }
+    });
+  }catch(e){}
+}
+
+function dibujarHack(){
+  var s=canvas.width;
+  ctx.fillStyle='#020404';ctx.fillRect(0,0,canvas.width,canvas.height);
+  // Terminal estilo
+  ctx.fillStyle='rgba(0,255,65,.08)';
+  ctx.fillRect(8,8,s-16,s-70);
+
+  // Sistema objetivo
+  ctx.fillStyle='#00ff41';ctx.font='bold '+(s/18)+'px Courier New';ctx.textAlign='center';
+  ctx.fillText('>> HACKEANDO: '+HACK_SISTEMAS[Math.min(Math.floor((hack.nivel-1)/4),HACK_SISTEMAS.length-1)]+' <<', s/2, 35);
+  ctx.font='bold '+(s/11)+'px Courier New';
+  ctx.fillStyle='#f1c40f';
+  ctx.fillText('NIVEL '+hack.nivel, s/2, s/2-40);
+
+  // Codigo a escribir (mostrar enmascarado progresivo)
+  ctx.font='bold '+(s/14)+'px Courier New';
+  ctx.fillStyle='#888';
+  ctx.fillText('CODIGO: '+hack.codigo, s/2, s/2+5);
+  // Barra de progreso del codigo
+  var pct = hack.codigo.length ? (hack.escrito.length/hack.codigo.length) : 0;
+  ctx.fillStyle='#1a1a1a';ctx.fillRect(s/4, s/2+20, s/2, 8);
+  ctx.fillStyle='#00ff41';ctx.fillRect(s/4, s/2+20, s/2*pct, 8);
+
+  // Escrito actual
+  ctx.font='bold '+(s/13)+'px Courier New';
+  ctx.fillStyle='#00ff41';
+  ctx.fillText(hack.escrito + '_', s/2, s/2+48);
+
+  // Barra de tiempo
+  ctx.fillStyle='#1a1a1a';ctx.fillRect(s/4, s-38, s/2, 6);
+  ctx.fillStyle = hack.tiempo>10?'#00ff41':hack.tiempo>5?'#f1c40f':'#e74c3c';
+  ctx.fillRect(s/4, s-38, s/2*(hack.tiempo/30), 6);
+  ctx.font='bold '+(s/18)+'px Courier New';
+  ctx.fillText(Math.ceil(hack.tiempo)+'s', s/2, s-20);
+
+  // Fallos
+  ctx.font='bold '+(s/22)+'px Courier New';
+  ctx.fillStyle='#e74c3c';
+  ctx.fillText('FALLOS: '+hack.fallos, s-80, 25);
+}
+
+function hackCtrl(dir){
+  if(!hack.activo) return;
+  var btn = document.querySelector("#btnAction");
+  if(!btn) return;
+  btn.textContent = dir;
+}
+// Soporte teclado para hackerman
+document.addEventListener('keydown',function(e){
+  if(juegoActual==='hackerman' && hack.activo){
+    e.preventDefault();
+    if(e.key.length===1) hackTecla(e.key);
+  }
+});
+
+// Agregar boton para letras en movil (se muestra en controles)
+function initHackMobile(){
+  var c=document.getElementById('controles');
+  if(!c) return;
+  var row=document.createElement('div');row.className='ctrl-row';row.style.marginTop='4px';
+  var letras='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  var i=0;
+  var addBtn=function(l){
+    var b=document.createElement('button');b.className='ctrl-btn';b.style.width='40px';b.style.height='40px';b.style.fontSize='.8em';
+    b.textContent=l;
+    b.onpointerdown=function(ev){ev.preventDefault();hackTecla(l);};
+    row.appendChild(b);
+  };
+  for(i=0;i<8;i++)addBtn(letras[i]);
+  c.appendChild(row);
+  var row2=document.createElement('div');row2.className='ctrl-row';
+  for(i=8;i<16;i++)addBtn(letras[i]);
+  c.appendChild(row2);
+  var row3=document.createElement('div');row3.className='ctrl-row';
+  for(i=16;i<24;i++)addBtn(letras[i]);
+  c.appendChild(row3);
+  var row4=document.createElement('div');row4.className='ctrl-row';
+  for(i=24;i<36;i++)addBtn(letras[i]);
+  c.appendChild(row4);
+}
+initHackMobile();
+</script>
+<script src="/errores.js" defer></script>
+<script src="/update_check.js" defer></script>
+</body>
+</html>

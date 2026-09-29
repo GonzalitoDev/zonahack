@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>🛡️ Ciberseguridad - ZonaHack</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0a;color:#c8d6e5;font-family:'Courier New',monospace;min-height:100vh;padding:15px}
+body::before{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:radial-gradient(circle at 50% 0%,rgba(0,255,65,.05) 0,transparent 60%),repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,255,65,.012) 2px,rgba(0,255,65,.012) 4px);pointer-events:none;z-index:9998}
+.header{display:flex;align-items:center;justify-content:space-between;padding:10px 0 14px;max-width:900px;margin:0 auto}
+.header h1{color:#00ff41;font-size:.95em;letter-spacing:2px;text-shadow:0 0 12px rgba(0,255,65,.25)}
+.back{color:#00ff41;text-decoration:none;font-size:.65em;padding:4px 8px;border:1px solid rgba(0,255,65,.15);border-radius:3px;white-space:nowrap}
+.wrap{max-width:900px;margin:0 auto;padding-bottom:30px}
+.intro{font-size:.68em;color:rgba(200,214,229,.5);line-height:1.7;margin-bottom:16px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;margin-bottom:12px}
+.card{background:#0d1117;border:1px solid rgba(0,255,65,.1);border-radius:8px;padding:16px;margin-bottom:12px}
+.card h2{color:#00ff41;font-size:.82em;letter-spacing:1px;margin-bottom:4px;display:flex;align-items:center;gap:6px}
+.card .sub{font-size:.62em;color:rgba(200,214,229,.4);margin-bottom:10px;line-height:1.6}
+.card input,.card textarea{width:100%;background:#050505;border:1px solid rgba(0,255,65,.15);color:#00ff41;padding:10px 12px;border-radius:4px;font-family:'Courier New',monospace;font-size:.8em;outline:none;margin-bottom:8px}
+.card input:focus,.card textarea:focus{border-color:rgba(0,255,65,.5);box-shadow:0 0 12px rgba(0,255,65,.08)}
+.card textarea{resize:vertical;min-height:70px}
+.btn{padding:9px 16px;background:linear-gradient(135deg,#00b33c,#007a2a);border:none;color:#fff;border-radius:4px;font-family:'Courier New',monospace;font-weight:bold;font-size:.72em;cursor:pointer;letter-spacing:1px}
+.btn:hover{box-shadow:0 0 18px rgba(0,255,65,.3)}
+.btn.ghost{background:transparent;border:1px solid rgba(0,255,65,.2);color:#00ff41}
+.out{margin-top:10px;font-size:.66em;line-height:1.7;word-break:break-all}
+.pill{display:inline-block;padding:3px 10px;border-radius:12px;font-size:.6em;letter-spacing:1px;margin:2px 4px 2px 0}
+.pill.ok{background:rgba(46,204,113,.1);border:1px solid rgba(46,204,113,.3);color:#2ecc71}
+.pill.bad{background:rgba(231,76,60,.1);border:1px solid rgba(231,76,60,.3);color:#e74c3c}
+.pill.warn{background:rgba(241,196,15,.08);border:1px solid rgba(241,196,15,.25);color:#f1c40f}
+.bar{height:8px;border-radius:4px;background:#050505;overflow:hidden;margin:6px 0;border:1px solid rgba(255,255,255,.05)}
+.bar .fill{height:100%;transition:width .3s,background .3s}
+.mono-box{background:#050505;border:1px solid rgba(0,255,65,.1);border-radius:4px;padding:10px;font-size:.65em;white-space:pre-wrap;word-break:break-all;max-height:260px;overflow:auto;color:#c8d6e5}
+.mono-box b{color:#00ff41}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;font-size:.65em}
+.kv b{color:#00ff41}
+.linkcard{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.linkcard a{color:#00c8ff;text-decoration:none;font-size:.72em;padding:7px 14px;border:1px solid rgba(0,200,255,.3);border-radius:6px;white-space:nowrap}
+.linkcard a:hover{background:rgba(0,200,255,.08)}
+.disclaimer{margin-top:8px;border:1px solid rgba(241,196,15,.15);border-radius:5px;padding:10px;font-size:.6em;color:rgba(200,214,229,.4);line-height:1.7}
+</style>
+</head>
+<body>
+<div class="header">
+  <a href="/" class="back">← Volver</a>
+  <h1>🛡️ CIBERSEGURIDAD</h1>
+  <div style="width:60px"></div>
+</div>
+
+<div class="wrap">
+  <p class="intro">Herramientas que corren <b style="color:#00ff41">100% en tu navegador</b>. Nada de lo que escribas acá se envía a nuestros servidores — cada tarjeta explica exactamente qué datos salen de tu equipo (si es que salen).</p>
+
+  <!-- 1. FORTALEZA DE CONTRASEÑA -->
+  <div class="card">
+    <h2>🔑 Fortaleza de contraseña</h2>
+    <div class="sub">Análisis 100% local (nunca sale de tu navegador). Estima el tiempo de fuerza bruta y detecta patrones débiles comunes.</div>
+    <input type="text" id="pfInput" placeholder="Escribí una contraseña para analizar" autocomplete="off" spellcheck="false" oninput="analizarFortaleza()">
+    <div id="pfOut" class="out"></div>
+  </div>
+
+  <!-- 2. CONTRASEÑA FILTRADA (HIBP k-anonimato) -->
+  <div class="card">
+    <h2>🕵️ ¿Tu contraseña fue filtrada?</h2>
+    <div class="sub">Usa la base pública de <b>Have I Been Pwned</b> con k-anonimato: tu contraseña se hashea (SHA-1) en tu navegador y <b style="color:#00ff41">solo se envían los primeros 5 caracteres</b> del hash — es matemáticamente imposible reconstruir tu contraseña con eso.</div>
+    <input type="password" id="hibpInput" placeholder="Contraseña a verificar" autocomplete="off" spellcheck="false">
+    <button class="btn" onclick="chequearHIBP()">🔍 Verificar filtración</button>
+    <div id="hibpOut" class="out"></div>
+  </div>
+
+  <!-- 3. JWT DECODER -->
+  <div class="card">
+    <h2>🪪 Decodificador de JWT</h2>
+    <div class="sub">Decodifica header y payload de un token JWT localmente. No valida la firma ni contacta ningún servidor — es solo Base64.</div>
+    <textarea id="jwtInput" placeholder="Pegá un token JWT (eyJhbGci...)" spellcheck="false" oninput="decodificarJWT()"></textarea>
+    <div id="jwtOut" class="out"></div>
+  </div>
+
+  <!-- 4. ANALIZADOR DE URL SOSPECHOSA -->
+  <div class="card">
+    <h2>🎣 Analizador de URLs sospechosas</h2>
+    <div class="sub">Heurística anti-phishing 100% local: no visita la URL, solo analiza el texto en busca de trucos comunes.</div>
+    <input type="text" id="urlSospInput" placeholder="Pegá una URL para analizar" autocomplete="off" spellcheck="false" oninput="analizarURL()">
+    <div id="urlSospOut" class="out"></div>
+  </div>
+
+  <!-- 5. HUELLA DIGITAL DEL NAVEGADOR -->
+  <div class="card">
+    <h2>🧬 Tu huella digital</h2>
+    <div class="sub">Esto es lo que cualquier sitio que visitás puede leer de tu navegador sin pedirte permiso. Solo informativo — no se envía a ningún lado.</div>
+    <button class="btn ghost" onclick="calcularHuella()">🔎 Analizar mi navegador</button>
+    <div id="huellaOut" class="out"></div>
+  </div>
+
+  <!-- Links a herramientas existentes -->
+  <div class="grid2">
+    <div class="card linkcard">
+      <div><h2 style="margin-bottom:2px">🛡 Escáner de sitios</h2><div class="sub" style="margin-bottom:0">Headers, TLS, CORS y más (análisis pasivo)</div></div>
+      <a href="/scanner.html">Abrir →</a>
+    </div>
+    <div class="card linkcard">
+      <div><h2 style="margin-bottom:2px">🧰 Más herramientas</h2><div class="sub" style="margin-bottom:0">Hashes, contraseñas, Base64, JSON, QR</div></div>
+      <a href="/herramientas.html">Abrir →</a>
+    </div>
+  </div>
+
+  <div class="disclaimer">⚠️ Con fines educativos y defensivos. Usá estas herramientas para proteger tus propias cuentas y sitios, no para atacar a terceros.</div>
+</div>
+
+<script>
+function $(id){return document.getElementById(id);}
+function esc(s){return String(s||"").replace(/[&<>]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;"}[c];});}
+
+/* ═══ 1. FORTALEZA DE CONTRASEÑA (100% local) ═══ */
+var COMUNES=["123456","password","12345678","qwerty","123456789","12345","1234","111111","1234567","dragon","123123","baseball","abc123","football","monkey","letmein","696969","shadow","master","666666","qwertyuiop","123321","mustang","1234567890","michael","654321","superman","1qaz2wsx","7777777","121212","000000","password1","contraseña","contrasena","admin","iloveyou","princess","welcome"];
+function analizarFortaleza(){
+  var p=$("pfInput").value;
+  var out=$("pfOut");
+  if(!p){out.innerHTML="";return;}
+  var pool=0;
+  if(/[a-z]/.test(p))pool+=26;
+  if(/[A-Z]/.test(p))pool+=26;
+  if(/[0-9]/.test(p))pool+=10;
+  if(/[^a-zA-Z0-9]/.test(p))pool+=32;
+  var entropia=Math.log2(Math.max(pool,1))*p.length;
+  var esComun=COMUNES.indexOf(p.toLowerCase())>=0;
+  var esSecuencial=/^(?:0123|1234|2345|3456|4567|5678|6789|abcd|qwer|asdf)/i.test(p);
+  var repetida=/(.)\1{2,}/.test(p);
+  var intentosPorSeg=1e10; // ataque offline con GPU, estimacion conservadora
+  var segundos=Math.pow(2,entropia)/intentosPorSeg;
+  function fmtTiempo(s){
+    if(s<1)return "instantáneo";
+    var u=[["siglo",3153600000],["año",31536000],["día",86400],["hora",3600],["minuto",60],["segundo",1]];
+    for(var i=0;i<u.length;i++){if(s>=u[i][1]){var n=Math.round(s/u[i][1]);return n+" "+u[i][0]+(n!==1?"s":"");}}
+    return "instantáneo";
+  }
+  var nivel,color,pct;
+  if(esComun||p.length<6){nivel="MUY DÉBIL";color="#e74c3c";pct=10;}
+  else if(esSecuencial||repetida||entropia<35){nivel="DÉBIL";color="#e74c3c";pct=30;}
+  else if(entropia<55){nivel="ACEPTABLE";color="#f1c40f";pct=55;}
+  else if(entropia<75){nivel="FUERTE";color="#2ecc71";pct=80;}
+  else{nivel="MUY FUERTE";color="#2ecc71";pct=100;}
+  var avisos=[];
+  if(esComun)avisos.push("Está en la lista de las contraseñas más usadas del mundo.");
+  if(esSecuencial)avisos.push("Contiene una secuencia predecible (1234, qwer, abcd...).");
+  if(repetida)avisos.push("Tiene caracteres repetidos consecutivos.");
+  if(p.length<8)avisos.push("Menos de 8 caracteres: muy corta.");
+  out.innerHTML=
+    '<div class="bar"><div class="fill" style="width:'+pct+'%;background:'+color+'"></div></div>'+
+    '<span class="pill" style="background:'+color+'22;border:1px solid '+color+'55;color:'+color+'">'+nivel+'</span>'+
+    '<div style="margin-top:6px">Tiempo estimado para romperla (fuerza bruta offline): <b style="color:'+color+'">'+esc(fmtTiempo(segundos))+'</b></div>'+
+    (avisos.length?'<div style="margin-top:6px;color:#f1c40f">⚠ '+avisos.map(esc).join(' · ')+'</div>':'');
+}
+
+/* ═══ 2. HIBP PWNED PASSWORDS (k-anonimato) ═══ */
+function chequearHIBP(){
+  var p=$("hibpInput").value;
+  var out=$("hibpOut");
+  if(!p){out.innerHTML='<span style="color:#e74c3c">Escribí una contraseña primero.</span>';return;}
+  out.innerHTML='⏳ Consultando (solo se envían 5 caracteres del hash)...';
+  var enc=new TextEncoder().encode(p);
+  crypto.subtle.digest("SHA-1",enc).then(function(buf){
+    var hex=Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,"0");}).join("").toUpperCase();
+    var prefix=hex.slice(0,5), suffix=hex.slice(5);
+    return fetch("https://api.pwnedpasswords.com/range/"+prefix).then(function(r){
+      if(!r.ok)throw new Error("HTTP "+r.status);
+      return r.text();
+    }).then(function(txt){
+      var lineas=txt.split("\n");
+      var count=0;
+      for(var i=0;i<lineas.length;i++){
+        var partes=lineas[i].split(":");
+        if(partes[0]===suffix){count=parseInt(partes[1])||0;break;}
+      }
+      if(count>0){
+        out.innerHTML='<span class="pill bad">⚠ FILTRADA</span><div style="margin-top:6px">Esta contraseña apareció en <b style="color:#e74c3c">'+count.toLocaleString()+'</b> filtraciones conocidas. No la uses en ningún lado.</div>';
+      }else{
+        out.innerHTML='<span class="pill ok">✓ No encontrada</span><div style="margin-top:6px">No aparece en las bases de filtraciones de Have I Been Pwned (esto no garantiza que sea fuerte, solo que no fue vista filtrada).</div>';
+      }
+    });
+  }).catch(function(){
+    out.innerHTML='<span style="color:#e74c3c">No se pudo consultar el servicio. Probá de nuevo más tarde.</span>';
+  });
+}
+
+/* ═══ 3. JWT DECODER (100% local) ═══ */
+function b64urlDecode(s){
+  s=s.replace(/-/g,"+").replace(/_/g,"/");
+  while(s.length%4)s+="=";
+  try{return decodeURIComponent(atob(s).split("").map(function(c){return "%"+("00"+c.charCodeAt(0).toString(16)).slice(-2);}).join(""));}
+  catch(e){return atob(s);}
+}
+function decodificarJWT(){
+  var t=$("jwtInput").value.trim();
+  var out=$("jwtOut");
+  if(!t){out.innerHTML="";return;}
+  var partes=t.split(".");
+  if(partes.length<2){out.innerHTML='<span style="color:#e74c3c">No parece un JWT válido (necesita al menos header.payload).</span>';return;}
+  try{
+    var header=JSON.parse(b64urlDecode(partes[0]));
+    var payload=JSON.parse(b64urlDecode(partes[1]));
+    var expInfo="";
+    if(payload.exp){
+      var expDate=new Date(payload.exp*1000);
+      var vencido=expDate.getTime()<Date.now();
+      expInfo='<div style="margin-top:6px">Expira: <b>'+expDate.toLocaleString()+'</b> — <span class="pill '+(vencido?"bad":"ok")+'">'+(vencido?"VENCIDO":"VIGENTE")+'</span></div>';
+    }
+    out.innerHTML=
+      '<div class="mono-box"><b>HEADER</b>\n'+esc(JSON.stringify(header,null,2))+'</div>'+
+      '<div class="mono-box" style="margin-top:6px"><b>PAYLOAD</b>\n'+esc(JSON.stringify(payload,null,2))+'</div>'+
+      expInfo+
+      '<div style="margin-top:6px;color:rgba(200,214,229,.4)">🔒 La firma no se verifica acá (necesitaría la clave secreta del servidor que lo emitió).</div>';
+  }catch(e){
+    out.innerHTML='<span style="color:#e74c3c">No se pudo decodificar: '+esc(e.message)+'</span>';
+  }
+}
+
+/* ═══ 4. ANALIZADOR DE URL (100% local, sin requests) ═══ */
+function analizarURL(){
+  var raw=$("urlSospInput").value.trim();
+  var out=$("urlSospOut");
+  if(!raw){out.innerHTML="";return;}
+  var señales=[];
+  var puntos=0;
+  var u;
+  try{ u=new URL(/^https?:\/\//i.test(raw)?raw:"http://"+raw); }
+  catch(e){ out.innerHTML='<span style="color:#e74c3c">URL inválida.</span>'; return; }
+  var host=u.hostname;
+  if(/^\d{1,3}(\.\d{1,3}){3}$/.test(host)){señales.push("La URL usa una dirección IP en vez de un dominio.");puntos+=3;}
+  if(raw.indexOf("@")>=0){señales.push("Contiene '@': todo lo anterior puede ser ignorado por el navegador (truco clásico de phishing).");puntos+=3;}
+  if(host.indexOf("xn--")>=0){señales.push("Dominio en punycode: puede imitar letras de otro alfabeto (ataque homográfico).");puntos+=3;}
+  var subdominios=host.split(".").length-2;
+  if(subdominios>=3){señales.push("Tiene "+subdominios+" subdominios: común para ocultar el dominio real.");puntos+=2;}
+  if((raw.match(/-/g)||[]).length>=4){señales.push("Muchos guiones en el dominio (típico de dominios armados para imitar marcas).");puntos+=1;}
+  var marcas=["paypal","google","facebook","instagram","microsoft","apple","amazon","netflix","banco","bancolombia","mercadopago","whatsapp","gmail"];
+  var marcaEncontrada=marcas.find(function(m){return host.toLowerCase().indexOf(m)>=0 && !host.toLowerCase().match(new RegExp("^(www\\.)?"+m+"\\.[a-z.]+$"));});
+  if(marcaEncontrada){señales.push("Menciona '"+marcaEncontrada+"' pero el dominio no es el oficial de esa marca.");puntos+=3;}
+  if(u.protocol!=="https:"){señales.push("No usa HTTPS: la conexión no está cifrada.");puntos+=1;}
+  if(host.length>40){señales.push("Dominio inusualmente largo.");puntos+=1;}
+
+  var nivel,color;
+  if(puntos===0){nivel="SIN SEÑALES OBVIAS";color="#2ecc71";}
+  else if(puntos<=2){nivel="RIESGO BAJO";color="#f1c40f";}
+  else if(puntos<=5){nivel="RIESGO MEDIO";color="#f1c40f";}
+  else{nivel="RIESGO ALTO";color="#e74c3c";}
+
+  out.innerHTML=
+    '<div class="kv"><b>Dominio</b><span>'+esc(host)+'</span></div>'+
+    '<span class="pill" style="background:'+color+'22;border:1px solid '+color+'55;color:'+color+'">'+nivel+'</span>'+
+    (señales.length?'<ul style="margin:8px 0 0 16px">'+señales.map(function(s){return '<li style="margin-bottom:3px">'+esc(s)+'</li>';}).join("")+'</ul>':
+      '<div style="margin-top:6px;color:rgba(200,214,229,.4)">No se detectaron trucos comunes, pero esto no es una garantía absoluta — cuando dudes, no hagas clic.</div>');
+}
+
+/* ═══ 5. HUELLA DIGITAL DEL NAVEGADOR (100% local) ═══ */
+function calcularHuella(){
+  var out=$("huellaOut");
+  out.innerHTML="⏳ Analizando...";
+  var datos={
+    "Navegador (user-agent)": navigator.userAgent,
+    "Plataforma": navigator.platform||"?",
+    "Idiomas": (navigator.languages||[navigator.language]).join(", "),
+    "Resolución de pantalla": screen.width+"x"+screen.height+" ("+(window.devicePixelRatio||1)+"x)",
+    "Zona horaria": Intl.DateTimeFormat().resolvedOptions().timeZone||"?",
+    "Núcleos de CPU (aprox)": navigator.hardwareConcurrency||"desconocido",
+    "Memoria del dispositivo (aprox)": (navigator.deviceMemory?navigator.deviceMemory+" GB":"no expuesto por este navegador"),
+    "Do Not Track": navigator.doNotTrack||"no enviado",
+    "Cookies habilitadas": navigator.cookieEnabled?"sí":"no"
+  };
+  var html='<div class="kv">'+Object.keys(datos).map(function(k){return '<b>'+esc(k)+'</b><span>'+esc(String(datos[k]))+'</span>';}).join("")+'</div>';
+
+  // WebRTC: chequeo de fuga de IP local (no se envía a ningun lado, solo se muestra)
+  html+='<div style="margin-top:10px;font-size:.65em;color:rgba(200,214,229,.5)">🔌 Fuga de IP local por WebRTC:</div>';
+  out.innerHTML=html+'<div id="webrtcOut" style="margin-top:4px">Comprobando...</div>';
+
+  try{
+    var pc=new RTCPeerConnection({iceServers:[]});
+    var ips=[];
+    pc.createDataChannel("");
+    pc.onicecandidate=function(e){
+      if(!e||!e.candidate){
+        var el=$("webrtcOut");
+        if(el)el.innerHTML=ips.length
+          ? '<span class="pill warn">EXPUESTA</span> Tu red local puede filtrar: '+ips.map(esc).join(", ")
+          : '<span class="pill ok">SIN FUGA DETECTADA</span>';
+        pc.close();
+        return;
+      }
+      var m=/([0-9]{1,3}(?:\.[0-9]{1,3}){3}|[a-f0-9:]{4,})/i.exec(e.candidate.candidate);
+      if(m && ips.indexOf(m[1])<0)ips.push(m[1]);
+    };
+    pc.createOffer().then(function(o){return pc.setLocalDescription(o);}).catch(function(){
+      var el=$("webrtcOut"); if(el)el.innerHTML='<span class="pill ok">No disponible en este navegador</span>';
+    });
+    setTimeout(function(){
+      var el=$("webrtcOut");
+      if(el && el.textContent==="Comprobando..."){el.innerHTML='<span class="pill ok">SIN FUGA DETECTADA</span>';}
+    },2500);
+  }catch(e){
+    var el=$("webrtcOut"); if(el)el.innerHTML='<span class="pill ok">No disponible en este navegador</span>';
+  }
+}
+</script>
+</body>
+</html>

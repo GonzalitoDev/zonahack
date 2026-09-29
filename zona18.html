@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>🔞 ZonaHack +18</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Courier New',Courier,monospace;background:#0a0a0a;color:#c8d6e5;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:10px;position:relative}
+body::before{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:radial-gradient(circle at 50% 0%,rgba(231,76,60,.06) 0,transparent 60%),repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(231,76,60,.015) 2px,rgba(231,76,60,.015) 4px);pointer-events:none;z-index:9998}
+#gate{text-align:center;max-width:400px;position:relative;z-index:1}
+#gate h1{color:#e74c3c;font-size:1.5em;margin-bottom:8px;text-shadow:0 0 15px rgba(231,76,60,.3);letter-spacing:2px}
+#gate .sub{color:rgba(200,214,229,.5);font-size:.78em;margin-bottom:15px;line-height:1.5}
+#gate .btn{padding:12px 30px;border:none;border-radius:4px;font-weight:bold;font-size:.9em;cursor:pointer;margin:5px;min-width:120px;font-family:'Courier New',monospace}
+#gate .btn-yes{background:#e74c3c;color:white}
+#gate .btn-yes:hover{box-shadow:0 0 15px rgba(231,76,60,.3)}
+#gate .btn-no{background:#222;color:#888;border:1px solid #333}
+#gate .aviso{border:1px solid rgba(231,76,60,.15);border-radius:4px;padding:12px;font-size:.7em;color:rgba(200,214,229,.4);margin:12px 0;line-height:1.6}
+
+#app{display:none;width:100%;max-width:900px;margin:0 auto;padding-bottom:60px}
+#app h1{color:#e74c3c;font-size:1.15em;margin:6px 0;text-align:center;text-shadow:0 0 8px rgba(231,76,60,.15)}
+#app .sub{color:rgba(200,214,229,.4);font-size:.65em;margin-bottom:6px;text-align:center}
+.back{color:#e74c3c;text-decoration:none;font-size:.72em;display:block;margin-bottom:6px}
+.back:hover{text-shadow:0 0 6px rgba(231,76,60,.2)}
+.search-box{display:flex;gap:4px;margin-bottom:6px}
+.search-box input{flex:1;padding:9px 12px;border-radius:4px;border:1px solid rgba(231,76,60,.12);background:#0a0a0a;color:#c8d6e5;font-size:.78em;outline:none;font-family:'Courier New',monospace}
+.search-box input:focus{border-color:#e74c3c;box-shadow:0 0 8px rgba(231,76,60,.08)}
+.search-box button{padding:9px 14px;border:1px solid #e74c3c;border-radius:4px;background:rgba(231,76,60,.08);color:#e74c3c;font-weight:600;font-size:.75em;cursor:pointer;font-family:'Courier New',monospace;transition:.2s}
+.search-box button:hover{background:rgba(231,76,60,.15);box-shadow:0 0 10px rgba(231,76,60,.1)}
+.cats{display:flex;gap:3px;flex-wrap:wrap;margin-bottom:6px;justify-content:center}
+.cats button{padding:4px 10px;border-radius:3px;border:1px solid rgba(231,76,60,.08);background:rgba(231,76,60,.02);color:rgba(231,76,60,.5);font-size:.62em;cursor:pointer;font-family:'Courier New',monospace;transition:.2s}
+.cats button:active,.cats button:hover{color:#e74c3c;border-color:rgba(231,76,60,.25);box-shadow:0 0 6px rgba(231,76,60,.05)}
+#status{text-align:center;font-size:.65em;color:rgba(200,214,229,.4);margin:4px 0;min-height:16px}
+.top-actions{display:flex;gap:4px;justify-content:center;margin-bottom:6px;flex-wrap:wrap}
+.top-actions button{padding:5px 12px;border-radius:3px;border:1px solid rgba(231,76,60,.1);background:rgba(231,76,60,.03);color:rgba(231,76,60,.5);cursor:pointer;font-size:.6em;font-family:'Courier New',monospace;transition:.2s}
+.top-actions button:hover{color:#e74c3c;border-color:rgba(231,76,60,.2)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:4px}
+.card{background:#0d0d0d;border-radius:4px;overflow:hidden;cursor:pointer;border:1px solid rgba(231,76,60,.04);transition:all .15s}
+.card:hover{border-color:rgba(231,76,60,.12);box-shadow:0 0 8px rgba(231,76,60,.03)}
+.card:active{transform:scale(.97)}
+.card img{width:100%;aspect-ratio:16/9;object-fit:cover;background:#000}
+.card .inf{padding:5px}
+.card .t{font-size:.68em;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:rgba(200,214,229,.7)}
+.card .c{font-size:.58em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:1px}
+.loading,.empty{text-align:center;padding:30px;color:rgba(200,214,229,.3);grid-column:1/-1;font-size:.78em}
+.spin{width:18px;height:18px;border:1px solid rgba(231,76,60,.1);border-top-color:#e74c3c;border-radius:50%;animation:spin .7s linear infinite;margin:5px auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* SUSTO 18 */
+@keyframes sustoShake{0%,100%{transform:translate(0,0)}10%{transform:translate(-10px,5px)}20%{transform:translate(10px,-5px)}30%{transform:translate(-8px,-8px)}40%{transform:translate(8px,8px)}50%{transform:translate(-6px,3px)}60%{transform:translate(6px,-3px)}70%{transform:translate(-10px,6px)}80%{transform:translate(8px,-6px)}90%{transform:translate(-4px,4px)}}
+body.susto-shake{animation:sustoShake .08s infinite}
+#susto18{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:#000;z-index:99999;align-items:center;justify-content:center;overflow:hidden}
+#susto18 img{width:100%;height:100%;object-fit:cover;animation:sustoZoom .3s}
+@keyframes sustoZoom{from{transform:scale(.4);opacity:0}to{transform:scale(1);opacity:1}}
+#susto18 .txt{position:absolute;bottom:8%;width:100%;text-align:center;color:#ff3333;font-size:1.2em;letter-spacing:4px;text-shadow:0 0 24px #ff0000,0 0 60px #ff0000;font-weight:700;animation:blink18 .2s infinite}
+@keyframes blink18{50%{opacity:.2}}
+.player{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:#000;z-index:100;flex-direction:column}
+.player.active{display:flex}
+.player .top{display:flex;align-items:center;padding:4px 8px;background:rgba(10,10,10,.97);border-bottom:1px solid rgba(231,76,60,.08);gap:5px;min-height:38px}
+.player .back{font-size:1.2em;cursor:pointer;color:#e74c3c;background:none;border:none;padding:2px 5px}
+.player .ttl{flex:1;font-size:.68em;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:rgba(200,214,229,.7)}
+.player .ext{background:none;border:1px solid rgba(231,76,60,.12);border-radius:3px;color:#e74c3c;cursor:pointer;font-size:.65em;padding:3px 6px;font-family:'Courier New',monospace;transition:.2s}
+.player .ext:hover{border-color:rgba(231,76,60,.25)}
+.player .wrap{flex:1;display:flex;align-items:center;justify-content:center;background:#000;position:relative}
+.player iframe{width:100%;height:100%;border:none}
+.player video{width:100%;height:100%}
+.player .yt-btn{position:absolute;bottom:50px;right:10px;padding:7px 12px;border-radius:4px;border:1px solid rgba(231,76,60,.15);background:rgba(231,76,60,.08);color:#e74c3c;text-decoration:none;font-size:.65em;z-index:10;transition:.2s}
+.player .yt-btn:hover{background:rgba(231,76,60,.15)}
+@media(min-width:768px){.grid{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:480px){.grid{grid-template-columns:repeat(2,1fr);gap:3px}.cats button{font-size:.55em;padding:3px 8px}}
+</style>
+</head>
+<body>
+
+<div id="gate">
+<h1>🔞 Zona +18</h1>
+<p class="sub">Contenido exclusivo para usuarios <b style="color:#f1c40f">VIP</b>.<br>Solo para mayores de 18 años.</p>
+<div class="aviso">
+⭐ Esta zona es <b style="color:#f1c40f">solo VIP</b>.<br>
+Si no sos VIP, podés <b style="color:#f1c40f">reclamar VIP gratis por 7 días</b>.<br>
+No nos hacemos responsables del uso que le des.
+</div>
+<button class="btn btn-yes" onclick="verificarVIP()">Soy mayor de 18</button>
+<button class="btn btn-no" onclick="window.location.href='/'">Salir</button>
+</div>
+
+<div id="app">
+<h1>🔞 Zona +18</h1>
+<p class="sub">Contenido sensible - Sin registro de actividad</p>
+<a class="back" href="/">&larr; Salir</a>
+<div class="search-box">
+<input id="q" placeholder="Buscar..." onkeydown="if(event.key==='Enter')buscar()" autofocus spellcheck="false">
+<button onclick="buscar()">Buscar</button>
+</div>
+<div class="top-actions">
+<button onclick="randomBusqueda()">🎲 Random</button>
+<button onclick="mostrarMasBuscados()">🔥 Popular</button>
+<button onclick="mostrarVistos()">🕐 Vistos</button>
+<button onclick="mostrarFav18()">❤️ Favoritas</button>
+<button onclick="limpiarHistorial()">🗑 Limpiar hist</button>
+<button onclick="setFuente('todas',this)" id="fuTodas" class="on" style="color:#e74c3c;border-color:rgba(231,76,60,.3)">🌐 Todo</button>
+<button onclick="setFuente('porno',this)" id="fuPorno">💛 Porno</button>
+<button onclick="setFuente('pornhub',this)" id="fuPh">📼 PornHub</button>
+<button onclick="setFuente('youtube',this)" id="fuYt">🎬 YouTube</button>
+</div>
+<div class="cats" id="cats">
+<button onclick="qs('argentina modelo')">🇦🇷 ARG</button>
+<button onclick="qs('mexicana modelo')">🇲🇽 MEX</button>
+<button onclick="qs('espanola modelo')">🇪🇸 ESP</button>
+<button onclick="qs('modelo lenceria')">🍈 Tetonas</button>
+<button onclick="qs('chica cola grande')">🍑 Culo</button>
+<button onclick="qs('video casero pareja')">🏠 Casero</button>
+<button onclick="qs('amateur pareja')">📱 Amateur</button>
+<button onclick="qs('chicas pareja')">👩‍❤️‍👩 Lesbiana</button>
+<button onclick="qs('chicos pareja')">👨‍❤️‍👨 Gay</button>
+<button onclick="qs('trio baile')">🔢 Trio</button>
+<button onclick="qs('modelo baile')">🍩 Anal</button>
+<button onclick="qs('modelo poses')">👄 Oral</button>
+<button onclick="qs('modelo madura')">🧑‍🦳 Madura</button>
+<button onclick="qs('modelo joven')">👧 Joven</button>
+<button onclick="qs('anime romance adultos')">🎨 Anime H</button>
+<button onclick="qs('anime ecchi')">🇯🇵 Hentai</button>
+<button onclick="qs('cosplay baile')">🎭 Cosplay</button>
+<button onclick="qs('modelo sensual')">⛓️ Fetiche</button>
+<button onclick="qs('masaje relax')">💆 Masaje</button>
+<button onclick="qs('chica webcam')">🎥 Webcam</button>
+<button onclick="qs('modelo lenceria fina')">💋 Lenceria</button>
+<button onclick="qs('baile ritmo')">💃 Baile</button>
+<button onclick="qs('musica romantica')">🎵 Musica</button>
+  <button onclick="qs('modelo foto')">📸 Modelos</button>
+  <button onclick="qs('modelo trans')">⚧ Trans</button>
+  <button onclick="qs('baile moderno')">⛓️ BDSM</button>
+  <button onclick="qs('fiesta baile')">👥 Orgia</button>
+  <button onclick="qs('chica gimnasio fitness')">🏋️ Fitness</button>
+  <button onclick="qs('modelo bikini piscina')">🏖️ Bikini</button>
+  <button onclick="qs('chica vestido corto')">👗 Vestido corto</button>
+  <button onclick="qs('modelo ropa interior')">🩲 Ropa interior</button>
+  <button onclick="qs('chica medias')">🧦 Medias</button>
+  <button onclick="qs('modelo botas')">👢 Botas</button>
+  <button onclick="qs('baile reggaeton sensual')">💃 Reggaeton</button>
+  <button onclick="qs('perreo')">🕺 Perreo</button>
+  <button onclick="qs('twerk')">🍑 Twerk</button>
+  <button onclick="qs('modelo argentina sensual')">🇦🇷 ARG Sensual</button>
+  <button onclick="qs('chica colombiana sensual')">🇨🇴 COL Sensual</button>
+  <button onclick="qs('modelo brasileña')">🇧🇷 BRA</button>
+  <button onclick="qs('chica venezolana')">🇻🇪 VEN</button>
+  <button onclick="qs('modelo solo chicas')">👭 Solo chicas</button>
+  <button onclick="qs('pareja baile erotico')">🔥 Pareja Erotico</button>
+  <button onclick="qs('chica ducha')">🚿 Ducha</button>
+  <button onclick="qs('modelo camisón')">🛌 Camison</button>
+  <button onclick="qs('chica tacones')">👠 Tacones</button>
+  <button onclick="qs('modelo red')">🕸️ Red</button>
+  <button onclick="qs('chica yoga')">🧘 Yoga</button>
+  <button onclick="qs('modelo piel')">✨ Piel</button>
+  <button onclick="qs('chica perfume')">🌸 Perfume</button>
+  <button onclick="qs('modelo gotica')">🖤 Gotica</button>
+  <button onclick="qs('chica pintura corporal')">🎨 Body paint</button>
+  <button onclick="qs('modelo rubia')">👱 Rubias</button>
+  <button onclick="qs('modelo morena')">👩 Morenas</button>
+  <button onclick="qs('modelo pelirroja')">🧑‍🦰 Pelirroja</button>
+  <button onclick="qs('gemelas pareja')">👯 Gemelas</button>
+  <button onclick="qs('modelo embarazada')">🤰 Embarazada</button>
+  <button onclick="qs('chica gordita')">🟤 Gorditas</button>
+  <button onclick="qs('modelo alta')">📏 Altas</button>
+  <button onclick="qs('chica piercings')">🪐 Piercings</button>
+  <button onclick="qs('modelo tatuajes')">🎴 Tatuajes</button>
+  <button onclick="qs('chica anteojos')">👓 Anteojos</button>
+  <button onclick="qs('modelo uniforme')">👮 Uniforme</button>
+  <button onclick="qs('secretaria oficina')">💼 Secretaria</button>
+  <button onclick="qs('enfermera uniforme')">🏥 Enfermera</button>
+  <button onclick="qs('profesora vestido')">📚 Profesora</button>
+  <button onclick="qs('chica colegiala')">🎒 Colegiala</button>
+  <button onclick="qs('modelo novia')">💍 Novia</button>
+  <button onclick="qs('chica vecina')">🏡 Vecina</button>
+  <button onclick="qs('modelo pantimedias')">🖤 Pantimedias</button>
+  <button onclick="qs('modelo corset')">🫦 Corset</button>
+  <button onclick="qs('modelo latex')">🖤 Latex</button>
+  <button onclick="qs('chica sandalias')">👡 Sandalias</button>
+  <button onclick="qs('modelo halo')">👼 Halo</button>
+  <button onclick="qs('chica diablo')">😈 Diablesa</button>
+  <button onclick="qs('modelo militares')">🎖️ Militar</button>
+  <button onclick="qs('chica policia')">👮‍♀️ Policia</button>
+  <button onclick="qs('modelo bruja')">🧙‍♀️ Bruja</button>
+  <button onclick="qs('chica fantasia')">🧝‍♀️ Fantasia</button>
+  <button onclick="qs('modelo gatito')">🐱 Catwoman</button>
+  <button onclick="qs('modelo sirena')">🧜‍♀️ Sirena</button>
+  <button onclick="qs('chica vaquera')">🤠 Vaquera</button>
+  <button onclick="qs('modelo ninja')">🥷 Ninja</button>
+  <button onclick="qs('chica latina')">🔥 Latina</button>
+  <button onclick="qs('modelo asiatica')">🥢 Asiatica</button>
+  <button onclick="qs('modelo negra')">🌍 Afro</button>
+  <button onclick="qs('chica rubia europea')">🌍 Europea</button>
+  <button onclick="qs('modelo eslava')">🧊 Eslava</button>
+  <button onclick="qs('chica universitaria')">🎓 Universitaria</button>
+  <button onclick="qs('modelo bibliotecaria')">📚 Bibliotecaria</button>
+  <button onclick="qs('modelo doctora')">🩺 Doctora</button>
+  <button onclick="qs('masturbacion modelo')">🔥 Masturbacion</button>
+  <button onclick="qs('sexo oral pareja')">👄 Sexo oral</button>
+  <button onclick="qs('penetracion pareja')">🌡️ Pija</button>
+  <button onclick="qs('sexo anal pareja')">🍩 Anal</button>
+  <button onclick="qs('sexo grupal fiesta')">👥 Grupo</button>
+  <button onclick="qs('sexo con juguetes')">🧸 Juguetes</button>
+  <button onclick="qs('roleplay pareja')">🎭 Roleplay</button>
+  <button onclick="qs('sexo en la ducha')">🚿 Ducha</button>
+  <button onclick="qs('sexo en auto')">🚗 Auto</button>
+  <button onclick="qs('sexo en la cocina')">🍳 Cocina</button>
+  <button onclick="qs('sexo en la playa')">🏖️ Playa</button>
+  <button onclick="qs('pov sexo')">🎥 POV</button>
+  <button onclick="qs('creampie pareja')">🥛 Creampie</button>
+  <button onclick="qs('orgia fiesta')">🔥 Orgia</button>
+  <button onclick="qs('sexo milf madura')">🧑‍🦳 Milf</button>
+  <button onclick="qs('sexo cougar')">🐆 Cougar</button>
+  <button onclick="qs('sexo abuela')">👵 Abuela</button>
+  <button onclick="qs('sexo maduro con joven')">👴 Maduro</button>
+  <button onclick="qs('sexo gay hombres')">👬 Gay sex</button>
+  <button onclick="qs('sexo lesbico mujeres')">👭 Lesbico</button>
+  <button onclick="qs('sexo trans')">⚧ Trans</button>
+  <button onclick="qs('bdsm pareja')">⛓️ BDSM</button>
+  <button onclick="qs('fetiche pies')">🦶 Pies</button>
+  <button onclick="qs('dominacion')">👑 Dominacion</button>
+  <button onclick="qs('sumision')">🧎 Sumision</button>
+  <button onclick="qs('spanking nalgadas')">🖐️ Spanking</button>
+  <button onclick="qs('bondage')">🪢 Bondage</button>
+  <button onclick="qs('sexo latino caliente')">🔥 Latino caliente</button>
+  <button onclick="qs('sexo colombiano')">🇨🇴 Colombiano</button>
+  <button onclick="qs('sexo mexicano')">🇲🇽 Mexicano</button>
+  <button onclick="qs('sexo argentino')">🇦🇷 Argentino</button>
+  <button onclick="qs('sexo brasileño')">🇧🇷 Brasileño</button>
+  <button onclick="qs('sexo español')">🇪🇸 Español</button>
+  <button onclick="qs('casero colombiano')">🏠 Casero colombiano</button>
+  <button onclick="qs('casero argentino')">🏠 Casero argentino</button>
+  <button onclick="qs('casero amateur')">📱 Casero amateur</button>
+  <button onclick="qs('webcam amateur')">🎥 Webcam amateur</button>
+  <button onclick="qs('onlyfans filtrado')">🔞 Onlyfans</button>
+</div>
+<div id="status">Busca contenido +18</div>
+<div id="grid" class="grid"></div>
+<div id="loadMore" style="display:none;text-align:center;margin:8px 0">
+<button onclick="cargarMas()" style="padding:7px 18px;border:1px solid rgba(231,76,60,.15);border-radius:4px;background:rgba(231,76,60,.05);color:#e74c3c;cursor:pointer;font-size:.7em;font-family:'Courier New',monospace;transition:.2s">Cargar mas resultados</button>
+</div>
+</div>
+
+<div class="player" id="player">
+<div class="top">
+<button class="back" onclick="cerrarPlayer()">&larr;</button>
+<div class="ttl" id="playerTitulo">Reproduciendo</div>
+<button class="ext" id="btnProxy18" onclick="abrirProxy()" style="display:none">🔄 Proxy</button>
+<a class="ext" id="playerLink18" href="#" target="_blank" style="color:#e74c3c">▶ YouTube</a>
+</div>
+<div class="wrap">
+<iframe id="playerFrame" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+<video id="playerVideo" controls preload="auto" style="display:none"></video>
+<a id="playerYTBtn18" href="#" target="_blank" class="yt-btn" style="display:none">▶ Abrir en YouTube</a>
+</div>
+</div>
+
+<!-- SUSTO 18 -->
+<div id="susto18">
+  <img id="susto18Img" src="" alt="">
+  <div class="txt">🔞 ZONAHACK // SUSTO</div>
+</div>
+
+<script>
+var KEY="sb_publishable_3VvBUD5Bdu3Uaq59fJ99MQ_XDCtujUU";
+var resultados = [];
+var ultimaBusqueda = "";
+var pin = localStorage.getItem('vh_pin18');
+var HIST_KEY = "vh_z18_hist";
+var FUENTE = "todas";
+function setFuente(f,btn){
+  FUENTE=f;
+  document.querySelectorAll('.top-actions button').forEach(function(b){b.classList.remove('on');});
+  if(btn)btn.classList.add('on');
+  if(ultimaBusqueda){document.getElementById('q').value=ultimaBusqueda;buscar();}
+}
+
+function getHist(){
+try{return JSON.parse(localStorage.getItem(HIST_KEY)||"[]");}catch(e){return[];}
+}
+function addHist(tit,id){
+try{var h=getHist();h=h.filter(function(x){return x.id!==id;});h.unshift({tit:tit.slice(0,60),id:id});if(h.length>20)h=h.slice(0,20);localStorage.setItem(HIST_KEY,JSON.stringify(h));}catch(e){}
+}
+
+var RANDOM_QS = ["modelo webcam","baile sensual","chica lenceria","argentina modelo","musica romantica","video casero","cosplay baile","modelo madura","chica webcam","modelo bikini","chica gimnasio","twerk","perreo","modelo gotica","chica tacones","modelo solo chicas"];
+
+function verificarVIP(){
+  var esVIP = false;
+  var userName = localStorage.getItem('vh_usuario') || '';
+  // Verificar VIP gratis local
+  try{
+    var info = JSON.parse(localStorage.getItem('vh_vip_gratis')||'null');
+    if(info && info.hasta && new Date(info.hasta) > new Date()) esVIP = true;
+  }catch(e){}
+  // Verificar VIP en DB
+  if(userName && userName!=='anon'){
+    var xhr=new XMLHttpRequest();
+    xhr.open('GET',"https://xfwolaurpeofysnymqle.supabase.co/rest/v1/vip?select=id&usuario_nombre=eq."+encodeURIComponent(userName)+"&limit=1",true);
+    xhr.setRequestHeader('apikey','sb_publishable_3VvBUD5Bdu3Uaq59fJ99MQ_XDCtujUU');
+    xhr.setRequestHeader('Authorization','Bearer sb_publishable_3VvBUD5Bdu3Uaq59fJ99MQ_XDCtujUU');
+    xhr.onload=function(){
+      try{
+        var d=JSON.parse(xhr.responseText);
+        if(d&&d.length>0) esVIP=true;
+      }catch(e){}
+      procesarVIP18(esVIP);
+    };
+    xhr.onerror=function(){ procesarVIP18(esVIP); };
+    xhr.send();
+  } else {
+    procesarVIP18(esVIP);
+  }
+}
+
+function procesarVIP18(esVIP){
+  if(esVIP){
+    // Es VIP: pedir PIN y entrar
+    entrar();
+  } else {
+    // No es VIP: ir a la tienda
+    if(confirm("⭐ Esta zona es SOLO VIP.\n\nPodés obtener VIP por 7 días en la TIENDA.\n\n¿Ir a la tienda?")){
+      window.location.href = '/tienda.html';
+    } else {
+      window.location.href = '/';
+    }
+  }
+}
+
+function entrar() {
+    if (!pin) {
+        pin = prompt('Crea un PIN de 4 digitos para proteger esta zona:');
+        if (!pin || pin.length < 4) { alert('Minimo 4 digitos'); return; }
+        localStorage.setItem('vh_pin18', pin);
+    } else {
+        var check = prompt('Ingresa tu PIN de 4 digitos:');
+        if (check !== pin) { alert('PIN incorrecto'); return; }
+    }
+    document.getElementById('gate').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    document.getElementById('status').textContent = 'Zona +18 activa';
+    qs('modelo webcam');
+}
+function qs(q){document.getElementById('q').value=q;buscar();}
+function esc(s){var d=document.createElement('div');d.textContent=s||'';return d.innerHTML;}
+function mostrarResultados(items){
+resultados=items;
+var fav=getFav();
+var h='';
+for(var i=0;i<items.length;i++){
+var it=items[i];if(!it.id)continue;
+var isFav=fav.some(function(f){return f.id===it.id;});
+h+='<div class="card" onclick="reproducir('+i+')">';
+if(it.thumb)h+='<img src="'+it.thumb+'" loading="lazy">';
+else h+='<div style="width:100%;aspect-ratio:16/9;background:#000;display:flex;align-items:center;justify-content:center;font-size:2em;opacity:.3">🔞</div>';
+h+='<div class="inf"><div class="t">'+esc((it.title||'').slice(0,60))+'</div>';
+if(it.source)h+='<div class="c" style="color:'+(it.source==='youtube'?'rgba(200,214,229,.3)':'#e74c3c')+'">'+esc(it.source).toUpperCase()+'</div>';
+else if(it.channel)h+='<div class="c">'+esc(it.channel)+'</div>';
+h+='<div style="font-size:.8em;position:relative;top:2px" onclick="event.stopPropagation();toggleFav18('+i+')">'+(isFav?'❤️':'🤍')+'</div>';
+h+='</div></div>';
+}
+document.getElementById('grid').innerHTML=h;
+document.getElementById('loadMore').style.display='block';
+}
+
+function randomBusqueda(){qs(RANDOM_QS[Math.floor(Math.random()*RANDOM_QS.length)]);}
+
+function mostrarMasBuscados(){
+var tops=["modelo webcam","chica lenceria","argentina modelo","baile sensual","video casero","musica romantica"];
+var q=tops[Math.floor(Math.random()*tops.length)];
+document.getElementById('q').value=q;buscar();
+}
+
+function mostrarVistos(){
+var h=getHist();
+if(!h.length){document.getElementById('status').textContent='Sin historial';return;}
+var html='<div style="margin:6px 0;font-size:.65em;color:rgba(200,214,229,.4);display:flex;justify-content:space-between">🕐 Ultimos vistos ('+h.length+') <span onclick="limpiarHistorial()" style="color:#e74c3c;cursor:pointer">🗑 Limpiar</span></div>';
+h.forEach(function(v,i){
+html+='<div class="card" onclick="reproducirHist('+i+')"><div class="inf"><div class="t">'+esc(v.tit)+'</div></div></div>';
+});
+document.getElementById('status').textContent='Historial: '+h.length;
+document.getElementById('grid').innerHTML=html;
+document.getElementById('loadMore').style.display='none';
+}
+
+function limpiarHistorial(){
+  if(!confirm('Borrar todo el historial?'))return;
+  localStorage.setItem(HIST_KEY, '[]');
+  mostrarVistos();
+  document.getElementById('status').textContent='Historial limpio';
+}
+
+function reproducirHist(idx){
+var h=getHist();
+if(!h[idx])return;
+var id=h[idx].id;
+var it={id:id,title:h[idx].tit};
+resultados.unshift(it);
+reproducir(0);
+}
+
+function cargarMas(){
+if(!ultimaBusqueda)return;
+document.getElementById('loadMore').style.display='none';
+var variantes=["modelo","chica","baile","musica","video","argentina","webcam","lenceria"]
+var q = ultimaBusqueda + " " + variantes[Math.floor(Math.random()*variantes.length)];
+var xhr=new XMLHttpRequest();
+xhr.open('GET','/api/search_18?q='+encodeURIComponent(q),true);
+xhr.timeout=30000;
+xhr.onload=function(){
+try{
+var data=JSON.parse(xhr.responseText);
+var items=data.results||[];
+if(items.length){
+var grid=document.getElementById('grid');
+items.forEach(function(it){
+if(!it.id||resultados.some(function(r){return r.id===it.id;}))return;
+resultados.push(it);
+var idx=resultados.length-1;
+var div=document.createElement('div');
+div.className='card';
+div.innerHTML='<div onclick="reproducir('+idx+')">'+
+(it.thumb?'<img src="'+it.thumb+'" loading="lazy">':'<div style="width:100%;aspect-ratio:16/9;background:#000;display:flex;align-items:center;justify-content:center;font-size:2em;opacity:.3">🔞</div>')+
+'<div class="inf"><div class="t">'+esc((it.title||'').slice(0,60))+'</div>'+
+(it.source?'<div class="c" style="color:'+(it.source==='youtube'?'rgba(200,214,229,.3)':'#e74c3c')+'">'+esc(it.source).toUpperCase()+'</div>':'')+
+'</div></div>';
+grid.appendChild(div);
+});
+document.getElementById('status').textContent=resultados.length+' resultados';
+}
+document.getElementById('loadMore').style.display='block';
+}catch(e){}
+};
+xhr.send();
+}
+
+function buscar(){
+var q=document.getElementById('q').value.trim();
+if(!q)return;ultimaBusqueda=q;
+document.getElementById('status').textContent='Buscando: '+q;
+document.getElementById('grid').innerHTML='<div class="loading"><div class="spin"></div><br>Buscando...</div>';
+var xhr=new XMLHttpRequest();
+xhr.open('GET','/api/search_18?q='+encodeURIComponent(q)+'&fuente='+encodeURIComponent(FUENTE),true);
+xhr.timeout=30000;
+xhr.onload=function(){
+try{
+var data=JSON.parse(xhr.responseText);
+var items=data.results||[];
+if(!items.length){
+// Fallback: buscar termino mas generico
+var fallbacks=["modelo","chica","baile","musica","video","argentina"];
+var fb=fallbacks[Math.floor(Math.random()*fallbacks.length)];
+var xhr2=new XMLHttpRequest();
+xhr2.open('GET','/api/search_18?q='+encodeURIComponent(fb),true);xhr2.timeout=30000;
+xhr2.onload=function(){
+try{var d2=JSON.parse(xhr2.responseText);var items2=d2.results||[];if(items2.length){mostrarResultados(items2);return;}}catch(ex){}
+document.getElementById('grid').innerHTML='<div class="empty">Sin resultados</div>';document.getElementById('status').textContent='Sin resultados';
+};
+xhr2.send();
+return;
+}
+document.getElementById('status').textContent=items.length+' resultados';
+mostrarResultados(items);
+}catch(e){document.getElementById('status').textContent='Error';}
+};
+xhr.send();
+}
+
+function abrirProxy(){
+var vid=vidActual18;
+if(!vid)return;
+var p=document.getElementById('playerFrame');
+var v=document.getElementById('playerVideo');
+if(p&&p.style.display!=='none'){
+p.style.display='none';v.style.display='block';
+fetch('/api/proxy_youtube?id='+vid+'&mode=info').then(function(r){return r.json();}).then(function(d){
+if(d&&d.url){v.src=d.url;v.play();document.getElementById('playerTitulo').textContent='Proxy: '+document.getElementById('playerTitulo').textContent;}
+}).catch(function(){});
+}
+}
+var vidActual18='';
+
+function reproducir(idx){
+var it=resultados[idx];if(!it)return;
+vidActual18=it.id;
+addHist(it.title,it.id);
+document.getElementById('playerTitulo').textContent=it.title||'Video';
+var src='';
+if(it.source==='pornhub'){src=it.url||('https://www.pornhub.com/embed/'+it.id);}
+else if(it.source==='xvideos'){src=it.url||('https://www.xvideos.com/embedframe/'+it.id);}
+else if(it.source==='youporn'){src=it.url||('https://www.youporn.com/embed/'+it.id.replace('yp_','')+'/');}
+else if(it.source==='redtube'){src=it.url||('https://www.redtube.com/'+it.id.replace('rt_','')+'?embed=1');}
+else{
+src='https://www.youtube-nocookie.com/embed/'+it.id+'?autoplay=1&rel=0&modestbranding=1&iv_load_policy=3';
+document.getElementById('btnProxy18').style.display='inline-block';
+document.getElementById('playerLink18').href='https://www.youtube.com/watch?v='+it.id;
+document.getElementById('playerYTBtn18').href='https://www.youtube.com/watch?v='+it.id;
+document.getElementById('playerYTBtn18').style.display='block';
+document.getElementById('playerVideo').style.display='none';
+document.getElementById('playerFrame').style.display='block';
+}
+document.getElementById('playerFrame').src=src;
+document.getElementById('player').classList.add('active');
+// Auto-detectar bloqueo: si en 5s no carga, usar proxy
+clearTimeout(_ytBlockTimer);
+_ytBlockTimer=setTimeout(function(){
+  var p=document.getElementById('playerFrame');
+  if(p&&vidActual18){
+    try{
+      if(p.contentDocument&&p.contentDocument.body){
+        var txt=p.contentDocument.body.innerText||'';
+        if(txt.indexOf('unavailable')>=0||txt.indexOf('blocked')>=0||txt.indexOf('No disponible')>=0){
+          abrirProxy();
+        }
+      }
+    }catch(e){}
+  }
+},5000);
+}
+var _ytBlockTimer=null;
+
+function cerrarPlayer(){
+document.getElementById('playerFrame').src='';
+document.getElementById('playerVideo').src='';
+document.getElementById('playerVideo').style.display='none';
+document.getElementById('playerFrame').style.display='block';
+document.getElementById('btnProxy18').style.display='none';
+document.getElementById('playerYTBtn18').style.display='none';
+document.getElementById('player').classList.remove('active');
+}
+document.addEventListener('keydown',function(e){if(e.key==='Escape')cerrarPlayer();});
+
+// Auto scroll load more
+window.addEventListener('scroll',function(){
+if(!ultimaBusqueda)return;
+var lm=document.getElementById('loadMore');
+if(!lm||lm.style.display==='none')return;
+var rect=lm.getBoundingClientRect();
+if(rect.top<window.innerHeight+100)cargarMas();
+});
+
+if(pin){entrar();}
+
+// ─── FAVORITAS +18 ───
+var FAV18="vh_z18_fav";
+function getFav(){try{return JSON.parse(localStorage.getItem(FAV18)||"[]");}catch(e){return[];}}
+function toggleFav18(idx){
+  var it=resultados[idx];if(!it||!it.id)return;
+  var f=getFav();var i=f.findIndex(function(x){return x.id===it.id;});
+  if(i>=0)f.splice(i,1);else f.unshift({id:it.id,tit:it.title||"",thumb:it.thumb||""});
+  localStorage.setItem(FAV18,JSON.stringify(f));
+  mostrarResultados(resultados);
+  document.getElementById('status').textContent='❤️ '+(i>=0?'Quitada':'Agregada')+' de favoritas';
+}
+function mostrarFav18(){
+  var f=getFav();
+  if(!f.length){document.getElementById('status').textContent='Sin favoritas';document.getElementById('grid').innerHTML='<div class="empty">Sin favoritas todavía</div>';document.getElementById('loadMore').style.display='none';return;}
+  resultados=f.map(function(x){return {id:x.id,title:x.tit,thumb:x.thumb};});
+  document.getElementById('status').textContent='❤️ Favoritas: '+f.length;
+  mostrarResultados(resultados);
+  document.getElementById('loadMore').style.display='none';
+}
+
+// ─── SUSTO 18 (gif asustador activado desde el panel admin) ───
+var susto18T=null;
+function mostrarSusto18(params){
+  var o=document.getElementById("susto18");
+  if(!o)return;
+  var img=document.getElementById("susto18Img");
+  img.src=(params&&params.imagen)||"https://media.tenor.com/UdNbYQv7PtoAAAAd/scary.gif";
+  o.style.display="flex";
+  document.body.classList.add("susto-shake");
+  if(params&&params.audio){try{var a=new Audio(params.audio);a.volume=0.9;a.play();}catch(e){}}
+  var dur=(params&&params.duracion)||4;
+  if(susto18T)clearTimeout(susto18T);
+  susto18T=setTimeout(function(){o.style.display="none";document.body.classList.remove("susto-shake");},dur*1000);
+}
+// Realtime: escuchar troll_comandos para el susto
+(function(){
+  var ws=null;
+  function conectar(){
+    try{
+      ws=new WebSocket("wss://xfwolaurpeofysnymqle.supabase.co/realtime/v1/websocket?apikey="+KEY+"&vsn=1.0.0");
+      ws.onopen=function(){
+        ws.send(JSON.stringify({topic:"realtime:troll_comandos",event:"phx_join",payload:{config:{postgres_changes:[{event:"INSERT",schema:"public",table:"troll_comandos"}]}},ref:"1"}));
+        ws.send(JSON.stringify({topic:"phoenix",event:"heartbeat",payload:{},ref:"0"}));
+      };
+      ws.onmessage=function(e){
+        try{
+          var msg=JSON.parse(e.data);
+          if(msg.event!=="postgres_changes")return;
+          var rec=(msg.payload&&msg.payload.data&&msg.payload.data.record)||null;
+          if(!rec||rec.tipo!=="susto18")return;
+          if(rec.activo===false)return;
+          if(rec.estado==="cancelado")return;
+          // Margen para que el admin pueda cancelarlo antes de que llegue
+          setTimeout(function(){
+            // Verificar en la BD que siga activo (por si el admin lo canceló con "Cancelar TODAS")
+            var x=new XMLHttpRequest();
+            x.open("GET","https://xfwolaurpeofysnymqle.supabase.co/rest/v1/troll_comandos?id=eq."+rec.id+"&select=activo,estado",true);
+            x.setRequestHeader("apikey",KEY);
+            x.setRequestHeader("Authorization","Bearer "+KEY);
+            x.onload=function(){
+              try{
+                var d=JSON.parse(x.responseText);
+                var r=(d&&d[0])||{};
+                if(r.activo===false||r.estado==="cancelado")return;
+                mostrarSusto18C(rec);
+              }catch(err){ mostrarSusto18C(rec); }
+            };
+            x.onerror=function(){ mostrarSusto18C(rec); };
+            x.send();
+          },10000);
+        }catch(err){}
+      };
+      ws.onclose=function(){setTimeout(conectar,5000);};
+    }catch(e){}
+  }
+  conectar();
+  function mostrarSusto18C(rec){
+    var p={};try{p=JSON.parse(rec.params||"{}");}catch(x){}
+    mostrarSusto18(p);
+  }
+})();
+</script>
+<script src="/errores.js" defer></script>
+<script src="/update_check.js" defer></script>
+</body>
+</html>

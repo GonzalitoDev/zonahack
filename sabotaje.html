@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>💣 Prueba de Sabotaje - ZonaHack</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0a;color:#c8d6e5;font-family:'Courier New',monospace;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:15px}
+body::before{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:radial-gradient(circle at 50% 0%,rgba(231,76,60,.06) 0,transparent 60%),repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(231,76,60,.015) 2px,rgba(231,76,60,.015) 4px);pointer-events:none;z-index:9998}
+.card{max-width:450px;width:100%;text-align:center;position:relative;z-index:1;background:#0d0d0d;border:1px solid rgba(231,76,60,.2);border-radius:10px;padding:25px}
+h1{color:#e74c3c;font-size:1.3em;margin-bottom:8px;text-shadow:0 0 15px rgba(231,76,60,.3);letter-spacing:2px}
+.sub{color:rgba(200,214,229,.5);font-size:.72em;margin-bottom:20px;line-height:1.6}
+.btn{padding:14px 20px;border:none;border-radius:6px;font-weight:bold;font-size:.85em;cursor:pointer;margin:6px;min-width:160px;font-family:'Courier New',monospace;transition:.2s}
+.btn-sabotaje{background:linear-gradient(135deg,#e74c3c,#c0392b);color:#fff}
+.btn-sabotaje:hover{box-shadow:0 0 20px rgba(231,76,60,.4);transform:scale(1.03)}
+.btn-volver{background:#222;color:#888;border:1px solid #333}
+.btn-volver:hover{border-color:#555}
+.log-box{background:#050505;border:1px solid rgba(231,76,60,.1);border-radius:6px;padding:12px;font-size:.65em;text-align:left;margin-top:15px;max-height:200px;overflow:auto;color:#00ff41;letter-spacing:.5px}
+.log-line{margin:2px 0;animation:in .3s}
+@keyframes in{from{opacity:0;transform:translateX(-5px)}to{opacity:1;transform:none}}
+.status{font-size:.7em;color:#e74c3c;margin-top:12px;min-height:16px;letter-spacing:1px}
+.aviso{border:1px solid rgba(241,196,15,.15);border-radius:6px;padding:10px;font-size:.6em;color:rgba(200,214,229,.4);margin-top:15px;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="card">
+<h1>💣 PRUEBA DE SABOTAJE</h1>
+<p class="sub">Este botón dispara eventos de abuso/ataque falsos<br>para verificar que el sistema de seguridad los detecta<br>y que aparezcan en el <b style="color:#e74c3c">Panel Admin → 🛡 Seguridad</b></p>
+
+<button class="btn btn-sabotaje" onclick="ejecutarSabotaje()">💥 EJECUTAR SABOTAJE</button>
+<button class="btn btn-volver" onclick="window.location.href='/'">← Volver</button>
+
+<div class="status" id="status">Listo para sabotear</div>
+<div class="log-box" id="logBox"><div class="log-line">>> esperando orden...</div></div>
+
+<div class="aviso">
+⚠️ Esta es una prueba CONTROLADA. Los eventos falsos se registran con severidad baja/media.<br>
+Verificá en <b>Panel Admin → 🛡 Seguridad</b> que aparezcan los registros en tiempo real.<br>
+Para ejecutar la tabla de seguridad primero: <b>sql_seguridad.sql</b>
+</div>
+</div>
+
+<script>
+var API_URL = "https://xfwolaurpeofysnymqle.supabase.co";
+var API_KEY = "sb_publishable_3VvBUD5Bdu3Uaq59fJ99MQ_XDCtujUU";
+
+// ─── VERIFICAR ADMIN ───
+// Si no es admin, muestra acceso denegado y oculta todo
+function esAdmin(){
+  if(localStorage.getItem('vh_admin_pass')) return true;
+  // Verificar rango manual
+  try{
+    if(window._rangoManual && ['admin','fundador','super_admin','root','owner','developer'].indexOf(window._rangoManual)>=0) return true;
+  }catch(e){}
+  return false;
+}
+
+// Verificar también desde la DB (rangos del usuario actual)
+function verificarAdmin(){
+  var usuario = localStorage.getItem('vh_usuario') || '';
+  if(!usuario || usuario==='anon'){
+    bloquearSabotaje('Iniciá sesión con una cuenta admin');
+    return;
+  }
+  if(esAdmin()){
+    activarSabotaje();
+    return;
+  }
+  // Verificar rango en la DB
+  fetch(API_URL+"/rest/v1/rangos?select=rango&usuario_nombre=eq."+encodeURIComponent(usuario)+"&limit=1",{headers:{'apikey':API_KEY,'Authorization':'Bearer '+API_KEY}})
+  .then(function(r){return r.json();}).then(function(d){
+    if(d && d.length>0){
+      var rango = d[0].rango;
+      if(['admin','fundador','super_admin','root','owner','developer'].indexOf(rango)>=0){
+        activarSabotaje();
+      } else {
+        bloquearSabotaje('Necesitás ser admin para usar el sabotaje');
+      }
+    } else {
+      bloquearSabotaje('Necesitás ser admin para usar el sabotaje');
+    }
+  }).catch(function(){
+    bloquearSabotaje('Error de conexión');
+  });
+}
+
+function bloquearSabotaje(msg){
+  document.getElementById('status').textContent = '⛔ ACCESO DENEGADO';
+  document.getElementById('logBox').innerHTML = '<div class="log-line">⛔ '+msg+'</div>';
+  document.querySelector('.btn-sabotaje').style.display = 'none';
+}
+
+function activarSabotaje(){
+  document.getElementById('status').textContent = '✅ Acceso admin confirmado - Listo para sabotear';
+  document.getElementById('logBox').innerHTML = '<div class="log-line">>> acceso admin concedido</div>';
+  document.querySelector('.btn-sabotaje').style.display = '';
+}
+
+verificarAdmin();
+
+function log(msg){
+  var box = document.getElementById('logBox');
+  var div = document.createElement('div');
+  div.className = 'log-line';
+  div.textContent = msg;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+function registrar(tipo, detalle, severidad){
+  var u = localStorage.getItem('vh_usuario') || 'anon';
+  var disp = (navigator.userAgent||'').slice(0,150);
+  fetch(API_URL+"/rest/v1/seguridad_logs",{method:'POST',headers:{'apikey':API_KEY,'Authorization':'Bearer '+API_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},
+    body:JSON.stringify({tipo:tipo, usuario:u, detalle:detalle, severidad:severidad, pagina:'/sabotaje.html', user_agent:disp})})
+  .then(function(r){
+    if(r.ok) log('✅ Registrado: '+tipo+' | '+(detalle||'').slice(0,60));
+    else log('❌ Error HTTP '+r.status+' (¿tabla no creada?)');
+  })
+  .catch(function(e){ log('❌ Error: '+e.message); });
+}
+
+function ejecutarSabotaje(){
+  document.getElementById('status').textContent = '💥 SABOTEANDO...';
+  log('>> Iniciando sabotaje de prueba');
+  log('>> Registrando eventos falsos en seguridad_logs...');
+
+  // Ráfaga de eventos de seguridad
+  setTimeout(function(){ registrar('spam','[TEST] Click en exceso: 25 clicks rapidos detectados',3); }, 200);
+  setTimeout(function(){ registrar('sospechoso','[TEST] Busquedas en exceso: 12 en 15 segundos',3); }, 600);
+  setTimeout(function(){ registrar('ataque','[TEST] Intento de acceso a ruta no autorizada: /admin_old',4); }, 1000);
+  setTimeout(function(){ registrar('fallo_login','[TEST] 5 intentos de login fallidos en 2 minutos',4); }, 1400);
+  setTimeout(function(){ registrar('bot','[TEST] Comportamiento de bot detectado: velocidad anormal',3); }, 1800);
+  setTimeout(function(){ registrar('inyeccion','[TEST] Intento de inyeccion en parametro: q="; DROP TABLE',5); }, 2200);
+  setTimeout(function(){ registrar('ataque','[TEST] Muchas peticiones a /api/search en corto tiempo',4); }, 2600);
+  setTimeout(function(){ registrar('spam','[TEST] Abuso del boton de comprar: 8 clicks en 10 segundos',4); }, 3000);
+  setTimeout(function(){ registrar('sospechoso','[TEST] Acceso desde multiple dispositivo en misma sesion',2); }, 3400);
+  setTimeout(function(){ registrar('ataque','[TEST] Intento de fuerza bruta detectado',5); }, 3800);
+
+  setTimeout(function(){
+    log('');
+    log('>> 10 eventos de prueba enviados');
+    log('>> Revisá el Panel Admin → 🛡 Seguridad');
+    document.getElementById('status').textContent = '✅ SABOTAJE ENVIADO - Revisá el Panel Admin';
+  }, 4500);
+}
+</script>
+</body>
+</html>

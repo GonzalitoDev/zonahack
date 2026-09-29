@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<title>👑 Portal del Dueño · ZonaHack</title>
+<meta name="theme-color" content="#f1c40f">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#07090e;--card:rgba(13,17,23,.92);--border:#1c2531;--text:#d7e2ef;--muted:#6d7f93;--accent:#2ee6a8;--violet:#7a5cff;--gold:#f1c40f}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh}
+.bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.orb{position:absolute;border-radius:50%;filter:blur(90px);opacity:.25;animation:flotar 18s ease-in-out infinite}
+.orb1{width:460px;height:460px;background:radial-gradient(circle,rgba(241,196,15,.18),transparent 70%);top:-170px;right:-120px}
+.orb2{width:500px;height:500px;background:radial-gradient(circle,rgba(122,92,255,.18),transparent 70%);bottom:-200px;left:-160px;animation-delay:-7s}
+@keyframes flotar{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(20px,-14px) scale(1.08)}}
+.wrap{position:relative;z-index:1;max-width:1000px;margin:0 auto;padding:14px}
+.header{display:flex;align-items:center;gap:10px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+.logo{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;background:linear-gradient(135deg,rgba(241,196,15,.25),rgba(122,92,255,.25));border:1px solid rgba(241,196,15,.4)}
+.ttl{flex:1}
+.ttl h1{font-size:1em;letter-spacing:2px;font-family:'Courier New',monospace;color:#fff}
+.ttl span{font-size:.6em;color:var(--muted)}
+.back{color:var(--accent);text-decoration:none;font-size:.7em;padding:6px 10px;border:1px solid var(--border);border-radius:8px}
+/* login */
+#lock{display:flex;align-items:center;justify-content:center;min-height:70vh}
+.login{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:26px;width:min(340px,90%);text-align:center}
+.login .candado{font-size:3em;filter:drop-shadow(0 0 18px rgba(241,196,15,.6))}
+.login h2{font-size:.95em;letter-spacing:2px;font-family:'Courier New',monospace;color:#fff;margin:8px 0}
+.login p{font-size:.68em;color:var(--muted);margin-bottom:14px}
+.login input{width:100%;background:#0a0d12;border:1px solid var(--border);border-radius:10px;color:var(--text);padding:12px 14px;font-size:.9em;margin-bottom:10px;outline:none;font-family:inherit}
+.login input:focus{border-color:var(--gold)}
+.login button{width:100%;background:linear-gradient(135deg,#f1c40f,#ff8c42);color:#03140a;border:none;border-radius:10px;padding:13px;font-weight:800;font-size:.8em;cursor:pointer;font-family:inherit}
+.login .err{font-size:.7em;color:var(--danger);min-height:18px;margin-top:8px}
+/* zonas */
+#zonas{display:none}
+.saludo{font-size:.75em;color:var(--muted);margin:12px 2px}
+.saludo b{color:var(--gold)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-top:10px}
+.zone{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;text-decoration:none;color:var(--text);transition:.15s;display:flex;flex-direction:column;gap:6px}
+.zone:hover{border-color:var(--gold);transform:translateY(-2px)}
+.zone .ico{font-size:1.8em}
+.zone .name{font-size:.78em;font-weight:800;color:#fff}
+.zone .desc{font-size:.62em;color:var(--muted);line-height:1.4}
+.zone .tag{font-size:.55em;color:var(--gold);letter-spacing:1px;text-transform:uppercase}
+.salir{margin-top:14px;background:var(--card);border:1px solid var(--border);border-radius:10px;color:var(--muted);padding:9px 16px;font-size:.68em;cursor:pointer;font-family:inherit}
+.salir:hover{border-color:var(--danger);color:var(--danger)}
+</style>
+</head>
+<body>
+<div class="bg"><div class="orb orb1"></div><div class="orb orb2"></div></div>
+
+<div class="wrap">
+  <div class="header">
+    <div class="logo">👑</div>
+    <div class="ttl"><h1>PORTAL DEL DUEÑO</h1><span>acceso único a las nuevas zonas de ZonaHack</span></div>
+    <a href="/asistente.html" class="back">←</a>
+  </div>
+
+  <!-- LOGIN -->
+  <div id="lock">
+    <div class="login">
+      <div class="candado">🔐</div>
+      <h2>ACCESO PRIVADO</h2>
+      <p>Solo el propietario puede entrar a las nuevas zonas.</p>
+      <input type="text" id="u" placeholder="Usuario" autocomplete="username">
+      <input type="password" id="p" placeholder="Contraseña" autocomplete="current-password" onkeydown="if(event.key==='Enter')login()">
+      <button onclick="login()">ENTRAR</button>
+      <div class="err" id="err"></div>
+    </div>
+  </div>
+
+  <!-- ZONAS -->
+  <div id="zonas">
+    <div class="saludo">👑 Bienvenido, <b id="nombre"></b> — estas son tus nuevas zonas:</div>
+    <div class="grid" id="grid"></div>
+    <button class="salir" onclick="salir()">🚪 Cerrar sesión</button>
+  </div>
+</div>
+
+<script>
+function $(i){ return document.getElementById(i); }
+function esc(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+var sesion=localStorage.getItem("zh_portal")||"";
+
+function login(){
+  var u=$("u").value.trim(), p=$("p").value.trim();
+  if(!u||!p){ $("err").textContent="Ingresá usuario y contraseña"; return; }
+  fetch("/api/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({usuario:u,clave:p})})
+  .then(function(r){return r.json();}).then(function(d){
+    if(d&&d.ok){
+      sesion=u+"|"+p;
+      localStorage.setItem("zh_portal",sesion);
+      abrirPortal(d.nombre||u);
+    }else{
+      $("err").textContent="❌ Usuario o contraseña incorrectos";
+    }
+  }).catch(function(){ $("err").textContent="❌ Error de conexión"; });
+}
+function salir(){
+  sesion=""; localStorage.removeItem("zh_portal");
+  location.reload();
+}
+function abrirPortal(nombre){
+  $("lock").style.display="none";
+  $("zonas").style.display="block";
+  $("nombre").textContent=nombre;
+  fetch("/api/estado").then(function(r){return r.json();}).then(function(d){
+    var links=d||{};
+    var zonas=[
+      {ico:"⌘", nombre:"ZonaLang", desc:"Tu lenguaje de programación con intérprete completo", url:"/lenguaje.html", tag:"NUEVO"},
+      {ico:"🤖", nombre:"Asistente IA", desc:"Chat, voz, canciones, fotos, resúmenes, recordatorios", url:"/asistente.html", tag:"TODO"},
+      {ico:"🎵", nombre:"Canciones", desc:"Compone canciones con voz y las da en MP3", url:"/asistente.html", tag:"NUEVO"},
+      {ico:"🖼️", nombre:"Analizar fotos", desc:"La IA describe imágenes desde el celular", url:"/asistente.html", tag:"NUEVO"},
+      {ico:"📄", nombre:"Resumir documentos", desc:"Resume textos largos o links", url:"/asistente.html", tag:"NUEVO"},
+      {ico:"🔔", nombre:"Botón de aviso", desc:"Avisos a Gonza + bloqueo solo dueño", url:"/gonza.html", tag:"PRIVADO"},
+      {ico:"📈", nombre:"Uptime Kuma", desc:"Monitor de tus páginas con avisos por Telegram", url:links.link_uptime||"", tag:"MONITOR"},
+      {ico:"🎛️", nombre:"Panel Nginx", desc:"Administra proxies y SSL", url:links.link_npm||"/panel-nginx/", tag:"SISTEMA"},
+      {ico:"🔗", nombre:"Túnel asistente", desc:"Link auto-regenerado del asistente", url:links.link_tunel||"", tag:"LINK"},
+      {ico:"🎬", nombre:"Túnel ZonaHack", desc:"Link auto-regenerado de ZonaHack", url:links.link_zh||"", tag:"LINK"},
+      {ico:"🛰️", nombre:"Monitores", desc:"Estado de todas tus páginas", url:"/api/paginas", tag:"SISTEMA"},
+      {ico:"📊", nombre:"Estado del sistema", desc:"Servidor, modelos, memoria, bots", url:"/api/estado", tag:"SISTEMA"}
+    ];
+    var html=zonas.map(function(z){
+      var href=z.url||"#";
+      return '<a class="zone" href="'+esc(href)+'" target="_blank" rel="noopener">'+
+        '<span class="ico">'+z.ico+'</span>'+
+        '<span class="tag">'+esc(z.tag)+'</span>'+
+        '<span class="name">'+esc(z.nombre)+'</span>'+
+        '<span class="desc">'+esc(z.desc)+'</span></a>';
+    }).join("");
+    $("grid").innerHTML=html;
+  }).catch(function(){ $("grid").innerHTML="Error al cargar las zonas."; });
+}
+
+if(sesion){
+  var partes=sesion.split("|");
+  // verificar que siga siendo válida
+  fetch("/api/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({usuario:partes[0]||"",clave:partes[1]||""})})
+  .then(function(r){return r.json();}).then(function(d){
+    if(d&&d.ok) abrirPortal(d.nombre||partes[0]);
+    else { sesion=""; localStorage.removeItem("zh_portal"); }
+  }).catch(function(){ sesion=""; localStorage.removeItem("zh_portal"); });
+}
+</script>
+</body>
+</html>

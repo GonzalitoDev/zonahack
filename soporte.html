@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>🎫 Soporte - ZonaHack</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0a;color:#c8d6e5;padding:10px;max-width:900px;margin:0 auto;font-family:'Courier New',monospace}
+h1{color:#00ff41;font-size:1.15em;margin:8px 0;text-align:center;text-shadow:0 0 8px rgba(0,255,65,.1)}
+h1::after{content:'_';animation:blink 1s step-end infinite}
+@keyframes blink{50%{opacity:0}}
+.back{color:#00ff41;text-decoration:none;font-size:.68em;display:block;margin-bottom:5px}
+.card{border:1px solid rgba(0,255,65,.07);border-radius:4px;padding:12px;margin-bottom:8px;background:#0d0d0d}
+.card h2{color:#00ff41;font-size:.8em;margin-bottom:6px;border-bottom:1px solid rgba(0,255,65,.06);padding-bottom:4px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:4px}
+label{font-size:.6em;color:rgba(200,214,229,.4);display:block;margin:6px 0 2px}
+input,select,textarea{padding:6px 9px;border:1px solid rgba(0,255,65,.12);border-radius:3px;background:#0a0a0a;color:#c8d6e5;font-size:.7em;width:100%;margin:2px 0;outline:none;font-family:'Courier New',monospace}
+input:focus,select:focus,textarea:focus{border-color:#00ff41}
+textarea{resize:vertical;min-height:80px}
+.btn{padding:6px 14px;border:1px solid rgba(0,255,65,.15);border-radius:3px;background:rgba(0,255,65,.05);color:#00ff41;cursor:pointer;font-size:.65em;font-family:'Courier New',monospace;transition:.2s;margin:2px 2px 2px 0}
+.btn:hover{border-color:rgba(0,255,65,.3);box-shadow:0 0 8px rgba(0,255,65,.08)}
+.btn-del{border-color:rgba(231,76,60,.2);color:#e74c3c}
+.btn-warn{border-color:rgba(241,196,15,.2);color:#f1c40f}
+.btn-ok{border-color:rgba(46,204,113,.2);color:#2ecc71}
+.btn-sm{padding:4px 9px;font-size:.6em}
+.fila{display:flex;justify-content:space-between;padding:6px 4px;border-bottom:1px solid rgba(0,255,65,.03);font-size:.7em;align-items:center;gap:6px;flex-wrap:wrap;cursor:pointer;transition:.15s}
+.fila:hover{background:rgba(0,255,65,.03)}
+.fila .lab{color:rgba(200,214,229,.4);font-size:.85em}
+.fila .val{color:#c8d6e5}
+.fila .tit{flex:1;min-width:140px;color:#c8d6e5}
+.badge{padding:2px 8px;border-radius:3px;font-size:.58em;display:inline-block;border:1px solid;white-space:nowrap}
+.st-abierto{background:rgba(231,76,60,.08);color:#e74c3c;border-color:rgba(231,76,60,.2)}
+.st-en_progreso{background:rgba(241,196,15,.08);color:#f1c40f;border-color:rgba(241,196,15,.2)}
+.st-resuelto{background:rgba(46,204,113,.08);color:#2ecc71;border-color:rgba(46,204,113,.2)}
+.st-cerrado{background:rgba(200,214,229,.06);color:rgba(200,214,229,.5);border-color:rgba(200,214,229,.12)}
+.pr-baja{color:#3498db}
+.pr-media{color:#f1c40f}
+.pr-alta{color:#e74c3c}
+.empty{text-align:center;padding:16px;color:rgba(200,214,229,.12);font-size:.7em}
+#userChip{background:rgba(0,255,65,.06);border:1px solid rgba(0,255,65,.1);padding:2px 10px;border-radius:12px;font-size:.62em;color:#00ff41;cursor:pointer}
+.ticket-det{display:none}
+.ticket-det.open{display:block}
+.msg{border:1px solid rgba(0,255,65,.06);border-radius:4px;padding:8px;margin-bottom:6px;font-size:.7em;background:#0c0f0c}
+.msg .meta{font-size:.6em;color:rgba(200,214,229,.3);margin-bottom:4px;display:flex;justify-content:space-between;gap:4px;flex-wrap:wrap}
+.msg.admin{border-color:rgba(0,255,65,.2);background:rgba(0,255,65,.04)}
+.msg.sistema{border-color:rgba(241,196,15,.15);background:rgba(241,196,15,.03)}
+.msg .autor{color:#00ff41;font-weight:bold}
+.msg.admin .autor{color:#f1c40f}
+.msg .texto{white-space:pre-wrap;word-break:break-word;line-height:1.5}
+.status-bar{font-size:.58em;color:rgba(200,214,229,.25);text-align:center;margin:4px 0;min-height:14px}
+#liveDot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#555;margin-left:6px;animation:pulse 1.5s infinite}
+#liveDot.on{background:#00ff41;box-shadow:0 0 6px rgba(0,255,65,.3)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media(max-width:600px){.grid2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<h1>🎫 Panel de Soporte</h1>
+<a class="back" href="/">← Volver al inicio</a>
+<div class="status-bar"><span id="liveDot"></span> <span id="statusTxt">Conectando...</span> · Usuario: <span id="userChip" onclick="cambiarUsuario()">cargando...</span></div>
+
+<!-- NUEVO TICKET -->
+<div class="card">
+  <h2>📨 Abrir nuevo ticket</h2>
+  <div class="grid2">
+    <div>
+      <label>Título *</label>
+      <input id="tickTitulo" placeholder="Ej: El video de X no carga..." maxlength="100">
+      <label>Categoría</label>
+      <select id="tickCategoria">
+        <option value="general">📌 General</option>
+        <option value="error">🐛 Error / Bug</option>
+        <option value="contenido">🎬 Solicitud de contenido</option>
+        <option value="cuenta">👤 Cuenta / Perfil</option>
+        <option value="reporte">🚩 Reporte de usuario</option>
+      </select>
+    </div>
+    <div>
+      <label>Prioridad</label>
+      <select id="tickPrioridad">
+        <option value="baja">🟦 Baja</option>
+        <option value="media" selected>🟨 Media</option>
+        <option value="alta">🟥 Alta</option>
+      </select>
+      <label>Describí tu problema *</label>
+      <textarea id="tickMensaje" placeholder="Contanos qué pasó, en qué página, qué buscabas..."></textarea>
+    </div>
+  </div>
+  <div style="text-align:right;margin-top:6px">
+    <button class="btn" onclick="crearTicket()">📨 ENVIAR TICKET</button>
+  </div>
+  <div id="crearMsg" style="font-size:.62em;color:rgba(200,214,229,.3);margin-top:4px;min-height:14px"></div>
+</div>
+
+<!-- MIS TICKETS -->
+<div class="card">
+  <h2>📋 Mis tickets <span id="miCount" style="font-size:.6em;color:rgba(200,214,229,.3)">0</span></h2>
+  <div id="misTickets"><div class="empty">Cargando...</div></div>
+</div>
+
+<!-- DETALLE TICKET -->
+<div id="ticketDetalle" class="ticket-det">
+  <div class="card">
+    <h2><span id="detTitulo">Ticket</span><span id="detEstado"></span></h2>
+    <div id="detMeta" style="font-size:.62em;color:rgba(200,214,229,.4);margin-bottom:8px"></div>
+    <div id="detMensajes"></div>
+    <div style="margin-top:8px">
+      <label>Tu respuesta</label>
+      <textarea id="respTexto" placeholder="Escribí tu respuesta al equipo de soporte..."></textarea>
+      <div style="text-align:right">
+        <button class="btn" onclick="enviarRespuesta(abiertoTicket)">📤 Responder</button>
+        <button class="btn btn-del" onclick="cerrarMiTicket(abiertoTicket)">🔒 Cerrar ticket</button>
+        <button class="btn btn-warn" onclick="cerrarDetalle()">← Volver</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+var APIKEY = "sb_publishable_3VvBUD5Bdu3Uaq59fJ99MQ_XDCtujUU";
+var SUPABASE = "https://xfwolaurpeofysnymqle.supabase.co/rest/v1";
+var DBH = {"apikey":APIKEY,"Authorization":"Bearer "+APIKEY,"Content-Type":"application/json"};
+var WS = null;
+var USER = localStorage.getItem("vh_usuario") || "anon";
+var abiertoTicket = null;
+var mensajesCache = {};
+
+function esc(s){return (s||"").replace(/[&<>"]/g,function(m){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m];});}
+function $id(x){return document.getElementById(x);}
+
+document.getElementById("userChip").textContent = USER;
+
+function cambiarUsuario(){
+  var n = prompt("Nombre de usuario actual: "+USER+"\n\nEscribí tu nombre (o dejá vacío para cancelar):");
+  if(n===null || !n.trim()) return;
+  USER = n.trim().slice(0,50);
+  localStorage.setItem("vh_usuario", USER);
+  document.getElementById("userChip").textContent = USER;
+  cargarMisTickets();
+}
+
+var estadoEtiqueta = {abierto:"ABIERTO",en_progreso:"EN PROGRESO",resuelto:"RESUELTO",cerrado:"CERRADO"};
+var estadoColor = {abierto:"#e74c3c",en_progreso:"#f1c40f",resuelto:"#2ecc71",cerrado:"#888"};
+var catIcono = {general:"📌",error:"🐛",contenido:"🎬",cuenta:"👤",reporte:"🚩"};
+
+function crearTicket(){
+  var titulo = $id("tickTitulo").value.trim();
+  var mensaje = $id("tickMensaje").value.trim();
+  if(!titulo){$id("crearMsg").innerHTML='<span style="color:#e74c3c">Ingresá un título</span>';return;}
+  if(!mensaje){$id("crearMsg").innerHTML='<span style="color:#e74c3c">Ingresá un mensaje</span>';return;}
+  var categoria = $id("tickCategoria").value;
+  var prioridad = $id("tickPrioridad").value;
+  fetch(SUPABASE+"/soporte_tickets",{method:"POST",headers:Object.assign({},DBH,{"Prefer":"return=representation"}),body:JSON.stringify({
+    titulo:titulo.slice(0,100),categoria:categoria,prioridad:prioridad,estado:"abierto",usuario_nombre:USER
+  })})
+  .then(function(r){return r.json();})
+  .then(function(d){
+    var t = (d&&d.length)?d[0]:(Array.isArray(d)?null:d);
+    if(!t||!t.id){$id("crearMsg").innerHTML='<span style="color:#e74c3c">Error creando ticket</span>';return;}
+    var tid = t.id;
+    return fetch(SUPABASE+"/soporte_mensajes",{method:"POST",headers:Object.assign({},DBH,{"Prefer":"return=minimal"}),body:JSON.stringify({
+      ticket_id:tid,autor:USER,tipo:"usuario",mensaje:mensaje.slice(0,2000)
+    })}).then(function(){return t;});
+  })
+  .then(function(t){
+    $id("crearMsg").innerHTML='<span style="color:#00ff41">✅ Ticket #'+t.id+' creado</span>';
+    $id("tickTitulo").value="";$id("tickMensaje").value="";
+    cargarMisTickets();
+    setTimeout(function(){abrirTicket(t.id);},300);
+  })
+  .catch(function(){$id("crearMsg").innerHTML='<span style="color:#e74c3c">Error de conexión</span>';});
+}
+
+function cargarMisTickets(){
+  $id("misTickets").innerHTML='<div class="empty">Cargando...</div>';
+  fetch(SUPABASE+"/soporte_tickets?select=id,titulo,categoria,prioridad,estado,usuario_nombre,creado,actualizado&usuario_nombre=eq."+encodeURIComponent(USER)+"&order=actualizado.desc&limit=200",{headers:DBH})
+  .then(function(r){return r.json();})
+  .then(function(d){
+    var arr = d||[];
+    $id("miCount").textContent = arr.length;
+    if(!arr.length){$id("misTickets").innerHTML='<div class="empty">Todavía no tenés tickets. Abrí uno arriba 👆</div>';return;}
+    $id("misTickets").innerHTML = arr.map(function(t){
+      var pri = '<span class="pr-'+esc(t.prioridad)+'">'+(t.prioridad==="alta"?"🔺":t.prioridad==="media"?"🔸":"🔹")+esc(t.prioridad)+'</span>';
+      var st = '<span class="badge st-'+esc(t.estado)+'">'+esc(estadoEtiqueta[t.estado]||t.estado)+'</span>';
+      return '<div class="fila" onclick="abrirTicket('+t.id+')">'+
+        '<span class="lab">#'+t.id+'</span>'+
+        '<span class="tit">'+(catIcono[t.categoria]||"📌")+' '+esc(t.titulo)+'</span>'+
+        '<span style="font-size:.6em">'+pri+'</span>'+
+        st+
+        '<span class="val" style="font-size:.58em;color:rgba(200,214,229,.3)">'+new Date(t.actualizado||t.creado).toLocaleDateString()+'</span>'+
+        '</div>';
+    }).join("");
+  })
+  .catch(function(){$id("misTickets").innerHTML='<div class="empty">Error al cargar tickets</div>';});
+}
+
+function abrirTicket(id){
+  abiertoTicket = id;
+  Promise.all([
+    fetch(SUPABASE+"/soporte_tickets?select=*&id=eq."+id+"&limit=1",{headers:DBH}).then(function(r){return r.json();}).catch(function(){return[];}),
+    fetch(SUPABASE+"/soporte_mensajes?select=*&ticket_id=eq."+id+"&order=creado.asc&limit=500",{headers:DBH}).then(function(r){return r.json();}).catch(function(){return[];})
+  ]).then(function(d){
+    var t = (d[0]||[])[0];
+    if(!t){alert("Ticket no encontrado");return;}
+    if(t.usuario_nombre !== USER){
+      alert("Este ticket no te pertenece");
+      abiertoTicket = null;
+      return;
+    }
+    mensajesCache[id] = d[1]||[];
+    $id("detTitulo").textContent = "#"+t.id+" · "+(catIcono[t.categoria]||"📌")+" "+t.titulo;
+    $id("detEstado").innerHTML = '<span class="badge st-'+esc(t.estado)+'">'+esc(estadoEtiqueta[t.estado]||t.estado)+'</span>';
+    $id("detMeta").innerHTML = "Abierto por <b style='color:#00ff41'>"+esc(t.usuario_nombre)+"</b> · "+
+      "Prioridad <span class='pr-"+esc(t.prioridad)+"'>"+esc(t.prioridad)+"</span> · "+
+      "Creado "+new Date(t.creado).toLocaleString();
+    $id("ticketDetalle").classList.add("open");
+    $id("respTexto").value="";
+    renderMensajes();
+    $id("ticketDetalle").scrollIntoView({behavior:"smooth",block:"start"});
+  });
+}
+
+function renderMensajes(){
+  var arr = mensajesCache[abiertoTicket]||[];
+  $id("detMensajes").innerHTML = arr.length ? arr.map(function(m){
+    var cls = m.tipo==="admin"?"admin":m.tipo==="sistema"?"sistema":"";
+    var autor = m.tipo==="admin" ? "🛡 SOPORTE · "+esc(m.autor) : "👤 "+esc(m.autor);
+    return '<div class="msg '+cls+'"><div class="meta"><span class="autor">'+autor+'</span><span>'+new Date(m.creado).toLocaleString()+'</span></div><div class="texto">'+esc(m.mensaje)+'</div></div>';
+  }).join("") : '<div class="empty">Sin mensajes todavía</div>';
+}
+
+function enviarRespuesta(id){
+  var txt = $id("respTexto").value.trim();
+  if(!txt){alert("Escribí un mensaje");return;}
+  if(txt.length>2000){alert("Máximo 2000 caracteres");return;}
+  fetch(SUPABASE+"/soporte_mensajes",{method:"POST",headers:Object.assign({},DBH,{"Prefer":"return=minimal"}),body:JSON.stringify({
+    ticket_id:id,autor:USER,tipo:"usuario",mensaje:txt
+  })})
+  .then(function(){
+    // Reabrir si estaba cerrado/resuelto
+    fetch(SUPABASE+"/soporte_tickets?id=eq."+id+"&estado=in.(cerrado,resuelto)",{method:"PATCH",headers:DBH,body:JSON.stringify({estado:"abierto",actualizado:new Date().toISOString()})}).catch(function(){});
+    fetch(SUPABASE+"/soporte_tickets?id=eq."+id,{method:"PATCH",headers:DBH,body:JSON.stringify({actualizado:new Date().toISOString()})}).catch(function(){});
+    $id("respTexto").value="";
+    abrirTicket(id);
+  })
+  .catch(function(){alert("Error al enviar");});
+}
+
+function cerrarMiTicket(id){
+  if(!confirm("¿Cerrar este ticket?")) return;
+  fetch(SUPABASE+"/soporte_tickets?id=eq."+id,{method:"PATCH",headers:DBH,body:JSON.stringify({estado:"cerrado",actualizado:new Date().toISOString()})})
+  .then(function(){
+    fetch(SUPABASE+"/soporte_mensajes",{method:"POST",headers:Object.assign({},DBH,{"Prefer":"return=minimal"}),body:JSON.stringify({ticket_id:id,autor:USER,tipo:"sistema",mensaje:"El usuario cerró el ticket."})}).catch(function(){});
+    cerrarDetalle();
+    cargarMisTickets();
+  });
+}
+
+function cerrarDetalle(){
+  abiertoTicket = null;
+  $id("ticketDetalle").classList.remove("open");
+  cargarMisTickets();
+}
+
+/* ─── REALTIME ─────────────────────────── */
+var _hb = null;
+function conectarWS(){
+  try{
+    WS = new WebSocket("wss://xfwolaurpeofysnymqle.supabase.co/realtime/v1/websocket?apikey="+APIKEY+"&vsn=1.0.0");
+    WS.onopen = function(){
+      $id("liveDot").className="on";
+      $id("statusTxt").textContent="🟢 En línea";
+      ["soporte_tickets","soporte_mensajes"].forEach(function(t,i){
+        WS.send(JSON.stringify({topic:"realtime:"+t,event:"phx_join",payload:{config:{postgres_changes:[{event:"*",schema:"public",table:t}]}},ref:(i+1).toString()}));
+      });
+      _hb = setInterval(function(){
+        try{WS.send(JSON.stringify({topic:"phoenix",event:"heartbeat",payload:{},ref:"0"}));}catch(e){}
+      },10000);
+    };
+    WS.onmessage = function(e){
+      try{
+        var msg = JSON.parse(e.data);
+        if(msg.event==="phx_reply") return;
+        var evento = msg.event;
+        var rec = null;
+        if(evento==="postgres_changes"){
+          evento=(msg.payload&&msg.payload.data&&msg.payload.data.type)||"";
+          rec=(msg.payload&&msg.payload.data&&msg.payload.data.record)||null;
+        } else { rec = msg.payload && msg.payload.record; }
+        if((evento==="INSERT"||evento==="UPDATE"||evento==="DELETE")){
+          var t = (msg.topic||"").replace("realtime:","");
+          if(t==="soporte_tickets"){ cargarMisTickets(); }
+          if(t==="soporte_mensajes"){
+            if(rec && abiertoTicket && rec.ticket_id===abiertoTicket){
+              abrirTicket(abiertoTicket);
+            } else {
+              cargarMisTickets();
+            }
+          }
+        }
+      }catch(err){}
+    };
+    WS.onclose = function(){if(_hb){clearInterval(_hb);_hb=null;}$id("liveDot").className="";$id("statusTxt").textContent="🔴 Reconectando...";setTimeout(conectarWS,3000);};
+    WS.onerror = function(){try{WS.close();}catch(e){}};
+  }catch(e){}
+}
+
+conectarWS();
+cargarMisTickets();
+</script>
+</body>
+</html>

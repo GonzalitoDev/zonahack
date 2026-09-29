@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>📱 ZonaHack — Descargar App</title>
+<style>
+:root{
+  --bg:#060907;
+  --card:rgba(255,255,255,.03);
+  --border:rgba(0,255,65,.10);
+  --border2:rgba(0,255,65,.18);
+  --text:#d6e4dc;
+  --muted:rgba(214,228,220,.45);
+  --accent:#00ff41;
+  --green2:#2ecc71;
+  --amber:#f1c40f;
+  --red:#e74c3c;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  background:var(--bg);color:var(--text);
+  font-family:'Segoe UI',system-ui,-apple-system,Roboto,sans-serif;
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(600px 300px at 85% -10%,rgba(0,255,65,.07),transparent 60%),
+    radial-gradient(500px 260px at -10% 30%,rgba(0,255,65,.05),transparent 60%);
+}
+/* ─── HEADER ─── */
+.header{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:12px;
+  padding:12px 18px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  background:rgba(6,9,7,.8);border-bottom:1px solid var(--border)}
+.logo{width:40px;height:40px;border-radius:12px;flex-shrink:0;
+  background:linear-gradient(135deg,rgba(0,255,65,.22),rgba(0,255,65,.04));
+  border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;
+  font-size:20px;box-shadow:0 0 16px rgba(0,255,65,.12)}
+.header .ttl{flex:1;min-width:0}
+.header .ttl h1{font-size:.95em;color:var(--accent);letter-spacing:.5px;
+  font-family:'Courier New',monospace;text-shadow:0 0 10px rgba(0,255,65,.25);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.header .ttl span{font-size:.62em;color:var(--muted)}
+.back{color:var(--accent);text-decoration:none;font-size:.72em;padding:7px 12px;
+  border:1px solid var(--border2);border-radius:10px;transition:.2s;white-space:nowrap}
+.back:hover{background:rgba(0,255,65,.08);box-shadow:0 0 12px rgba(0,255,65,.15)}
+/* ─── LAYOUT ─── */
+.container{position:relative;z-index:1;max-width:640px;margin:0 auto;padding:18px 16px 40px}
+.hero{text-align:center;padding:26px 16px 20px;margin-bottom:16px}
+.hero .big{font-size:56px;line-height:1;filter:drop-shadow(0 0 20px rgba(0,255,65,.25))}
+.hero h2{font-size:1.5em;color:#fff;margin-top:12px;font-weight:700;letter-spacing:.5px}
+.hero h2 em{color:var(--accent);font-style:normal;font-family:'Courier New',monospace}
+.hero p{color:var(--muted);font-size:.8em;margin-top:6px;max-width:460px;margin-inline:auto;line-height:1.6}
+.pills{display:flex;gap:6px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+.pill{font-size:.62em;padding:5px 12px;border-radius:20px;border:1px solid var(--border2);
+  color:var(--accent);background:rgba(0,255,65,.05);letter-spacing:.5px}
+/* ─── CARDS ─── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;
+  padding:20px;margin-bottom:14px;transition:border-color .2s, box-shadow .2s}
+.card:hover{border-color:var(--border2);box-shadow:0 8px 30px rgba(0,0,0,.35)}
+.card .hdr{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.card .hdr .ic{width:38px;height:38px;border-radius:11px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:18px;
+  background:rgba(0,255,65,.08);border:1px solid var(--border2)}
+.card .hdr h2{font-size:.92em;color:#fff;font-weight:600;letter-spacing:.3px}
+.card .hdr h2 span{display:block;font-size:.62em;color:var(--muted);font-weight:400;margin-top:2px}
+/* ─── FEATURES ─── */
+.feat{display:flex;align-items:flex-start;gap:10px;padding:9px 0;font-size:.74em;
+  color:rgba(214,228,220,.75);line-height:1.5;border-bottom:1px dashed rgba(0,255,65,.06)}
+.feat:last-of-type{border-bottom:none}
+.feat .chk{color:var(--accent);flex-shrink:0;font-size:.85em;margin-top:1px}
+.feat b{color:#fff;font-weight:600}
+/* ─── BUTTONS ─── */
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;
+  padding:15px 18px;border:none;border-radius:13px;text-decoration:none;
+  font-family:inherit;font-weight:700;font-size:.85em;cursor:pointer;transition:all .2s;
+  margin-top:14px;letter-spacing:.3px}
+.btn-primary{background:linear-gradient(135deg,#00ff41,#00c73a);color:#03140a;
+  box-shadow:0 6px 22px rgba(0,255,65,.25)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(0,255,65,.35)}
+.btn-primary:active{transform:scale(.97)}
+.btn-ghost{background:rgba(0,255,65,.05);color:var(--accent);border:1px solid var(--border2)}
+.btn-ghost:hover{background:rgba(0,255,65,.1)}
+.btn-ghost:active{transform:scale(.97)}
+.btn.tildado{background:linear-gradient(135deg,#2ecc71,#00ff41);color:#03140a;
+  box-shadow:0 0 24px rgba(0,255,65,.5)}
+.size{text-align:center;font-size:.62em;color:var(--muted);margin-top:8px}
+/* ─── STEPS ─── */
+.steps{display:flex;flex-direction:column;gap:9px;margin-top:4px}
+.step{display:flex;align-items:center;gap:11px;font-size:.75em;color:rgba(214,228,220,.8);line-height:1.45}
+.step .num{width:22px;height:22px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  background:rgba(0,255,65,.1);border:1px solid var(--border2);color:var(--accent);font-size:.68em;font-weight:700}
+.step b{color:#fff}
+.step code{color:var(--accent);font-family:'Courier New',monospace;font-size:.9em}
+code.inline{background:rgba(0,255,65,.07);border:1px solid var(--border2);padding:2px 7px;border-radius:6px;color:var(--accent);
+  font-family:'Courier New',monospace;font-size:.88em}
+/* ─── WARN / NOTE ─── */
+.warn{display:flex;gap:8px;margin-top:14px;padding:11px 13px;border-radius:11px;font-size:.68em;line-height:1.5;
+  background:rgba(241,196,15,.06);border:1px solid rgba(241,196,15,.18);color:#f5d76e}
+.warn.red{background:rgba(231,76,60,.06);border-color:rgba(231,76,60,.18);color:#ff8f84}
+.note{font-size:.62em;color:var(--muted);margin-top:9px;line-height:1.6}
+.note a{color:var(--green2)}
+@media(max-width:480px){
+  .container{padding:14px 12px 30px}
+  .hero .big{font-size:46px}
+  .card{padding:16px}
+  .btn{font-size:.8em;padding:14px 12px}
+}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="logo">💀</div>
+  <div class="ttl">
+    <h1>ZONAHACK</h1>
+    <span>Descargas oficiales · v5.0</span>
+  </div>
+  <a href="/" class="back">← Volver</a>
+</div>
+
+<div class="container">
+  <!-- HERO -->
+  <div class="hero">
+    <div class="big">📱</div>
+    <h2>La app de <em>ZonaHack</em></h2>
+    <p>Películas, anime y videos offline en tu teléfono. Pantalla completa automática al reproducir, descargas directas y un diseño pensado para el celular.</p>
+    <div class="pills">
+      <span class="pill">⬇ 3 MB</span>
+      <span class="pill">🤖 Android 7+</span>
+      <span class="pill">🔋 Liviana</span>
+      <span class="pill">🎬 Fullscreen</span>
+    </div>
+  </div>
+
+  <!-- ANDROID -->
+  <div class="card">
+    <div class="hdr">
+      <div class="ic">🤖</div>
+      <h2>App Android (.apk)<span>Versión 5.0 · instalación directa</span></h2>
+    </div>
+    <div class="feat"><span class="chk">✓</span><span><b>Arranque rápido:</b> caché inteligente + Service Worker, la segunda apertura es casi instantánea y funciona offline</span></div>
+    <div class="feat"><span class="chk">✓</span><span><b>Video fluido:</b> render por hardware y rotación automática a horizontal en pantalla completa</span></div>
+    <div class="feat"><span class="chk">✓</span><span><b>Tiempo real:</b> notificaciones de películas nuevas, actualizaciones y anuncios al instante</span></div>
+    <div class="feat"><span class="chk">✓</span><span><b>Fullscreen automático:</b> al reproducir un video la app pasa a pantalla completa sola</span></div>
+    <div class="feat"><span class="chk">✓</span><span><b>Descargas reales</b> a la carpeta Descargas con notificación</span></div>
+    <div class="feat"><span class="chk">✓</span><span><b>Doble atrás para salir</b> (sin cerrarla por error)</span></div>
+    <a href="/ZonaHack.apk" class="btn btn-primary">⬇ DESCARGAR ZonaHack.apk</a>
+    <div class="size">Android 7.0 o superior · ~3 MB</div>
+    <div class="warn">📲 Para instalar: permití <b>"Instalar apps desconocidas"</b> y abrí el .apk descargado. Si ya tenías una versión anterior, desinstalala primero.</div>
+  </div>
+
+  <!-- WINDOWS -->
+  <div class="card">
+    <div class="hdr">
+      <div class="ic">🖥️</div>
+      <h2>App de Escritorio (Windows)<span>Electron · instalador con asistente</span></h2>
+    </div>
+    <div class="feat"><span class="chk">✓</span><span><b>Conectada a la web:</b> películas, anime, offline y tiempo real de ZonaHack</span></div>
+    <div class="feat"><span class="chk">✓</span><span><b>Splash de carga</b> al abrir la app</span></div>
+    <div class="feat"><span class="chk">✓</span><span><b>Video fluido:</b> aceleración por hardware y pantalla completa</span></div>
+    <div class="feat"><span class="chk">✓</span><span><b>Atajos:</b> F5 recargar · F11 pantalla completa · F12 desarrollador · Ctrl+Q salir · Ctrl+Home inicio · Alt+←/→ navegar</span></div>
+    <div class="feat"><span class="chk">✓</span><span><b>Tiempo real:</b> notificaciones de Windows para películas nuevas y anuncios</span></div>
+    <div class="feat"><span class="chk">✓</span><span><b>Offline:</b> usa el Service Worker de la PWA, funciona sin internet</span></div>
+    <a href="/ZonaHack-PC-Setup.exe" class="btn btn-primary">⬇ DESCARGAR INSTALADOR (.exe)</a>
+    <div class="size">Windows 10/11 · 64 bits · ~81 MB</div>
+  </div>
+
+  <!-- ZONAHACK DB -->
+  <div class="card">
+    <div class="hdr">
+      <div class="ic">🗄️</div>
+      <h2>ZonaHack DB — Base de Datos<span>Visor de la base para celular</span></h2>
+    </div>
+    <div class="feat"><span class="chk">✓</span><span><b>Explorá la base de datos</b> de ZonaHack: videos, categorías y usuarios</span></div>
+    <div class="feat"><span class="chk">✓</span><span><b>Buscar y filtrar</b> por categoría en tiempo real</span></div>
+    <div class="feat"><span class="chk">✓</span><span><b>Tocá un video</b> y se abre en YouTube</span></div>
+    <div class="feat"><span class="chk">✓</span><span><b>Hecha por GONZA</b> · solo celular</span></div>
+    <a href="/ZonaHackDB.apk" class="btn btn-primary" download>⬇ DESCARGAR ZonaHackDB.apk</a>
+    <div class="size">Android 7+ · se genera solo al compilar (GitHub Actions) y aparece acá automáticamente</div>
+    <div class="warn">🤖 Primera vez: subí la carpeta <code class="inline">ZonaHackDBApp/</code> a tu repo de GitHub → la pestaña <b>Actions</b> compila y publica el APK solo en la web. Después cada cambio se actualiza solo.</div>
+  </div>
+
+  <!-- DBXPLORER -->
+  <div class="card">
+    <div class="hdr">
+      <div class="ic">🔎</div>
+      <h2>DBXplorer — App propia conectada a la base<span>Apartada de ZonaHack · visor de datos</span></h2>
+    </div>
+    <div class="feat"><span class="chk">✓</span><span><b>App propia y separada</b> de ZonaHack, con su diseño</span></div>
+    <div class="feat"><span class="chk">✓</span><span><b>Conectada a la base de datos</b> de ZonaHack (Supabase) en vivo</span></div>
+    <div class="feat"><span class="chk">✓</span><span><b>Explorá videos, categorías y usuarios</b> con buscador</span></div>
+    <div class="feat"><span class="chk">✓</span><span><b>Tocá un video</b> y se abre en YouTube</span></div>
+    <a href="/DBXplorer.apk" class="btn btn-primary" download>⬇ DESCARGAR DBXplorer.apk</a>
+    <div class="size">Android 7+ · se genera solo al compilar (GitHub Actions) y aparece acá automáticamente</div>
+    <div class="warn">🤖 Primera vez: subí la carpeta <code class="inline">DBXplorerApp/</code> a tu repo de GitHub → la pestaña <b>Actions</b> compila y publica el APK solo en la web. Después cada cambio se actualiza solo.</div>
+  </div>
+
+  <!-- CYBERALERTA -->
+  <div class="card">
+    <div class="hdr">
+      <div class="ic">🛡️</div>
+      <h2>CyberAlerta — Seguridad Informática<span>Noticias de ciberseguridad · solo celular y PC</span></h2>
+    </div>
+    <div class="feat"><span class="chk">✓</span><span><b>Noticias en vivo</b> de The Hacker News, Bleeping Computer, Krebs on Security, SecurityWeek y Threatpost</span></div>
+    <div class="feat"><span class="chk">✓</span><span><b>Buscar y filtrar</b> por fuente, alertas y novedades de seguridad</span></div>
+    <div class="feat"><span class="chk">✓</span><span><b>App propia aparte</b>, no es una página web: es solo app de celular y de PC</span></div>
+    <div class="feat"><span class="chk">✓</span><span><b>Android</b>: APK instalable · <b>Windows</b>: instalador de escritorio</span></div>
+    <div class="feat"><span class="chk">✓</span><span><b>Se actualiza sola</b>: al salir una versión nueva la app se descarga e instala sin reinstalar</span></div>
+    <div class="feat"><span class="chk">✓</span><span><b>Asistente de IA</b> de ciberseguridad integrado, con API gratuita (Gemini)</span></div>
+    <a href="/CyberAlerta-Setup.exe" class="btn btn-ghost">⬇ CYBERALERTA PARA PC (.exe)</a>
+    <div class="size">Windows 10/11 · 64 bits · ~77 MB</div>
+    <div class="warn">🤖 La versión Android se compila con GitHub Actions: subí la carpeta <code class="inline">CyberAlertaApp/</code> a tu repo y bajá el artefacto <b>CyberAlerta-APK</b> de la pestaña Actions.</div>
+  </div>
+
+  <!-- PWA -->
+  <div class="card">
+    <div class="hdr">
+      <div class="ic">📲</div>
+      <h2>Instalar como PWA<span>sin descargar nada</span></h2>
+    </div>
+    <div class="steps">
+      <div class="step"><span class="num">1</span><span>Abrí el sitio en <b>Chrome Android</b></span></div>
+      <div class="step"><span class="num">2</span><span>Tocá los 3 puntitos <b>⋮</b> → <b>"Agregar a pantalla de inicio"</b></span></div>
+      <div class="step"><span class="num">3</span><span>Tocá <b>"Instalar"</b></span></div>
+    </div>
+    <div class="note">La PWA funciona como app: offline, icono propio, sin navegador y notificaciones.</div>
+  </div>
+
+  <!-- COMPILAR -->
+  <div class="card">
+    <div class="hdr">
+      <div class="ic">⚙️</div>
+      <h2>Compilar el APK<span>sin Android Studio</span></h2>
+    </div>
+    <div class="steps">
+      <div class="step"><span class="num">1</span><span>Subí la carpeta <code>ZonaHackApp/</code> a un repo de <b>GitHub</b></span></div>
+      <div class="step"><span class="num">2</span><span>El workflow <code>build-apk.yml</code> compila solo en la nube</span></div>
+      <div class="step"><span class="num">3</span><span>En <b>Actions</b> bajás el artefacto <b>ZonaHack-APK</b></span></div>
+      <div class="step"><span class="num">4</span><span>O tocá <b>Run workflow</b> para recompilar cuando quieras</span></div>
+    </div>
+    <div class="note">💡 Alternativa sin GitHub: <a href="https://pwabuilder.com" target="_blank">PWA Builder</a> — pegá la URL del sitio → Start → Android → descargá el .apk.</div>
+    <div class="warn">🔧 Cualquier cambio en <code class="inline">ZonaHackApp/</code> se recompila automáticamente al subirlo.</div>
+  </div>
+
+  <div style="text-align:center;margin-top:20px;font-size:.6em;color:var(--muted)">
+    ZonaHack · Descarga segura desde el sitio oficial
+  </div>
+</div>
+
+<script>
+// Los botones se "tildan" (✓) al tocarlos
+document.querySelectorAll("a.btn").forEach(function(a){
+  a.addEventListener("click", function(){
+    this.classList.add("tildado");
+    if(this.textContent.indexOf("✓") !== 0) this.textContent = "✓ " + this.textContent;
+  });
+});
+</script>
+</body>
+</html>

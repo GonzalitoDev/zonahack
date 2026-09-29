@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>🏎️ AUTO AL PISO — ZonaHack</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#050705;color:#c8d6e5;font-family:'Courier New',monospace;min-height:100vh;overflow-x:hidden;display:flex;flex-direction:column;align-items:center;padding:8px}
+.header{width:100%;max-width:520px;display:flex;align-items:center;justify-content:space-between;padding:8px 6px;border-bottom:1px solid rgba(0,255,65,.1)}
+.header h1{color:#00ff41;font-size:.8em;letter-spacing:1px}
+.back{color:#00ff41;text-decoration:none;font-size:.62em;padding:4px 8px;border:1px solid rgba(255,255,255,.1);border-radius:4px}
+.wrap{position:relative;width:100%;max-width:420px;margin-top:8px;border:1px solid rgba(0,255,65,.12);border-radius:10px;overflow:hidden;background:#000}
+canvas{display:block;width:100%;height:auto;touch-action:none}
+/* HUD */
+.hud{position:absolute;top:0;left:0;right:0;display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:6px;background:linear-gradient(180deg,rgba(0,0,0,.85),transparent);font-size:.6em;pointer-events:none;z-index:5}
+.hud .lab{color:rgba(0,255,65,.5)}
+.hud .val{color:#00ff41;font-weight:700}
+.hud .b{background:rgba(255,255,255,.08);border-radius:3px;padding:3px 6px}
+.hud .bar{height:3px;background:#222;border-radius:2px;margin-top:2px;overflow:hidden}
+.hud .bar i{display:block;height:100%;background:#00ff41;border-radius:2px;transition:width .2s}
+.hud .bar.warn i{background:#f1c40f}
+.hud .bar.danger i{background:#e74c3c}
+.district{position:absolute;top:64px;left:0;right:0;text-align:center;font-size:.8em;font-weight:700;letter-spacing:2px;color:#fff;text-shadow:0 0 12px currentColor;pointer-events:none;z-index:5;opacity:.9}
+/* THOR */
+.thor{position:absolute;left:8px;right:8px;bottom:60px;background:rgba(6,10,6,.92);border:1px solid rgba(0,255,65,.3);border-left:3px solid #00ff41;border-radius:6px;padding:8px 10px;font-size:.66em;z-index:6;pointer-events:none;transform:translateY(20px);opacity:0;transition:.25s}
+.thor.show{transform:translateY(0);opacity:1}
+.thor .t{color:#00ff41;font-weight:700;letter-spacing:1px;display:flex;align-items:center;gap:6px}
+.thor .m{color:#e6f7ec;margin-top:3px;line-height:1.4}
+/* Controles */
+.ctrl{display:flex;gap:8px;justify-content:center;margin-top:8px;flex-wrap:wrap}
+.ctrl button{padding:12px 18px;border:1px solid rgba(0,255,65,.15);border-radius:10px;background:rgba(0,255,65,.05);color:#00ff41;font-size:.7em;font-family:'Courier New',monospace;touch-action:manipulation;user-select:none}
+.ctrl button:active{background:rgba(0,255,65,.15)}
+/* Pantallas */
+.screen{position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(3,5,3,.95);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px;z-index:10;gap:10px}
+.screen h2{color:#00ff41;font-size:1.4em;letter-spacing:2px;text-shadow:0 0 15px rgba(0,255,65,.4)}
+.screen .sub{color:rgba(200,214,229,.5);font-size:.7em;max-width:340px;line-height:1.7}
+.screen button{padding:12px 26px;border:1px solid #00ff41;border-radius:8px;background:rgba(0,255,65,.08);color:#00ff41;font-weight:700;font-size:.8em;cursor:pointer;font-family:'Courier New',monospace;letter-spacing:1px}
+.screen button:hover{background:rgba(0,255,65,.15);box-shadow:0 0 14px rgba(0,255,65,.2)}
+.zones{display:grid;grid-template-columns:1fr 1fr;gap:4px;width:100%;max-width:340px;font-size:.62em}
+.zones div{border:1px solid rgba(0,255,65,.08);border-radius:4px;padding:4px;color:rgba(200,214,229,.5)}
+.zones b{color:#00ff41}
+.ghint{font-size:.6em;color:rgba(200,214,229,.3);margin-top:6px}
+</style>
+</head>
+<body>
+<div class="header">
+  <a href="/juegos.html" class="back">←</a>
+  <h1>🏎️ AUTO AL PISO</h1>
+  <span style="font-size:.55em;color:rgba(0,255,65,.4)">STREET SYSTEM</span>
+</div>
+<div style="width:100%;max-width:420px;display:flex;justify-content:center;margin-top:6px">
+  <button onclick="toggleLAN()" id="btnLAN" style="padding:6px 14px;border:1px solid rgba(0,200,255,.3);border-radius:8px;background:rgba(0,200,255,.05);color:#00c8ff;font-size:.62em;cursor:pointer;font-family:'Courier New',monospace">🌐 MODO LAN · controlá desde el celular</button>
+</div>
+<div id="lanPanel" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:50;background:rgba(6,9,7,.97);border:1px solid rgba(0,200,255,.4);border-radius:12px;padding:18px;min-width:260px;text-align:center;font-size:.72em">
+  <div style="color:#00c8ff;font-weight:700;letter-spacing:1px;margin-bottom:6px">🌐 MODO LAN</div>
+  <div style="color:rgba(255,255,255,.6);margin-bottom:6px">Usá el celular como mando:</div>
+  <div style="background:rgba(0,0,0,.5);border:1px dashed rgba(0,200,255,.3);border-radius:6px;padding:8px;margin-bottom:8px">
+    <div style="font-size:.55em;color:rgba(255,255,255,.4)">CÓDIGO DE SALA</div>
+    <div id="lanCode" style="font-size:1.6em;color:#00c8ff;letter-spacing:4px;font-weight:700">---</div>
+  </div>
+  <div style="font-size:.6em;color:rgba(255,255,255,.45);line-height:1.6">En el celular abrí <b style="color:#00c8ff">lan.html</b> y poné este código.<br>El mando tendrá d-pad y turbo.</div>
+  <button onclick="cerrarLAN()" style="margin-top:8px;padding:6px 12px;border:1px solid rgba(0,200,255,.4);border-radius:6px;background:transparent;color:#00c8ff;cursor:pointer;font-family:'Courier New',monospace;font-size:.7em;width:100%">✕ Cerrar sala</button>
+</div>
+
+<div class="wrap">
+  <canvas id="cv"></canvas>
+  <div class="hud" id="hud"></div>
+  <div class="district" id="district"></div>
+  <div class="thor" id="thor"><div class="t">🚨 THOR // ALERT</div><div class="m" id="thorMsg"></div></div>
+
+  <div class="screen" id="startScreen">
+    <h2>🏎️ AUTO AL PISO</h2>
+    <div class="sub">ZONAHACK // STREET SYSTEM</div>
+    <div class="sub">Conducí por <b>ZONA CITY</b> esquivando el tráfico y la policía. Cuidá el combustible y la temperatura del motor. Usá el TURBO con cuidado.</div>
+    <div class="zones">
+      <div>🏙️ <b>Centro</b></div><div>🛣️ <b>Autopista</b></div>
+      <div>🏘️ <b>Barrio</b></div><div>🏭 <b>Zona Industrial</b></div>
+      <div>🌆 <b>Distrito Neon</b></div><div>🎖️ <b>Zona Militar</b></div>
+      <div>🔴 <b>Zona Roja</b></div><div>🚨 <b>Persecución</b></div>
+    </div>
+    <div class="ghint">⌨️ Flechas/WASD mover · ⬆ acelera · ⬇ frena · SHIFT o ESPACIO = TURBO</div>
+    <button onclick="iniciar()">🚦 ARRANCAR</button>
+  </div>
+
+  <div class="screen" id="overScreen" style="display:none">
+    <h2 style="color:#e74c3c">💥 CHOQUE</h2>
+    <div class="sub" id="overMsg"></div>
+    <button onclick="iniciar()">🔄 REINTENTAR</button>
+    <a class="back" href="/juegos.html" style="font-size:.65em">← Volver a juegos</a>
+  </div>
+</div>
+
+<div class="ctrl" id="ctrlBar">
+  <button onpointerdown="steer(-1)" onpointerup="steer(0)" onpointerleave="steer(0)">◀</button>
+  <button onpointerdown="acel(true)" onpointerup="acel(false)">▲</button>
+  <button onpointerdown="fren(true)" onpointerup="fren(false)">▼</button>
+  <button onpointerdown="steer(1)" onpointerup="steer(0)" onpointerleave="steer(0)">▶</button>
+  <button onpointerdown="turboOn(true)" onpointerup="turboOn(false)">💨 TURBO</button>
+</div>
+
+<script>
+(function(){
+var cv=document.getElementById("cv"),ctx=cv.getContext("2d");
+var W=420,H=640;cv.width=W;cv.height=H;
+
+// ─── DISTRITOS ZONA CITY ───
+var DISTRITOS=[
+ {n:"🏙️ CENTRO",c:"#1a3a1a",hud:"#00ff41",km:0},
+ {n:"🛣️ AUTOPISTA",c:"#123",hud:"#4aa8ff",km:200},
+ {n:"🏘️ BARRIO",c:"#3a2a12",hud:"#f1c40f",km:500},
+ {n:"🏭 ZONA INDUSTRIAL",c:"#2a1a1a",hud:"#ff8c42",km:900},
+ {n:"🌆 DISTRITO NEON",c:"#1a0a2a",hud:"#ff4aff",km:1400},
+ {n:"🎖️ ZONA MILITAR",c:"#1a2a12",hud:"#7fff42",km:1900},
+ {n:"🔴 ZONA ROJA",c:"#2a0a0a",hud:"#ff3333",km:2500},
+];
+
+// ─── ESTADO ───
+var S=null,pid=0;
+function nuevoEstado(){
+  return {x:0.5, speed:0, maxSpeed:150, fuel:100, temp:60, turbo:100, damage:0, chase:0,
+    dist:0, km:0, score:0, over:false, running:false, steerDir:0, acelDir:0, turboOn:false,
+    trafico:[], pickups:[], police:0, shake:0, thorT:0};
+}
+
+function steer(d){if(S)S.steerDir=d;}
+function acel(b){if(S)S.acelDir=b?1:0;}
+function fren(b){if(S)S.acelDir=b?-1:0;}
+function turboOn(b){if(S)S.turboOn=b;}
+
+var keys={};
+document.addEventListener("keydown",function(e){
+  var k=e.key.toLowerCase();
+  if(["arrowleft","arrowright","arrowup","arrowdown"," ","shift"].indexOf(k)>=0)e.preventDefault();
+  keys[k]=true;
+  if(k==="arrowleft"||k==="a")S&&(S.steerDir=-1);
+  if(k==="arrowright"||k==="d")S&&(S.steerDir=1);
+  if(k==="arrowup"||k==="w")S&&(S.acelDir=1);
+  if(k==="arrowdown"||k==="s")S&&(S.acelDir=-1);
+  if(k===" "||k==="shift")S&&(S.turboOn=true);
+});
+document.addEventListener("keyup",function(e){
+  var k=e.key.toLowerCase();
+  if(k==="arrowleft"||k==="a")if(!keys.arrowright&&!keys.d)S&&(S.steerDir=0);
+  if(k==="arrowright"||k==="d")if(!keys.arrowleft&&!keys.a)S&&(S.steerDir=0);
+  if(k==="arrowup"||k==="w")S&&(S.acelDir=0);
+  if(k==="arrowdown"||k==="s")S&&(S.acelDir=0);
+  if(k===" "||k==="shift")S&&(S.turboOn=false);
+});
+
+// ─── THOR ASISTENTE ───
+function thor(msg){
+  if(!S||S.over)return;
+  document.getElementById("thorMsg").textContent=msg;
+  var t=document.getElementById("thor");
+  t.classList.add("show");
+  S.thorT=2.6;
+  if(pid%3===0)try{window._android&&window._android("toast","🚨 THOR: "+msg);}catch(e){}
+}
+function dibujarThor(){
+  if(S.thorT>0){S.thorT-=1/30;}
+  else{document.getElementById("thor").classList.remove("show");}
+}
+
+// ─── DISTRITO ───
+function distrito(){
+  var d=DISTRITOS[0];
+  for(var i=0;i<DISTRITOS.length;i++){if(S.km>=DISTRITOS[i].km)d=DISTRITOS[i];}
+  return d;
+}
+
+// ─── LOGICA ───
+function actualizar(){
+  if(!S||!S.running)return;
+  var turbo = S.turboOn && S.turbo>0;
+  var acel = S.acelDir;
+  // velocidad
+  if(turbo){S.speed=Math.min(S.speed+6,S.maxSpeed*1.5);S.turbo-=1.2;S.temp+=2.2;}
+  else if(acel===1){S.speed=Math.min(S.speed+1.6,S.maxSpeed);}
+  else if(acel===-1){S.speed=Math.max(S.speed-4,20);}
+  else{S.speed=Math.max(S.speed-0.6,60);}
+  // temperatura
+  if(turbo||S.speed>S.maxSpeed*0.8)S.temp=Math.min(S.temp+0.5,120);
+  else S.temp=Math.max(S.temp-0.6,45);
+  // combustible
+  S.fuel=Math.max(0,S.fuel-(0.02+S.speed*0.0007));
+  // persecucion aumenta
+  S.chase=Math.min(S.chase+0.006,100);
+  // movimiento lateral
+  S.x+=S.steerDir*(0.045+S.speed*0.0004);
+  S.x=Math.max(0.08,Math.min(0.92,S.x));
+  // avance
+  S.dist+=S.speed/3.6; S.km=Math.floor(S.dist/1000);
+  // spawn trafico
+  if(Math.random()<0.006+S.speed*0.00003){
+    S.trafico.push({lane:Math.floor(Math.random()*3),y:-40,spd:20+Math.random()*30,police:false});
+  }
+  // spawn policia si persecucion alta
+  if(S.chase>40 && Math.random()<0.003){
+    S.trafico.push({lane:Math.floor(Math.random()*3),y:-40,spd:S.speed*0.9,police:true});
+  }
+  // pickups
+  if(Math.random()<0.002&&S.fuel<80){
+    S.pickups.push({lane:Math.floor(Math.random()*3),y:-30});
+  }
+  // mover trafico
+  var laneX=[0.16,0.5,0.84];
+  for(var i=S.trafico.length-1;i>=0;i--){
+    var t=S.trafico[i];
+    t.y+=S.speed*0.8+t.spd;
+    if(t.y>H+50){S.trafico.splice(i,1);if(!t.police)S.score+=Math.floor(S.speed/2);continue;}
+    // colision
+    var px=(S.x-laneX[t.lane]);
+    if(Math.abs(px)<0.12&&Math.abs(t.y-470)<55){
+      S.damage+=t.police?22:12;
+      S.shake=12;
+      thor(t.police?"🚨 ¡Te chocó la policía!":"⚠️ ¡Impacto! Reducí la velocidad");
+      if(S.damage>=100){gameOver();return;}
+      S.trafico.splice(i,1);
+    }
+  }
+  // pickups
+  for(var i=S.pickups.length-1;i>=0;i--){
+    var p=S.pickups[i];p.y+=S.speed*0.8;
+    if(p.y>H+30){S.pickups.splice(i,1);continue;}
+    if(Math.abs(S.x-laneX[p.lane])<0.15&&Math.abs(p.y-470)<40){
+      S.fuel=Math.min(100,S.fuel+25);S.pickups.splice(i,1);thor("⛽ Combustible recargado");
+    }
+  }
+  // combustible vacio
+  if(S.fuel<=0){gameOver();return;}
+  // alertas THOR
+  if(Math.random()<0.006)thor("🚧 Tráfico detectado.");
+  if(Math.random()<0.004)thor("⚠️ Vehículo aproximándose.");
+  if(S.turbo>=95&&Math.random()<0.005)thor("💨 Turbo disponible. Usá SHIFT.");
+  if(S.temp>95&&Math.random()<0.01)thor("🌡️ Motor recalentando. Bajá la velocidad.");
+  if(S.fuel<20&&Math.random()<0.01)thor("⛽ Combustible bajo. Buscá combustible.");
+  if(S.chase>60&&Math.random()<0.01)thor("🚨 ¡Persecución nivel "+Math.floor(S.chase/20)+"! Cuidado.");
+  // cambio de distrito
+  var d=distrito();
+  var el=document.getElementById("district");
+  if(el.textContent!==d.n){el.textContent=d.n;el.style.color=d.hud;thor("🏙️ Entrando a: "+d.n);}
+}
+
+function gameOver(){
+  S.over=true;S.running=false;
+  var d=distrito();
+  document.getElementById("overMsg").innerHTML=
+    "Recorriste <b>"+S.km+" km</b> · Puntaje <b>"+Math.floor(S.score)+"</b><br>"+
+    "Distrito alcanzado: <b>"+d.n+"</b><br>Persecución: <b>"+Math.floor(S.chase)+"%</b>";
+  document.getElementById("overScreen").style.display="flex";
+}
+
+// ─── DIBUJO ───
+function dibujar(){
+  var d=distrito();
+  // fondo distrito
+  ctx.fillStyle=d.c;ctx.fillRect(0,0,W,H);
+  // calle
+  ctx.fillStyle="#111";ctx.fillRect(70,0,W-140,H);
+  ctx.strokeStyle=d.hud;ctx.globalAlpha=.3;
+  ctx.setLineDash([14,16]);
+  ctx.lineWidth=4;
+  var off=(S.dist/8)%30;
+  for(var y=-30+off;y<H;y+=30){ctx.beginPath();ctx.moveTo(W/2,y);ctx.lineTo(W/2,y+16);ctx.stroke();}
+  ctx.setLineDash([]);ctx.globalAlpha=1;
+  ctx.fillStyle=d.hud;ctx.fillRect(74,0,3,H);ctx.fillRect(W-77,0,3,H);
+  // pickups
+  var laneX=[0.16,0.5,0.84];
+  S.pickups.forEach(function(p){
+    ctx.fillStyle="#f1c40f";ctx.beginPath();ctx.arc(laneX[p.lane]*W,p.y,9,0,7);ctx.fill();
+    ctx.fillStyle="#000";ctx.font="bold 12px monospace";ctx.textAlign="center";
+    ctx.fillText("⛽",laneX[p.lane]*W,p.y+4);
+  });
+  // trafico
+  S.trafico.forEach(function(t){
+    ctx.fillStyle=t.police?"#e74c3c":"#8a8a8a";
+    ctx.fillRect(laneX[t.lane]*W-16,t.y-28,32,56);
+    ctx.fillStyle="#222";ctx.fillRect(laneX[t.lane]*W-12,t.y-22,10,10);ctx.fillRect(laneX[t.lane]*W+2,t.y-22,10,10);
+    if(t.police){ctx.fillStyle="#fff";ctx.font="bold 10px monospace";ctx.textAlign="center";ctx.fillText("🚨",laneX[t.lane]*W,t.y+18);}
+  });
+  // jugador
+  var x=S.x*W;
+  ctx.save();
+  if(S.shake>0){ctx.translate((Math.random()-0.5)*S.shake,(Math.random()-0.5)*S.shake);S.shake=Math.max(0,S.shake-1);}
+  // turbo flame
+  if(S.turboOn&&S.turbo>0){ctx.fillStyle="rgba(255,120,0,.8)";ctx.beginPath();ctx.moveTo(x-8,540);ctx.lineTo(x,570);ctx.lineTo(x+8,540);ctx.closePath();ctx.fill();}
+  ctx.fillStyle=S.damage>70?"#c0392b":"#00ccff";
+  ctx.fillRect(x-17,440,34,60);
+  ctx.fillStyle="#222";ctx.fillRect(x-10,450,20,8);ctx.fillRect(x-10,478,20,8);
+  ctx.fillStyle="#fff";ctx.fillRect(x-14,442,6,6);ctx.fillRect(x+8,442,6,6);
+  ctx.restore();
+  // hud
+  pintarHUD(d);
+  dibujarThor();
+}
+
+function pintarHUD(d){
+  var h=document.getElementById("hud");
+  var turboW=Math.max(0,S.turbo);
+  h.innerHTML=
+   '<div class="b"><span class="lab">VELOCIDAD</span> <span class="val">'+Math.floor(S.speed)+' km/h</span><div class="bar'+(S.speed>S.maxSpeed*0.9?' danger':'')+'"><i style="width:'+(S.speed/(S.maxSpeed*1.5)*100)+'%"></i></div></div>'+
+   '<div class="b"><span class="lab">COMBUSTIBLE</span> <span class="val">'+Math.floor(S.fuel)+'%</span><div class="bar'+(S.fuel<20?' danger':S.fuel<40?' warn':'')+'"><i style="width:'+S.fuel+'%"></i></div></div>'+
+   '<div class="b"><span class="lab">MOTOR</span> <span class="val">'+Math.floor(S.temp)+'°</span><div class="bar'+(S.temp>95?' danger':S.temp>80?' warn':'')+'"><i style="width:'+Math.min(100,S.temp)+'%"></i></div></div>'+
+   '<div class="b"><span class="lab">TURBO</span> <span class="val">'+(S.turboOn&&S.turbo>0?'💨':'')+Math.floor(turboW)+'%</span><div class="bar'+(S.turbo<20?' warn':'')+'"><i style="width:'+turboW+'%"></i></div></div>'+
+   '<div class="b"><span class="lab">DAÑO</span> <span class="val">'+Math.floor(S.damage)+'%</span><div class="bar'+(S.damage>70?' danger':S.damage>40?' warn':'')+'"><i style="width:'+S.damage+'%"></i></div></div>'+
+   '<div class="b"><span class="lab">PERSECUCIÓN</span> <span class="val">🚨'+Math.floor(S.chase)+'%</span><div class="bar'+(S.chase>60?' danger':'')+'"><i style="width:'+S.chase+'%"></i></div></div>'+
+   '<div class="b" style="grid-column:1/-1"><span class="lab">KM</span> <span class="val">'+S.km+' km</span> · <span class="lab">PTS</span> <span class="val">'+Math.floor(S.score)+'</span></div>';
+}
+
+// ─── BUCLE ───
+function bucle(){
+  actualizar();
+  if(S&&S.running)dibujar();
+  requestAnimationFrame(bucle);
+}
+
+function iniciar(){
+  document.getElementById("startScreen").style.display="none";
+  document.getElementById("overScreen").style.display="none";
+  S=nuevoEstado();S.running=true;
+  thor("🏁 ¡A fondo! Bienvenido a Zona City");
+  setTimeout(function(){if(S)thor("🚨 THOR a tu servicio. Cuidá el motor y el turbo.");},2500);
+}
+
+bucle();
+
+// Exponer funciones para los botones onclick/onpointerdown
+window.iniciar=iniciar;
+window.steer=steer;
+window.acel=acel;
+window.fren=fren;
+window.turboOn=turboOn;
+window.toggleLAN=toggleLAN;
+window.cerrarLAN=cerrarLAN;
+
+// ─── MODO LAN (host del juego) ───
+var LAN_SB="https://xfwolaurpeofysnymqle.supabase.co/rest/v1";
+var LAN_KEY="sb_publishable_3VvBUD5Bdu3Uaq59fJ99MQ_XDCtujUU";
+var LAN_H={"apikey":LAN_KEY,"Authorization":"Bearer "+LAN_KEY,"Content-Type":"application/json","Prefer":"return=minimal"};
+var lanRoom="",lanLastId=0,lanTimer=null;
+function toggleLAN(){
+  if(lanRoom){cerrarLAN();return;}
+  var code="ZH"+Math.floor(1000+Math.random()*9000);
+  lanRoom=code;lanLastId=0;
+  try{var u=localStorage.getItem("vh_usuario")||"anon";
+  fetch(LAN_SB+"/lan_rooms",{method:"POST",headers:Object.assign({},LAN_H,{"Prefer":"resolution=merge-duplicates,return=minimal"}),body:JSON.stringify({code:code,mode:"game",host:u})}).catch(function(){});}catch(e){}
+  var p=document.getElementById("lanPanel");if(p)p.style.display="block";
+  var c=document.getElementById("lanCode");if(c)c.textContent=code;
+  var b=document.getElementById("btnLAN");if(b){b.textContent="🌐 Sala activa: "+code;b.style.color="#ff0044";}
+  clearInterval(lanTimer);
+  lanTimer=setInterval(escucharLAN,120);
+}
+function cerrarLAN(){
+  lanRoom="";lanLastId=0;
+  if(lanTimer){clearInterval(lanTimer);lanTimer=null;}
+  var p=document.getElementById("lanPanel");if(p)p.style.display="none";
+  var b=document.getElementById("btnLAN");if(b){b.textContent="🌐 MODO LAN · controlá desde el celular";b.style.color="#00c8ff";}
+}
+function escucharLAN(){
+  if(!lanRoom)return;
+  fetch(LAN_SB+"/lan_commands?select=id,cmd,data&room=eq."+encodeURIComponent(lanRoom)+"&id=gt."+lanLastId+"&order=id.asc&limit=60",{headers:LAN_H})
+  .then(function(r){return r.json();}).then(function(d){
+    (d||[]).forEach(function(c){lanLastId=Math.max(lanLastId,c.id);try{window.ZHLAN(c.cmd,JSON.parse(c.data||"{}"));}catch(e){}});
+  }).catch(function(){});
+}
+window.ZHLAN=function(cmd,data){
+  if(cmd!=="game"||!data)return;
+  if(typeof data.left==="number"||typeof data.right==="number"){
+    var l=data.left||0,r=data.right||0;
+    window.steer(l-r);
+  }
+  if(typeof data.acel==="number"){
+    if(data.acel>0)window.acel(true);
+    else if(data.acel<0)window.fren(true);
+    else window.acel(false);
+  }
+  if(typeof data.turbo==="number")window.turboOn(data.turbo>0);
+};
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>🧪 Zona de Pruebas de Robots · ZonaHack</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#07090e;--card:rgba(13,17,23,.92);--border:#1c2531;--text:#d7e2ef;--muted:#6d7f93;--accent:#2ee6a8;--violet:#7a5cff;--gold:#f1c40f;--pink:#ff5ec4}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh}
+.bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.orb{position:absolute;border-radius:50%;filter:blur(90px);opacity:.3;animation:flotar 18s ease-in-out infinite}
+.orb1{width:460px;height:460px;background:radial-gradient(circle,rgba(46,230,168,.15),transparent 70%);top:-170px;right:-120px}
+.orb2{width:500px;height:500px;background:radial-gradient(circle,rgba(255,94,196,.14),transparent 70%);bottom:-200px;left:-160px;animation-delay:-7s}
+@keyframes flotar{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(20px,-14px) scale(1.08)}}
+@keyframes tp{0%,100%{opacity:.25}50%{opacity:1}}
+.com-card{border:1px solid var(--border);border-radius:12px;padding:10px 12px;cursor:pointer;transition:.15s;background:rgba(0,0,0,.2)}
+.com-card:hover{border-color:var(--accent);background:rgba(46,230,168,.06)}
+.com-card .t{font-size:.76em;font-weight:800}
+.com-card .s{font-size:.6em;color:var(--muted);margin-top:3px}
+.com-card .new{color:var(--gold);font-size:.55em;margin-left:6px}
+.header{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border);background:rgba(7,9,14,.92);backdrop-filter:blur(10px);position:sticky;top:0;z-index:100}
+.logo{width:40px;height:40px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px;background:linear-gradient(135deg,rgba(46,230,168,.25),rgba(255,94,196,.25));border:1px solid rgba(46,230,168,.4)}
+.ttl{flex:1;min-width:0}
+.ttl h1{font-size:.95em;letter-spacing:2px;font-weight:900;font-family:'Courier New',monospace;color:#fff}
+.ttl span{font-size:.6em;color:var(--muted)}
+.back{color:var(--accent);text-decoration:none;font-size:.7em;padding:6px 10px;border:1px solid var(--border);border-radius:8px}
+.container{max-width:860px;margin:0 auto;padding:16px 14px 50px;position:relative;z-index:1}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:14px}
+.card h3{font-size:.8em;letter-spacing:1px;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+label{display:block;font-size:.62em;color:var(--muted);margin:8px 0 3px}
+input{width:100%;background:rgba(0,0,0,.4);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:10px 12px;font-size:.8em;outline:none;font-family:inherit}
+input:focus{border-color:var(--accent)}
+.btn{background:linear-gradient(135deg,#2ee6a8,#7a5cff);color:#03140a;border:none;border-radius:10px;padding:11px 18px;font-weight:800;font-size:.74em;cursor:pointer;font-family:inherit;margin-top:10px}
+.btn.ghost{background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--text)}
+.btn:active{transform:scale(.96)}
+.fila{display:flex;gap:8px}
+.fila input{flex:1}
+.regla{display:flex;gap:6px;align-items:center;margin-top:6px;font-size:.7em;border:1px solid var(--border);border-radius:10px;padding:7px 10px;background:rgba(0,0,0,.25)}
+.regla .k{color:var(--accent);font-weight:800;min-width:120px}
+.regla .r{flex:1;color:var(--muted)}
+.regla button{background:none;border:none;color:var(--red,#ff5a5a);cursor:pointer;font-size:.85em}
+.chat{height:260px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding:10px;border:1px solid var(--border);border-radius:12px;background:rgba(0,0,0,.3);margin-top:10px}
+.msg{max-width:85%;padding:8px 12px;border-radius:12px;font-size:.76em;line-height:1.5;white-space:pre-wrap}
+.msg.bot{align-self:flex-start;background:var(--card);border:1px solid var(--border)}
+.msg.user{align-self:flex-end;background:linear-gradient(135deg,rgba(46,230,168,.15),rgba(122,92,255,.15));border:1px solid rgba(46,230,168,.25)}
+.ep{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.ep .btn{width:100%;text-align:left;margin-top:0;white-space:normal}
+.ep small{display:block;font-size:.58em;color:var(--muted);margin-top:3px}
+pre{background:rgba(0,0,0,.4);border:1px solid var(--border);border-radius:10px;padding:10px;font-size:.66em;max-height:180px;overflow:auto;margin-top:10px;white-space:pre-wrap;word-break:break-all}
+.tunnel{background:rgba(46,230,168,.06);border:1px solid rgba(46,230,168,.25);border-radius:12px;padding:12px;font-size:.72em;line-height:1.7}
+.tunnel code{background:rgba(0,0,0,.4);padding:2px 6px;border-radius:6px;color:var(--accent)}
+</style>
+</head>
+<body>
+<div class="bg"><div class="orb orb1"></div><div class="orb orb2"></div></div>
+
+<div class="header">
+  <div class="logo">🧪</div>
+  <div class="ttl"><h1>ZONA DE PRUEBAS DE ROBOTS</h1><span>laboratorio gratis · sin APIs · para internet</span></div>
+  <a href="/" class="back">←</a>
+</div>
+
+<div class="container">
+  <div class="card">
+    <h3>🤖 CREADOR DE ROBOTS (probalos al toque)</h3>
+    <div class="fila">
+      <div style="flex:1"><label>Nombre</label><input id="rNom" placeholder="Ej: Boti"></div>
+      <div style="flex:.6"><label>Emoji</label><input id="rEmo" placeholder="🤖"></div>
+    </div>
+
+    <div class="tunnel" style="margin:10px 0" id="colabBox">
+      <div id="colabOff">
+        <b>👥 Armar este robot con un amigo, en vivo:</b><br>
+        <div class="fila" style="margin-top:6px">
+          <button class="btn ghost" style="margin-top:0" onclick="crearColab()">➕ Crear sala para invitar</button>
+          <input id="colabCodigoInp" placeholder="o pegá un código (ej: BOT-AB12C)" style="flex:1">
+          <button class="btn ghost" style="margin-top:0" onclick="unirseColab()">Unirme</button>
+        </div>
+      </div>
+      <div id="colabOn" style="display:none">
+        <span id="colabDot" style="width:7px;height:7px;border-radius:50%;background:var(--accent);display:inline-block;animation:tp 1.4s infinite;margin-right:6px"></span>
+        <b>Editando en vivo</b> — código: <code id="colabCodigoTxt"></code>
+        <span style="cursor:pointer;color:var(--accent)" onclick="copiarCodigoColab()">📋 copiar</span>
+        · <span id="colabQuien"></span>
+        · <span style="cursor:pointer;color:#ff5a5a" onclick="salirColab()">salir</span>
+      </div>
+    </div>
+
+    <label>Reglas (palabras → respuestas). Separá varias palabras clave y varias respuestas con coma "," — el robot elige una respuesta al azar sin repetir la última:</label>
+    <div class="fila">
+      <input id="regK" placeholder="palabras (ej: hola, buenas, hey)">
+      <input id="regR" placeholder="respuestas (ej: ¡Hola!, ¿Qué tal?, Hey, ¿cómo va?)">
+      <button class="btn ghost" style="margin-top:0" onclick="agregarRegla()">➕</button>
+    </div>
+    <div style="font-size:.58em;color:var(--muted);margin-top:4px">💡 Usá <code style="background:rgba(0,0,0,.4);padding:1px 5px;border-radius:5px;color:var(--accent)">{nombre}</code> para el nombre de quien escribe. Y si una respuesta empieza con <code style="background:rgba(0,0,0,.4);padding:1px 5px;border-radius:5px;color:var(--accent)">js:</code> el robot EJECUTA ese código de verdad (ej: <code style="background:rgba(0,0,0,.4);padding:1px 5px;border-radius:5px;color:var(--accent)">js: 2+2</code> o <code style="background:rgba(0,0,0,.4);padding:1px 5px;border-radius:5px;color:var(--accent)">js: new Date().toLocaleDateString()</code>).</div>
+    <div id="reglas"></div>
+    <div class="chat" id="chat"></div>
+    <div class="fila" style="margin-top:8px">
+      <input id="msgInp" placeholder="Probá tu robot..." onkeydown="if(event.key==='Enter')probar()">
+      <button class="btn" style="margin-top:0" onclick="probar()">ENVIAR</button>
+      <button class="btn ghost" style="margin-top:0" onclick="reiniciarRobot()">🗑</button>
+    </div>
+    <button class="btn" style="width:100%" onclick="publicarRobot()">📤 Publicar mi robot para todos</button>
+    <div id="publicarMsg" style="font-size:.6em;color:var(--muted);margin-top:6px;min-height:14px"></div>
+  </div>
+
+  <div class="card">
+    <h3>🌐 ROBOTS DE LA COMUNIDAD <span id="liveDot" style="width:7px;height:7px;border-radius:50%;background:var(--accent);display:inline-block;animation:tp 1.4s infinite"></span></h3>
+    <div style="font-size:.6em;color:var(--muted);margin-bottom:8px">Robots que publicó otra gente — se actualiza solo, tocá uno para cargarlo y chatear con él</div>
+    <div class="ep" id="comunidadGrid"><div style="font-size:.62em;color:var(--muted)">Cargando...</div></div>
+  </div>
+
+  <div class="card">
+    <h3>⚙️ PROBAR ENDPOINTS (gratis, sin API)</h3>
+    <div class="ep">
+      <button class="btn ghost" onclick="probarEp('/api/test')">🧪 /api/test<small>estado del servidor</small></button>
+      <button class="btn ghost" onclick="probarEp('/api/amor?n=3')">💘 /api/amor<small>frases de amor scrapeadas</small></button>
+      <button class="btn ghost" onclick="probarEp('/api/auto?q=que%20es%20python')">🤖 /api/auto<small>robot que busca solo</small></button>
+      <button class="btn ghost" onclick="probarEp('/api/scrape?url=https%3A%2F%2Fes.wikipedia.org%2Fwiki%2FPerro')">📄 /api/scrape<small>lee una página</small></button>
+      <button class="btn ghost" onclick="probarEp('/api/search?q=pelicula')">🔍 /api/search<small>busca en YouTube</small></button>
+      <button class="btn ghost" onclick="probarEp('/api/anime?action=top')">🍥 /api/anime<small>anime popular</small></button>
+    </div>
+    <pre id="out">Tocá un botón para probar un endpoint...</pre>
+  </div>
+
+  <div class="card">
+    <h3>🌐 EXPONERLO POR INTERNET (gratis)</h3>
+    <div class="tunnel">
+      1️⃣ Corré tu servidor: <code>python local_server.py --db sqlite --seed</code><br>
+      2️⃣ Exponélo con un túnel GRATIS (Cloudflare):
+      <code>cloudflared tunnel --url http://localhost:8080</code><br>
+      3️⃣ Cloudflare te da una URL pública tipo <code>https://xxxxx.trycloudflare.com</code> — abrí
+      <code>https://xxxxx.trycloudflare.com/pruebas_robots.html</code> desde cualquier parte. 🌍<br><br>
+      💡 Si no tenés cloudflared: descargalo gratis de <code>https://github.com/cloudflare/cloudflared/releases</code>
+      (o usá <code>internet.bat</code> que arranca servidor + túnel juntos).
+    </div>
+  </div>
+</div>
+
+<script>
+function $(id){return document.getElementById(id);}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+
+// ─── CREADOR DE ROBOTS (todo local: reglas, memoria y variedad, sin API) ───
+var LS_ROBOT="zh_robot_pruebas";
+function cargarRobotGuardado(){
+  try{
+    var s=JSON.parse(localStorage.getItem(LS_ROBOT)||"{}");
+    if(s.nom)$("rNom").value=s.nom;
+    if(s.emo)$("rEmo").value=s.emo;
+    return {reglas:s.reglas||[],memoria:s.memoria||{}};
+  }catch(e){ return {reglas:[],memoria:{}}; }
+}
+function guardarRobot(){
+  try{ localStorage.setItem(LS_ROBOT,JSON.stringify({nom:$("rNom").value,emo:$("rEmo").value,reglas:reglas,memoria:memoria})); }catch(e){}
+}
+var _cargado=cargarRobotGuardado();
+var reglas=_cargado.reglas;
+var memoria=_cargado.memoria;
+
+function agregarRegla(){
+  var k=$("regK").value.trim().toLowerCase(), r=$("regR").value.trim();
+  if(!k||!r)return;
+  var keys=k.split(",").map(function(x){return x.trim();}).filter(Boolean);
+  var resps=r.split(",").map(function(x){return x.trim();}).filter(Boolean);
+  if(!keys.length||!resps.length)return;
+  reglas.push({k:keys,r:resps});
+  $("regK").value=""; $("regR").value="";
+  pintarReglas();
+  guardarRobot();
+  sincronizarColabSiActivo();
+}
+function pintarReglas(){
+  var el=$("reglas");
+  el.innerHTML=reglas.map(function(x,i){
+    return '<div class="regla"><span class="k">'+esc(x.k.join(", "))+'</span><span class="r">'+esc(x.r.join(" | "))+'</span><button onclick="quitarRegla('+i+')">✕</button></div>';
+  }).join('')||'<div style="font-size:.62em;color:var(--muted)">Sin reglas todavía. Agregá algunas para probar el robot (o probalo igual: ya entiende saludos, cómo estás, gracias y despedidas por su cuenta).</div>';
+}
+function quitarRegla(i){ reglas.splice(i,1); pintarReglas(); guardarRobot(); sincronizarColabSiActivo(); }
+window.reiniciarRobot=function(){
+  reglas=[]; memoria={};
+  try{ localStorage.removeItem(LS_ROBOT); }catch(e){}
+  pintarReglas();
+  $("chat").innerHTML="";
+};
+function chat(msg,quien){
+  var c=$("chat"); var d=document.createElement("div"); d.className="msg "+quien;
+  d.textContent=msg; c.appendChild(d); c.scrollTop=c.scrollHeight;
+  return d;
+}
+// Elige una respuesta sin repetir la ultima usada en esa misma regla
+var _ultimaResp={};
+function elegirRespuesta(idx,arr){
+  var texto=arr.length===1?arr[0]:(function(){
+    var opciones=arr.filter(function(x){return x!==_ultimaResp[idx];});
+    if(!opciones.length)opciones=arr;
+    return opciones[Math.floor(Math.random()*opciones.length)];
+  })();
+  _ultimaResp[idx]=texto;
+  return texto.replace(/\{nombre\}/gi, memoria.nombre||"amigo/a");
+}
+// Base de intelencia minima aunque el usuario no haya cargado reglas propias
+var BASE=[
+  {k:["hola","buenas","hey","buen dia","buenos dias"],r:["¡Hola! 😊","Hey, ¿qué tal?","Buenas, ¿en qué te ayudo?"]},
+  {k:["como estas","como andas","que tal"],r:["¡Todo bien! ¿Y vos?","Acá, funcionando 🤖","Bien, gracias por preguntar"]},
+  {k:["gracias"],r:["¡De nada! 😊","Para eso estoy","Un placer ayudarte"]},
+  {k:["chau","adios","hasta luego","nos vemos","bye"],r:["¡Chau! Que andes bien","Nos vemos 👋","Hasta la próxima"]},
+  {k:["quien sos","qué sos","que sos","quien eres"],r:["Soy un robot que armaste vos mismo/a en esta página 🤖","Soy tu creación, ¡decime cómo querés que sea!"]},
+];
+function responderRobot(m){
+  var t=m.toLowerCase();
+  // aprender el nombre si lo dice
+  var mn=m.match(/me llamo\s+([a-záéíóúñü]+)/i)||m.match(/mi nombre es\s+([a-záéíóúñü]+)/i);
+  if(mn){
+    memoria.nombre=mn[1].charAt(0).toUpperCase()+mn[1].slice(1);
+    guardarRobot();
+    return "¡Un gusto, "+memoria.nombre+"! 🤖 Ya te voy a reconocer.";
+  }
+  // 1) reglas del usuario (prioridad, y prefiere la palabra clave mas larga/especifica)
+  var mejor=null, mejorLen=-1;
+  for(var i=0;i<reglas.length;i++){
+    for(var j=0;j<reglas[i].k.length;j++){
+      var kw=reglas[i].k[j];
+      if(kw&&t.indexOf(kw)>=0&&kw.length>mejorLen){ mejor=i; mejorLen=kw.length; }
+    }
+  }
+  if(mejor!==null) return elegirRespuesta("u"+mejor,reglas[mejor].r);
+  // 2) base minima (saludos, cortesia, despedidas)
+  for(var b=0;b<BASE.length;b++){
+    for(var c2=0;c2<BASE[b].k.length;c2++){
+      if(t.indexOf(BASE[b].k[c2])>=0) return elegirRespuesta("b"+b,BASE[b].r);
+    }
+  }
+  // 3) no entiende -> invita a enseñarle
+  var def=[($("rNom").value||"Tu robot")+" no tiene una regla para eso todavía. ¡Agregá una arriba! 📝","No te entendí bien... ¿me enseñás qué responder acá? 🤔","Todavía no aprendí eso. Agregá una regla con esa palabra y probá de nuevo."];
+  return elegirRespuesta("def",def);
+}
+
+// ─── LINEAS DE CODIGO: si una respuesta empieza con "js:" se ejecuta de verdad ───
+// (Worker aislado y con tiempo limite; sin eval — asi funciona bajo la CSP del sitio)
+function ejecutarLineaJS(codigo){
+  return new Promise(function(resolve){
+    var workerSrc=
+      'try{'+
+      '  var __r=(function(){ return ('+codigo+'); })();'+
+      '  postMessage({ok:true,r:(typeof __r==="object"&&__r!==null)?JSON.stringify(__r):String(__r)});'+
+      '}catch(e){ postMessage({ok:false,r:String(e)}); }';
+    var w,url;
+    try{
+      var blob=new Blob([workerSrc],{type:"application/javascript"});
+      url=URL.createObjectURL(blob);
+      w=new Worker(url);
+    }catch(e){ resolve("⚠️ No pude ejecutar ese código: "+e.message); return; }
+    function limpiar(){ try{w.terminate();}catch(e){} try{URL.revokeObjectURL(url);}catch(e){} }
+    var watchdog=setTimeout(function(){ limpiar(); resolve("⏱️ El código tardó demasiado (¿bucle infinito?)"); },3000);
+    w.onmessage=function(ev){
+      clearTimeout(watchdog); limpiar();
+      resolve(ev.data.ok?String(ev.data.r):"⚠️ Error en el código: "+ev.data.r);
+    };
+    w.onerror=function(ev){
+      clearTimeout(watchdog); limpiar();
+      resolve("⚠️ Error: "+(ev.message||"desconocido"));
+    };
+  });
+}
+function probar(){
+  var m=$("msgInp").value.trim(); if(!m)return;
+  $("msgInp").value="";
+  chat(m,"user");
+  setTimeout(function(){
+    var resp=responderRobot(m);
+    var mCod=/^js:\s*([\s\S]+)/i.exec(resp);
+    if(mCod){
+      var d=chat("⏳ ejecutando código...","bot");
+      ejecutarLineaJS(mCod[1]).then(function(resultado){ d.textContent=resultado; });
+    }else{
+      chat(resp,"bot");
+    }
+  },500);
+}
+pintarReglas();
+$("rNom").addEventListener("input",function(){ guardarRobot(); sincronizarColabSiActivo(); });
+$("rEmo").addEventListener("input",function(){ guardarRobot(); sincronizarColabSiActivo(); });
+
+// ─── ARMAR UN ROBOT CON UN AMIGO, EN VIVO (misma tabla que se comparte por código) ───
+var COLAB_URL="https://xfwolaurpeofysnymqle.supabase.co/rest/v1/robots_colaborativos";
+var COLAB_H={"apikey":"sb_publishable_3VvBUD5Bdu3Uaq59fJ99MQ_XDCtujUU","Authorization":"Bearer sb_publishable_3VvBUD5Bdu3Uaq59fJ99MQ_XDCtujUU","Content-Type":"application/json"};
+var _colabId=null,_colabCodigo=null,_colabUpdatedAt=null,_colabInterval=null,_colabSyncing=false;
+
+function mostrarColabUI(codigo,participantes){
+  $("colabOff").style.display="none";
+  $("colabOn").style.display="block";
+  $("colabCodigoTxt").textContent=codigo;
+  $("colabQuien").textContent="con: "+(participantes||[]).join(", ");
+}
+function ocultarColabUI(){
+  $("colabOff").style.display="block";
+  $("colabOn").style.display="none";
+}
+window.crearColab=function(){
+  var codigo="BOT-"+Math.random().toString(36).slice(2,7).toUpperCase();
+  var yo=nombreUsuario();
+  fetch(COLAB_URL,{method:"POST",headers:Object.assign({},COLAB_H,{"Prefer":"return=representation"}),body:JSON.stringify({
+    codigo:codigo, nombre:$("rNom").value||"Robot en equipo", emoji:$("rEmo").value||"🤖",
+    reglas:reglas, creador_nombre:yo, participantes:[yo]
+  })}).then(function(r){return r.json();}).then(function(rows){
+    var row=rows&&rows[0];
+    if(!row){ alert("No se pudo crear la sala. ¿Ya está creada la tabla robots_colaborativos en Supabase?"); return; }
+    _colabId=row.id; _colabCodigo=codigo; _colabUpdatedAt=row.updated_at;
+    mostrarColabUI(codigo,[yo]);
+    if(_colabInterval)clearInterval(_colabInterval);
+    _colabInterval=setInterval(pullColab,2500);
+  }).catch(function(){ alert("No se pudo crear la sala colaborativa."); });
+};
+window.unirseColab=function(){
+  var codigo=($("colabCodigoInp").value||"").trim().toUpperCase();
+  if(!codigo)return;
+  fetch(COLAB_URL+"?codigo=eq."+encodeURIComponent(codigo),{headers:COLAB_H}).then(function(r){return r.json();}).then(function(rows){
+    var row=rows&&rows[0];
+    if(!row){ alert("No encontré esa sala. Revisá el código."); return; }
+    var yo=nombreUsuario();
+    var participantes=row.participantes||[];
+    if(participantes.indexOf(yo)<0)participantes.push(yo);
+    _colabId=row.id; _colabCodigo=codigo; _colabUpdatedAt=row.updated_at;
+    $("rNom").value=row.nombre||"Robot en equipo";
+    $("rEmo").value=row.emoji||"🤖";
+    reglas=(row.reglas||[]).map(function(x){return {k:x.k||[],r:x.r||[]};});
+    guardarRobot(); pintarReglas(); $("chat").innerHTML="";
+    mostrarColabUI(codigo,participantes);
+    fetch(COLAB_URL+"?id=eq."+row.id,{method:"PATCH",headers:COLAB_H,body:JSON.stringify({participantes:participantes,updated_at:new Date().toISOString()})}).catch(function(){});
+    if(_colabInterval)clearInterval(_colabInterval);
+    _colabInterval=setInterval(pullColab,2500);
+  }).catch(function(){ alert("No se pudo unir a la sala."); });
+};
+window.salirColab=function(){
+  if(_colabInterval){clearInterval(_colabInterval);_colabInterval=null;}
+  _colabId=null;_colabCodigo=null;_colabUpdatedAt=null;
+  ocultarColabUI();
+};
+window.copiarCodigoColab=function(){
+  if(!_colabCodigo)return;
+  try{ navigator.clipboard.writeText(_colabCodigo); }catch(e){}
+};
+function sincronizarColabSiActivo(){
+  if(!_colabId||_colabSyncing)return;
+  var iso=new Date().toISOString();
+  _colabUpdatedAt=iso; // asumimos que este cambio es el mas nuevo, para no re-tirar nuestro propio eco
+  fetch(COLAB_URL+"?id=eq."+_colabId,{method:"PATCH",headers:COLAB_H,body:JSON.stringify({
+    nombre:$("rNom").value||"Robot en equipo", emoji:$("rEmo").value||"🤖", reglas:reglas, updated_at:iso
+  })}).catch(function(){});
+}
+function pullColab(){
+  if(!_colabId||_colabSyncing)return;
+  fetch(COLAB_URL+"?id=eq."+_colabId+"&select=nombre,emoji,reglas,updated_at,participantes",{headers:COLAB_H}).then(function(r){return r.json();}).then(function(rows){
+    var row=rows&&rows[0];
+    if(!row)return;
+    if(row.updated_at===_colabUpdatedAt)return; // no cambio nadie mas desde la ultima vez
+    _colabSyncing=true;
+    _colabUpdatedAt=row.updated_at;
+    $("rNom").value=row.nombre||"Robot en equipo";
+    $("rEmo").value=row.emoji||"🤖";
+    reglas=(row.reglas||[]).map(function(x){return {k:x.k||[],r:x.r||[]};});
+    guardarRobot(); pintarReglas();
+    $("colabQuien").textContent="con: "+(row.participantes||[]).join(", ");
+    _colabSyncing=false;
+  }).catch(function(){});
+}
+
+// ─── ROBOTS DE LA COMUNIDAD (compartidos entre todos, se actualiza solo) ───
+var SB_URL="https://xfwolaurpeofysnymqle.supabase.co/rest/v1/robots_comunidad";
+var SB_H={"apikey":"sb_publishable_3VvBUD5Bdu3Uaq59fJ99MQ_XDCtujUU","Authorization":"Bearer sb_publishable_3VvBUD5Bdu3Uaq59fJ99MQ_XDCtujUU","Content-Type":"application/json"};
+var _comunidadVista=0; // cantidad de robots que ya vio esta sesion (para marcar "nuevo")
+function nombreUsuario(){
+  var u=localStorage.getItem("vh_usuario");
+  if(u&&u!=="anon")return u;
+  var g=localStorage.getItem("zh_robot_invitado");
+  if(!g){ g="Invitado_"+Math.random().toString(36).slice(2,6); localStorage.setItem("zh_robot_invitado",g); }
+  return g;
+}
+window.publicarRobot=function(){
+  var nom=($("rNom").value||"").trim();
+  var msg=$("publicarMsg");
+  if(!nom){ msg.textContent="⚠️ Ponele un nombre a tu robot primero"; msg.style.color="#ff5a5a"; return; }
+  if(!reglas.length){ msg.textContent="⚠️ Agregá al menos una regla antes de publicarlo"; msg.style.color="#ff5a5a"; return; }
+  msg.textContent="⏳ Publicando..."; msg.style.color="var(--muted)";
+  fetch(SB_URL,{method:"POST",headers:Object.assign({},SB_H,{"Prefer":"return=minimal"}),body:JSON.stringify({
+    usuario_nombre:nombreUsuario(), nombre:nom.slice(0,40), emoji:($("rEmo").value||"🤖").slice(0,4), reglas:reglas, usos:0
+  })}).then(function(r){
+    if(!r.ok)throw new Error("HTTP "+r.status);
+    msg.textContent="✅ ¡Publicado! Ya lo pueden ver los demás."; msg.style.color="var(--accent)";
+    cargarComunidad();
+  }).catch(function(){
+    msg.textContent="❌ No se pudo publicar (¿ya está creada la tabla robots_comunidad en Supabase?)"; msg.style.color="#ff5a5a";
+  });
+};
+function cargarComunidad(){
+  fetch(SB_URL+"?select=id,usuario_nombre,nombre,emoji,reglas,usos,created_at&order=created_at.desc&limit=30",{headers:SB_H})
+  .then(function(r){return r.json();})
+  .then(function(rows){
+    var el=$("comunidadGrid");
+    if(!rows||!Array.isArray(rows)){ el.innerHTML='<div style="font-size:.62em;color:var(--muted)">Todavía no hay robots publicados. ¡Sé el primero!</div>'; return; }
+    if(!rows.length){ el.innerHTML='<div style="font-size:.62em;color:var(--muted)">Todavía no hay robots publicados. ¡Sé el primero!</div>'; return; }
+    el.innerHTML=rows.map(function(r,i){
+      var esNuevo=_comunidadVista>0 && i<rows.length && r.id> (window._ultimoIdVisto||0);
+      return '<div class="com-card" onclick="cargarRobotComunidad('+r.id+')">'+
+        '<div class="t">'+esc(r.emoji||"🤖")+' '+esc(r.nombre)+(esNuevo?'<span class="new">✨ nuevo</span>':'')+'</div>'+
+        '<div class="s">de '+esc(r.usuario_nombre)+' · '+((r.reglas||[]).length)+' reglas · usado '+(r.usos||0)+' veces</div>'+
+      '</div>';
+    }).join("");
+    if(rows.length) window._ultimoIdVisto=Math.max.apply(null,rows.map(function(r){return r.id;}));
+    _comunidadVista++;
+    window._comunidadCache=rows;
+  }).catch(function(){
+    $("comunidadGrid").innerHTML='<div style="font-size:.62em;color:var(--muted)">No se pudo cargar (¿falta crear la tabla robots_comunidad en Supabase?)</div>';
+  });
+}
+window.cargarRobotComunidad=function(id){
+  var r=(window._comunidadCache||[]).filter(function(x){return x.id===id;})[0];
+  if(!r)return;
+  $("rNom").value=r.nombre;
+  $("rEmo").value=r.emoji||"🤖";
+  reglas=(r.reglas||[]).map(function(x){return {k:x.k||[],r:x.r||[]};});
+  memoria={};
+  guardarRobot();
+  pintarReglas();
+  $("chat").innerHTML="";
+  chat("🤖 Cargaste el robot \""+r.nombre+"\" de "+r.usuario_nombre+". ¡Probalo!","bot");
+  fetch(SB_URL+"?id=eq."+id,{method:"PATCH",headers:SB_H,body:JSON.stringify({usos:(r.usos||0)+1})}).catch(function(){});
+  window.scrollTo({top:0,behavior:"smooth"});
+};
+cargarComunidad();
+setInterval(cargarComunidad,4000);
+
+// ─── ENDPOINTS ───
+function probarEp(u){
+  $("out").textContent="⏳ Probando "+u+" ...";
+  fetch(u).then(function(r){return r.text();}).then(function(t){
+    try{ $("out").textContent=u+"\n\n"+JSON.stringify(JSON.parse(t),null,2); }
+    catch(e){ $("out").textContent=u+"\n\n"+t; }
+  }).catch(function(e){ $("out").textContent=u+"\n\nERR: "+e; });
+}
+</script>
+<script src="/logger_zh.js?v=2026"></script>
+</body>
+</html>
