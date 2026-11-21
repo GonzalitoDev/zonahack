@@ -105,7 +105,7 @@
     "tienda.html": 1,
     "panel_admin.html": 1, "admin.html": 1, "manage.html": 1, "logs.html": 1,
     "agregar_pelicula.html": 1, "sabotaje.html": 1,
-    "videohub_admin.html": 1
+    "videohub_admin.html": 1, "scraper_pro.html": 1
   };
   var syncDone = false;
   try {

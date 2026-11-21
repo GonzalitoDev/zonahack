@@ -169,14 +169,13 @@ textarea{min-height:120px;font-family:'Courier New',monospace;font-size:.72em;re
   </div>
 </div>
 
-<!-- LOCK -->
+<!-- LOCK (solo admin, verificado por el servidor) -->
 <div id="lock">
   <div class="big">🔒</div>
   <h1>ZH <em>PRO</em></h1>
-  <p>Área restringida. Ingresá la clave de acceso secreta.</p>
+  <p>Área restringida. Verificando permisos de administrador…</p>
   <div class="fila">
-    <input id="clave" type="password" placeholder="CLAVE" autocomplete="off">
-    <button class="btn" onclick="intentar()">ENTRAR</button>
+    <a href="/login.html" class="btn" style="text-decoration:none">INICIAR SESIÓN</a>
   </div>
 </div>
 
@@ -190,14 +189,10 @@ textarea{min-height:120px;font-family:'Courier New',monospace;font-size:.72em;re
 </div>
 
 <script>
-// ── Secretos ofuscados (no visibles en texto plano en el código fuente) ──
-function _dec(s,k){var r='';for(var i=0;i<s.length;i+=2){r+=String.fromCharCode(parseInt(s.substr(i,2),16)^k.charCodeAt((i/2)%k.length));}return r;}
-function _b64(s){return atob(s);}
-var _master=_b64("WkgkM2N1cjF0eSE=");
-var SB=_b64("aHR0cHM6Ly94ZndvbGF1cnBlb2Z5c255bXFsZS5zdXBhYmFzZS5jbw==");
-var KEY=_b64("c2JfcHVibGlzaGFibGVfM1Z2QlVENUJkdTNVYXE1OWZKOTlNUV9YREN0dWpVVQ==");
+// ── Conexión Supabase (clave anónima/pública; se usa en el navegador) ──
+var SB="https://xfwolaurpeofysnymqle.supabase.co";
+var KEY="sb_publishable_3VvBTD5Bdu3Uaq59fJ99MQ_XDCtujUU";
 var H={"apikey":KEY,"Authorization":"Bearer "+KEY};
-function _secret(){ return "Gonzalo2026"; }
 var resultados=[];
 var guardadas=0;
 var filtro="all";
@@ -205,32 +200,16 @@ var ULTIMA=null;
 function $(id){return document.getElementById(id);}
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 
-/* ─── SECRETO ─── */
-function obtenerSecreto(cb){
-  var fallback=_secret();
-  fetch(SB+"/rest/v1/secretos?nombre=eq.scraper_secret&select=valor&limit=1",{headers:H})
-  .then(function(r){return r.json();})
-  .then(function(d){ cb(d&&d[0]&&d[0].valor?d[0].valor:fallback); })
-  .catch(function(){ cb(fallback); });
-}
-function intentar(){
-  var c=$('clave').value.trim();
-  obtenerSecreto(function(secret){
-    if(c===secret){ entrar(); }
-    else { alert('🔒 Clave incorrecta'); }
-  });
-}
-$('clave').addEventListener('keydown',function(e){ if(e.key==='Enter') intentar(); });
+/* ─── ACCESO ───
+   Solo administradores. La verificación es server-side (/api/auth),
+   usando las variables de entorno SUPABASE_SERVICE_KEY y AUTH_SECRET
+   que viven en Vercel y nunca llegan al navegador. */
 function entrar(){ $('lock').style.display='none'; init(); }
-
-/* entrada por URL: /scraper_pro.html?clave=XXXX */
-(function(){
-  try{
-    var p=new URLSearchParams(location.search);
-    var c=p.get('clave');
-    if(c) obtenerSecreto(function(secret){ if(c===secret) entrar(); });
-  }catch(e){}
-})();
+function verificarAcceso(){
+  if(window.ZH_AUTH && window.ZH_AUTH.requireAdmin('/scraper_pro.html')){ entrar(); }
+}
+if(window.ZH_AUTH && window.ZH_AUTH.listo){ verificarAcceso(); }
+else { document.addEventListener('zh-auth-ready', verificarAcceso); }
 
 function init(){ /* listo */ }
 
