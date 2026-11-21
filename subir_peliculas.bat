@@ -9,11 +9,21 @@ rem  Sube videos a la base de ZonaHack (tabla videos).
 rem  - YouTube: link o ID
 rem  - Lote: archivo .txt con un link por linea
 rem  - Legal: Archive.org (dominio publico / Creative Commons)
+rem  Ahora sube via /api/videos (servidor) con tu cuenta admin.
 rem  Requiere: Windows 10/11 (usa PowerShell, ya viene instalado)
 rem =========================================================
 
+set "API=https://offlinevideoplayer.vercel.app"
 set "SUPA=https://xfwolaurpeofysnymqle.supabase.co/rest/v1/videos"
 set "KEY=sb_publishable_3VvBUD5Bdu3Uaq59fJ99MQ_XDCtujUU"
+
+call :login
+if "%ZH_TOKEN%"=="" (
+  echo.
+  echo  [X] No se pudo iniciar sesion. Revisa usuario/contrasena.
+  pause
+  exit /b
+)
 
 :menu
 cls
@@ -133,6 +143,23 @@ rem =========================================================
 rem  SUBRUTINAS
 rem =========================================================
 
+:login
+cls
+echo  -- INICIAR SESION (cuenta admin de ZonaHack) ---------
+echo.
+set /p ZH_USER=  Usuario: 
+set /p ZH_PASS=  Contrasena: 
+set "ZH_TOKEN="
+powershell -NoProfile -ExecutionPolicy Bypass -Command "try{$b=@{usuario=$env:ZH_USER;password=$env:ZH_PASS}|ConvertTo-Json; $r=Invoke-RestMethod -Uri ($env:API+'/api/auth?accion=login') -Method Post -Body $b -ContentType 'application/json' -TimeoutSec 20; Write-Output $r.token}catch{Write-Output ''}" > "%TEMP%\zh_tok.txt" 2>nul
+set /p ZH_TOKEN=<"%TEMP%\zh_tok.txt"
+set "ZH_TOKEN=%ZH_TOKEN: =%"
+if "%ZH_TOKEN%"=="" (
+  echo  [X] Usuario o contrasena incorrectos.
+  exit /b 1
+)
+echo  [OK] Sesion iniciada.
+exit /b
+
 :extraer_id
 set "ZH_VID="
 powershell -NoProfile -ExecutionPolicy Bypass -Command "$u=$env:ZH_URL; if($u -match '[?&]v=([A-Za-z0-9_-]{11})'){Write-Output $Matches[1]} elseif($u -match 'youtu\.be/([A-Za-z0-9_-]{11})'){Write-Output $Matches[1]} elseif($u -match '/embed/([A-Za-z0-9_-]{11})'){Write-Output $Matches[1]} elseif($u -match '^[A-Za-z0-9_-]{11}$'){Write-Output $u} else{Write-Output ''}" > "%TEMP%\zh_id.txt" 2>nul
@@ -146,7 +173,7 @@ if "%ZH_TP%"=="archive" set "ZH_TH=https://archive.org/services/img/%ZH_VID:ia_=
 echo.
 echo  Subiendo: %ZH_T%
 echo  ID: %ZH_VID%  |  Categoria: %ZH_CA%
-powershell -NoProfile -ExecutionPolicy Bypass -Command "try{$r=Invoke-WebRequest -UseBasicParsing -Uri $env:SUPA -Method Post -Headers @{'apikey'=$env:KEY;'Authorization'='Bearer '+$env:KEY;'Content-Type'='application/json';'Prefer'='return=minimal'} -Body (@{titulo=$env:ZH_T;url=$env:ZH_VID;tipo=$env:ZH_TP;thumbnail=$env:ZH_TH;categoria=$env:ZH_CA}|ConvertTo-Json) -ContentType 'application/json'; Write-Output $r.StatusCode}catch{Write-Output ('ERR:'+$_.Exception.Message)}" > "%TEMP%\zh_st.txt" 2>nul
+powershell -NoProfile -ExecutionPolicy Bypass -Command "try{$b=@{videos=@(@{url=$env:ZH_VID;titulo=$env:ZH_T;thumbnail=$env:ZH_TH;tipo=$env:ZH_TP;categoria=$env:ZH_CA})}|ConvertTo-Json -Depth 5; $r=Invoke-WebRequest -UseBasicParsing -Uri ($env:API+'/api/videos') -Method Post -Headers @{'Authorization'='Bearer '+$env:ZH_TOKEN} -Body $b -ContentType 'application/json' -TimeoutSec 30; Write-Output $r.StatusCode}catch{Write-Output ('ERR:'+$_.Exception.Message)}" > "%TEMP%\zh_st.txt" 2>nul
 set /p ZH_ST=<"%TEMP%\zh_st.txt"
 echo !ZH_ST! | findstr /i "200 201" >nul && ( echo  [OK] Subida correctamente ) || ( echo  [X] Error: !ZH_ST! )
 call :subir_firebase
@@ -155,7 +182,7 @@ exit /b
 :subir_silencioso
 if "%ZH_TP%"=="youtube" set "ZH_TH=https://i.ytimg.com/vi/%ZH_VID%/hqdefault.jpg"
 if not defined ZH_T set "ZH_T=%ZH_VID%"
-powershell -NoProfile -ExecutionPolicy Bypass -Command "try{Invoke-WebRequest -UseBasicParsing -Uri $env:SUPA -Method Post -Headers @{'apikey'=$env:KEY;'Authorization'='Bearer '+$env:KEY;'Content-Type'='application/json';'Prefer'='return=minimal'} -Body (@{titulo=$env:ZH_T;url=$env:ZH_VID;tipo='youtube';thumbnail=$env:ZH_TH;categoria=$env:ZH_CA}|ConvertTo-Json) -ContentType 'application/json'|Out-Null; Write-Output 'OK'}catch{Write-Output 'ERR'}" > "%TEMP%\zh_st.txt" 2>nul
+powershell -NoProfile -ExecutionPolicy Bypass -Command "try{$b=@{videos=@(@{url=$env:ZH_VID;titulo=$env:ZH_T;thumbnail=$env:ZH_TH;tipo='youtube';categoria=$env:ZH_CA})}|ConvertTo-Json -Depth 5; Invoke-WebRequest -UseBasicParsing -Uri ($env:API+'/api/videos') -Method Post -Headers @{'Authorization'='Bearer '+$env:ZH_TOKEN} -Body $b -ContentType 'application/json' -TimeoutSec 30|Out-Null; Write-Output 'OK'}catch{Write-Output 'ERR'}" > "%TEMP%\zh_st.txt" 2>nul
 set /p RES=<"%TEMP%\zh_st.txt"
 echo  [%RES%] %ZH_T%
 call :subir_firebase
