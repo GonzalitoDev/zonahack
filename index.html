@@ -3088,20 +3088,13 @@ xhr.send();
 }
 function registrarPelisEnDB(items){
 if(!items||!items.length)return;
-var apikey='sb_publishable_3VvBUD5Bdu3Uaq59fJ99MQ_XDCtujUU';
-var url='https://xfwolaurpeofysnymqle.supabase.co/rest/v1/videos';
-var hdrs={'apikey':apikey,'Authorization':'Bearer '+apikey,'Content-Type':'application/json','Prefer':'return=minimal'};
+var filas=[];
 items.forEach(function(it){
 if(!it.id||!it.title)return;
-// Verificar si ya existe
-fetch(url+'?url=eq.'+encodeURIComponent(it.id)+'&select=id&limit=1',{headers:hdrs})
-.then(function(r){return r.json();})
-.then(function(d){
-if(!d||!d.length){
-fetch(url,{method:'POST',headers:hdrs,body:JSON.stringify({titulo:it.title.slice(0,200),url:it.id,tipo:'youtube',thumbnail:it.thumb||'',categoria:'pelicula'})}).catch(function(){});
-}
-}).catch(function(){});
+filas.push({url:it.id,titulo:(it.title||'').slice(0,200),thumbnail:(it.thumb||'').slice(0,500),tipo:'youtube',categoria:'pelicula'});
 });
+if(!filas.length)return;
+fetch('/api/videos',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'same-origin',body:JSON.stringify({videos:filas})}).catch(function(){});
 }
 window.abrirPlayerDesdePeli=function(idx){
 var items=window._peliResults||[];

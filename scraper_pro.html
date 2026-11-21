@@ -189,10 +189,7 @@ textarea{min-height:120px;font-family:'Courier New',monospace;font-size:.72em;re
 </div>
 
 <script>
-// ── Conexión Supabase (clave anónima/pública; se usa en el navegador) ──
-var SB="https://xfwolaurpeofysnymqle.supabase.co";
-var KEY="sb_publishable_3VvBUD5Bdu3Uaq59fJ99MQ_XDCtujUU";
-var H={"apikey":KEY,"Authorization":"Bearer "+KEY};
+// (las escrituras van por /api/videos, del lado del servidor — sin clave acá)
 var resultados=[];
 var guardadas=0;
 var filtro="all";
@@ -328,21 +325,16 @@ function guardarSel(){
   });
   if(!sel.length){ $('status').textContent='Seleccioná resultados de YouTube para guardar'; return; }
   $('status').textContent='💾 Guardando '+sel.length+' a la base...';
-  // dedupe contra existentes
-  fetch(SB+"/rest/v1/videos?select=url&limit=3000",{headers:H})
-  .then(function(r){return r.json();}).then(function(ex){
-    var exist=[]; (ex||[]).forEach(function(v){ if(v.url) exist.push(v.url); });
-    var filas=[],vistos={};
-    sel.forEach(function(v){
-      if(exist.indexOf(v.id)>=0||vistos[v.id]) return;
-      vistos[v.id]=1;
-      filas.push({titulo:(v.title||"Video").slice(0,180),url:v.id,tipo:"youtube",thumbnail:(v.thumb||"").slice(0,500),categoria:$('qCat').value});
-    });
-    if(!filas.length){ $('status').textContent='Todo ya estaba en la base (sin duplicados)'; return; }
-    fetch(SB+"/rest/v1/videos",{method:'POST',headers:Object.assign({},H,{'Content-Type':'application/json','Prefer':'resolution=ignore-duplicates,return=minimal'}),body:JSON.stringify(filas)})
-    .then(function(r){ guardadas+=filas.length; $('sSaved').textContent=guardadas; $('status').textContent='✅ '+filas.length+' guardados a la base ('+sel.length+' seleccionados, sin duplicados)'; })
-    .catch(function(){ $('status').textContent='Error al guardar'; });
+  var filas=sel.map(function(v){
+    return {url:v.id,titulo:(v.title||"Video").slice(0,180),thumbnail:(v.thumb||"").slice(0,500),tipo:"youtube",categoria:$('qCat').value};
   });
+  fetch('/api/videos',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'same-origin',body:JSON.stringify({videos:filas})})
+  .then(function(r){return r.json().catch(function(){return {};});})
+  .then(function(d){
+    if(d.ok){ guardadas+=d.guardadas; $('sSaved').textContent=guardadas; $('status').textContent='✅ '+d.guardadas+' guardados a la base ('+sel.length+' seleccionados, sin duplicados)'; }
+    else { $('status').textContent='⛔ '+(d.error==='no_autorizado'?'Necesitás iniciar sesión':(d.error||'Error al guardar')); }
+  })
+  .catch(function(){ $('status').textContent='Error al guardar'; });
 }
 function limpiar(){ resultados=[]; $('grid').innerHTML='<div class="empty">Limpio.</div>'; $('status').textContent=''; $('sRes').textContent='0';$('sYT').textContent='0'; }
 
