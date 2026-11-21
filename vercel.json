@@ -52,7 +52,7 @@
         { "src": "/api/amor", "dest": "/api/legal_scraper.py" },
         { "src": "/api/tesla", "dest": "/api/tesla.py" },
         { "src": "/api/vps", "dest": "/api/legal_scraper.py" },
-        { "src": "/api/videos", "dest": "/api/videos.py" },
+        { "src": "/api/videos", "dest": "/api/search_multi.py" },
         { "src": "/tesla", "dest": "/tesla.html" },
         { "src": "/videohub", "dest": "/videohub.html" },
         { "src": "/videohub_admin", "dest": "/videohub_admin.html" },
