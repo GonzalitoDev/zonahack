@@ -87,6 +87,8 @@ select:focus,input:focus,textarea:focus{border-color:var(--accent);box-shadow:0 
 .empty{text-align:center;color:var(--text2);padding:20px;font-size:.7em}
 .checkbox{width:auto;min-width:0;margin:0}
 </style>
+<link rel="stylesheet" href="/zh_update.css?v=1">
+<script src="/zh_auth.js?v=2"></script>
 </head>
 <body>
 <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
@@ -96,9 +98,10 @@ select:focus,input:focus,textarea:focus{border-color:var(--accent);box-shadow:0 
   <div class="lock-box">
     <div class="lock-ico">🎬</div>
     <h1>VIDEOHUB_<span>ADMIN</span></h1>
-    <p>Panel protegido. Ingresá la contraseña de administrador.</p>
+    <p>Solo administradores con sesión verificada. Ingresá la contraseña del panel.</p>
     <input type="password" id="lockPass" placeholder="••••••••">
     <button onclick="desbloquear()">DESBLOQUEAR</button>
+    <a href="/login.html?next=/videohub_admin.html" style="display:block;margin-top:8px;color:#00ff41;font-size:.7em">🔑 Iniciar sesión</a>
     <div id="lockMsg"></div>
   </div>
 </div>
@@ -218,21 +221,29 @@ function _dec(s,k){var r='';for(var i=0;i<s.length;i+=2){r+=String.fromCharCode(
 function _b64(s){return atob(s);}
 var _master=_b64("WkgkM2N1cjF0eSE=");
 var _passAdmin=_dec("000065570e1c1c03444b17",_master);
-var _desbloqueado=(sessionStorage.getItem("zh_admin_unlock")==="1");
-var _adminPass=sessionStorage.getItem("zh_admin_pass")||"";
+var _desbloqueado=false;
+var _adminPass="";
 function desbloquear(){
-  var c=document.getElementById("lockPass").value;
-  if(c===_passAdmin){
-    _desbloqueado=true;_adminPass=c;
-    sessionStorage.setItem("zh_admin_unlock","1");sessionStorage.setItem("zh_admin_pass",c);
-    document.getElementById("adminLock").style.display="none";
-    init();
-  }else{
-    document.getElementById("lockMsg").textContent="❌ Contraseña incorrecta";
-  }
+  var A=window.ZH_AUTH;
+  var msgEl=document.getElementById("lockMsg");
+  if(!A){ if(msgEl)msgEl.textContent="❌ Error de seguridad"; return; }
+  A.ready.then(function(){
+    if(!A.verified || !A.admin){
+      if(msgEl)msgEl.textContent="❌ Necesitás una sesión de administrador verificada";
+      return;
+    }
+    USER=A.usuario;
+    try{ localStorage.setItem("vh_usuario",A.usuario); }catch(e){}
+    var c=document.getElementById("lockPass").value;
+    if(c===_passAdmin){
+      _desbloqueado=true;_adminPass=c;
+      document.getElementById("adminLock").style.display="none";
+      init();
+    }else{
+      if(msgEl)msgEl.textContent="❌ Contraseña incorrecta";
+    }
+  });
 }
-(function(){var p=new URLSearchParams(location.search);if(p.get("pass")===_passAdmin)desbloquear();})();
-if(_desbloqueado){document.getElementById("adminLock").style.display="none";}
 
 /* ─── HELPERS ─── */
 function $(id){return document.getElementById(id);}
@@ -468,5 +479,6 @@ if(_desbloqueado)init();
 </script>
 <script src="/errores.js" defer></script>
 <script src="/update_check.js" defer></script>
+<script src="/zh_update.js?v=1" defer></script>
 </body>
 </html>

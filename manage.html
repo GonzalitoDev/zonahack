@@ -48,14 +48,16 @@ input:focus{border-color:#00ff41}
 #loginBox .btn{width:100%;margin-top:4px}
 #app{display:none}
 </style>
+<link rel="stylesheet" href="/zh_update.css?v=1">
+<script src="/zh_auth.js?v=2"></script>
 </head>
 <body>
 <div id="loginOverlay">
   <div id="loginBox">
     <h2>⚙️ Gestion</h2>
-    <p style="color:rgba(200,214,229,.25);font-size:.65em;margin-bottom:8px">Panel de administracion de usuarios</p>
-    <input id="loginPass" type="password" placeholder="Contrasena admin..." onkeydown="if(event.key==='Enter')login()">
-    <button class="btn" onclick="login()">Ingresar</button>
+    <p style="color:rgba(200,214,229,.25);font-size:.65em;margin-bottom:8px">Solo administradores con sesión verificada</p>
+    <button class="btn" onclick="login()">VERIFICAR MI SESIÓN</button>
+    <a class="back" href="/login.html?next=/manage.html" style="margin-top:8px">🔑 Iniciar sesión</a>
     <div id="loginError" style="color:#e74c3c;font-size:.6em;margin-top:4px;display:none"></div>
     <a class="back" href="/" style="margin-top:8px">← Volver</a>
   </div>
@@ -94,29 +96,23 @@ var BLOCK_KEY = "vh_mgmt_block";
 
 function esc(s){return (s||"").replace(/[&<>"]/g,function(m){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m];});}
 
+function authAdmin(accion,data){
+  if(window.ZH_AUTH && window.ZH_AUTH.fetchAuth) return window.ZH_AUTH.fetchAuth(accion,data);
+  return Promise.reject(new Error("sin_sesion"));
+}
 function login(){
-  var p = document.getElementById("loginPass").value;
-  if(!p) return;
-  var b = localStorage.getItem(BLOCK_KEY);
-  if(b && parseInt(b)>Date.now()){document.getElementById("loginError").textContent="Bloqueado 24h";document.getElementById("loginError").style.display="block";return;}
-  fetch(SUPABASE+"/rangos?select=rango&usuario_nombre=eq.admin&limit=1",{headers:DBH})
-  .then(function(r){return r.json();}).then(function(d){
-    var pass = (d&&d.length>0)?d[0].rango:"admin123";
-    if(p===pass){
-      localStorage.setItem(PASS_KEY, "1");
-      document.getElementById("loginOverlay").style.display="none";
-      document.getElementById("app").style.display="block";
-      iniciar();
-    }else{
-      var a = parseInt(localStorage.getItem(ATT_KEY)||"0")+1;
-      localStorage.setItem(ATT_KEY, a);
-      if(a>=3){localStorage.setItem(BLOCK_KEY, Date.now()+86400000);document.getElementById("loginError").textContent="Bloqueado 24h";}
-      else document.getElementById("loginError").textContent="Pass incorrecta ("+a+"/3)";
-      document.getElementById("loginError").style.display="block";
-    }
-  }).catch(function(){
-    if(p==="admin123"){localStorage.setItem(PASS_KEY,"1");document.getElementById("loginOverlay").style.display="none";document.getElementById("app").style.display="block";iniciar();}
-    else{document.getElementById("loginError").textContent="Error de conexion";document.getElementById("loginError").style.display="block";}
+  var err=document.getElementById("loginError");
+  function fallo(t){ if(err){err.textContent=t;err.style.display="block";} }
+  var A=window.ZH_AUTH;
+  if(!A){ fallo("Error de seguridad. Recargá la página."); return; }
+  A.ready.then(function(){
+    if(A.offline){ fallo("Necesitás conexión para verificar tu cuenta."); return; }
+    if(!A.verified){ location.replace(A.urlLogin("/manage.html")); return; }
+    if(!A.admin){ fallo("La cuenta "+A.usuario+" no tiene rango de administrador."); return; }
+    try{ localStorage.setItem("vh_usuario",A.usuario); }catch(e){}
+    document.getElementById("loginOverlay").style.display="none";
+    document.getElementById("app").style.display="block";
+    iniciar();
   });
 }
 
@@ -229,13 +225,8 @@ function cargarRangos(){
 // ─── ACCIONES ────────────────────────────
 function setRango(nom, rango, color){
   if(!nom) return;
-  fetch(SUPABASE+"/rangos?usuario_nombre=eq."+encodeURIComponent(nom)+"&limit=1",{headers:DBH}).then(function(r){return r.json();}).then(function(d){
-    if(d&&d.length>0){
-      return fetch(SUPABASE+"/rangos?usuario_nombre=eq."+encodeURIComponent(nom),{method:"PATCH",headers:DBH,body:JSON.stringify({rango:rango,color:color})});
-    }else{
-      return fetch(SUPABASE+"/rangos",{method:"POST",headers:Object.assign({},DBH,{"Prefer":"return=minimal"}),body:JSON.stringify({usuario_nombre:nom,rango:rango,color:color})});
-    }
-  }).then(function(){cargarUsuarios();cargarRangos();document.getElementById("statusBar").textContent="✅ Rango asignado: "+rango;setTimeout(function(){document.getElementById("statusBar").textContent="🟢 Tiempo real conectado";},2000);}).catch(function(){});
+  var p = rango==="baneado" ? authAdmin("admin_ban",{usuario:nom}) : authAdmin("admin_set_rango",{usuario:nom,rango:rango,color:color});
+  p.then(function(){cargarUsuarios();cargarRangos();document.getElementById("statusBar").textContent="✅ Rango asignado: "+rango;setTimeout(function(){document.getElementById("statusBar").textContent="🟢 Tiempo real conectado";},2000);}).catch(function(){});
 }
 
 function asignarRango(rango, color){
@@ -247,8 +238,7 @@ function asignarRango(rango, color){
 
 function banear(nom){
   if(!confirm("Banear a "+nom+"?")) return;
-  fetch(SUPABASE+"/baneados",{method:"POST",headers:Object.assign({},DBH,{"Prefer":"return=minimal"}),body:JSON.stringify({usuario_nombre:nom,usuario_id:nom,tipo:"ban",motivo:"Baneado desde gestion",admin_nombre:"admin",activo:true})}).then(function(){
-    setRango(nom, "baneado", "#e74c3c");
+  authAdmin("admin_ban",{usuario:nom,motivo:"Baneado desde gestion",tipo:"ban"}).then(function(){
     cargarUsuarios();
     document.getElementById("statusBar").textContent="🔨 Baneado: "+nom;
     setTimeout(function(){document.getElementById("statusBar").textContent="🟢 Tiempo real conectado";},2000);
@@ -257,15 +247,10 @@ function banear(nom){
 
 function desbanear(nom){
   if(!confirm("Desbanear a "+nom+"?")) return;
-  fetch(SUPABASE+"/baneados?usuario_nombre=eq."+encodeURIComponent(nom)+"&activo=eq.true",{headers:DBH}).then(function(r){return r.json();}).then(function(d){
-    if(d&&d.length>0){
-      fetch(SUPABASE+"/baneados?id=eq."+d[0].id,{method:"PATCH",headers:DBH,body:JSON.stringify({activo:false})}).then(function(){
-        setRango(nom, "user", "#888");
-        cargarUsuarios();
-        document.getElementById("statusBar").textContent="✅ Desbaneado: "+nom;
-        setTimeout(function(){document.getElementById("statusBar").textContent="🟢 Tiempo real conectado";},2000);
-      });
-    }
+  authAdmin("admin_unban",{usuario:nom}).then(function(){
+    cargarUsuarios();
+    document.getElementById("statusBar").textContent="✅ Desbaneado: "+nom;
+    setTimeout(function(){document.getElementById("statusBar").textContent="🟢 Tiempo real conectado";},2000);
   }).catch(function(){});
 }
 
@@ -302,19 +287,9 @@ function iniciar(){
   conectarWS();
   cargarUsuarios();
 }
-// Auto-login si ya esta autorizado
-if(localStorage.getItem(PASS_KEY)==="1"){
-  document.getElementById("loginOverlay").style.display="none";
-  document.getElementById("app").style.display="block";
-  iniciar();
-}
-// O si tiene vh_admin_pass (del panel admin)
-if(localStorage.getItem("vh_admin_pass")==="1"){
-  localStorage.setItem(PASS_KEY,"1");
-  document.getElementById("loginOverlay").style.display="none";
-  document.getElementById("app").style.display="block";
-  iniciar();
-}
+// Verificación automática contra el servidor (sin claves locales).
+login();
 </script>
+<script src="/zh_update.js?v=1" defer></script>
 </body>
 </html>

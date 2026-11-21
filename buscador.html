@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<script src="/adblock_zh.js?v=1"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
 <title>🔎 Buscador de Páginas · Retransmisión · ZonaHack</title>
 <link rel="manifest" href="/manifest.json">
@@ -74,6 +75,8 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;background:
 .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:rgba(10,12,16,.95);border:1px solid var(--az);color:var(--az2);padding:11px 20px;border-radius:14px;font-size:.68em;z-index:99;display:none;max-width:90vw;text-align:center;box-shadow:0 8px 30px rgba(0,0,0,.5)}
 @media(max-width:640px){.grid{grid-template-columns:1fr}}
 </style>
+<link rel="stylesheet" href="/zh_update.css?v=1">
+<script src="/zh_auth.js?v=2"></script>
 </head>
 <body>
 <div class="wrap">
@@ -196,5 +199,6 @@ function exterior(){
 function cerrarP(){ $("player").style.display="none"; $("pFrame").src="about:blank"; document.body.style.overflow=""; }
 pintarHist();
 </script>
+<script src="/zh_update.js?v=1" defer></script>
 </body>
 </html>

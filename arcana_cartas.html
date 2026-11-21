@@ -1,0 +1,1249 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>Arcana — Duelo de Cartas Mágicas</title>
+<meta name="theme-color" content="#08060f">
+<style>
+:root{
+--bg:#08060f;--panel:#120e21;--panel2:#0d0a19;--line:rgba(176,123,255,.18);--line2:rgba(176,123,255,.42);
+--acc:#b07bff;--acc2:#e0ccff;--cyan:#6ee7ff;--gold:#ffcf6b;--red:#ff5c7a;--green:#7dffb0;
+--txt:#ece8f8;--dim:#8f88a8;--mono:'Courier New',Courier,monospace;--sans:'Segoe UI',system-ui,-apple-system,sans-serif;--serif:Georgia,'Times New Roman',serif;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:radial-gradient(circle at 50% -10%,#21163d,#08060f 60%);color:var(--txt);font-family:var(--sans);overflow:hidden;-webkit-tap-highlight-color:transparent;user-select:none}
+button{font-family:inherit;color:inherit}
+#bg{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+#app{height:100vh;height:100dvh;display:flex;flex-direction:column;position:relative;z-index:1;overflow:hidden}
+header{display:flex;align-items:center;gap:16px;padding:8px 16px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,rgba(26,18,46,.92),rgba(10,7,19,.85));flex:0 0 auto;z-index:3}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.sigil{width:34px;height:34px;display:grid;place-items:center;border-radius:50%;border:1px solid var(--line2);color:var(--acc2);background:radial-gradient(circle,rgba(176,123,255,.25),rgba(176,123,255,.03));font-size:17px;box-shadow:0 0 22px rgba(176,123,255,.35);animation:sigilPulse 3s infinite}
+@keyframes sigilPulse{0%,100%{box-shadow:0 0 16px rgba(176,123,255,.25)}50%{box-shadow:0 0 30px rgba(176,123,255,.5)}}
+.brand b{display:block;font-family:var(--serif);font-size:15px;letter-spacing:4px;color:var(--acc2);white-space:nowrap}
+.brand small{display:block;font-size:8px;letter-spacing:2.2px;color:var(--dim);white-space:nowrap}
+.hstats{display:flex;gap:16px;margin-left:auto;font-family:var(--mono)}
+.hstat{text-align:right;line-height:1.1}
+.hstat span{display:block;font-size:7.5px;letter-spacing:1.6px;color:var(--dim)}
+.hstat b{font-size:16px;letter-spacing:1px}
+.hstat.gold b{color:var(--gold)}
+.iconbtn{width:34px;height:34px;border:1px solid var(--line2);border-radius:8px;background:rgba(176,123,255,.06);color:var(--acc2);font-family:var(--mono);font-size:10px;letter-spacing:1px;cursor:pointer}
+.iconbtn:hover{background:rgba(176,123,255,.16)}
+main{flex:1 1 auto;min-height:0;position:relative;z-index:2}
+#menuScreen{overflow-y:auto;padding:16px}
+.menu-wrap{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:330px minmax(0,1fr);gap:16px;align-items:start}
+.hero-panel{position:sticky;top:0;background:linear-gradient(180deg,rgba(24,17,42,.95),rgba(12,9,22,.95));border:1px solid var(--line);border-radius:16px;padding:22px 20px;text-align:center;box-shadow:0 24px 70px rgba(0,0,0,.55)}
+.hero-orb{width:120px;height:120px;margin:4px auto 14px;border-radius:50%;display:grid;place-items:center;position:relative;font-size:46px;color:var(--acc2)}
+.hero-orb::before{content:"";position:absolute;inset:0;border-radius:50%;border:1px dashed rgba(176,123,255,.45);animation:spin 18s linear infinite}
+.hero-orb::after{content:"";position:absolute;inset:14px;border-radius:50%;background:radial-gradient(circle at 40% 35%,rgba(176,123,255,.4),rgba(110,231,255,.08) 55%,transparent 72%);filter:blur(1px)}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hero-panel h1{font-family:var(--serif);font-size:clamp(22px,3vw,30px);letter-spacing:4px;color:var(--acc2);margin:0 0 4px;text-shadow:0 0 26px rgba(176,123,255,.4)}
+.hero-panel .lore{font-size:11px;line-height:1.5;color:var(--dim);margin:0 0 16px;letter-spacing:.4px}
+.hero-chips{display:flex;justify-content:center;gap:6px;flex-wrap:wrap;margin-bottom:18px;font-family:var(--mono);font-size:9px;color:var(--dim)}
+.hero-chips span{border:1px solid var(--line);border-radius:20px;padding:4px 9px;background:rgba(176,123,255,.05)}
+.hero-chips b{color:var(--acc2)}
+.bigbtn{background:linear-gradient(180deg,#a76dff,#6a3fc0);border:1px solid #c9a6ff;color:#140a24;font-family:var(--mono);font-weight:700;font-size:13px;letter-spacing:2.4px;padding:14px 26px;border-radius:10px;cursor:pointer;transition:.15s;box-shadow:0 10px 30px rgba(120,60,220,.35)}
+.bigbtn:hover{filter:brightness(1.12);transform:translateY(-1px)}
+.bigbtn:disabled{filter:grayscale(.6);opacity:.5;cursor:default;transform:none}
+.hero-panel .bigbtn{width:100%}
+.next-enemy{margin-top:14px;font-family:var(--mono);font-size:9px;letter-spacing:1px;color:var(--dim);line-height:1.8;border-top:1px solid var(--line);padding-top:12px}
+.next-enemy b{color:var(--gold);display:block;font-size:11px;letter-spacing:1.6px}
+.linkbtn{all:unset;margin-top:14px;font-family:var(--mono);font-size:9px;letter-spacing:1.4px;color:#6f6688;cursor:pointer}
+.linkbtn:hover{color:var(--red)}
+.howto{font-size:10px;line-height:1.55;color:var(--dim);border-top:1px solid var(--line);margin-top:14px;padding-top:12px;text-align:left}
+.collection{min-width:0}
+.col-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.col-head h2{font-family:var(--serif);font-size:18px;letter-spacing:3px;color:var(--acc2);margin:0}
+.col-head span{font-family:var(--mono);font-size:9px;letter-spacing:1.2px;color:var(--dim)}
+.rar-group{margin-bottom:18px}
+.rar-title{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--rc);margin:0 0 8px}
+.rar-title::after{content:"";height:1px;flex:1;background:linear-gradient(90deg,var(--rc),transparent);opacity:.35}
+.ugrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}
+.ucard{position:relative;border:1px solid var(--rc);border-radius:10px;padding:11px 12px 10px;background:linear-gradient(160deg,rgba(255,255,255,.045),rgba(0,0,0,.3));overflow:hidden;transition:.15s}
+.ucard::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 20% 0%,var(--rc),transparent 60%);opacity:.12;pointer-events:none}
+.ucard:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(0,0,0,.45)}
+.ucard.locked{opacity:.72;border-style:dashed}
+.uc-head{display:flex;align-items:center;gap:9px;margin-bottom:6px}
+.uc-icon{width:34px;height:34px;flex:0 0 auto;display:grid;place-items:center;border-radius:50%;border:1px solid var(--rc);color:var(--rc);font-size:19px;background:rgba(0,0,0,.3);text-shadow:0 0 12px var(--rc)}
+.uc-title{min-width:0;flex:1}
+.uc-title b{display:block;font-size:12px;letter-spacing:.4px;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.uc-title small{display:block;font-family:var(--mono);font-size:7px;letter-spacing:1.5px;color:var(--rc);margin-top:1px}
+.uc-lvl{font-family:var(--mono);font-size:9px;color:var(--gold);border:1px solid rgba(255,207,107,.3);border-radius:5px;padding:2px 5px;white-space:nowrap}
+.uc-desc{font-size:10px;line-height:1.45;color:var(--dim);min-height:28px;margin:0 0 9px}
+.uc-btn{width:100%;border:1px solid var(--rc);border-radius:7px;background:rgba(176,123,255,.1);color:var(--acc2);font-family:var(--mono);font-size:9px;letter-spacing:1.2px;padding:8px 6px;cursor:pointer;transition:.12s}
+.uc-btn:hover{background:rgba(176,123,255,.22)}
+.uc-btn.unlock{color:var(--gold);border-color:rgba(255,207,107,.45);background:rgba(255,207,107,.08)}
+.uc-btn.unlock:hover{background:rgba(255,207,107,.18)}
+.uc-btn.cant{opacity:.55}
+.uc-max{text-align:center;font-family:var(--mono);font-size:8px;letter-spacing:1.5px;color:var(--green);padding:7px 0;border:1px solid rgba(125,255,176,.22);border-radius:7px;background:rgba(125,255,176,.05)}
+#battleScreen{display:flex;flex-direction:column;gap:5px;padding:8px 14px 10px;min-height:0;overflow:hidden}
+#battleScreen::before{content:"";position:absolute;left:50%;top:54%;width:min(74vh,600px);height:min(74vh,600px);transform:translate(-50%,-50%);border-radius:50%;border:1px solid rgba(176,123,255,.13);background:radial-gradient(circle,rgba(176,123,255,.055),transparent 66%);box-shadow:inset 0 0 90px rgba(110,231,255,.035);z-index:0;pointer-events:none}
+#battleScreen::after{content:"";position:absolute;left:50%;top:54%;width:min(52vh,430px);height:min(52vh,430px);transform:translate(-50%,-50%);border-radius:50%;border:1px dashed rgba(110,231,255,.14);animation:spin 34s linear infinite;z-index:0;pointer-events:none}
+#battleScreen > *{position:relative;z-index:1}
+.b-top{display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-size:9px;letter-spacing:1.6px;color:var(--dim);flex:0 0 auto}
+.ghostbtn{all:unset;cursor:pointer;font-family:var(--mono);font-size:9px;letter-spacing:1.4px;color:var(--dim);border:1px solid var(--line);padding:6px 12px;border-radius:6px}
+.ghostbtn:hover{color:var(--red);border-color:rgba(255,92,122,.4)}
+.enemy-panel{display:flex;flex-direction:column;align-items:center;gap:3px;flex:0 0 auto}
+.enemy-name{font-family:var(--serif);font-size:clamp(15px,2.2vw,21px);letter-spacing:2px;color:var(--acc2);text-align:center}
+.enemy-badges{display:flex;gap:5px;flex-wrap:wrap;justify-content:center;min-height:0}
+.badge{font-family:var(--mono);font-size:7.5px;letter-spacing:1px;border:1px solid currentColor;border-radius:10px;padding:2px 7px;opacity:.9}
+.badge.burn{color:#ff9a5c}
+.badge.freeze{color:var(--cyan)}
+.badge.boss{color:var(--red)}
+.orb{position:relative;border-radius:50%;display:grid;place-items:center;flex:0 0 auto}
+.enemy-orb{width:92px;height:92px;font-size:40px;color:#f0b6ff;background:radial-gradient(circle at 42% 36%,rgba(255,92,140,.45),rgba(90,26,120,.55) 45%,rgba(10,6,18,.9) 72%);box-shadow:0 0 40px rgba(190,80,255,.3),inset 0 0 30px rgba(0,0,0,.6);border:1px solid rgba(255,92,140,.35)}
+.enemy-orb::before{content:"";position:absolute;inset:-8px;border-radius:50%;border:1px dashed rgba(255,120,170,.4);animation:spin 12s linear infinite reverse}
+.enemy-orb.hit{animation:orbHit .3s}
+@keyframes orbHit{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}55%{transform:translateX(7px)}80%{transform:translateX(-4px)}}
+.ebar{width:min(520px,92%);height:12px;border:1px solid rgba(255,255,255,.14);border-radius:6px;background:rgba(0,0,0,.55);overflow:hidden}
+.ebar i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#ff4f7a,#ff9a5c);transition:width .25s}
+.enemy-meta{display:flex;gap:14px;font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:1px}
+.enemy-meta .sh{color:var(--cyan)}
+.intent{font-family:var(--mono);font-size:9.5px;letter-spacing:1.4px;color:var(--gold);border:1px solid rgba(255,207,107,.3);background:rgba(255,207,107,.06);padding:4px 13px;border-radius:20px;min-height:22px;display:flex;align-items:center;gap:6px;text-align:center}
+.intent.danger{color:var(--red);border-color:rgba(255,92,122,.4);background:rgba(255,92,122,.08)}
+.logbox{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:2px;overflow:hidden;padding:2px 0;font-size:10.5px;color:var(--dim);text-align:center}
+.logline{opacity:.85;animation:logIn .2s ease-out;max-width:90%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.logline.cast{color:var(--acc2)}.logline.dmg{color:#ff9a8a}.logline.heal{color:var(--green)}.logline.enemy{color:#ff9ab0}.logline.shield{color:var(--cyan)}.logline.turn{color:var(--gold)}
+@keyframes logIn{from{opacity:0;transform:translateY(5px)}to{opacity:.85;transform:none}}
+.player-panel{display:flex;align-items:center;justify-content:center;gap:14px;flex:0 0 auto}
+.player-orb{width:64px;height:64px;font-size:26px;color:#bff4ff;background:radial-gradient(circle at 40% 35%,rgba(110,231,255,.4),rgba(30,80,140,.45) 48%,rgba(8,10,24,.92) 75%);border:1px solid rgba(110,231,255,.35);box-shadow:0 0 30px rgba(110,231,255,.22)}
+.player-orb::before{content:"";position:absolute;inset:-6px;border-radius:50%;border:1px dashed rgba(110,231,255,.35);animation:spin 16s linear infinite}
+.pstats{display:flex;flex-direction:column;gap:4px;min-width:min(320px,62vw)}
+.prow{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:8px;letter-spacing:1.2px;color:var(--dim)}
+.prow span.ll{width:44px}
+.prow b{color:var(--txt);font-size:10px;min-width:28px;text-align:right;letter-spacing:.5px}
+.pbar{flex:1;height:10px;border:1px solid rgba(255,255,255,.12);border-radius:5px;background:rgba(0,0,0,.5);overflow:hidden}
+.pbar i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#3fd08a,#9bffcf);transition:width .25s}
+.prow .shv{color:var(--cyan)}
+.pips{display:flex;gap:3px;flex:1;align-items:center;min-height:14px}
+.pip{width:9px;height:9px;border-radius:50%;border:1px solid rgba(110,231,255,.5);background:radial-gradient(circle,rgba(110,231,255,.6),rgba(110,231,255,.1));box-shadow:0 0 7px rgba(110,231,255,.35)}
+.pip.used{background:rgba(0,0,0,.4);box-shadow:none;border-color:rgba(255,255,255,.12)}
+.turnlabel{font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--gold);text-align:center;margin-top:2px}
+.turnlabel.enemy{color:var(--red)}
+.hand{display:flex;gap:8px;justify-content:center;align-items:flex-end;overflow-x:auto;overflow-y:hidden;padding:10px 4px 6px;flex:0 0 auto;min-height:186px;scrollbar-width:thin}
+.bcard{position:relative;flex:0 0 auto;width:130px;height:178px;border-radius:11px;border:1px solid var(--rc);background:linear-gradient(170deg,rgba(255,255,255,.06),rgba(0,0,0,.44));display:flex;flex-direction:column;align-items:center;padding:10px 9px 8px;cursor:pointer;transition:transform .13s,box-shadow .13s,filter .13s;overflow:hidden;text-align:center}
+.bcard::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 0%,var(--rc),transparent 68%);opacity:.16;pointer-events:none}
+.bcard:hover{transform:translateY(-7px);box-shadow:0 14px 30px rgba(0,0,0,.6),0 0 0 1px var(--rc)}
+.bcard .bc-cost{position:absolute;top:6px;left:6px;width:23px;height:23px;border-radius:50%;display:grid;place-items:center;background:rgba(110,231,255,.14);border:1px solid var(--cyan);color:#c9f4ff;font-family:var(--mono);font-size:11px;font-weight:700}
+.bcard .bc-lvl{position:absolute;top:6px;right:6px;font-family:var(--mono);font-size:7px;color:var(--gold);border:1px solid rgba(255,207,107,.35);border-radius:4px;padding:1px 4px}
+.bcard .bc-icon{font-size:30px;color:var(--rc);margin-top:16px;text-shadow:0 0 18px var(--rc)}
+.bcard .bc-name{font-size:9.5px;font-weight:700;letter-spacing:.2px;color:var(--txt);min-height:24px;display:flex;align-items:center;justify-content:center;margin-top:4px;width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bcard .bc-desc{font-size:8.5px;line-height:1.35;color:var(--dim);flex:1;display:flex;align-items:center}
+.bcard .bc-rar{font-family:var(--mono);font-size:6.5px;letter-spacing:1.3px;color:var(--rc);opacity:.9}
+.bcard.off{opacity:.42;filter:grayscale(.5)}
+.bcard.off:hover{transform:none;box-shadow:none}
+.bcard.casting{animation:cardCast .28s ease-out}
+@keyframes cardCast{0%{transform:translateY(0) scale(1);filter:brightness(1)}40%{transform:translateY(-26px) scale(1.08);filter:brightness(1.7)}100%{transform:translateY(-10px) scale(.95);filter:brightness(1)}}
+.battle-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;flex:0 0 auto;padding-top:2px}
+.piles{font-family:var(--mono);font-size:8.5px;letter-spacing:1.2px;color:var(--dim)}
+.piles b{color:var(--acc2)}
+#endTurnBtn{padding:11px 22px;font-size:11px}
+#endTurnBtn:disabled{filter:grayscale(.7);opacity:.45}
+.modal{position:fixed;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(4,2,10,.78);backdrop-filter:blur(5px)}
+.panel{width:min(420px,100%);background:linear-gradient(180deg,rgba(28,20,48,.99),rgba(10,7,19,.99));border:1px solid var(--line2);border-radius:16px;padding:26px 24px;text-align:center;box-shadow:0 30px 90px rgba(0,0,0,.75)}
+.panel h2{font-family:var(--serif);font-size:26px;letter-spacing:4px;margin:0 0 6px;color:var(--gold);text-shadow:0 0 24px rgba(255,207,107,.35)}
+.panel h2.bad{color:var(--red);text-shadow:0 0 24px rgba(255,92,122,.35)}
+.panel p{font-size:11px;line-height:1.5;color:var(--dim);margin:6px 0 16px}
+.win-gold{font-family:var(--mono);font-size:26px;color:var(--gold);letter-spacing:2px;margin:6px 0 10px}
+.btnrow{display:flex;gap:9px;justify-content:center;flex-wrap:wrap;margin-top:6px}
+.minibtn{border:1px solid var(--line2);background:rgba(176,123,255,.08);color:var(--acc2);font-family:var(--mono);font-size:10px;letter-spacing:1.3px;padding:11px 16px;border-radius:8px;cursor:pointer}
+.minibtn:hover{background:rgba(176,123,255,.2)}
+.minibtn.ghost{color:var(--dim);border-color:rgba(255,255,255,.14);background:transparent}
+#toast{position:fixed;top:64px;left:50%;transform:translate(-50%,-14px);z-index:50;background:rgba(12,8,22,.96);border:1px solid var(--line2);border-left:3px solid var(--acc);color:var(--acc2);font-family:var(--mono);font-size:10px;letter-spacing:1.3px;padding:9px 16px;border-radius:7px;opacity:0;transition:.25s;pointer-events:none;max-width:92%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+#fxLayer{position:fixed;inset:0;z-index:45;pointer-events:none;overflow:hidden}
+.floater{position:absolute;transform:translate(-50%,-50%);font-family:var(--mono);font-weight:700;font-size:18px;letter-spacing:1px;text-shadow:0 2px 8px #000,0 0 14px currentColor;animation:floatUp .95s ease-out forwards;white-space:nowrap}
+.floater.dmg{color:#ff7a6a}.floater.heal{color:var(--green)}.floater.shield{color:var(--cyan)}.floater.burn{color:#ff9a5c}.floater.freeze{color:var(--cyan)}.floater.mana{color:#9bdcff}.floater.gold{color:var(--gold)}
+@keyframes floatUp{0%{opacity:0;transform:translate(-50%,-30%) scale(.8)}20%{opacity:1;transform:translate(-50%,-60%) scale(1.06)}100%{opacity:0;transform:translate(-50%,-220%) scale(1)}}
+#battleScreen.shake{animation:battleShake .32s}
+@keyframes battleShake{0%,100%{transform:translate(0)}20%{transform:translate(-6px,3px)}40%{transform:translate(5px,-3px)}60%{transform:translate(-4px,2px)}80%{transform:translate(3px,-1px)}}
+.hidden{display:none!important}
+@media (max-width:860px){
+  .menu-wrap{grid-template-columns:1fr}
+  .hero-panel{position:static}
+  .hero-orb{width:96px;height:96px;font-size:38px}
+  header{gap:8px;padding:6px 9px}
+  .brand b{font-size:11px;letter-spacing:2px}.brand small{display:none}
+  .hstats{gap:9px}.hstat span{font-size:6.5px}.hstat b{font-size:13px}
+  .iconbtn{width:30px;height:30px;font-size:8px}
+  #menuScreen{padding:10px}
+  .ugrid{grid-template-columns:1fr 1fr;gap:8px}
+  .ucard{padding:9px}
+  .uc-desc{font-size:9px;min-height:24px}
+  .uc-btn{font-size:8px;letter-spacing:.6px}
+  #battleScreen{padding:5px 7px 7px;gap:3px}
+  .enemy-orb{width:66px;height:66px;font-size:28px}
+  .enemy-name{font-size:14px;letter-spacing:1px}
+  .ebar{height:10px;width:96%}
+  .logbox{font-size:9px}
+  .player-orb{width:48px;height:48px;font-size:20px}
+  .player-panel{gap:8px}
+  .pstats{min-width:min(250px,66vw)}
+  .prow{font-size:7px}.prow span.ll{width:36px}
+  .hand{min-height:148px;gap:5px;padding:8px 2px 4px;justify-content:flex-start}
+  .bcard{width:98px;height:140px;padding:7px 6px 6px;border-radius:9px}
+  .bcard .bc-cost{width:19px;height:19px;font-size:9px}
+  .bcard .bc-icon{font-size:22px;margin-top:12px}
+  .bcard .bc-name{font-size:8px;min-height:20px}
+  .bcard .bc-desc{font-size:7px;line-height:1.3}
+  .bcard .bc-rar{font-size:5.5px;letter-spacing:.8px}
+  #endTurnBtn{padding:10px 14px;font-size:9px;letter-spacing:1.2px}
+  .piles{font-size:7px}
+  .panel{padding:20px 16px}
+  .floater{font-size:15px}
+}
+@media (max-width:420px){.ugrid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<canvas id="bg"></canvas>
+<div id="app">
+  <header>
+    <div class="brand">
+      <span class="sigil">&#10022;</span>
+      <div><b>ARCANA</b><small>DUELO DE CARTAS M&Aacute;GICAS</small></div>
+    </div>
+    <div class="hstats">
+      <div class="hstat gold"><span>ORO</span><b id="coinsHdr">0</b></div>
+      <div class="hstat"><span>TORRE</span><b id="towerHdr">1</b></div>
+      <div class="hstat"><span>VICTORIAS</span><b id="winsHdr">0</b></div>
+    </div>
+    <button id="muteBtn" class="iconbtn">SND</button>
+  </header>
+
+  <main id="menuScreen">
+    <div class="menu-wrap">
+      <section class="hero-panel">
+        <div class="hero-orb">&#10022;</div>
+        <h1>EL GRIMORIO</h1>
+        <p class="lore">Domina el maná, encadena hechizos y desafía a los magos de la torre. Cada victoria otorga oro para mejorar tus cartas.</p>
+        <div class="hero-chips">
+          <span>VIDA <b>100</b></span>
+          <span>MAN&Aacute; <b>3 &rarr; 9</b></span>
+          <span>MAZO <b id="deckSize">0</b></span>
+        </div>
+        <button id="battleBtn" class="bigbtn">ENTRAR EN BATALLA</button>
+        <div class="next-enemy">PR&Oacute;XIMO RIVAL<b id="nextEnemyName">Aprendiz Oscuro</b><span id="nextEnemyLevel">NIVEL 1</span></div>
+        <div class="howto">Juega cartas con man&aacute; y termina el turno. Observa la intenci&oacute;n del rival para defenderte. Las cartas legendarias se desbloquean con oro y las mejoras aumentan su poder.</div>
+        <button id="resetBtn" class="linkbtn">REINICIAR PROGRESO</button>
+      </section>
+      <section class="collection">
+        <div class="col-head"><h2>GRIMORIO Y MEJORAS</h2><span id="collTotal">0 cartas</span></div>
+        <div id="collectionList"></div>
+      </section>
+    </div>
+  </main>
+
+  <main id="battleScreen" class="hidden">
+    <div class="b-top">
+      <button id="fleeBtn" class="ghostbtn">&larr; RETIRARSE</button>
+      <span>TORRE <b id="bTower">1</b></span>
+    </div>
+    <div class="enemy-panel">
+      <div class="enemy-name" id="enemyName">Rival</div>
+      <div class="enemy-badges" id="enemyBadges"></div>
+      <div id="enemyOrb" class="orb enemy-orb">&#9790;</div>
+      <div class="ebar"><i id="enemyHpFill"></i></div>
+      <div class="enemy-meta"><span id="enemyHpText">0 / 0</span><span class="sh" id="enemyShieldText"></span></div>
+      <div class="intent" id="intentBox"><span id="intentText">...</span></div>
+    </div>
+    <div class="logbox" id="logBox"></div>
+    <div class="player-panel">
+      <div class="orb player-orb">&#10022;</div>
+      <div class="pstats">
+        <div class="prow"><span class="ll">VIDA</span><div class="pbar"><i id="playerHpFill"></i></div><b id="playerHpText">100</b></div>
+        <div class="prow"><span class="ll">ESCUDO</span><b class="shv" id="playerShieldText">0</b></div>
+        <div class="prow"><span class="ll">MANÁ</span><div class="pips" id="manaPips"></div><b id="manaText">3/3</b></div>
+        <div class="turnlabel" id="turnLabel">TU TURNO</div>
+      </div>
+    </div>
+    <div class="hand" id="hand"></div>
+    <div class="battle-foot">
+      <div class="piles">MAZO <b id="deckCount">0</b> &middot; DESCARTE <b id="discardCount">0</b></div>
+      <button id="endTurnBtn" class="bigbtn">TERMINAR TURNO</button>
+    </div>
+  </main>
+</div>
+
+<div id="winOverlay" class="modal hidden">
+  <div class="panel">
+    <h2>VICTORIA</h2>
+    <div class="win-gold" id="winReward">+0 ORO</div>
+    <p id="winNote">La torre tiembla. Un nuevo rival te espera.</p>
+    <div class="btnrow">
+      <button id="winNext" class="bigbtn">SIGUIENTE DUELO</button>
+      <button id="winMenu" class="minibtn ghost">GRIMORIO</button>
+    </div>
+  </div>
+</div>
+
+<div id="loseOverlay" class="modal hidden">
+  <div class="panel">
+    <h2 class="bad">DERROTA</h2>
+    <div class="win-gold" id="loseReward">+0 ORO</div>
+    <p>El rival resisti&oacute;. Vuelve al grimorio, mejora tus cartas con el oro obtenido y desaf&iacute;alo de nuevo.</p>
+    <div class="btnrow">
+      <button id="loseRetry" class="bigbtn">REINTENTAR</button>
+      <button id="loseMenu" class="minibtn ghost">MEJORAR CARTAS</button>
+    </div>
+  </div>
+</div>
+
+<div id="resetOverlay" class="modal hidden">
+  <div class="panel">
+    <h2 class="bad">&iquest;REINICIAR?</h2>
+    <p>Se perder&aacute;n el oro, las mejoras y las cartas legendarias desbloqueadas.</p>
+    <div class="btnrow">
+      <button id="resetYes" class="minibtn">S&Iacute;, BORRAR TODO</button>
+      <button id="resetNo" class="minibtn ghost">CANCELAR</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+<div id="fxLayer"></div>
+
+<script>
+(function(){
+'use strict';
+var $ = function(s){ return document.querySelector(s); };
+var bg = $('#bg'), bctx = bg.getContext('2d');
+var coinsHdr = $('#coinsHdr'), towerHdr = $('#towerHdr'), winsHdr = $('#winsHdr'), muteBtn = $('#muteBtn');
+var menuScreen = $('#menuScreen'), battleScreen = $('#battleScreen');
+var collectionList = $('#collectionList'), collTotal = $('#collTotal'), deckSizeEl = $('#deckSize');
+var nextEnemyName = $('#nextEnemyName'), nextEnemyLevel = $('#nextEnemyLevel');
+var battleBtn = $('#battleBtn'), resetBtn = $('#resetBtn');
+var bTower = $('#bTower'), fleeBtn = $('#fleeBtn');
+var enemyNameEl = $('#enemyName'), enemyBadges = $('#enemyBadges'), enemyOrbEl = $('#enemyOrb');
+var enemyHpFill = $('#enemyHpFill'), enemyHpText = $('#enemyHpText'), enemyShieldText = $('#enemyShieldText');
+var intentBox = $('#intentBox'), intentText = $('#intentText');
+var logBox = $('#logBox');
+var playerHpFill = $('#playerHpFill'), playerHpText = $('#playerHpText'), playerShieldText = $('#playerShieldText');
+var manaPips = $('#manaPips'), manaText = $('#manaText'), turnLabel = $('#turnLabel');
+var handEl = $('#hand'), deckCountEl = $('#deckCount'), discardCountEl = $('#discardCount'), endTurnBtn = $('#endTurnBtn');
+var winOverlay = $('#winOverlay'), winReward = $('#winReward'), winNote = $('#winNote'), winNext = $('#winNext'), winMenu = $('#winMenu');
+var loseOverlay = $('#loseOverlay'), loseReward = $('#loseReward'), loseRetry = $('#loseRetry'), loseMenu = $('#loseMenu');
+var resetOverlay = $('#resetOverlay'), resetYes = $('#resetYes'), resetNo = $('#resetNo');
+var toastEl = $('#toast'), fxLayer = $('#fxLayer');
+
+var SAVE_KEY = 'arcana_save_v1';
+var MAX_LEVEL = 5;
+var battle = null;
+var toastT = null;
+var muted = false;
+var actx = null, noiseBuf = null;
+
+var RARITY = {
+  comun:     { label: 'COMÚN',      color: '#9aa8b4' },
+  rara:      { label: 'RARA',       color: '#5aa9e6' },
+  epica:     { label: 'ÉPICA',      color: '#b07bff' },
+  legendaria:{ label: 'LEGENDARIA', color: '#ffb347' }
+};
+var RAR_ORDER = ['comun', 'rara', 'epica', 'legendaria'];
+
+var CARDS = [
+  {id:'chispa', name:'Chispa', icon:'✦', cost:1, rarity:'comun', gold:15, copies:2, dmg:9,
+    desc:function(v){ return 'Inflige ' + v.dmg + ' de daño.'; }},
+  {id:'escudo', name:'Escudo Rúnico', icon:'⬡', cost:1, rarity:'comun', gold:15, copies:2, shield:12,
+    desc:function(v){ return 'Gana ' + v.shield + ' de escudo.'; }},
+  {id:'balsamo', name:'Bálsamo', icon:'✚', cost:1, rarity:'comun', gold:15, copies:2, heal:10,
+    desc:function(v){ return 'Recupera ' + v.heal + ' PV.'; }},
+  {id:'daga', name:'Daga Etérea', icon:'✕', cost:1, rarity:'comun', gold:18, copies:2, dmg:5, draw:1,
+    desc:function(v){ return v.dmg + ' de daño. Roba 1 carta.'; }},
+  {id:'rayo', name:'Rayo Menor', icon:'⌁', cost:2, rarity:'rara', gold:30, copies:2, dmg:20,
+    desc:function(v){ return 'Inflige ' + v.dmg + ' de daño.'; }},
+  {id:'bola', name:'Bola de Fuego', icon:'✹', cost:2, rarity:'rara', gold:32, copies:2, dmg:26,
+    desc:function(v){ return 'Inflige ' + v.dmg + ' de daño.'; }},
+  {id:'ventisca', name:'Ventisca', icon:'✻', cost:2, rarity:'rara', gold:34, copies:1, dmg:14, freeze:1,
+    desc:function(v){ return v.dmg + ' de daño y congela al rival 1 turno.'; }},
+  {id:'pocion', name:'Poción Mayor', icon:'✜', cost:2, rarity:'rara', gold:30, copies:2, heal:26,
+    desc:function(v){ return 'Recupera ' + v.heal + ' PV.'; }},
+  {id:'cristal', name:'Escudo de Cristal', icon:'◈', cost:2, rarity:'rara', gold:30, copies:1, shield:28,
+    desc:function(v){ return 'Gana ' + v.shield + ' de escudo.'; }},
+  {id:'drenar', name:'Drenar Vida', icon:'✷', cost:3, rarity:'rara', gold:36, copies:1, dmg:20, heal:14,
+    desc:function(v){ return v.dmg + ' de daño y recupera ' + v.heal + ' PV.'; }},
+  {id:'maldicion', name:'Maldición', icon:'☾', cost:1, rarity:'rara', gold:28, copies:1, burn:8, burnTurns:3,
+    desc:function(v){ return 'Aplica ' + v.burn + ' de quemadura durante 3 turnos.'; }},
+  {id:'cadena', name:'Cadena de Relámpagos', icon:'↯', cost:3, rarity:'epica', gold:55, copies:1, dmg:42,
+    desc:function(v){ return 'Inflige ' + v.dmg + ' de daño.'; }},
+  {id:'egida', name:'Égida Arcana', icon:'⬢', cost:3, rarity:'epica', gold:55, copies:1, shield:40, heal:10,
+    desc:function(v){ return 'Gana ' + v.shield + ' de escudo y recupera ' + v.heal + ' PV.'; }},
+  {id:'meteorito', name:'Meteorito', icon:'✺', cost:4, rarity:'epica', gold:60, copies:1, dmg:60,
+    desc:function(v){ return 'Inflige ' + v.dmg + ' de daño.'; }},
+  {id:'pacto', name:'Pacto de Sangre', icon:'✖', cost:2, rarity:'epica', gold:60, copies:1, dmg:48, self:12,
+    desc:function(v){ return v.dmg + ' de daño. Pierdes ' + v.self + ' PV.'; }},
+  {id:'distorsion', name:'Distorsión', icon:'⟡', cost:2, rarity:'epica', gold:58, copies:1, freeze:1, draw:2,
+    desc:function(){ return 'Congela al rival 1 turno y roba 2 cartas.'; }},
+  {id:'meteoro_arcano', name:'Meteoro Arcano', icon:'☄', cost:5, rarity:'legendaria', gold:110, unlock:220, copies:1, dmg:90, burn:10, burnTurns:2,
+    desc:function(v){ return v.dmg + ' de daño y ' + v.burn + ' de quemadura durante 2 turnos.'; }},
+  {id:'fenix', name:'Fénix Eterno', icon:'✶', cost:4, rarity:'legendaria', gold:110, unlock:280, copies:1, heal:55, shield:30,
+    desc:function(v){ return 'Recupera ' + v.heal + ' PV y gana ' + v.shield + ' de escudo.'; }},
+  {id:'tormenta', name:'Tormenta de Almas', icon:'✵', cost:6, rarity:'legendaria', gold:120, unlock:360, copies:1, dmg:70, burn:12, burnTurns:3,
+    desc:function(v){ return v.dmg + ' de daño y ' + v.burn + ' de quemadura durante 3 turnos.'; }},
+  {id:'reloj', name:'Reloj de Arena', icon:'⧗', cost:3, rarity:'legendaria', gold:110, unlock:320, copies:1, mana:2, draw:3,
+    desc:function(){ return 'Gana 2 de maná y roba 3 cartas.'; }},
+  {id:'dragon', name:'Dragón de Ceniza', icon:'◉', cost:7, rarity:'legendaria', gold:140, unlock:500, copies:1, dmg:130,
+    desc:function(v){ return 'Inflige ' + v.dmg + ' de daño devastador.'; }}
+];
+
+var CARD_BY_ID = {};
+CARDS.forEach(function(c){ CARD_BY_ID[c.id] = c; });
+
+var ENEMY_NAMES = ['Aprendiz Oscuro', 'Caballero Rúnico', 'Nigromante de Sal', 'Elementalista', 'Hechicero del Vacío', 'Custodio de Ceniza', 'Oráculo Ciego'];
+
+function clamp(v, a, b){ return v < a ? a : v > b ? b : v; }
+function rand(a, b){ return a + Math.random() * (b - a); }
+function pick(a){ return a[Math.floor(Math.random() * a.length)]; }
+function shuffle(a){ a = a.slice(); for(var i = a.length - 1; i > 0; i--){ var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+function esc(s){ return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+
+function defaultState(){
+  return { coins: 80, tower: 1, wins: 0, losses: 0, levels: {}, unlocked: {} };
+}
+
+var state = (function(){
+  try {
+    var raw = localStorage.getItem(SAVE_KEY);
+    if(!raw) return defaultState();
+    var s = JSON.parse(raw);
+    if(!s || typeof s !== 'object') return defaultState();
+    var d = defaultState();
+    d.coins = isFinite(s.coins) ? Math.max(0, Math.floor(s.coins)) : 80;
+    d.tower = isFinite(s.tower) ? Math.max(1, Math.floor(s.tower)) : 1;
+    d.wins = isFinite(s.wins) ? Math.max(0, Math.floor(s.wins)) : 0;
+    d.losses = isFinite(s.losses) ? Math.max(0, Math.floor(s.losses)) : 0;
+    d.levels = (s.levels && typeof s.levels === 'object') ? s.levels : {};
+    d.unlocked = (s.unlocked && typeof s.unlocked === 'object') ? s.unlocked : {};
+    return d;
+  } catch(e){ return defaultState(); }
+})();
+
+function saveState(){
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify(state)); } catch(e){}
+}
+
+function isOwned(card){
+  return card.rarity !== 'legendaria' || !!state.unlocked[card.id];
+}
+
+function getLevel(card){
+  var lv = state.levels[card.id];
+  if(!isFinite(lv)) return 1;
+  return clamp(Math.floor(lv), 1, MAX_LEVEL);
+}
+
+function upgradeCost(card, lvl){
+  if(lvl >= MAX_LEVEL) return null;
+  return Math.round(card.gold * Math.pow(1.5, lvl - 1) * lvl);
+}
+
+function buildDeckIds(){
+  var deck = [];
+  CARDS.forEach(function(c){
+    if(!isOwned(c)) return;
+    var n = c.copies || 1;
+    for(var i = 0; i < n; i++) deck.push(c.id);
+  });
+  return deck;
+}
+
+function ownedCount(){
+  return CARDS.filter(isOwned).length;
+}
+
+function values(card, lvl){
+  var f = 1 + (lvl - 1) * 0.2;
+  return {
+    dmg: Math.round((card.dmg || 0) * f),
+    heal: Math.round((card.heal || 0) * f),
+    shield: Math.round((card.shield || 0) * f),
+    burn: Math.round((card.burn || 0) * f),
+    burnTurns: card.burnTurns || 0,
+    freeze: card.freeze || 0,
+    draw: card.draw || 0,
+    mana: card.mana || 0,
+    self: card.self || 0
+  };
+}
+
+function cardDesc(card, lvl){
+  return card.desc(values(card, lvl));
+}
+
+function enemyNameFor(level){
+  if(level % 5 === 0) return 'Archimago de la Ceniza';
+  return ENEMY_NAMES[(level - 1) % ENEMY_NAMES.length];
+}
+
+function renderHeader(){
+  coinsHdr.textContent = state.coins;
+  towerHdr.textContent = state.tower;
+  winsHdr.textContent = state.wins;
+  deckSizeEl.textContent = buildDeckIds().length;
+  nextEnemyName.textContent = enemyNameFor(state.tower);
+  nextEnemyLevel.textContent = 'NIVEL ' + state.tower + (state.tower % 5 === 0 ? ' · JEFE' : '');
+  collTotal.textContent = ownedCount() + ' cartas · ' + buildDeckIds().length + ' en mazo';
+}
+
+function renderCollectionCard(c){
+  var r = RARITY[c.rarity];
+  var owned = isOwned(c);
+  var lvl = getLevel(c);
+  var btn;
+  if(!owned){
+    btn = '<button class="uc-btn unlock' + (state.coins < c.unlock ? ' cant' : '') + '" data-unlock="' + c.id + '">DESBLOQUEAR · ' + c.unlock + ' ORO</button>';
+  } else if(lvl >= MAX_LEVEL){
+    btn = '<div class="uc-max">NIVEL MÁXIMO</div>';
+  } else {
+    var cost = upgradeCost(c, lvl);
+    btn = '<button class="uc-btn' + (state.coins < cost ? ' cant' : '') + '" data-up="' + c.id + '">MEJORAR · ' + cost + ' ORO</button>';
+  }
+  return '<div class="ucard' + (owned ? '' : ' locked') + '" style="--rc:' + r.color + '">' +
+    '<div class="uc-head"><span class="uc-icon">' + c.icon + '</span>' +
+      '<div class="uc-title"><b>' + esc(c.name) + '</b><small>' + r.label + ' · x' + (c.copies || 1) + '</small></div>' +
+      '<span class="uc-lvl">Nv.' + (owned ? lvl : '—') + '</span></div>' +
+    '<p class="uc-desc">' + (owned ? esc(cardDesc(c, lvl)) : 'Carta legendaria bloqueada. Desbloquéala para añadirla a tu mazo.') + '</p>' + btn +
+  '</div>';
+}
+
+function renderMenu(){
+  var html = '';
+  RAR_ORDER.forEach(function(rar){
+    var list = CARDS.filter(function(c){ return c.rarity === rar; });
+    html += '<div class="rar-group"><div class="rar-title" style="--rc:' + RARITY[rar].color + '">' + RARITY[rar].label + '</div><div class="ugrid">';
+    list.forEach(function(c){ html += renderCollectionCard(c); });
+    html += '</div></div>';
+  });
+  collectionList.innerHTML = html;
+  renderHeader();
+}
+
+function upgradeCard(id){
+  var c = CARD_BY_ID[id];
+  if(!c || !isOwned(c)) return;
+  var lvl = getLevel(c);
+  if(lvl >= MAX_LEVEL){ toast('NIVEL MÁXIMO'); return; }
+  var cost = upgradeCost(c, lvl);
+  if(state.coins < cost){ toast('ORO INSUFICIENTE'); sfx('nope'); return; }
+  state.coins -= cost;
+  state.levels[id] = lvl + 1;
+  saveState();
+  sfx('upgrade');
+  toast(c.name.toUpperCase() + ' → NIVEL ' + (lvl + 1));
+  renderMenu();
+}
+
+function unlockCard(id){
+  var c = CARD_BY_ID[id];
+  if(!c || isOwned(c)) return;
+  if(state.coins < c.unlock){ toast('ORO INSUFICIENTE'); sfx('nope'); return; }
+  state.coins -= c.unlock;
+  state.unlocked[id] = true;
+  state.levels[id] = 1;
+  saveState();
+  sfx('unlock');
+  toast('CARTA LEGENDARIA: ' + c.name.toUpperCase());
+  renderMenu();
+}
+
+function ensureAudio(){
+  if(!actx){ try { actx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e){ actx = null; } }
+  if(actx && actx.state === 'suspended') actx.resume();
+}
+function tone(f1, f2, dur, type, vol){
+  if(!actx || muted) return;
+  var o = actx.createOscillator(), g = actx.createGain(), t = actx.currentTime;
+  o.type = type || 'square';
+  o.frequency.setValueAtTime(f1, t);
+  if(f2) o.frequency.exponentialRampToValueAtTime(Math.max(1, f2), t + dur);
+  g.gain.setValueAtTime(vol, t);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  o.connect(g); g.connect(actx.destination);
+  o.start(t); o.stop(t + dur + 0.03);
+}
+function noiseHit(dur, vol, freq){
+  if(!actx || muted) return;
+  if(!noiseBuf){
+    var len = Math.floor(actx.sampleRate * 0.7);
+    noiseBuf = actx.createBuffer(1, len, actx.sampleRate);
+    var d = noiseBuf.getChannelData(0);
+    for(var i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+  }
+  var s = actx.createBufferSource(), f = actx.createBiquadFilter(), g = actx.createGain(), t = actx.currentTime;
+  s.buffer = noiseBuf;
+  f.type = 'lowpass'; f.frequency.value = freq || 1200;
+  g.gain.setValueAtTime(vol, t);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  s.connect(f); f.connect(g); g.connect(actx.destination);
+  s.start(t); s.stop(t + dur);
+}
+function sfx(kind){
+  if(muted || !actx) return;
+  switch(kind){
+    case 'cast': tone(520, 900, 0.12, 'triangle', 0.05); break;
+    case 'hit': noiseHit(0.16, 0.07, 1500); tone(180, 70, 0.12, 'sawtooth', 0.05); break;
+    case 'heal': tone(500, 820, 0.18, 'sine', 0.06); break;
+    case 'shield': tone(260, 420, 0.16, 'triangle', 0.04); break;
+    case 'coin': tone(760, 1080, 0.08, 'square', 0.04); break;
+    case 'upgrade': tone(620, 980, 0.16, 'triangle', 0.06); setTimeout(function(){ if(actx) tone(900, 1300, 0.14, 'triangle', 0.05); }, 110); break;
+    case 'unlock': tone(440, 880, 0.2, 'sine', 0.07); setTimeout(function(){ if(actx) tone(660, 1320, 0.25, 'sine', 0.06); }, 140); break;
+    case 'win': tone(523, 1046, 0.4, 'triangle', 0.08); break;
+    case 'lose': tone(220, 70, 0.6, 'sawtooth', 0.08); break;
+    case 'nope': tone(150, 110, 0.1, 'square', 0.04); break;
+    case 'click': tone(600, 700, 0.05, 'square', 0.02); break;
+    case 'turn': tone(360, 540, 0.12, 'triangle', 0.03); break;
+  }
+}
+
+function toast(msg, ms){
+  toastEl.textContent = msg;
+  toastEl.classList.add('show');
+  if(toastT) clearTimeout(toastT);
+  toastT = setTimeout(function(){ toastEl.classList.remove('show'); }, ms || 2200);
+}
+
+function screenShake(){
+  battleScreen.classList.remove('shake');
+  void battleScreen.offsetWidth;
+  battleScreen.classList.add('shake');
+  setTimeout(function(){ battleScreen.classList.remove('shake'); }, 360);
+}
+
+function floatAt(el, text, cls){
+  if(!el) return;
+  var r = el.getBoundingClientRect();
+  var d = document.createElement('div');
+  d.className = 'floater ' + (cls || 'dmg');
+  d.textContent = text;
+  d.style.left = (r.left + r.width / 2) + 'px';
+  d.style.top = (r.top + r.height / 2) + 'px';
+  fxLayer.appendChild(d);
+  setTimeout(function(){ if(d.parentNode) d.parentNode.removeChild(d); }, 1000);
+}
+var playerOrbEl = document.querySelector('.player-orb');
+var fxCanvas = document.createElement('canvas');
+fxCanvas.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;z-index:2;pointer-events:none';
+document.getElementById('app').appendChild(fxCanvas);
+var fctx = fxCanvas.getContext('2d');
+
+function showScreen(which){
+  var inBattle = which === 'battle';
+  menuScreen.classList.toggle('hidden', inBattle);
+  battleScreen.classList.toggle('hidden', !inBattle);
+}
+
+function createEnemy(level){
+  var boss = level % 5 === 0;
+  var hp = Math.round((64 + level * 22) * (boss ? 1.65 : 1));
+  return {
+    name: enemyNameFor(level),
+    level: level,
+    boss: boss,
+    hp: hp,
+    maxHp: hp,
+    shield: 0,
+    burn: 0,
+    burnTurns: 0,
+    freeze: 0,
+    charged: false,
+    intent: null,
+    turn: 0,
+    dmgBase: 8.5 + level * 2.3
+  };
+}
+
+function startBattle(){
+  ensureAudio();
+  var level = state.tower;
+  var enemy = createEnemy(level);
+  var p = { hp: 100, maxHp: 100, shield: 0, mana: 3, maxMana: 3 };
+  var deck = shuffle(buildDeckIds());
+  battle = {
+    active: true, result: null, turn: 'player', turnNum: 0, level: level,
+    enemy: enemy, player: p, deck: deck, hand: [], discard: [], log: []
+  };
+  drawCards(5);
+  chooseIntent(enemy);
+  log('Un ' + enemy.name + ' te desafía.', 'turn');
+  showScreen('battle');
+  bTower.textContent = level;
+  renderBattle();
+  sfx('turn');
+}
+
+function drawCards(n){
+  if(!battle) return;
+  for(var i = 0; i < n; i++){
+    if(!battle.deck.length){
+      if(!battle.discard.length) return;
+      battle.deck = shuffle(battle.discard);
+      battle.discard = [];
+    }
+    var id = battle.deck.pop();
+    if(battle.hand.length >= 8){
+      battle.discard.push(id);
+      log('Mano llena: ' + CARD_BY_ID[id].name + ' se descarta.', 'dmg');
+    } else {
+      battle.hand.push(id);
+    }
+  }
+}
+
+function chooseIntent(e){
+  e.turn++;
+  if(e.charged){
+    e.charged = false;
+    e.intent = { type: 'attack', value: Math.round(e.dmgBase * 1.9), double: true };
+    return;
+  }
+  var base = Math.round(e.dmgBase * rand(0.88, 1.15));
+  if(e.boss && e.turn % 3 === 0){
+    e.intent = { type: 'special', value: Math.round(e.dmgBase * 1.55) };
+    return;
+  }
+  var r = Math.random();
+  if(r < 0.5) e.intent = { type: 'attack', value: base };
+  else if(r < 0.68) e.intent = { type: 'shield', value: Math.round(8 + e.level * 2.4) };
+  else if(r < 0.85) e.intent = { type: 'drain', value: Math.round(base * 0.8) };
+  else e.intent = { type: 'charge', value: base };
+}
+
+function intentInfo(e){
+  var i = e.intent;
+  if(!i) return { text: '...', danger: false };
+  switch(i.type){
+    case 'attack': return { text: (i.double ? '¡ATAQUE CARGADO! ' : 'ATACARÁ ') + i.value + ' DE DAÑO', danger: true };
+    case 'shield': return { text: 'SE PROTEGE · +' + i.value + ' ESCUDO', danger: false };
+    case 'drain': return { text: 'DRENARÁ ' + i.value + ' PV', danger: true };
+    case 'charge': return { text: 'ACUMULA PODER...', danger: true };
+    case 'special': return { text: '¡TORMENTA ARCANA! ' + i.value + ' DE DAÑO', danger: true };
+  }
+  return { text: '...', danger: false };
+}
+
+function log(msg, cls){
+  if(!battle) return;
+  battle.log.push({ msg: msg, cls: cls || '' });
+  if(battle.log.length > 30) battle.log.shift();
+  renderLog();
+}
+
+function renderLog(){
+  if(!battle) return;
+  logBox.innerHTML = battle.log.slice(-4).map(function(l){
+    return '<div class="logline ' + l.cls + '">' + esc(l.msg) + '</div>';
+  }).join('');
+}
+
+function renderBattle(){
+  if(!battle) return;
+  var p = battle.player, e = battle.enemy;
+
+  bTower.textContent = battle.level;
+  enemyNameEl.textContent = e.name;
+  var badges = '';
+  if(e.boss) badges += '<span class="badge boss">JEFE</span>';
+  if(e.burnTurns > 0) badges += '<span class="badge burn">QUEMADURA ' + e.burn + ' · ' + e.burnTurns + '</span>';
+  if(e.freeze > 0) badges += '<span class="badge freeze">CONGELADO</span>';
+  enemyBadges.innerHTML = badges;
+
+  enemyHpFill.style.width = clamp(e.hp / e.maxHp * 100, 0, 100) + '%';
+  enemyHpText.textContent = Math.max(0, Math.ceil(e.hp)) + ' / ' + e.maxHp;
+  enemyShieldText.textContent = e.shield > 0 ? 'ESCUDO ' + e.shield : '';
+  var ii = intentInfo(e);
+  intentText.textContent = ii.text;
+  intentBox.classList.toggle('danger', !!ii.danger);
+
+  playerHpFill.style.width = clamp(p.hp / p.maxHp * 100, 0, 100) + '%';
+  playerHpText.textContent = Math.max(0, Math.ceil(p.hp));
+  playerShieldText.textContent = Math.max(0, p.shield);
+  var pips = '';
+  var pipCount = Math.max(p.maxMana, Math.ceil(p.mana));
+  for(var i = 0; i < pipCount; i++){
+    pips += '<span class="pip' + (i < Math.floor(p.mana) ? '' : ' used') + '"></span>';
+  }
+  manaPips.innerHTML = pips;
+  manaText.textContent = Math.floor(p.mana) + '/' + p.maxMana;
+
+  turnLabel.textContent = battle.turn === 'player' ? 'TU TURNO' : 'TURNO ENEMIGO';
+  turnLabel.classList.toggle('enemy', battle.turn !== 'player');
+  endTurnBtn.disabled = battle.turn !== 'player' || !battle.active;
+
+  if(!battle.hand.length){
+    handEl.innerHTML = '<div style="color:#8f88a8;font-family:var(--mono);font-size:10px;letter-spacing:1.4px;padding:24px 10px">SIN CARTAS EN MANO</div>';
+  } else {
+    handEl.innerHTML = battle.hand.map(function(id, idx){
+      var c = CARD_BY_ID[id];
+      var lvl = getLevel(c);
+      var off = battle.turn !== 'player' || !battle.active || p.mana < c.cost;
+      return '<button class="bcard' + (off ? ' off' : '') + '" data-card="' + idx + '" style="--rc:' + RARITY[c.rarity].color + '" title="' + esc(cardDesc(c, lvl)) + '">' +
+        '<span class="bc-cost">' + c.cost + '</span>' +
+        '<span class="bc-lvl">Nv.' + lvl + '</span>' +
+        '<span class="bc-icon">' + c.icon + '</span>' +
+        '<span class="bc-name">' + esc(c.name) + '</span>' +
+        '<span class="bc-desc">' + esc(cardDesc(c, lvl)) + '</span>' +
+        '<span class="bc-rar">' + RARITY[c.rarity].label + '</span>' +
+      '</button>';
+    }).join('');
+  }
+
+  deckCountEl.textContent = battle.deck.length;
+  discardCountEl.textContent = battle.discard.length;
+  renderLog();
+}
+
+function damageEnemy(amount, pierce){
+  if(!battle || !battle.active) return;
+  var e = battle.enemy;
+  var remaining = amount;
+  if(!pierce && e.shield > 0){
+    var a = Math.min(e.shield, remaining);
+    e.shield -= a;
+    remaining -= a;
+  }
+  e.hp = Math.max(0, e.hp - remaining);
+  if(remaining > 0){
+    floatAt(enemyOrbEl, '-' + remaining, 'dmg');
+  } else {
+    floatAt(enemyOrbEl, 'BLOQUEADO', 'shield');
+  }
+  burstAt(enemyOrbEl, '#ff7a6a', 16);
+  enemyOrbEl.classList.remove('hit');
+  void enemyOrbEl.offsetWidth;
+  enemyOrbEl.classList.add('hit');
+  sfx('hit');
+  screenShake();
+  renderBattle();
+  if(e.hp <= 0) winBattle();
+}
+
+function damagePlayer(amount, pierce){
+  if(!battle || !battle.active) return;
+  var p = battle.player;
+  var remaining = amount;
+  if(!pierce && p.shield > 0){
+    var a = Math.min(p.shield, remaining);
+    p.shield -= a;
+    remaining -= a;
+  }
+  p.hp = Math.max(0, p.hp - remaining);
+  if(remaining > 0){
+    floatAt(playerOrbEl, '-' + remaining, 'dmg');
+  } else {
+    floatAt(playerOrbEl, 'BLOQUEADO', 'shield');
+  }
+  burstAt(playerOrbEl, '#ff7a6a', 14);
+  sfx('hit');
+  screenShake();
+  renderBattle();
+  if(p.hp <= 0) loseBattle();
+}
+
+function healPlayer(amount){
+  var p = battle.player;
+  var before = p.hp;
+  p.hp = Math.min(p.maxHp, p.hp + amount);
+  var gained = p.hp - before;
+  if(gained > 0){
+    floatAt(playerOrbEl, '+' + gained, 'heal');
+    burstAt(playerOrbEl, '#7dffb0', 12);
+    log('Recuperas ' + gained + ' PV.', 'heal');
+  } else {
+    log('Tu vida ya está al máximo.', 'shield');
+  }
+  sfx('heal');
+  renderBattle();
+}
+
+function shieldPlayer(amount){
+  battle.player.shield += amount;
+  floatAt(playerOrbEl, '+' + amount + ' ESCUDO', 'shield');
+  burstAt(playerOrbEl, '#6ee7ff', 12);
+  log('Ganas ' + amount + ' de escudo.', 'shield');
+  sfx('shield');
+  renderBattle();
+}
+
+function applyCard(card, v){
+  if(v.dmg > 0) damageEnemy(v.dmg);
+  if(!battle || !battle.active) return;
+  if(v.heal > 0) healPlayer(v.heal);
+  if(v.shield > 0) shieldPlayer(v.shield);
+  if(v.burn > 0){
+    battle.enemy.burn = Math.max(battle.enemy.burn, v.burn);
+    battle.enemy.burnTurns = Math.max(battle.enemy.burnTurns, v.burnTurns || 1);
+    floatAt(enemyOrbEl, 'QUEMADURA', 'burn');
+    log('El rival arde: ' + v.burn + ' por turno.', 'burn');
+  }
+  if(v.freeze > 0){
+    battle.enemy.freeze = Math.max(battle.enemy.freeze, v.freeze);
+    floatAt(enemyOrbEl, 'CONGELADO', 'freeze');
+    log('El rival queda congelado.', 'freeze');
+  }
+  if(v.self > 0){
+    battle.player.hp = Math.max(0, battle.player.hp - v.self);
+    floatAt(playerOrbEl, '-' + v.self, 'dmg');
+    log('El pacto te cuesta ' + v.self + ' PV.', 'dmg');
+  }
+  if(v.draw > 0) drawCards(v.draw);
+  if(v.mana > 0){
+    battle.player.mana = Math.min(10, battle.player.mana + v.mana);
+    floatAt(playerOrbEl, '+' + v.mana + ' MANÁ', 'mana');
+  }
+  sfx('cast');
+  renderBattle();
+  if(battle.player.hp <= 0){ loseBattle(); return; }
+  if(battle.enemy.hp <= 0){ winBattle(); return; }
+}
+
+function playCard(idx){
+  if(!battle || !battle.active || battle.turn !== 'player') return;
+  var id = battle.hand[idx];
+  if(!id) return;
+  var card = CARD_BY_ID[id];
+  if(battle.player.mana < card.cost){ toast('MANÁ INSUFICIENTE'); sfx('nope'); return; }
+  battle.player.mana -= card.cost;
+  battle.hand.splice(idx, 1);
+  battle.discard.push(id);
+  log('Lanzas ' + card.name + '.', 'cast');
+  sfx('click');
+  applyCard(card, values(card, getLevel(card)));
+  renderBattle();
+}
+
+function endTurn(){
+  if(!battle || !battle.active || battle.turn !== 'player') return;
+  battle.turn = 'enemy';
+  sfx('turn');
+  renderBattle();
+  var b = battle;
+  setTimeout(function(){
+    if(battle !== b || !b.active) return;
+    enemyAct();
+  }, 650);
+}
+
+function enemyAct(){
+  var e = battle.enemy, p = battle.player;
+  e.shield = 0;
+
+  if(e.burnTurns > 0 && e.burn > 0){
+    e.hp = Math.max(0, e.hp - e.burn);
+    e.burnTurns--;
+    floatAt(enemyOrbEl, '-' + e.burn, 'burn');
+    log('La quemadura inflige ' + e.burn + ' al rival.', 'burn');
+    if(e.burnTurns <= 0) e.burn = 0;
+    renderBattle();
+    if(e.hp <= 0){ winBattle(); return; }
+  }
+
+  var i = e.intent || { type: 'attack', value: Math.round(e.dmgBase) };
+  if(e.freeze > 0){
+    e.freeze--;
+    floatAt(enemyOrbEl, 'CONGELADO', 'freeze');
+    log(e.name + ' está congelado y pierde el turno.', 'freeze');
+  } else if(i.type === 'attack'){
+    log(e.name + ' ataca por ' + i.value + '.', 'enemy');
+    damagePlayer(i.value);
+  } else if(i.type === 'special'){
+    log('¡' + e.name + ' desata la Tormenta Arcana!', 'enemy');
+    damagePlayer(i.value);
+    screenShake();
+  } else if(i.type === 'shield'){
+    e.shield += i.value;
+    floatAt(enemyOrbEl, '+' + i.value, 'shield');
+    log(e.name + ' se protege con ' + i.value + ' de escudo.', 'shield');
+    sfx('shield');
+  } else if(i.type === 'drain'){
+    var before = e.hp;
+    e.hp = Math.min(e.maxHp, e.hp + Math.round(i.value * 0.6));
+    if(e.hp > before) floatAt(enemyOrbEl, '+' + (e.hp - before), 'heal');
+    log(e.name + ' drena ' + i.value + ' PV.', 'enemy');
+    damagePlayer(i.value);
+  } else if(i.type === 'charge'){
+    e.charged = true;
+    floatAt(enemyOrbEl, 'CARGANDO', 'mana');
+    log(e.name + ' acumula poder para el próximo ataque.', 'turn');
+  }
+
+  renderBattle();
+  if(!battle.active) return;
+  if(battle.player.hp <= 0){ loseBattle(); return; }
+
+  var b = battle;
+  setTimeout(function(){
+    if(battle !== b || !b.active) return;
+    startPlayerTurn();
+  }, 700);
+}
+
+function startPlayerTurn(){
+  var p = battle.player, e = battle.enemy;
+  battle.turn = 'player';
+  battle.turnNum++;
+  p.maxMana = Math.min(9, p.maxMana + 1);
+  p.mana = p.maxMana;
+  p.shield = 0;
+  drawCards(2);
+  chooseIntent(e);
+  log('Turno ' + (battle.turnNum + 1) + '. Maná recargado.', 'turn');
+  sfx('turn');
+  renderBattle();
+}
+
+function winBattle(){
+  if(!battle || !battle.active) return;
+  battle.active = false;
+  battle.result = 'win';
+  var reward = 30 + battle.level * 10 + (battle.enemy.boss ? 50 : 0);
+  state.coins += reward;
+  state.wins++;
+  state.tower++;
+  saveState();
+  renderHeader();
+  log('¡Victoria! +' + reward + ' oro.', 'heal');
+  sfx('win');
+  winReward.textContent = '+' + reward + ' ORO';
+  winNote.textContent = 'Torre ' + battle.level + ' superada. La torre ' + state.tower + ' te espera.';
+  winOverlay.classList.remove('hidden');
+  renderBattle();
+}
+
+function loseBattle(){
+  if(!battle || !battle.active) return;
+  battle.active = false;
+  battle.result = 'lose';
+  var consolation = 8 + battle.level * 3;
+  state.coins += consolation;
+  state.losses++;
+  saveState();
+  renderHeader();
+  log('Has caído ante el rival...', 'dmg');
+  sfx('lose');
+  loseReward.textContent = '+' + consolation + ' ORO DE CONSUELO';
+  loseOverlay.classList.remove('hidden');
+  renderBattle();
+}
+var stars = [], embers = [], sparks = [];
+var ambientT = 0, lastFrame = 0;
+
+function resizeBg(){
+  bg.width = Math.max(320, window.innerWidth);
+  bg.height = Math.max(300, window.innerHeight);
+  fxCanvas.width = bg.width;
+  fxCanvas.height = bg.height;
+  stars = [];
+  var i;
+  for(i = 0; i < 80; i++){
+    stars.push({
+      x: Math.random() * bg.width,
+      y: Math.random() * bg.height,
+      r: rand(0.5, 1.7),
+      ph: rand(0, 6.28),
+      c: Math.random() < 0.5 ? '176,123,255' : '110,231,255'
+    });
+  }
+  embers = [];
+  for(i = 0; i < 26; i++){
+    embers.push({
+      x: Math.random() * bg.width,
+      y: Math.random() * bg.height,
+      vy: rand(8, 26),
+      r: rand(0.8, 2.2),
+      ph: rand(0, 6.28),
+      c: Math.random() < 0.65 ? '255,207,107' : '176,123,255'
+    });
+  }
+}
+
+function burstAt(el, color, count){
+  if(!el) return;
+  var r = el.getBoundingClientRect();
+  var cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+  for(var i = 0; i < count; i++){
+    var a = rand(0, Math.PI * 2), sp = rand(60, 280);
+    sparks.push({
+      x: cx, y: cy,
+      vx: Math.cos(a) * sp,
+      vy: Math.sin(a) * sp - 50,
+      life: rand(0.35, 0.85), max: 0.85,
+      size: rand(1.4, 3.6),
+      color: color
+    });
+  }
+  if(sparks.length > 260) sparks.splice(0, sparks.length - 260);
+}
+
+function drawBg(dt){
+  bctx.clearRect(0, 0, bg.width, bg.height);
+  var i, s;
+  for(i = 0; i < stars.length; i++){
+    s = stars[i];
+    var al = 0.12 + 0.3 * (0.5 + 0.5 * Math.sin(ambientT * 0.9 + s.ph));
+    bctx.fillStyle = 'rgba(' + s.c + ',' + al + ')';
+    bctx.beginPath();
+    bctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+    bctx.fill();
+  }
+  for(i = 0; i < embers.length; i++){
+    s = embers[i];
+    s.y -= s.vy * dt;
+    s.x += Math.sin(ambientT * 0.7 + s.ph) * dt * 9;
+    if(s.y < -10){ s.y = bg.height + 10; s.x = Math.random() * bg.width; }
+    var ea = 0.18 + 0.28 * (0.5 + 0.5 * Math.sin(ambientT * 2 + s.ph));
+    bctx.fillStyle = 'rgba(' + s.c + ',' + ea + ')';
+    bctx.beginPath();
+    bctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+    bctx.fill();
+  }
+}
+
+function drawSparks(dt){
+  fctx.clearRect(0, 0, fxCanvas.width, fxCanvas.height);
+  for(var i = sparks.length - 1; i >= 0; i--){
+    var s = sparks[i];
+    s.life -= dt;
+    if(s.life <= 0){ sparks.splice(i, 1); continue; }
+    s.x += s.vx * dt;
+    s.y += s.vy * dt;
+    s.vy += 380 * dt;
+    s.vx *= (1 - 1.6 * dt);
+    var a2 = clamp(s.life / s.max, 0, 1);
+    fctx.fillStyle = 'rgba(' + hexToRgb(s.color) + ',' + a2 + ')';
+    fctx.beginPath();
+    fctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+    fctx.fill();
+  }
+}
+
+function hexToRgb(hex){
+  if(hex.charAt(0) !== '#') return hex;
+  var v = hex.slice(1);
+  if(v.length === 3) v = v.charAt(0) + v.charAt(0) + v.charAt(1) + v.charAt(1) + v.charAt(2) + v.charAt(2);
+  var n = parseInt(v, 16);
+  return ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255);
+}
+
+function frame(now){
+  if(!lastFrame) lastFrame = now;
+  var dt = Math.min(0.05, (now - lastFrame) / 1000);
+  lastFrame = now;
+  ambientT += dt;
+  drawBg(dt);
+  drawSparks(dt);
+  requestAnimationFrame(frame);
+}
+
+function resetProgress(){
+  try { localStorage.removeItem(SAVE_KEY); } catch(e){}
+  state = defaultState();
+  saveState();
+  battle = null;
+  resetOverlay.classList.add('hidden');
+  winOverlay.classList.add('hidden');
+  loseOverlay.classList.add('hidden');
+  showScreen('menu');
+  renderMenu();
+  toast('PROGRESO REINICIADO');
+  sfx('nope');
+}
+
+function fleeBattle(){
+  if(battle) battle.active = false;
+  battle = null;
+  winOverlay.classList.add('hidden');
+  loseOverlay.classList.add('hidden');
+  showScreen('menu');
+  renderMenu();
+  toast('TE RETIRASTE DEL DUELO');
+}
+
+battleBtn.addEventListener('click', function(){ ensureAudio(); startBattle(); });
+resetBtn.addEventListener('click', function(){ resetOverlay.classList.remove('hidden'); });
+resetNo.addEventListener('click', function(){ resetOverlay.classList.add('hidden'); });
+resetYes.addEventListener('click', resetProgress);
+muteBtn.addEventListener('click', function(){
+  muted = !muted;
+  muteBtn.textContent = muted ? 'OFF' : 'SND';
+  muteBtn.style.color = muted ? '#8f88a8' : '#e0ccff';
+  if(!muted) ensureAudio();
+});
+fleeBtn.addEventListener('click', fleeBattle);
+endTurnBtn.addEventListener('click', endTurn);
+winNext.addEventListener('click', function(){
+  winOverlay.classList.add('hidden');
+  ensureAudio();
+  startBattle();
+});
+winMenu.addEventListener('click', function(){
+  winOverlay.classList.add('hidden');
+  showScreen('menu');
+  renderMenu();
+});
+loseRetry.addEventListener('click', function(){
+  loseOverlay.classList.add('hidden');
+  ensureAudio();
+  startBattle();
+});
+loseMenu.addEventListener('click', function(){
+  loseOverlay.classList.add('hidden');
+  showScreen('menu');
+  renderMenu();
+});
+
+collectionList.addEventListener('click', function(ev){
+  var t = ev.target;
+  var up = t.closest ? t.closest('[data-up]') : null;
+  if(up){ ensureAudio(); upgradeCard(up.getAttribute('data-up')); return; }
+  var un = t.closest ? t.closest('[data-unlock]') : null;
+  if(un){ ensureAudio(); unlockCard(un.getAttribute('data-unlock')); }
+});
+
+handEl.addEventListener('click', function(ev){
+  var b = ev.target.closest ? ev.target.closest('[data-card]') : null;
+  if(!b || !battle) return;
+  ensureAudio();
+  var idx = parseInt(b.getAttribute('data-card'), 10);
+  var id = battle.hand[idx];
+  if(!id) return;
+  var c = CARD_BY_ID[id];
+  if(battle.active && battle.turn === 'player' && battle.player.mana < c.cost){
+    toast('MANÁ INSUFICIENTE');
+    sfx('nope');
+    return;
+  }
+  playCard(idx);
+});
+
+window.addEventListener('keydown', function(ev){
+  var k = ev.key;
+  ensureAudio();
+  if(battle && battle.active && battle.turn === 'player'){
+    if(k === 'Enter' || k === ' '){
+      ev.preventDefault();
+      endTurn();
+      return;
+    }
+    if(/^[1-8]$/.test(k)){
+      ev.preventDefault();
+      playCard(parseInt(k, 10) - 1);
+      return;
+    }
+  }
+  if(k === 'Escape'){
+    resetOverlay.classList.add('hidden');
+  }
+});
+
+window.addEventListener('resize', resizeBg);
+
+renderMenu();
+resizeBg();
+requestAnimationFrame(frame);
+showScreen('menu');
+
+})();
+</script>
+</body>
+</html>

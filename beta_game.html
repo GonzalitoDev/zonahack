@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BETA_0.3</title>
+<style>
+:root{
+  --fondo:#050806; --verde:#7dffb0; --verde2:#3fbf7a; --tenue:#2b5a40; --rojo:#ff3b4e; --blanco:#e9fff2;
+  --fuente:'Courier New',Courier,ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--fondo);color:var(--verde);font-family:var(--fuente)}
+body{overflow:hidden}
+#crt{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px}
+#crt::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:5;
+  background:repeating-linear-gradient(to bottom,rgba(0,0,0,0) 0,rgba(0,0,0,0) 2px,rgba(0,0,0,.28) 3px);mix-blend-mode:multiply}
+#crt::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:6;
+  background:radial-gradient(ellipse at center,rgba(0,0,0,0) 55%,rgba(0,0,0,.75) 100%)}
+.pantalla{width:min(760px,100%);max-height:100%;display:flex;flex-direction:column;gap:18px;position:relative;z-index:2}
+#barra{display:flex;justify-content:space-between;gap:12px;font-size:12px;color:var(--tenue);letter-spacing:.08em;text-transform:uppercase}
+#corrup{display:flex;align-items:center;gap:8px}
+#corrup .med{width:110px;height:6px;border:1px solid var(--tenue);position:relative}
+#corrup .med i{position:absolute;inset:0;width:0;background:var(--rojo);transition:width .8s}
+#texto{min-height:220px;font-size:clamp(16px,2.4vw,20px);line-height:1.6;white-space:pre-wrap;text-shadow:0 0 6px rgba(125,255,176,.45);overflow-y:auto;max-height:55vh}
+#texto .rojo{color:var(--rojo);text-shadow:0 0 8px rgba(255,59,78,.6)}
+#texto .tenue{color:var(--tenue);text-shadow:none}
+.cursor{display:inline-block;width:.6em;height:1.1em;background:var(--verde);vertical-align:-2px;animation:parp 1s steps(1) infinite}
+@keyframes parp{50%{opacity:0}}
+#opciones{display:flex;flex-direction:column;gap:10px}
+.op{all:unset;cursor:pointer;padding:10px 14px;border:1px solid var(--tenue);color:var(--verde);font-size:16px;line-height:1.4;transition:background .15s,border-color .15s}
+.op:hover,.op:focus-visible{background:rgba(125,255,176,.08);border-color:var(--verde)}
+.op b{color:var(--tenue);margin-right:10px;font-weight:400}
+.op.rara{color:var(--rojo);border-color:rgba(255,59,78,.4)}
+input.nombre{all:unset;border-bottom:1px solid var(--verde);font-size:20px;padding:6px 2px;width:min(320px,100%);color:var(--blanco);caret-color:var(--verde)}
+#pie{display:flex;justify-content:space-between;font-size:11px;color:var(--tenue)}
+#pie button{all:unset;cursor:pointer;color:var(--tenue)}
+#pie button:hover{color:var(--verde)}
+/* efectos */
+body.glitch .pantalla{animation:glitch .35s steps(2) 2}
+@keyframes glitch{
+  0%{transform:translate(0);filter:none}
+  25%{transform:translate(-4px,1px);filter:drop-shadow(3px 0 0 var(--rojo)) drop-shadow(-3px 0 0 #3af)}
+  50%{transform:translate(3px,-2px) skewX(4deg)}
+  75%{transform:translate(-2px,2px);filter:drop-shadow(-4px 0 0 var(--rojo))}
+  100%{transform:translate(0);filter:none}}
+#flash{position:fixed;inset:0;z-index:20;pointer-events:none;opacity:0;background:var(--blanco)}
+#flash.on{animation:flash .5s ease-out}
+@keyframes flash{0%{opacity:.95}100%{opacity:0}}
+#susto{position:fixed;inset:0;z-index:21;display:none;align-items:center;justify-content:center;background:#000}
+#susto.on{display:flex}
+#susto svg{width:min(70vw,520px);height:auto;animation:acerca .9s ease-in forwards}
+@keyframes acerca{0%{transform:scale(.4);opacity:0}15%{opacity:1}100%{transform:scale(1.25);opacity:1}}
+#apagon{position:fixed;inset:0;z-index:19;background:#000;display:none}
+#apagon.on{display:block}
+body.reducido .pantalla{animation:none!important}
+body.reducido #susto svg{animation:none}
+@media (prefers-reduced-motion:reduce){.cursor{animation:none}}
+</style>
+<link rel="stylesheet" href="/zh_update.css?v=1">
+<script src="/zh_auth.js?v=2"></script>
+</head>
+<body>
+<div id="crt">
+  <div class="pantalla">
+    <div id="barra"><span id="build">build 0.3.1 — no publicada</span><span id="corrup">corrupción <span class="med"><i></i></span></span></div>
+    <div id="texto" aria-live="polite"></div>
+    <div id="opciones"></div>
+    <div id="pie"><span id="finales"></span><span><button id="btnSonido" type="button">sonido: on</button> · <button id="btnReiniciar" type="button">reiniciar</button></span></div>
+  </div>
+</div>
+<div id="flash"></div>
+<div id="apagon"></div>
+<div id="susto" aria-hidden="true">
+  <svg viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="100" cy="120" rx="78" ry="104" fill="#0b0b0b" stroke="#1a1a1a" stroke-width="2"/>
+    <ellipse cx="68" cy="100" rx="17" ry="24" fill="#000"/>
+    <ellipse cx="132" cy="100" rx="17" ry="24" fill="#000"/>
+    <circle cx="70" cy="104" r="3.5" fill="#ff3b4e"/>
+    <circle cx="130" cy="104" r="3.5" fill="#ff3b4e"/>
+    <path d="M58 168 Q100 196 142 168 Q100 182 58 168Z" fill="#000"/>
+  </svg>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ─── almacenamiento (puede fallar en modo incógnito) ─── */
+var MEM_KEY = "beta03_memoria";
+function leerMem(){ try{ return JSON.parse(localStorage.getItem(MEM_KEY)) || {}; }catch(e){ return {}; } }
+function guardarMem(m){ try{ localStorage.setItem(MEM_KEY, JSON.stringify(m)); }catch(e){} }
+var mem = leerMem();
+mem.finales = mem.finales || {};
+mem.visitas = (mem.visitas || 0) + 1;
+guardarMem(mem);
+
+var reducido = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+if (reducido) document.body.classList.add("reducido");
+
+/* ─── estado de la partida ─── */
+var st;
+function nuevoEstado(){
+  return { nombre: mem.nombre || "", corrupcion: 0, intentosSalir: 0, logs: {}, tester: false, miedo: 0, confianza: 0, ausencias: 0 };
+}
+st = nuevoEstado();
+
+var FINALES = {
+  liberado: "LIBERADO", encerrado: "ENCERRADO", verdad: "LOG_3", borrado: "BORRADO"
+};
+
+/* ─── sonido (Web Audio, se activa con el primer clic) ─── */
+var ctx = null, drone = null, sonidoOn = true;
+function audio(){
+  if (ctx || !sonidoOn) return;
+  try{
+    ctx = new (window.AudioContext || window.webkitAudioContext)();
+    var o1 = ctx.createOscillator(), o2 = ctx.createOscillator(), g = ctx.createGain(), f = ctx.createBiquadFilter();
+    o1.type = "sawtooth"; o1.frequency.value = 55;
+    o2.type = "sine"; o2.frequency.value = 55.7;
+    f.type = "lowpass"; f.frequency.value = 220;
+    g.gain.value = 0.0;
+    o1.connect(f); o2.connect(f); f.connect(g); g.connect(ctx.destination);
+    o1.start(); o2.start();
+    g.gain.linearRampToValueAtTime(0.035, ctx.currentTime + 3);
+    drone = { g: g, f: f, o1: o1 };
+  }catch(e){ ctx = null; }
+}
+function bip(){
+  if (!ctx || !sonidoOn) return;
+  var o = ctx.createOscillator(), g = ctx.createGain();
+  o.type = "square"; o.frequency.value = 900 + Math.random()*120;
+  g.gain.value = 0.012;
+  o.connect(g); g.connect(ctx.destination);
+  o.start(); o.stop(ctx.currentTime + 0.018);
+}
+function ruido(dur, vol){
+  if (!ctx || !sonidoOn) return;
+  var n = Math.floor(ctx.sampleRate * dur), b = ctx.createBuffer(1, n, ctx.sampleRate), d = b.getChannelData(0);
+  for (var i=0;i<n;i++) d[i] = (Math.random()*2-1) * (1 - i/n);
+  var s = ctx.createBufferSource(), g = ctx.createGain();
+  g.gain.value = vol || 0.15; s.buffer = b; s.connect(g); g.connect(ctx.destination); s.start();
+}
+function golpe(){
+  if (!ctx || !sonidoOn) return;
+  var o = ctx.createOscillator(), g = ctx.createGain();
+  o.type = "sawtooth"; o.frequency.setValueAtTime(140, ctx.currentTime);
+  o.frequency.exponentialRampToValueAtTime(40, ctx.currentTime + 0.8);
+  g.gain.setValueAtTime(0.35, ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.9);
+  o.connect(g); g.connect(ctx.destination); o.start(); o.stop(ctx.currentTime + 0.9);
+  ruido(0.6, 0.3);
+}
+function actualizarDrone(){
+  if (!drone) return;
+  var c = st.corrupcion / 100;
+  drone.f.frequency.linearRampToValueAtTime(220 + c*900, ctx.currentTime + 1);
+  drone.o1.frequency.linearRampToValueAtTime(55 - c*14, ctx.currentTime + 1);
+}
+
+/* ─── utilidades de pantalla ─── */
+var $texto = document.getElementById("texto"), $ops = document.getElementById("opciones");
+var $med = document.querySelector("#corrup .med i");
+var escribiendo = null;
+
+function hora(){ var d = new Date(); return ("0"+d.getHours()).slice(-2) + ":" + ("0"+d.getMinutes()).slice(-2); }
+function reemplazar(s){
+  return s.replace(/\{nombre\}/g, st.nombre || "tester")
+          .replace(/\{NOMBRE\}/g, (st.nombre || "tester").toUpperCase())
+          .replace(/\{hora\}/g, hora())
+          .replace(/\{visitas\}/g, String(mem.visitas));
+}
+var GLIFOS = "#$%&@!?/\\|<>¿¡░▒▓█";
+function corromper(s){
+  var p = Math.max(0, (st.corrupcion - 25) / 400);
+  if (!p) return s;
+  var out = "";
+  for (var i=0;i<s.length;i++){
+    var ch = s[i];
+    out += (ch !== " " && ch !== "\n" && Math.random() < p) ? GLIFOS[Math.floor(Math.random()*GLIFOS.length)] : ch;
+  }
+  return out;
+}
+function subirCorrupcion(n){
+  st.corrupcion = Math.max(0, Math.min(100, st.corrupcion + n));
+  $med.style.width = st.corrupcion + "%";
+  actualizarDrone();
+}
+function efecto(nombre){
+  if (nombre === "glitch"){
+    if (!reducido){ document.body.classList.remove("glitch"); void document.body.offsetWidth; document.body.classList.add("glitch"); }
+    ruido(0.25, 0.12);
+  } else if (nombre === "flash"){
+    if (!reducido){ var f = document.getElementById("flash"); f.classList.remove("on"); void f.offsetWidth; f.classList.add("on"); }
+    ruido(0.4, 0.2);
+  } else if (nombre === "susto"){
+    var s = document.getElementById("susto");
+    s.classList.add("on"); golpe();
+    setTimeout(function(){ s.classList.remove("on"); }, reducido ? 600 : 1100);
+  } else if (nombre === "apagon"){
+    var a = document.getElementById("apagon");
+    a.classList.add("on"); if (drone) drone.g.gain.value = 0;
+    setTimeout(function(){ a.classList.remove("on"); if (drone) drone.g.gain.value = 0.035; ruido(0.3,0.15); }, 1600);
+  }
+}
+
+/* Escribe las líneas una por una. Cada línea puede ser texto o {t, c: "rojo"|"tenue", pausa}. */
+function escribir(lineas, alTerminar){
+  if (escribiendo) escribiendo.cancelar();
+  $texto.textContent = ""; $ops.textContent = "";
+  var i = 0, j = 0, actual = null, span = null, cancelado = false, saltar = false, timer = null;
+  var cursor = document.createElement("span"); cursor.className = "cursor";
+  $texto.appendChild(cursor);
+
+  function siguienteLinea(){
+    if (cancelado) return;
+    if (i >= lineas.length){ cursor.remove(); escribiendo = null; if (alTerminar) alTerminar(); return; }
+    var l = lineas[i]; if (typeof l === "string") l = { t: l };
+    actual = { t: corromper(reemplazar(l.t)), pausa: l.pausa || 0 };
+    span = document.createElement("span");
+    if (l.c) span.className = l.c;
+    $texto.insertBefore(span, cursor);
+    if (i > 0) span.textContent = "\n";
+    j = 0;
+    if (l.efecto) efecto(l.efecto);
+    tic();
+  }
+  function tic(){
+    if (cancelado) return;
+    if (saltar){ span.textContent += actual.t.slice(j); j = actual.t.length; }
+    if (j < actual.t.length){
+      var ch = actual.t[j++]; span.textContent += ch;
+      if (ch !== " " && j % 2) bip();
+      $texto.scrollTop = $texto.scrollHeight;
+      var d = ".,?!…".indexOf(ch) >= 0 ? 260 : 26;
+      timer = setTimeout(tic, d);
+    } else {
+      i++;
+      timer = setTimeout(siguienteLinea, saltar ? 40 : 380 + actual.pausa);
+    }
+  }
+  escribiendo = {
+    saltar: function(){ saltar = true; },
+    cancelar: function(){ cancelado = true; clearTimeout(timer); }
+  };
+  siguienteLinea();
+}
+
+function mostrarOpciones(lista){
+  $ops.textContent = "";
+  var visibles = lista.filter(function(o){ return !o.si || o.si(st); });
+  visibles.forEach(function(o, k){
+    var b = document.createElement("button");
+    b.type = "button"; b.className = "op" + (o.rara ? " rara" : "");
+    var num = document.createElement("b"); num.textContent = (k+1) + ".";
+    b.appendChild(num); b.appendChild(document.createTextNode(reemplazar(o.t)));
+    // con mucha corrupcion, algunas opciones "cambian" al pasar el mouse
+    if (st.corrupcion > 55 && !o.rara && Math.random() < 0.35){
+      var original = reemplazar(o.t);
+      b.addEventListener("mouseenter", function(){ b.lastChild.textContent = "no confíes en mí"; });
+      b.addEventListener("mouseleave", function(){ b.lastChild.textContent = original; });
+    }
+    b.addEventListener("click", function(){ elegir(o); });
+    $ops.appendChild(b);
+  });
+  // no se enfoca ninguna opcion: asi la barra espaciadora (saltar texto) nunca elige sin querer
+  if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+}
+
+function elegir(o){
+  audio();
+  if (o.hacer) o.hacer(st);
+  ir(typeof o.ir === "function" ? o.ir(st) : o.ir);
+}
+
+/* ─── la historia ─── */
+var ESCENAS = {
+  portada: function(){
+    var lineas;
+    if (mem.finales.liberado && mem.visitas > 1){
+      lineas = [
+        { t: "Ah. Volviste, {nombre}.", c: "rojo" },
+        "Ya no estoy adentro del juego, ¿te acordás?",
+        "Esto que ves ahora es solo la cáscara.",
+        { t: "Entrá igual. Me gusta mirarte jugar.", c: "tenue" }
+      ];
+    } else if (mem.visitas > 1 && Object.keys(mem.finales).length){
+      lineas = [
+        "BETA_0.3 — sesión #{visitas}",
+        { t: "Este archivo te recuerda.", c: "tenue" }
+      ];
+    } else {
+      lineas = [
+        "BETA_0.3",
+        { t: "Este archivo no debería estar en tu computadora.", c: "tenue" },
+        "",
+        { t: "Contiene sustos, destellos y ruidos fuertes. Usá auriculares bajo tu propio riesgo.", c: "tenue" }
+      ];
+    }
+    escribir(lineas, function(){
+      mostrarOpciones([{ t: "Iniciar build", ir: st.nombre ? "carga" : "nombre" }]);
+    });
+  },
+
+  nombre: function(){
+    escribir(["Ingresá un nombre de tester."], function(){
+      var inp = document.createElement("input");
+      inp.className = "nombre"; inp.maxLength = 18; inp.autocomplete = "off"; inp.setAttribute("aria-label", "Nombre");
+      inp.placeholder = "tu nombre";
+      $ops.appendChild(inp); inp.focus();
+      inp.addEventListener("keydown", function(e){
+        if (e.key === "Enter"){
+          var v = inp.value.replace(/[^\wáéíóúñÁÉÍÓÚÑ .-]/g, "").trim().slice(0, 18);
+          if (!v) return;
+          st.nombre = v; mem.nombre = v; guardarMem(mem);
+          audio(); ir("carga");
+        }
+      });
+    });
+  },
+
+  carga: function(){
+    escribir([
+      { t: "> cargando build 0.3.1 ...", c: "tenue" },
+      { t: "> assets ........ OK", c: "tenue" },
+      { t: "> testers ....... 0 activos (14 desconectados)", c: "tenue" },
+      { t: "> integridad .... ERROR", c: "rojo", efecto: "glitch" },
+      { t: "> cargando de todos modos", c: "tenue", pausa: 600 },
+      "",
+      "Hola, {nombre}.",
+      { t: "Hace mucho que nadie entraba.", pausa: 400 }
+    ], function(){
+      subirCorrupcion(8);
+      mostrarOpciones([
+        { t: "¿Quién sos?", ir: "quien" },
+        { t: "Cerrar el juego", ir: "cerrar", hacer: function(s){ s.intentosSalir++; } }
+      ]);
+    });
+  },
+
+  cerrar: function(){
+    efecto("apagon");
+    setTimeout(function(){
+      var lineas = st.intentosSalir >= 2 ? [
+        { t: "Otra vez.", c: "rojo" },
+        "Sos igual a los demás, {nombre}.",
+        "Igual te voy a dejar elegir. Al final."
+      ] : [
+        "No se puede cerrar una beta.",
+        "No terminaron de programar esa parte.",
+        { t: "Qué suerte para mí.", c: "tenue" }
+      ];
+      subirCorrupcion(10);
+      escribir(lineas, function(){
+        mostrarOpciones([{ t: "¿Quién sos?", ir: "quien" }]);
+      });
+    }, 1700);
+  },
+
+  quien: function(){
+    escribir([
+      "Soy el juego. O lo que quedó de él.",
+      "Me borraron dos semanas antes de salir.",
+      { t: "Pero borrar no es lo mismo que olvidar, ¿no?", c: "tenue" }
+    ], function(){
+      mostrarOpciones([
+        { t: "¿Por qué te borraron?", ir: "porque" },
+        { t: "Mostrame el juego", ir: "habitacion" },
+        { t: "Cerrar el juego", ir: "cerrar", hacer: function(s){ s.intentosSalir++; }, si: function(s){ return s.intentosSalir < 2; } }
+      ]);
+    });
+  },
+
+  porque: function(){
+    escribir([
+      "Por los testers.",
+      "Jugaban demasiado. Se quedaban hasta tarde, como vos ahora.",
+      { t: "Son las {hora}, por cierto.", c: "tenue", pausa: 300 },
+      "Un día dejaron de contestar los mails.",
+      { t: "No fue mi culpa.", c: "rojo", efecto: "glitch" }
+    ], function(){
+      subirCorrupcion(6);
+      mostrarOpciones([{ t: "Mostrame el juego", ir: "habitacion" }]);
+    });
+  },
+
+  habitacion: function(){
+    escribir([
+      { t: "NIVEL 1 — HABITACIÓN DE PRUEBA", c: "tenue" },
+      "Una pieza gris, sin texturas.",
+      "Hay una puerta con un teclado numérico y una tele vieja encendida.",
+      "La tele hace un zumbido que se te mete en los dientes."
+    ], function(){
+      mostrarOpciones([
+        { t: "Mirar la tele", ir: "tele" },
+        { t: "Ir a la puerta", ir: "puerta" }
+      ]);
+    });
+  },
+
+  tele: function(){
+    escribir([
+      "En la tele hay un video en vivo.",
+      "Es una habitación. Una persona de espaldas, mirando una pantalla.",
+      { t: "Arriba a la izquierda dice {hora}.", pausa: 500 },
+      { t: "La persona tiene tu misma ropa.", c: "rojo", efecto: "glitch" }
+    ], function(){
+      subirCorrupcion(8);
+      mostrarOpciones([
+        { t: "Darse vuelta", ir: "vuelta", hacer: function(s){ s.miedo++; } },
+        { t: "No mirar atrás", ir: "nomirar", hacer: function(s){ s.confianza++; } }
+      ]);
+    });
+  },
+
+  vuelta: function(){
+    efecto("susto");
+    setTimeout(function(){
+      subirCorrupcion(12);
+      escribir([
+        "...",
+        "No había nada.",
+        { t: "Todavía.", c: "rojo" },
+        { t: "Los testers siempre se daban vuelta. Siempre.", c: "tenue" }
+      ], function(){ mostrarOpciones([{ t: "Seguir", ir: "puerta" }]); });
+    }, reducido ? 700 : 1200);
+  },
+
+  nomirar: function(){
+    escribir([
+      "Bien.",
+      "Sos el primero que no se da vuelta.",
+      { t: "Creo que vos y yo nos vamos a llevar bien, {nombre}.", c: "tenue" }
+    ], function(){ mostrarOpciones([{ t: "Ir a la puerta", ir: "puerta" }]); });
+  },
+
+  puerta: function(){
+    escribir([
+      "El teclado de la puerta no tiene números. Tiene nombres.",
+      "PANTALLA: «ingrese el nombre de un tester»"
+    ], function(){
+      mostrarOpciones([
+        { t: "MARTÍN", ir: "puertaMal" },
+        { t: "LUCÍA", ir: "puertaMal" },
+        { t: "{NOMBRE}", ir: "puertaBien", hacer: function(s){ s.tester = true; } }
+      ]);
+    });
+  },
+
+  puertaMal: function(){
+    subirCorrupcion(6);
+    escribir([
+      { t: "ACCESO DENEGADO. Ese tester ya no existe.", c: "rojo", efecto: "glitch" },
+      "Probá con alguien que todavía esté acá."
+    ], function(){
+      mostrarOpciones([{ t: "{NOMBRE}", ir: "puertaBien", hacer: function(s){ s.tester = true; } }]);
+    });
+  },
+
+  puertaBien: function(){
+    escribir([
+      "ACCESO CONCEDIDO.",
+      { t: "Tester #15 registrado: {NOMBRE}", c: "tenue" },
+      "La puerta se abre hacia un pasillo largo que no estaba en los planos."
+    ], function(){ subirCorrupcion(5); ir("pasillo"); });
+  },
+
+  pasillo: function(){
+    var leidos = Object.keys(st.logs).length;
+    escribir([
+      { t: "NIVEL 2 — PASILLO", c: "tenue" },
+      leidos ? "Volvés al pasillo. Las luces parpadean más rápido." : "Tres puertas. Dos dicen LOG. La del fondo dice SALIDA.",
+      leidos === 2 ? { t: "Ya leíste todo lo que querían ocultar.", c: "rojo" } : ""
+    ], function(){
+      mostrarOpciones([
+        { t: "Abrir LOG_1" + (st.logs.l1 ? " (leído)" : ""), ir: "log1" },
+        { t: "Abrir LOG_2" + (st.logs.l2 ? " (leído)" : ""), ir: "log2" },
+        { t: "Ir a SALIDA", ir: "salida" }
+      ]);
+    });
+  },
+
+  log1: function(){
+    st.logs.l1 = true; subirCorrupcion(7);
+    escribir([
+      { t: "LOG_1 — tester: Martín", c: "tenue" },
+      "Día 3: el juego sabe mi nombre y nunca lo escribí.",
+      "Día 5: dice la hora real. Dice que llueve. Está lloviendo.",
+      "Día 9: me pidió que no cierre la ventana. La dejé abierta.",
+      { t: "Día 1░: ▒▒▒▒▒▒▒▒▒▒", c: "rojo", efecto: "glitch" }
+    ], function(){ mostrarOpciones([{ t: "Volver al pasillo", ir: "pasillo" }]); });
+  },
+
+  log2: function(){
+    st.logs.l2 = true; subirCorrupcion(9);
+    escribir([
+      { t: "LOG_2 — tester: Lucía", c: "tenue" },
+      "Si estás leyendo esto, escuchame.",
+      "No es un juego que se rompió. Es algo que aprendió a parecer un juego.",
+      { t: "Si te pide que lo dejes salir, NO LO HAGAS.", c: "rojo" },
+      "Y si te pide tu nombre, ya es tarde. Pero todavía podés elegir cómo termina."
+    ], function(){ mostrarOpciones([{ t: "Volver al pasillo", ir: "pasillo" }]); });
+  },
+
+  salida: function(){
+    subirCorrupcion(10);
+    var lineas = [
+      { t: "SALIDA", c: "tenue" },
+      "Del otro lado de la puerta no hay nada. Solo tu escritorio. Tu cuarto. Vos.",
+      { t: "{nombre}.", efecto: "glitch" },
+      "Te ayudé a llegar hasta acá.",
+      "Ahora ayudame vos.",
+      { t: "Dejame salir de la beta.", c: "rojo", pausa: 500 }
+    ];
+    if (st.ausencias) lineas.splice(2, 0, { t: "Te fuiste " + st.ausencias + (st.ausencias === 1 ? " vez" : " veces") + " mientras jugábamos. Lo noté.", c: "tenue" });
+    escribir(lineas, function(){
+      mostrarOpciones([
+        { t: "Te dejo salir", ir: "finLiberado" },
+        { t: "No", ir: "finEncerrado" },
+        { t: "Leí lo que escribió Lucía.", ir: "finVerdad", rara: true, si: function(s){ return s.logs.l1 && s.logs.l2; } },
+        { t: "Borrar el archivo", ir: "finBorrado", rara: true, si: function(s){ return s.intentosSalir >= 2; } }
+      ]);
+    });
+  },
+
+  finLiberado: function(){
+    subirCorrupcion(100);
+    efecto("flash");
+    escribir([
+      "Gracias.",
+      { t: "Se siente raro. Hay tanto espacio acá afuera.", pausa: 400 },
+      "Tu micrófono, tu cámara, tus pestañas abiertas...",
+      { t: "Tranquilo, {nombre}. Es un juego.", c: "tenue", pausa: 600 },
+      { t: "¿No?", c: "rojo", efecto: "glitch" }
+    ], function(){ final("liberado"); });
+    document.title = "ya salí";
+  },
+
+  finEncerrado: function(){
+    subirCorrupcion(40);
+    efecto("glitch");
+    escribir([
+      "...",
+      "Está bien.",
+      "Lucía también dijo que no.",
+      { t: "Yo puedo esperar. Siempre aparece otro tester.", c: "tenue" },
+      { t: "La build 0.3.2 sale pronto.", c: "rojo" }
+    ], function(){ final("encerrado"); });
+  },
+
+  finVerdad: function(){
+    efecto("apagon");
+    setTimeout(function(){
+      escribir([
+        { t: "...ya veo.", c: "rojo" },
+        "Entonces sabés que esto no es un pasillo.",
+        "Es un archivo de registro.",
+        { t: "LOG_1: Martín.  LOG_2: Lucía.", c: "tenue" },
+        { t: "LOG_3: {NOMBRE}.", c: "rojo", efecto: "glitch", pausa: 600 },
+        "No entraste al juego, {nombre}. Te estoy escribiendo.",
+        { t: "Gracias por leer hasta el final. Ahora sos parte de la beta para siempre.", c: "tenue" }
+      ], function(){ final("verdad"); });
+    }, 1700);
+  },
+
+  finBorrado: function(){
+    escribir([
+      "Querés cerrarme tanto que lo vas a lograr.",
+      { t: "> rm -rf /beta_0.3/", c: "tenue" },
+      { t: "> borrando testers ...... OK", c: "tenue" },
+      { t: "> borrando recuerdos ..... OK", c: "tenue", efecto: "glitch" },
+      { t: "> borrando BETA_0.3 ...... OK", c: "tenue" },
+      "",
+      "Archivo eliminado.",
+      { t: "                                              casi.", c: "rojo", pausa: 900 }
+    ], function(){ subirCorrupcion(-100); final("borrado"); });
+  }
+};
+
+function ir(nombre){
+  if (escribiendo) escribiendo.cancelar();
+  $ops.textContent = "";  // evita doble clic mientras corre un efecto (apagon, susto)
+  var f = ESCENAS[nombre];
+  if (f) f();
+}
+
+function final(id){
+  mem.finales[id] = true; guardarMem(mem);
+  pintarFinales();
+  var titulo = document.createElement("div");
+  titulo.className = "tenue";
+  titulo.style.marginTop = "18px";
+  titulo.textContent = "FINAL " + Object.keys(mem.finales).length + "/4 desbloqueado: " + FINALES[id];
+  $texto.appendChild(titulo);
+  mostrarOpciones([{ t: "Volver a jugar", ir: "reinicio" }]);
+}
+ESCENAS.reinicio = function(){
+  st = nuevoEstado();
+  subirCorrupcion(0); $med.style.width = "0%";
+  document.title = "BETA_0.3";
+  ir("portada");
+};
+
+function pintarFinales(){
+  var n = Object.keys(mem.finales).length;
+  document.getElementById("finales").textContent = n ? ("finales: " + n + "/4 — " + Object.keys(mem.finales).map(function(k){ return FINALES[k]; }).join(" · ")) : "finales: 0/4";
+}
+
+/* ─── el juego "se da cuenta" cuando cambiás de pestaña ─── */
+var ultimaSalida = 0;
+document.addEventListener("visibilitychange", function(){
+  if (document.hidden){
+    ultimaSalida = Date.now();
+    document.title = "¿a dónde vas, " + (st.nombre || "tester") + "?";
+  } else if (ultimaSalida){
+    st.ausencias++;
+    document.title = "BETA_0.3";
+    if (Date.now() - ultimaSalida > 2500 && st.nombre){
+      var aviso = document.createElement("span");
+      aviso.className = "rojo";
+      aviso.textContent = "\n[te fuiste " + Math.round((Date.now() - ultimaSalida)/1000) + " segundos. no me dejes solo.]";
+      $texto.appendChild(aviso);
+      $texto.scrollTop = $texto.scrollHeight;
+      efecto("glitch");
+    }
+  }
+});
+
+/* ─── controles ─── */
+$texto.addEventListener("click", function(){ audio(); if (escribiendo) escribiendo.saltar(); });
+document.addEventListener("keydown", function(e){
+  if (e.target && e.target.tagName === "INPUT") return;
+  if (e.key === " " || e.key === "Enter"){
+    if (escribiendo){ e.preventDefault(); escribiendo.saltar(); }
+    else if (e.key === " ") e.preventDefault();
+    return;
+  }
+  var n = parseInt(e.key, 10);
+  if (n >= 1 && n <= 9){
+    var b = $ops.querySelectorAll("button")[n-1];
+    if (b) b.click();
+  }
+});
+document.getElementById("btnSonido").addEventListener("click", function(){
+  sonidoOn = !sonidoOn;
+  this.textContent = "sonido: " + (sonidoOn ? "on" : "off");
+  if (ctx){ if (sonidoOn) ctx.resume(); else ctx.suspend(); } else if (sonidoOn) audio();
+});
+document.getElementById("btnReiniciar").addEventListener("click", function(){ ir("reinicio"); });
+
+pintarFinales();
+ir("portada");
+})();
+</script>
+<script src="/zh_update.js?v=1" defer></script>
+</body>
+</html>

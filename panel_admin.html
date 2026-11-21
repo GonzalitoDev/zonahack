@@ -124,7 +124,309 @@ select:focus,input:focus,textarea:focus{border-color:var(--accent);box-shadow:0 
   background:linear-gradient(135deg,#00ff41,#00c73a);color:#03140a;font-weight:800;font-size:14px;cursor:pointer;letter-spacing:1px}
 .lock-box button:hover{box-shadow:0 0 18px rgba(0,255,65,.3)}
 .lock-msg{color:#ff5a5a;font-size:12px;margin-top:10px;min-height:14px;font-family:'Courier New',monospace}
+
+:root{
+  --bg:#050806;--bg2:#080d09;--card:#0b120d;
+  --border:rgba(100,255,160,.12);
+  --text:#dfe9e2;--text2:#7d9487;
+  --accent:#38e07a;--accent2:#7bffb0;
+  --red:#ff5b6e;--yellow:#ffd166;--blue:#59b7ff;--purple:#b07bff;
+  --radius:12px;--shadow:0 18px 45px rgba(0,0,0,.45);
+  --font:'Segoe UI',system-ui,-apple-system,sans-serif;
+  --mono:'Courier New',monospace;
+}
+html{scroll-behavior:smooth}
+body{
+  background:radial-gradient(circle at 12% -8%,rgba(56,224,122,.10),transparent 44%),radial-gradient(circle at 100% 0%,rgba(89,183,255,.05),transparent 38%),#050806;
+  letter-spacing:0;font-size:14px;color:var(--text);
+}
+body::before{display:none}
+body::after{background:radial-gradient(ellipse at 50% -10%,rgba(56,224,122,.05),transparent 60%)}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(56,224,122,.18);border-radius:8px}
+::-webkit-scrollbar-thumb:hover{background:rgba(56,224,122,.32)}
+
+.sidebar{
+  width:252px;
+  background:linear-gradient(180deg,#0a120d 0%,#070b08 100%);
+  border-right:1px solid var(--border);
+  box-shadow:18px 0 50px rgba(0,0,0,.28);
+  transition:transform .25s ease;
+}
+.sidebar.open{box-shadow:0 0 0 100vmax rgba(0,0,0,.55),30px 0 80px rgba(0,0,0,.65)}
+.sidebar .logo{padding:18px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:11px}
+.logo-mark{
+  width:38px;height:38px;flex:0 0 auto;border-radius:11px;
+  display:grid;place-items:center;
+  background:linear-gradient(135deg,#5bf29a,#0e8a3d);
+  color:#04160a;font-family:var(--mono);font-weight:800;font-size:17px;
+  box-shadow:0 0 24px rgba(56,224,122,.32),inset 0 1px 0 rgba(255,255,255,.35);
+}
+.sidebar .logo-txt{min-width:0}
+.sidebar .logo-txt h1{font-family:var(--mono);font-size:12px!important;letter-spacing:2.4px!important;color:var(--text)!important;text-shadow:none!important;margin:0;line-height:1.2}
+.sidebar .logo-txt h1::after{display:none!important}
+.sidebar .logo-txt span{display:block;margin-top:3px;font-family:var(--mono);font-size:7.5px!important;letter-spacing:2px;color:var(--accent)!important;background:transparent!important;border:0!important;padding:0!important;opacity:.85;line-height:1}
+.sidebar nav{padding:10px 8px}
+.sidebar nav .nav-section{font-family:var(--mono);font-size:8px;letter-spacing:2.4px;color:#5d7264;padding:14px 10px 6px;font-weight:600}
+.sidebar nav a{
+  position:relative;padding:9px 10px;border-left:0;border-radius:9px;
+  color:#92a69a;font-size:11px;font-weight:500;gap:9px;margin:2px 0;
+  transition:background .15s,color .15s,transform .15s;
+}
+.sidebar nav a i{width:18px;text-align:center;font-size:12px;color:#6e8577;transition:color .15s}
+.sidebar nav a:hover{background:rgba(56,224,122,.06);color:var(--text);border-left-color:transparent;transform:translateX(2px)}
+.sidebar nav a:hover i{color:var(--accent)}
+.sidebar nav a.active{
+  background:linear-gradient(90deg,rgba(56,224,122,.17),rgba(56,224,122,.035));
+  color:#e3fff0;border-left-color:transparent;
+  box-shadow:inset 0 0 0 1px rgba(56,224,122,.14);
+  text-shadow:none;
+}
+.sidebar nav a.active::before{content:'';position:absolute;left:0;top:8px;bottom:8px;width:3px;border-radius:3px;background:var(--accent);box-shadow:0 0 12px var(--accent)}
+.sidebar nav a.active i{color:var(--accent)}
+.sidebar .user-info{margin:8px;padding:11px;border:1px solid var(--border);border-radius:12px;background:rgba(255,255,255,.025);gap:10px}
+.sidebar .user-info .avatar{width:34px;height:34px;flex:0 0 auto;border-radius:50%;border:1px solid rgba(56,224,122,.25);background:rgba(56,224,122,.1);display:grid;place-items:center}
+.sidebar .user-info #sidebarName{font-weight:600;color:var(--text);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px}
+.sidebar .user-info #sidebarRol{font-family:var(--mono);letter-spacing:.5px}
+.menu-toggle{
+  display:none;align-items:center;justify-content:center;
+  width:42px;height:42px;padding:0;border-radius:11px;
+  background:rgba(8,13,9,.96);border:1px solid rgba(56,224,122,.35);color:var(--accent);
+  box-shadow:0 10px 24px rgba(0,0,0,.5);font-size:16px;z-index:101;
+}
+
+.main{margin-left:252px;max-width:calc(100vw - 252px);padding:22px 26px 34px}
+.main .top-bar{
+  position:sticky;top:0;z-index:60;
+  margin:-6px -26px 20px;padding:14px 26px;
+  background:rgba(5,8,6,.82);backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--border);gap:14px;
+}
+.main .top-bar h2{
+  font-size:17px;font-weight:600;letter-spacing:.4px;color:var(--text);
+  text-shadow:none;display:flex;flex-direction:column;gap:3px;line-height:1.25;
+}
+.main .top-bar h2::before{
+  content:'ADMIN CONSOLE';font-family:var(--mono);font-size:8px;
+  font-weight:600;letter-spacing:2.6px;color:var(--accent);opacity:.9;
+}
+.main .top-bar .search-box{
+  display:flex;gap:2px;align-items:center;
+  background:rgba(255,255,255,.03);border:1px solid var(--border);
+  border-radius:11px;padding:3px;
+}
+.main .top-bar .search-box input{
+  width:220px;border:0!important;background:transparent!important;
+  padding:8px 10px;color:var(--text);font-size:11px;font-family:var(--font);
+  box-shadow:none!important;
+}
+.main .top-bar .search-box input:focus{box-shadow:none!important}
+.main .top-bar .search-box .btn{
+  padding:7px 11px;border:0;background:rgba(56,224,122,.12);color:var(--accent);
+  border-radius:8px;box-shadow:none;
+}
+.main .top-bar .search-box .btn:hover{background:rgba(56,224,122,.22);color:#d8ffe8;transform:none}
+#liveDot{width:8px;height:8px!important;box-shadow:0 0 10px rgba(56,224,122,.45);animation:pulseDot 1.9s ease-in-out infinite}
+@keyframes pulseDot{0%,100%{opacity:.45;transform:scale(.9)}50%{opacity:1;transform:scale(1.15)}}
+#currentUserBadge{
+  background:rgba(56,224,122,.06)!important;border:1px solid var(--border)!important;
+  border-radius:20px!important;padding:6px 12px!important;font-size:10px!important;
+  color:var(--text)!important;font-family:var(--mono);letter-spacing:.3px;
+}
+
+.dash-banner{
+  position:relative;display:flex;align-items:center;gap:14px;
+  padding:16px 18px;margin-bottom:16px;border:1px solid var(--border);border-radius:14px;
+  background:linear-gradient(100deg,rgba(56,224,122,.09),rgba(255,255,255,.018));
+  overflow:hidden;
+}
+.dash-banner::after{content:'';position:absolute;right:-40px;top:-60px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(56,224,122,.14),transparent 68%);pointer-events:none}
+.db-icon{
+  width:44px;height:44px;flex:0 0 auto;border-radius:12px;display:grid;place-items:center;
+  background:linear-gradient(135deg,rgba(56,224,122,.24),rgba(56,224,122,.05));
+  border:1px solid rgba(56,224,122,.28);color:var(--accent);font-size:18px;
+  box-shadow:0 0 22px rgba(56,224,122,.15);
+}
+.db-text{min-width:0}
+.db-text b{display:block;font-size:13px;letter-spacing:.2px;color:var(--text)}
+.db-text span{display:block;margin-top:3px;font-size:10px;color:var(--text2);line-height:1.4}
+.db-pill{
+  margin-left:auto;display:flex;align-items:center;gap:7px;flex:0 0 auto;
+  font-family:var(--mono);font-size:8px;letter-spacing:1.5px;color:var(--accent);
+  border:1px solid rgba(56,224,122,.3);border-radius:20px;padding:6px 11px;
+  background:rgba(56,224,122,.06);white-space:nowrap;
+}
+.db-pill i{width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px var(--accent);animation:pulseDot 1.8s infinite}
+
+.btn{
+  font-family:var(--font);font-weight:600;font-size:11px;letter-spacing:.2px;
+  text-transform:none;border-radius:9px;border:1px solid var(--border);
+  background:rgba(255,255,255,.035);color:var(--text);
+  padding:8px 13px;display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  line-height:1.15;white-space:nowrap;transition:background .15s,border-color .15s,color .15s,transform .15s,box-shadow .15s;
+}
+.btn:hover{background:rgba(56,224,122,.08);border-color:rgba(56,224,122,.4);color:var(--accent2);transform:translateY(-1px);box-shadow:0 6px 18px rgba(0,0,0,.28)}
+.btn:active{transform:translateY(0);box-shadow:none}
+.btn:focus-visible{outline:2px solid rgba(56,224,122,.45);outline-offset:2px}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none}
+.btn i{font-size:11px}
+.btn-primary{background:linear-gradient(180deg,#3fe883,#22b95f);border-color:#5cff9c;color:#04160a;text-shadow:none;box-shadow:0 7px 20px rgba(45,220,110,.22)}
+.btn-primary:hover{background:linear-gradient(180deg,#5bf29a,#2bcf6e);border-color:#8dffc0;color:#03130a;box-shadow:0 10px 26px rgba(45,220,110,.3)}
+.btn-danger{background:rgba(255,91,110,.08);border-color:rgba(255,91,110,.35);color:#ff8b99}
+.btn-danger:hover{background:rgba(255,91,110,.16);border-color:rgba(255,91,110,.6);color:#ffc2c9}
+.btn-sm{padding:6px 10px;font-size:10px;border-radius:7px}
+.btn-sm i{font-size:10px}
+
+#quickActions{display:grid!important;grid-template-columns:repeat(auto-fit,minmax(170px,1fr))!important;gap:10px!important;margin:0 0 18px!important}
+#quickActions .btn{
+  justify-content:flex-start;min-height:48px;padding:13px 15px;font-size:11px;
+  background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.012));
+  border-radius:11px;box-shadow:none;
+}
+#quickActions .btn:hover{background:linear-gradient(180deg,rgba(56,224,122,.14),rgba(56,224,122,.04));box-shadow:0 10px 24px rgba(0,0,0,.3)}
+#quickActions .btn-primary{background:linear-gradient(180deg,#3fe883,#22b95f);border-color:#5cff9c;color:#04160a}
+#quickActions .btn-primary:hover{background:linear-gradient(180deg,#5bf29a,#2bcf6e);border-color:#8dffc0;color:#03130a}
+
+.stats-grid{grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:12px;margin-bottom:20px}
+.stat-card{
+  border-radius:13px;padding:16px 16px 14px;
+  background:linear-gradient(160deg,rgba(255,255,255,.05),rgba(255,255,255,.012));
+  border-color:var(--border);box-shadow:0 10px 24px rgba(0,0,0,.18);overflow:hidden;
+}
+.stat-card::before{height:3px;width:100%;background:linear-gradient(90deg,var(--accent),transparent);opacity:.8;border-radius:0}
+.stat-card::after{content:'';position:absolute;right:-22px;top:-22px;width:74px;height:74px;border-radius:50%;background:radial-gradient(circle,rgba(56,224,122,.14),transparent 70%);pointer-events:none}
+.stat-card:hover{transform:translateY(-2px);border-color:rgba(56,224,122,.3);box-shadow:0 16px 34px rgba(0,0,0,.3)}
+.stat-card .num{font-size:26px;font-weight:700;letter-spacing:-.6px;line-height:1.1}
+.stat-card .lbl{font-size:9px;letter-spacing:1.3px;color:#7f9487;margin-top:5px}
+
+.card{
+  background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.01));
+  border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:14px;
+  box-shadow:0 12px 30px rgba(0,0,0,.16);
+}
+.card::before{width:46px;height:2px;background:var(--accent);opacity:.75;border-radius:2px}
+.card .hdr{margin-bottom:14px;padding-bottom:10px;gap:10px}
+.card .hdr h3{font-size:11px;letter-spacing:1.2px;font-weight:600;color:#d4ecdc;text-transform:none}
+.card .hdr .actions{gap:6px}
+
+.table-wrap{border:1px solid rgba(255,255,255,.045);border-radius:11px;overflow:auto}
+.table-wrap table{min-width:100%}
+table{font-size:11px;border-collapse:separate;border-spacing:0}
+th{
+  background:rgba(255,255,255,.03);padding:10px 12px;color:#8fa79a;
+  font-weight:600;letter-spacing:.8px;font-size:9.5px;text-transform:uppercase;
+  border-bottom:1px solid var(--border);position:sticky;top:0;z-index:1;
+}
+th:hover{text-shadow:none;color:var(--accent2)}
+td{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.04);font-size:11px;color:#c6d6cc;white-space:nowrap}
+tr:last-child td{border-bottom:0}
+tr:hover td{background:rgba(56,224,122,.05)}
+
+.badge{padding:3px 9px;border-radius:20px;font-size:9.5px;font-weight:600;letter-spacing:.3px}
+
+input,select,textarea{
+  background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:8px!important;
+  padding:9px 11px;color:var(--text);font-size:11px;font-family:var(--font);
+}
+input:focus,select:focus,textarea:focus{border-color:rgba(56,224,122,.55);box-shadow:0 0 0 3px rgba(56,224,122,.09);outline:none}
+
+.user-cell{display:flex;align-items:center;gap:8px}
+.u-avatar{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:rgba(56,224,122,.08);border:1px solid var(--border);font-size:14px}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;vertical-align:middle}
+.dot.on{background:var(--accent);box-shadow:0 0 8px var(--accent)}
+.dot.off{background:#54655a}
+.badge-ban{background:rgba(255,91,110,.08);color:#ff8b99;border-color:rgba(255,91,110,.25)}
+.badge-suspend{background:rgba(255,209,102,.08);color:var(--yellow);border-color:rgba(255,209,102,.25)}
+td .btn-sm{padding:5px 8px!important;font-size:10px!important;border-radius:6px!important;min-width:28px}
+td .btn-sm i{font-size:10px!important}
+.pagination{display:flex;gap:6px;justify-content:center;align-items:center;margin-top:14px;flex-wrap:wrap}
+.pagination button{
+  padding:6px 10px;min-width:30px;border-radius:7px;border:1px solid var(--border);
+  background:rgba(255,255,255,.03);color:var(--text2);font-family:var(--font);
+  font-size:10px;cursor:pointer;transition:.15s;
+}
+.pagination button:hover{background:rgba(56,224,122,.08);border-color:rgba(56,224,122,.3);color:var(--accent2)}
+.pagination button.active{background:rgba(56,224,122,.15);border-color:rgba(56,224,122,.45);color:#b4ffd1}
+
+.filters{gap:7px;margin-bottom:14px}
+.filters button{
+  padding:7px 13px;border-radius:20px;border:1px solid var(--border);
+  background:rgba(255,255,255,.028);color:#93a79b;font-size:10.5px;
+  letter-spacing:.2px;font-family:var(--font);transition:.15s;
+}
+.filters button:hover{background:rgba(56,224,122,.08);border-color:rgba(56,224,122,.3);color:var(--accent2)}
+.filters button.active{background:rgba(56,224,122,.15);border-color:rgba(56,224,122,.45);color:#b4ffd1}
+
+.feed-item{display:flex;align-items:flex-start;gap:9px;padding:9px 6px;border-bottom:1px solid rgba(255,255,255,.04);font-size:10.5px;line-height:1.45;color:#a9bcb0}
+.feed-item:last-child{border-bottom:0}
+.feed-item .time{font-family:var(--mono);color:#5f7869;font-size:9px;min-width:42px;flex:0 0 auto;padding-top:1px}
+.feed-item .icon{flex:0 0 auto;width:18px;text-align:center}
+.feed-item .text{min-width:0}
+.feed-item .text span{color:var(--accent2);font-weight:600}
+
+.modal-overlay{background:rgba(2,6,3,.72);backdrop-filter:blur(6px)}
+.modal{border-radius:16px;border:1px solid rgba(56,224,122,.3);box-shadow:0 30px 90px rgba(0,0,0,.65);padding:22px}
+
+#adminLock{background:radial-gradient(circle at 50% 22%,#0c1a12,#040706 72%)}
+.lock-box{
+  border-radius:20px;border:1px solid rgba(56,224,122,.22);padding:34px 28px;
+  background:linear-gradient(180deg,rgba(13,20,15,.97),rgba(7,10,8,.99));
+  box-shadow:0 30px 90px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.02) inset;
+}
+.lock-box h1{font-size:22px;letter-spacing:3px;color:var(--text)}
+.lock-box h1 span{color:var(--accent);text-shadow:0 0 18px rgba(56,224,122,.35)}
+.lock-box p{font-size:12px;line-height:1.55;color:#8ba193}
+.lock-box input{border-radius:10px;border:1px solid rgba(56,224,122,.25);background:rgba(0,0,0,.45);color:var(--accent);letter-spacing:3px}
+.lock-box button{
+  border-radius:11px;background:linear-gradient(180deg,#3fe883,#1fae58);color:#04150a;
+  font-weight:700;letter-spacing:.8px;box-shadow:0 10px 30px rgba(40,220,110,.25);
+  transition:.15s;
+}
+.lock-box button:hover{box-shadow:0 14px 38px rgba(40,220,110,.34);transform:translateY(-1px)}
+.lock-box a{color:var(--accent)!important;text-decoration:none}
+.lock-box a:hover{color:var(--accent2)!important}
+
+#sec-dashboard > div[style*="grid-template-columns:1fr 1fr"] > .card:nth-child(3){grid-column:1/-1}
+
+@media(max-width:1100px){
+  .main .top-bar .search-box input{width:170px}
+}
+@media(max-width:900px){
+  #sec-dashboard > div[style*="grid-template-columns:1fr 1fr"]{grid-template-columns:1fr!important;gap:14px!important}
+  #sec-dashboard > div[style*="grid-template-columns:1fr 1fr"] > .card{min-width:0}
+  #sec-dashboard > div[style*="grid-template-columns:1fr 1fr"] > .card input{min-width:0}
+  #sec-dashboard > div[style*="grid-template-columns:1fr 1fr"] > .card > div{min-width:0}
+}
+@media(max-width:768px){
+  .menu-toggle{display:flex;top:12px;left:12px}
+  .sidebar{width:min(84vw,290px)}
+  .main{margin-left:0;max-width:100vw;padding:12px}
+  .main .top-bar{margin:-12px -12px 16px;padding:12px 12px 12px 60px;gap:10px}
+  .main .top-bar h2{font-size:15px;flex:1 1 100%}
+  .main .top-bar > div{flex:1 1 100%;width:100%;justify-content:space-between}
+  .main .top-bar .search-box{order:3;flex:1 1 100%;width:100%}
+  .main .top-bar .search-box input{width:100%}
+  #currentUserBadge{display:none}
+  #liveDot{display:none!important}
+  .stats-grid{grid-template-columns:repeat(2,1fr);gap:10px}
+  .stat-card{padding:13px}
+  .stat-card .num{font-size:21px}
+  .card{padding:14px;border-radius:12px}
+  .dash-banner{padding:13px;gap:11px}
+  .db-icon{width:38px;height:38px;border-radius:10px;font-size:15px}
+  .db-pill{display:none}
+  #quickActions{grid-template-columns:repeat(2,1fr)!important}
+  #quickActions .btn{font-size:10px;padding:11px;min-height:44px}
+  th,td{padding:8px 9px}
+}
+@media(max-width:430px){
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .db-text span{display:none}
+}
 </style>
+<link rel="stylesheet" href="/zh_update.css?v=1">
+<script src="/zh_auth.js?v=2"></script>
 </head>
 <body>
 <div class="menu-toggle" onclick="toggleSidebar()">☰</div>
@@ -134,19 +436,19 @@ select:focus,input:focus,textarea:focus{border-color:var(--accent);box-shadow:0 
   <div class="lock-box">
     <div class="lock-ico">👑</div>
     <h1>ZONAHACK <span>ADMIN</span></h1>
-    <p>Acceso por rango. Ingresá tu usuario de ZonaHack (admin · root · owner · fundador).</p>
-    <input id="rangoUser" placeholder="USUARIO DE ZONAHACK" autocomplete="off">
-    <button onclick="verificarRango()">VERIFICAR ACCESO</button>
+    <p>Solo el dueño y los administradores autorizados pueden entrar. La sesión se verifica con tu contraseña en el servidor.</p>
+    <button onclick="verificarRango()">VERIFICAR MI SESIÓN</button>
+    <div style="margin-top:10px"><a href="/login.html?next=/panel_admin.html" style="color:var(--accent);font-size:12px">🔑 Iniciar sesión con mi cuenta</a></div>
     <div class="lock-msg" id="lockMsg"></div>
   </div>
 </div>
 
 <!-- ═══ SIDEBAR ═══ -->
 <div class="sidebar" id="sidebar">
-  <div class="logo"><h1>> ZONAHACK</h1><span>root</span></div>
+  <div class="logo"><div class="logo-mark">Z</div><div class="logo-txt"><h1>ZONAHACK</h1><span>ADMIN CONSOLE</span></div></div>
   <nav>
     <div class="nav-section">General</div>
-    <a class="active" onclick="navegar('dashboard')"><i class="fas fa-chart-simple"></i> Dashboard</a>
+    <a class="active" onclick="navegar('dashboard')"><i class="fas fa-chart-line"></i> Dashboard</a>
     <a onclick="navegar('usuarios')"><i class="fas fa-users"></i> Usuarios</a>
     <a onclick="navegar('autorizacion')"><i class="fas fa-user-check"></i> 🔐 Autorización</a>
     <a onclick="navegar('roles')"><i class="fas fa-shield"></i> Roles</a>
@@ -203,6 +505,11 @@ select:focus,input:focus,textarea:focus{border-color:var(--accent);box-shadow:0 
 
   <!-- DASHBOARD -->
   <section id="sec-dashboard">
+    <div class="dash-banner">
+      <div class="db-icon">◆</div>
+      <div class="db-text"><b>Centro de control</b><span>Usuarios, contenido, seguridad y métricas del sitio en un solo lugar.</span></div>
+      <div class="db-pill"><i></i> ACCESO ROOT</div>
+    </div>
     <div class="stats-grid" id="statsGrid"></div>
     <div class="quick-actions" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px" id="quickActions">
       <button class="btn btn-sm btn-primary" onclick="navegar('usuarios')">👥 Gestionar Usuarios</button>
@@ -1072,45 +1379,45 @@ select:focus,input:focus,textarea:focus{border-color:var(--accent);box-shadow:0 
 /* ═══════════════════════════════════════
    PANEL ADMIN v2 - JavaScript
    ═══════════════════════════════════════ */
-/* ─── ACCESO POR RANGO (sin contraseña) ─── */
+/* ─── ACCESO VERIFICADO POR EL SERVIDOR (sin atajos) ─── */
 var ZH_RANGOS_ADMIN=["admin","fundador","super_admin","root","owner","developer"];
-var _desbloqueado=(sessionStorage.getItem("zh_admin_unlock")==="1");
+var _desbloqueado=false;
 function esRangoAdmin(r){ return ZH_RANGOS_ADMIN.indexOf(String(r||"").toLowerCase())>=0; }
-function verificarRango(){
-  var inp=document.getElementById("rangoUser");
-  var u=(inp?inp.value:"").trim() || (localStorage.getItem("vh_usuario")||"").trim();
-  var msg=document.getElementById("lockMsg");
-  if(!u){ if(msg)msg.textContent="⚠ Escribí tu usuario de ZonaHack (o ya tenés sesión iniciada)."; return; }
-  if(msg)msg.textContent="🔍 Verificando rango de "+esc(u)+"...";
-  fetch("https://xfwolaurpeofysnymqle.supabase.co/rest/v1/rangos?select=rango&usuario_nombre=eq."+encodeURIComponent(u)+"&limit=1",{
-    headers:{"apikey":"sb_publishable_3VvBUD5Bdu3Uaq59fJ99MQ_XDCtujUU","Authorization":"Bearer sb_publishable_3VvBUD5Bdu3Uaq59fJ99MQ_XDCtujUU"}
-  }).then(function(r){return r.json();}).then(function(d){
-    var rango=(d&&d[0]&&d[0].rango)||"user";
-    if(esRangoAdmin(rango)){
-      _desbloqueado=true;
-      try{ localStorage.setItem("vh_usuario",u); }catch(e){}
-      sessionStorage.setItem("zh_admin_unlock","1");
-      document.getElementById("adminLock").style.display="none";
-      if(typeof cargarDashboard==="function") cargarDashboard();
-      if(typeof navegar==="function") navegar("dashboard");
-    }else{
-      if(msg)msg.innerHTML="❌ <b>"+esc(u)+"</b> tiene rango <b>"+esc(String(rango).toUpperCase())+"</b>. Necesitás admin/root/owner.";
-    }
-  }).catch(function(){ if(msg)msg.textContent="❌ Error de conexión al verificar."; });
+function _panelPermitido(d){
+  return !!(d && d.verified && (d.admin || (d.panel && d.panel.autorizado)));
 }
-var _ruser=document.getElementById("rangoUser");
-if(_ruser)_ruser.addEventListener("keydown",function(e){ if(e.key==="Enter") verificarRango(); });
+function _abrirPanel(d){
+  _desbloqueado=true;
+  USER=d.usuario;
+  document.getElementById("adminLock").style.display="none";
+  if(typeof cargarDashboard==="function") cargarDashboard();
+  if(typeof navegar==="function") navegar("dashboard");
+}
+function verificarRango(){
+  var msg=document.getElementById("lockMsg");
+  var A=window.ZH_AUTH;
+  if(!A){ if(msg)msg.textContent="⚠ Error de seguridad. Recargá la página."; return; }
+  if(msg)msg.textContent="🔍 Verificando tu sesión...";
+  A.ready.then(function(){
+    if(A.offline){ if(msg)msg.textContent="⚠ Necesitás conexión para verificar tu cuenta."; return; }
+    if(!A.verified){ location.replace(A.urlLogin("/panel_admin.html")); return; }
+    if(_panelPermitido(A)){
+      _abrirPanel(A);
+    }else{
+      if(msg)msg.innerHTML="❌ La cuenta <b>"+esc(A.usuario)+"</b> no tiene permisos de administrador.";
+    }
+  });
+}
 (function(){
-  var u=(localStorage.getItem("vh_usuario")||"").trim();
-  if(_desbloqueado){ document.getElementById("adminLock").style.display="none"; }
-  else if(u){ document.getElementById("lockMsg").textContent="🔍 Verificando rango automáticamente..."; setTimeout(verificarRango,500); }
+  var msg=document.getElementById("lockMsg");
+  if(msg)msg.textContent="🔍 Verificando tu sesión...";
 })();
 const SUPABASE = "https://xfwolaurpeofysnymqle.supabase.co/rest/v1";
 const APIKEY = "sb_publishable_3VvBUD5Bdu3Uaq59fJ99MQ_XDCtujUU";
 const WS_URL = "wss://xfwolaurpeofysnymqle.supabase.co/realtime/v1/websocket?apikey="+APIKEY+"&vsn=1.0.0";
 const DBH = {"apikey":APIKEY,"Authorization":"Bearer "+APIKEY,"Content-Type":"application/json"};
 const PAGE_SIZE = 20;
-let USER = localStorage.getItem('vh_usuario')||'anon';
+var USER = localStorage.getItem('vh_usuario')||'anon';
 let filtroActual = 'todos';
 let busquedaUsuario = '';
 let ordenActual = 'nombre';
@@ -1123,6 +1430,13 @@ function $(id){return document.getElementById(id)}
 function api(m,e,d){return fetch(SUPABASE+"/"+e,{method:m||"GET",headers:DBH,body:d?JSON.stringify(d):undefined}).then(r=>r.json().catch(()=>[]))}
 // Igual que api() pero rechaza si la respuesta NO es ok (2xx), para que el .catch pueda reintentar
 function apiCheck(m,e,d){return fetch(SUPABASE+"/"+e,{method:m||"GET",headers:DBH,body:d?JSON.stringify(d):undefined}).then(r=>{if(!r.ok)throw new Error("HTTP "+r.status);return r.json().catch(()=>[]);})}
+// Operaciones sensibles (roles, VIP, cuentas, reset) van por el servidor /api/auth.
+function authAdmin(accion,data){
+  var tok=localStorage.getItem("vh_token")||"";
+  var h={"Content-Type":"application/json"};
+  if(tok) h["Authorization"]="Bearer "+tok;
+  return fetch("/api/auth?accion="+accion,{method:data?"POST":"GET",headers:h,credentials:"same-origin",body:data?JSON.stringify(data):undefined}).then(function(r){return r.json().catch(function(){return {};}).then(function(j){j.__status=r.status;return j;});});
+}
 
 /* ─── BLOQUEO DE CATEGORIAS DE BUSQUEDA ─────────── */
 var VPS_API = "https://5fae371f-39e5-4c16-9b04-658e273c947c.clouding.host/api";
@@ -1452,7 +1766,7 @@ function renderizarUsuarios(){
         <button class="btn btn-sm" title="Ver perfil" onclick="mostrarPerfil('${esc(u.nombre)}')" style="padding:2px 5px;font-size:.6em">👁</button>
         <button class="btn btn-sm" title="Admin" onclick="cambiarRol('${esc(u.nombre)}','admin','#00ff41')" style="padding:2px 5px;font-size:.6em">⚙</button>
         <button class="btn btn-sm btn-danger" title="Banear" onclick="banearUsuario('${esc(u.nombre)}')" style="padding:2px 5px;font-size:.6em">🚫</button>
-        <button class="btn btn-sm" title="Suplantar" onclick="suplantarUsuario('${esc(u.nombre)}')" style="padding:2px 5px;font-size:.6em;border-color:#f1c40f;color:#f1c40f">🔐</button>
+        <span title="Suplantar deshabilitado por seguridad" style="padding:2px 5px;font-size:.6em;color:#5d6b7c">🚫</span>
         ${quitarVip}
         ${quitarBtn}
       </td>
@@ -1985,18 +2299,18 @@ function generarCodigosVIP(){
       return;
     }
     var codigo = "ZH-VIP-" + Array(6).join('x').replace(/x/g,function(){return "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"[Math.floor(Math.random()*36)];});
-    api("POST","vip_codigos",{codigo:codigo, dias:dias, creado_por:USER}).then(function(){
-      generados.push(codigo);
+    authAdmin("admin_crear_codigo_vip",{codigo:codigo, dias:dias}).then(function(r){
+      if(r && r.ok) generados.push(r.codigo||codigo);
       i++;
       genUno();
-    });
+    }).catch(function(){ i++; genUno(); });
   }
   genUno();
 }
 
 function cargarCodigosVIP(){
-  api("GET","vip_codigos?select=*&order=creado.desc&limit=200").then(function(d){
-    codigosVIP = d||[];
+  authAdmin("admin_listar_codigos_vip").then(function(r){
+    codigosVIP = (r && r.codigos) || [];
     renderCodigosVIP();
   }).catch(function(){
     $("vipCodigosBody").innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--text2);padding:30px">La tabla vip_codigos no existe. Ejecutá sql_vip_codigos.sql</td></tr>';
@@ -2033,14 +2347,14 @@ function renderCodigosVIP(){
 
 function revertirCodigo(id){
   if(!confirm("Reactivar este código como disponible?")) return;
-  api("PATCH","vip_codigos?id=eq."+id,{usado:false,usuario_uso:"",usado_en:null}).then(function(){
+  authAdmin("admin_revertir_codigo_vip",{id:id}).then(function(){
     cargarCodigosVIP();
   });
 }
 
 function borrarCodigo(id){
   if(!confirm("Eliminar este código?")) return;
-  api("DELETE","vip_codigos?id=eq."+id).then(function(){
+  authAdmin("admin_eliminar_codigo_vip",{id:id}).then(function(){
     cargarCodigosVIP();
   });
 }
@@ -2294,61 +2608,23 @@ function accionUsuario(nom,accion){
 }
 
 function suplantarUsuario(nom){
-  if(!confirm("Entrar como "+nom+"?")) return;
-  localStorage.setItem('vh_usuario', nom);
-  // Usar el user_id del usuario si existe
-  api("GET","usuarios_ext?select=user_id&usuario_nombre=eq."+encodeURIComponent(nom)+"&limit=1").then(d=>{
-    if(d&&d.length&&d[0].user_id){
-      localStorage.setItem('vh_user_id', d[0].user_id);
-    } else if(!localStorage.getItem('vh_user_id')){
-      localStorage.setItem('vh_user_id', Date.now().toString(36).slice(-4));
-    }
-    alert("✅ Ahora sos: "+nom+"\nRedirigiendo al inicio...");
-    window.location.href = "/";
-  }).catch(()=>{
-    if(!localStorage.getItem('vh_user_id')) localStorage.setItem('vh_user_id', Date.now().toString(36).slice(-4));
-    alert("✅ Ahora sos: "+nom+"\nRedirigiendo al inicio...");
-    window.location.href = "/";
-  });
+  // Deshabilitado: nadie puede entrar a la cuenta de otro usuario.
+  alert("⛔ Por seguridad no se puede entrar como otro usuario.\nCada cuenta solo la usa su dueño con su contraseña.");
 }
 
 function cambiarRol(nom,rol,color){
   if(!confirm(`Cambiar ${nom} a ${rol}?`)) return;
-  api("GET","usuarios_ext?usuario_nombre=eq."+encodeURIComponent(nom)+"&limit=1").then(d=>{
-    if(d&&d.length){
-      api("PATCH","usuarios_ext?usuario_nombre=eq."+encodeURIComponent(nom),{rol:rol});
-    }else{
-      api("POST","usuarios_ext",{usuario_nombre:nom,rol:rol,nivel:1,xp:0,estado:"activo"});
-    }
-    api("GET","rangos?usuario_nombre=eq."+encodeURIComponent(nom)+"&limit=1").then(d2=>{
-      if(d2&&d2.length) api("PATCH","rangos?usuario_nombre=eq."+encodeURIComponent(nom),{rango:rol,color:color});
-      else api("POST","rangos",{usuario_nombre:nom,rango:rol,color:color});
-    });
-    // Reflejar el rol en Firestore tambien (lo usan los tags de chat, ej: OWNER/ADMIN)
-    ZHFirebase.update("cuentas/"+nom,{rol:rol}).catch(()=>{});
-    // Log
+  // El rol se guarda por el servidor (evita que cualquiera se auto-ascenda).
+  authAdmin("admin_set_rango",{usuario:nom,rango:rol,color:color}).then(function(d){
+    if(!d || !d.ok){ alert("⛔ No se pudo cambiar el rol (¿sesión admin verificada?)"); return; }
     api("POST","admin_logs",{admin_nombre:USER,accion:"cambio_rango",usuario_afectado:nom,detalle:`${nom} ahora es ${rol}`});
     api("POST","feed_actividad",{tipo:"rango",usuario_nombre:nom,detalle:`cambio a ${rol}`});
     cargarUsuarios();
-  });
+  }).catch(function(){});
 }
 
 /* ─── CREAR CUENTA (ADMIN) ────────────── */
-// Hash fuerte (SHA-256, con el usuario como sal) — mismo esquema que login.html
-function sha256HexAdmin(str){
-  var enc = new TextEncoder().encode(str);
-  return crypto.subtle.digest("SHA-256", enc).then(function(buf){
-    return Array.from(new Uint8Array(buf)).map(function(b){ return b.toString(16).padStart(2,"0"); }).join("");
-  });
-}
-function hashPassAdmin(usuario, pass){
-  if(!(window.crypto && window.crypto.subtle)){
-    var h = 5381;
-    for(var i=0;i<pass.length;i++){ h = ((h<<5)+h) + pass.charCodeAt(i); h = h & 0x7fffffff; }
-    return Promise.resolve("zh$" + h.toString(36) + "$" + pass.length);
-  }
-  return sha256HexAdmin("zh-salt-" + usuario + "-" + pass + "-zh2026").then(function(hex){ return "zh2$" + hex; });
-}
+// La contraseña la maneja el servidor (/api/auth). El navegador nunca la hashea.
 function crearCuentaAdmin(){
   var nom = ($("nuevoUserNom").value||"").trim().toLowerCase();
   var em  = ($("nuevoUserEmail").value||"").trim();
@@ -2357,60 +2633,35 @@ function crearCuentaAdmin(){
   var monedas = parseInt($("nuevoUserMonedas").value)||0;
   var msg = $("crearCuentaMsg");
   if(!nom || nom.length<3){ msg.textContent="⛔ El usuario necesita al menos 3 caracteres"; return; }
-  if(!pass || pass.length<4){ msg.textContent="⛔ La contraseña necesita al menos 4 caracteres"; return; }
-  // Verificar que no exista (las cuentas viven en Firestore; Supabase se chequea por compatibilidad con cuentas viejas no migradas)
-  Promise.all([
-    ZHFirebase.get("cuentas/"+nom).catch(function(){ return null; }),
-    api("GET","cuentas?usuario=eq."+encodeURIComponent(nom)+"&limit=1").catch(function(){ return []; })
-  ]).then(function(r){
-    if(r[0] || (r[1] && r[1].length)){ msg.textContent="⛔ Ese usuario ya existe"; return; }
-    // Crear cuenta en Firestore
-    hashPassAdmin(nom,pass).then(function(hp){
-    ZHFirebase.set("cuentas/"+nom, {usuario:nom, email:em, password:hp, created_at:new Date().toISOString()}).then(function(){
-      // Crear en usuarios_ext con rol y monedas
-      var uid = "ZH-" + Math.random().toString(36).slice(2,6).toUpperCase() + "-" + Math.random().toString(36).slice(2,6).toUpperCase();
-      api("GET","usuarios_ext?usuario_nombre=eq."+encodeURIComponent(nom)+"&limit=1").then(function(u2){
-        if(u2 && u2.length){
-          api("PATCH","usuarios_ext?usuario_nombre=eq."+encodeURIComponent(nom),{rol:rol,estado:"activo",user_id:uid});
-        }else{
-          api("POST","usuarios_ext",{usuario_nombre:nom,rol:rol,nivel:1,xp:0,estado:"activo",online:false,user_id:uid});
-        }
-        // Rango en tabla rangos
-        var col = {user:"#888",vip:"#f1c40f",premium:"#9b59b6",moderator:"#3498db",admin:"#00ff41"}[rol]||"#888";
-        api("GET","rangos?usuario_nombre=eq."+encodeURIComponent(nom)+"&limit=1").then(function(r2){
-          if(r2 && r2.length) api("PATCH","rangos?usuario_nombre=eq."+encodeURIComponent(nom),{rango:rol,color:col});
-          else api("POST","rangos",{usuario_nombre:nom,rango:rol,color:col});
-        });
-        // VIP real si rol es vip
-        if(rol==="vip"){
-          var hasta = new Date(Date.now()+30*86400000).toISOString();
-          api("GET","vip?usuario_nombre=eq."+encodeURIComponent(nom)+"&limit=1").then(function(vd){
-            if(vd && vd.length) api("PATCH","vip?usuario_nombre=eq."+encodeURIComponent(nom),{activo:true,tipo:"vip",fecha_expiracion:hasta});
-            else api("POST","vip",{usuario_nombre:nom,tipo:"vip",activo:true,fecha_expiracion:hasta});
-          });
-        }
-        // Monedas iniciales
-        api("GET","monedas?usuario_nombre=eq."+encodeURIComponent(nom)+"&limit=1").then(function(md){
-          if(md && md.length) api("PATCH","monedas?usuario_nombre=eq."+encodeURIComponent(nom),{saldo:(md[0].saldo||0)+monedas});
-          else api("POST","monedas",{usuario_nombre:nom,saldo:monedas,total_ganadas:monedas,total_gastadas:0});
-        });
-        // Log admin
-        api("POST","admin_logs",{admin_nombre:USER,accion:"crear_cuenta",usuario_afectado:nom,detalle:"Cuenta creada por admin (rol: "+rol+", monedas: "+monedas+")"});
-        msg.style.color="#2ecc71";
-        msg.textContent="✅ Cuenta creada: "+nom+" · rol "+rol+(monedas>0?" · +"+monedas+" 🪙":"")+" · ID: "+uid;
-        $("nuevoUserNom").value=""; $("nuevoUserEmail").value=""; $("nuevoUserPass").value="";
-        setTimeout(cargarUsuarios, 300);
+  if(!pass || pass.length<6){ msg.textContent="⛔ La contraseña necesita al menos 6 caracteres"; return; }
+  authAdmin("admin_crear_cuenta",{usuario:nom,email:em,password:pass}).then(function(res){
+    if(!res || !res.ok){ msg.textContent="⛔ "+((res&&res.error)||"No se pudo crear la cuenta"); return; }
+      var uid = res.user_id || "ZH-0000-0000";
+      // Rango en tabla rangos (por el servidor)
+      var col = {user:"#888",vip:"#f1c40f",premium:"#9b59b6",moderator:"#3498db",admin:"#00ff41"}[rol]||"#888";
+      authAdmin("admin_set_rango",{usuario:nom,rango:rol,color:col}).catch(function(){});
+      // VIP real si rol es vip
+      if(rol==="vip"){ authAdmin("admin_set_vip",{usuario:nom,dias:30}).catch(function(){}); }
+      // Monedas iniciales
+      api("GET","monedas?usuario_nombre=eq."+encodeURIComponent(nom)+"&limit=1").then(function(md){
+        if(md && md.length) api("PATCH","monedas?usuario_nombre=eq."+encodeURIComponent(nom),{saldo:(md[0].saldo||0)+monedas});
+        else api("POST","monedas",{usuario_nombre:nom,saldo:monedas,total_ganadas:monedas,total_gastadas:0});
       });
-    }).catch(function(){ msg.textContent="⛔ Error de red"; });
-    });
-  });
+      // Log admin
+      api("POST","admin_logs",{admin_nombre:USER,accion:"crear_cuenta",usuario_afectado:nom,detalle:"Cuenta creada por admin (rol: "+rol+", monedas: "+monedas+")"});
+      msg.style.color="#2ecc71";
+      msg.textContent="✅ Cuenta creada: "+nom+" · rol "+rol+(monedas>0?" · +"+monedas+" 🪙":"")+" · ID: "+uid;
+      $("nuevoUserNom").value=""; $("nuevoUserEmail").value=""; $("nuevoUserPass").value="";
+      setTimeout(cargarUsuarios, 300);
+  }).catch(function(){ msg.textContent="⛔ Error de red"; });
 }
 
 /* ─── AUTORIZACIÓN DE PANEL ──────────── */
 var _autorizadosCache = null;
 function cargarAutorizados(){
-  api("GET","panel_autorizados?select=*&order=usuario_nombre.asc&limit=500").then(function(d){
-    _autorizadosCache = d||[];
+  authAdmin("admin_listar_panel").then(function(res){
+    var d = (res && res.autorizados) || [];
+    _autorizadosCache = d;
     $("autorizCount").textContent = _autorizadosCache.length;
     var rows = _autorizadosCache.map(function(a){
       var nivelTxt = a.nivel==='limited' ? '<span style="color:#3498db">🔍 Limitado</span>' : '<span style="color:#00ff41">⚙️ Full</span>';
@@ -2443,29 +2694,22 @@ function autorizarUsuario(){
   var msg = $("autorizMsg");
   if(!nom){ msg.textContent="⛔ Escribí el nombre del usuario a autorizar"; return; }
   if(nom===USER){ msg.textContent="⛔ Vos ya tenés acceso al panel"; return; }
-  api("GET","usuarios_ext?usuario_nombre=eq."+encodeURIComponent(nom)+"&limit=1").then(function(ex){
-    if(!ex || !ex.length){ msg.textContent="⛔ El usuario '"+nom+"' no existe en la base de datos"; return; }
-    api("GET","panel_autorizados?usuario_nombre=eq."+encodeURIComponent(nom)+"&limit=1").then(function(prev){
-      if(prev && prev.length){
-        api("PATCH","panel_autorizados?id=eq."+prev[0].id,{nivel:nivel,activo:true}).then(function(){
-          msg.style.color="#2ecc71"; msg.textContent="✅ "+nom+" actualizado a nivel "+nivel;
-          cargarAutorizados();
-        });
-      }else{
-        api("POST","panel_autorizados",{usuario_nombre:nom,nivel:nivel,autorizado_por:USER,activo:true}).then(function(){
-          msg.style.color="#2ecc71"; msg.textContent="✅ "+nom+" autorizado (nivel "+nivel+"). Ahora verá el botón 👑";
-          api("POST","admin_logs",{admin_nombre:USER,accion:"autorizar_panel",usuario_afectado:nom,detalle:"Autorizado a acceder al panel (nivel: "+nivel+")"});
-          cargarAutorizados();
-        }).catch(function(){ msg.textContent="⛔ Error (¿existe la tabla? ejecuta sql_panel_autorizados.sql)"; });
-      }
-    });
-  });
+  authAdmin("admin_autorizar_panel",{usuario:nom,nivel:nivel}).then(function(d){
+    if(d && d.ok){
+      msg.style.color="#2ecc71"; msg.textContent="✅ "+nom+" autorizado (nivel "+nivel+"). Ahora verá el botón 👑";
+      api("POST","admin_logs",{admin_nombre:USER,accion:"autorizar_panel",usuario_afectado:nom,detalle:"Autorizado a acceder al panel (nivel: "+nivel+")"}).catch(function(){});
+      cargarAutorizados();
+    }else{
+      msg.style.color="#e74c3c"; msg.textContent="⛔ "+(d&&d.error?d.error:"No se pudo autorizar");
+    }
+  }).catch(function(){ msg.textContent="⛔ Error de conexión"; });
 }
 
 function toggleAutorizado(nom,activo){
-  api("PATCH","panel_autorizados?usuario_nombre=eq."+encodeURIComponent(nom),{activo:activo}).then(function(){
+  var accion = activo ? "admin_autorizar_panel" : "admin_quitar_panel";
+  authAdmin(accion,{usuario:nom,nivel:"full"}).then(function(){
     cargarAutorizados();
-  });
+  }).catch(function(){});
 }
 
 // ─── CREAR DUEÑO (todos los permisos) ───
@@ -2473,29 +2717,25 @@ function crearDueno(){
   var nom=($("duenoUser").value||"").trim().toLowerCase();
   var msg=$("duenoMsg");
   if(!nom){ msg.textContent="⛔ Escribí el nombre del usuario"; return; }
-  var H2=Object.assign({},DBH,{"Prefer":"resolution=merge-duplicates,return=minimal"});
-  var ok=0, err=[];
-  var paso=function(p,label){
-    return p.then(function(){ok++;}).catch(function(){err.push(label);});
-  };
-  paso(fetch(SUPABASE+"/rangos",{method:"POST",headers:H2,body:JSON.stringify({usuario_nombre:nom,rango:"root",color:"#f1c40f"})}).then(function(r){if(!r.ok)throw 1;}),"rangos")
-  .then(function(){ return paso(fetch(SUPABASE+"/panel_autorizados",{method:"POST",headers:H2,body:JSON.stringify({usuario_nombre:nom,nivel:"full",autorizado_por:USER,activo:true})}).then(function(r){if(!r.ok)throw 1;}),"panel_autorizados"); })
-  .then(function(){ return paso(fetch(SUPABASE+"/insignias",{method:"POST",headers:H2,body:JSON.stringify({usuario_nombre:nom,insignia:"👑 DUEÑO",color:"#f1c40f",descripcion:"Tiene todos los permisos de ZonaHack"})}).then(function(r){if(!r.ok)throw 1;}),"insignias"); })
-  .then(function(){ return paso(fetch(SUPABASE+"/vip",{method:"POST",headers:H2,body:JSON.stringify({usuario_nombre:nom,activo:true,tipo:"owner"})}).then(function(r){if(!r.ok)throw 1;}),"vip"); })
-  .then(function(){
-    msg.style.color = err.length?"#e74c3c":"#2ecc71";
-    msg.innerHTML = "👑 <b>"+esc(nom)+"</b> ahora es DUEÑO (root + panel + VIP + insignia)" +
-      (err.length? " <span style='color:#e74c3c'>· sin: "+esc(err.join(", "))+"</span>":"") +
-      (err.indexOf("panel_autorizados")>=0? " · <span style='color:#f1c40f'>ejecutá sql_superadmin.sql 1 vez para habilitar el panel</span>":"");
-    api("POST","admin_logs",{admin_nombre:USER,accion:"crear_dueno",usuario_afectado:nom,detalle:"Usuario convertido en dueño (root+panel+vip+insignia)"}).catch(function(){});
-  });
+  msg.style.color="#f1c40f"; msg.textContent="Aplicando permisos de dueño...";
+  authAdmin("admin_crear_dueno",{usuario:nom}).then(function(d){
+    if(d && d.ok){
+      msg.style.color="#2ecc71";
+      msg.innerHTML="👑 <b>"+esc(nom)+"</b> ahora es DUEÑO (root + panel + VIP + insignia)";
+    }else{
+      msg.style.color="#e74c3c";
+      msg.innerHTML="⛔ "+(d&&d.error?esc(d.error):"No se pudo completar")+
+        (d&&d.fallos&&d.fallos.length?" · sin: "+esc(d.fallos.join(", ")):"");
+    }
+    api("POST","admin_logs",{admin_nombre:USER,accion:"crear_dueno",usuario_afectado:nom,detalle:"Intento de convertir en dueño"}).catch(function(){});
+  }).catch(function(){ msg.textContent="⛔ Error de conexión"; });
 }
 function quitarAutorizado(nom){
   if(!confirm("¿Quitar acceso al panel de "+nom+"? Perderá el botón 👑 y no podrá entrar")) return;
-  api("DELETE","panel_autorizados?usuario_nombre=eq."+encodeURIComponent(nom)).then(function(){
-    $("autorizMsg").textContent="🗑 "+nom+" perdió el acceso al panel";
+  authAdmin("admin_quitar_panel",{usuario:nom}).then(function(d){
+    $("autorizMsg").textContent=(d&&d.ok)?"🗑 "+nom+" perdió el acceso al panel":"⛔ No se pudo quitar el acceso";
     cargarAutorizados();
-  });
+  }).catch(function(){ $("autorizMsg").textContent="⛔ Error de conexión"; });
 }
 
 /* ─── RANGOS MILITARES ────────────────── */
@@ -2606,39 +2846,21 @@ function quitarRolUsuario(nom,rol){
   } else {
     if(!confirm(`¿Quitar rol '${rol}' a ${nom}?`)) return;
   }
-  // Bajar a user en usuarios_ext
-  api("GET","usuarios_ext?usuario_nombre=eq."+encodeURIComponent(nom)+"&limit=1").then(d=>{
-    if(d&&d.length){
-      api("PATCH","usuarios_ext?usuario_nombre=eq."+encodeURIComponent(nom),{rol:"user"});
-    }
-    // Bajar a user en rangos
-    api("GET","rangos?usuario_nombre=eq."+encodeURIComponent(nom)+"&limit=1").then(d2=>{
-      if(d2&&d2.length) api("PATCH","rangos?usuario_nombre=eq."+encodeURIComponent(nom),{rango:"user",color:"#888"});
-      else api("POST","rangos",{usuario_nombre:nom,rango:"user",color:"#888"});
-      // Quitar VIP si estaba
-      api("PATCH","vip?usuario_nombre=eq."+encodeURIComponent(nom),{activo:false}).catch(()=>{});
-    });
-    ZHFirebase.update("cuentas/"+nom,{rol:"user"}).catch(()=>{});
+  // Bajar a user en rangos/usuarios_ext (por el servidor) y quitar VIP
+  authAdmin("admin_quitar_rango",{usuario:nom}).then(function(){
+    authAdmin("admin_quitar_vip",{usuario:nom}).catch(()=>{});
     api("POST","admin_logs",{admin_nombre:USER,accion:"quitar_rol",usuario_afectado:nom,detalle:`Se quitó ${rol} a ${nom}`});
     api("POST","feed_actividad",{tipo:"rango",usuario_nombre:nom,detalle:`perdió ${rol}`});
     alert(`✅ Se quitó ${rol} a ${nom}. Ahora es usuario normal`);
     cargarUsuarios();
-  });
+  }).catch(()=>{});
 }
 
 function quitarVIPUsuario(nom){
   if(!confirm(`¿Quitar VIP a ${nom}?`)) return;
-  // Quitar VIP en tabla vip
-  api("PATCH","vip?usuario_nombre=eq."+encodeURIComponent(nom),{activo:false}).catch(()=>{});
-  api("GET","vip?usuario_nombre=eq."+encodeURIComponent(nom)+"&activo=eq.true&limit=1").then(d=>{
-    if(d&&d.length) api("PATCH","vip?id=eq."+d[0].id,{activo:false});
-  });
-  // Si tenía rol vip, bajar a user
+  authAdmin("admin_quitar_vip",{usuario:nom}).catch(()=>{});
   api("GET","rangos?usuario_nombre=eq."+encodeURIComponent(nom)+"&limit=1").then(d=>{
-    if(d&&d.length && d[0].rango==='vip'){
-      api("PATCH","rangos?usuario_nombre=eq."+encodeURIComponent(nom),{rango:"user",color:"#888"});
-      api("PATCH","usuarios_ext?usuario_nombre=eq."+encodeURIComponent(nom),{rol:"user"});
-    }
+    if(d&&d.length && d[0].rango==='vip') authAdmin("admin_quitar_rango",{usuario:nom}).catch(()=>{});
   });
   api("POST","admin_logs",{admin_nombre:USER,accion:"quitar_vip",usuario_afectado:nom,detalle:`Se quitó VIP a ${nom}`});
   api("POST","feed_actividad",{tipo:"vip",usuario_nombre:nom,detalle:"perdió VIP"});
@@ -2650,40 +2872,18 @@ function quitarVIPUsuario(nom){
 function darVIPUsuario(nom, dias){
   if(!confirm(`⭐ ¿Dar VIP a ${nom}?`)) return;
   var d = dias || 7;
-  // Insertar/activar en tabla vip
-  api("GET","vip?usuario_nombre=eq."+encodeURIComponent(nom)+"&limit=1").then(vd=>{
-    var ahora = new Date().toISOString();
-    var hasta = new Date(Date.now()+d*86400000).toISOString();
-    if(vd&&vd.length){
-      api("PATCH","vip?usuario_nombre=eq."+encodeURIComponent(nom),{activo:true,tipo:"vip",fecha_inicio:ahora,fecha_expiracion:hasta});
-    }else{
-      api("POST","vip",{usuario_nombre:nom,tipo:"vip",activo:true,fecha_inicio:ahora,fecha_expiracion:hasta});
-    }
-    // También dar rango vip
-    api("PATCH","usuarios_ext?usuario_nombre=eq."+encodeURIComponent(nom),{rol:"vip"}).catch(()=>{});
-    api("GET","rangos?usuario_nombre=eq."+encodeURIComponent(nom)+"&limit=1").then(r2=>{
-      if(r2&&r2.length) api("PATCH","rangos?usuario_nombre=eq."+encodeURIComponent(nom),{rango:"vip",color:"#f1c40f"});
-      else api("POST","rangos",{usuario_nombre:nom,rango:"vip",color:"#f1c40f"});
-    });
-    api("POST","admin_logs",{admin_nombre:USER,accion:"dar_vip",usuario_afectado:nom,detalle:`VIP ${d} días otorgado por admin`});
-    api("POST","feed_actividad",{tipo:"vip",usuario_nombre:nom,detalle:"recibió VIP del admin"});
-    alert(`✅ VIP otorgado a ${nom} por ${d} días`);
-    cargarUsuarios();
-  });
+  authAdmin("admin_set_vip",{usuario:nom,dias:d}).catch(()=>{});
+  authAdmin("admin_set_rango",{usuario:nom,rango:"vip",color:"#f1c40f"}).catch(()=>{});
+  api("POST","admin_logs",{admin_nombre:USER,accion:"dar_vip",usuario_afectado:nom,detalle:`VIP ${d} días otorgado por admin`});
+  api("POST","feed_actividad",{tipo:"vip",usuario_nombre:nom,detalle:"recibió VIP del admin"});
+  alert(`✅ VIP otorgado a ${nom} por ${d} días`);
+  cargarUsuarios();
 }
 
 function banearUsuario(nom){
   if(!confirm(`Banear a ${nom}?`)) return;
-  api("POST","baneados",{usuario_nombre:nom,usuario_id:nom,tipo:"ban",motivo:"Baneado desde panel admin",admin_nombre:USER,activo:true});
-  api("PATCH","usuarios_ext?usuario_nombre=eq."+encodeURIComponent(nom),{estado:"baneado"}).catch(()=>{});
-  // Asignar rango baneado
-  api("PATCH","rangos?usuario_nombre=eq."+encodeURIComponent(nom),{rango:"baneado",color:"#e74c3c"}).catch(()=>{});
-  // QUITAR VIP automáticamente al banear
-  api("PATCH","vip?usuario_nombre=eq."+encodeURIComponent(nom),{activo:false}).catch(()=>{});
-  api("GET","vip?usuario_nombre=eq."+encodeURIComponent(nom)+"&activo=eq.true&limit=1").then(d=>{
-    if(d&&d.length) api("PATCH","vip?id=eq."+d[0].id,{activo:false});
-  });
-  // Guardar que el VIP se perdió por ban (para que no vuelva al desbanear)
+  // Ban por el servidor: marca baneado, quita VIP y baja el rango.
+  authAdmin("admin_ban",{usuario:nom}).catch(()=>{});
   api("POST","vip_logs",{usuario_nombre:nom,accion:"perdio_vip_ban",detalle:"VIP quitado por baneo",admin_nombre:USER}).catch(()=>{});
   api("POST","admin_logs",{admin_nombre:USER,accion:"ban",usuario_afectado:nom,detalle:"Usuario baneado - VIP quitado"});
   api("POST","feed_actividad",{tipo:"ban",usuario_nombre:nom,detalle:"fue baneado (perdió VIP)"});
@@ -2693,11 +2893,7 @@ function banearUsuario(nom){
 
 function desbanearUsuario(nom){
   if(!confirm(`Desbanear a ${nom}?`)) return;
-  api("GET","baneados?usuario_nombre=eq."+encodeURIComponent(nom)+"&activo=eq.true&limit=1").then(d=>{
-    if(d&&d.length) api("PATCH","baneados?id=eq."+d[0].id,{activo:false});
-  });
-  api("PATCH","usuarios_ext?usuario_nombre=eq."+encodeURIComponent(nom),{estado:"activo"}).catch(()=>{});
-  api("PATCH","rangos?usuario_nombre=eq."+encodeURIComponent(nom),{rango:"user",color:"#888"}).catch(()=>{});
+  authAdmin("admin_unban",{usuario:nom}).catch(()=>{});
   api("POST","admin_logs",{admin_nombre:USER,accion:"unban",usuario_afectado:nom,detalle:"Usuario desbaneado"});
   api("POST","feed_actividad",{tipo:"unban",usuario_nombre:nom,detalle:"fue desbaneado"});
   alert(`✅ ${nom} fue desbaneado.\n⭐ Recordá que el VIP NO se devuelve automáticamente. Usá el botón para dárselo si querés.`);
@@ -2706,10 +2902,11 @@ function desbanearUsuario(nom){
 
 function eliminarUsuario(nom){
   if(!confirm(`¿ESTAS SEGURO? Eliminar a ${nom} permanentemente?`)) return;
-  api("DELETE","usuarios_ext?usuario_nombre=eq."+encodeURIComponent(nom)).catch(()=>{});
-  api("DELETE","rangos?usuario_nombre=eq."+encodeURIComponent(nom)).catch(()=>{});
-  api("POST","admin_logs",{admin_nombre:USER,accion:"eliminar_usuario",usuario_afectado:nom,detalle:"Usuario eliminado"});
-  cargarUsuarios();
+  authAdmin("admin_eliminar_usuario",{usuario:nom}).then(function(d){
+    if(!d || !d.ok){ alert("⛔ No se pudo eliminar (¿sesión admin verificada?)"); return; }
+    api("POST","admin_logs",{admin_nombre:USER,accion:"eliminar_usuario",usuario_afectado:nom,detalle:"Usuario eliminado"});
+    cargarUsuarios();
+  }).catch(()=>{});
 }
 
 /* ─── PERFIL RAPIDO ──────────────────── */
@@ -2755,7 +2952,7 @@ function mostrarPerfil(nom){
         <button class="btn btn-sm" onclick="cambiarRol('${esc(nom)}','user','#888');cerrarModal()">👤 User</button>
         <button class="btn btn-sm btn-danger" onclick="banearUsuario('${esc(nom)}');cerrarModal()">🚫 Banear</button>
         <button class="btn btn-sm" style="border-color:#2ecc71;color:#2ecc71" onclick="desbanearUsuario('${esc(nom)}');cerrarModal()">✅ Desbanear</button>
-        <button class="btn btn-sm" style="border-color:#f1c40f;color:#f1c40f" onclick="suplantarUsuario('${esc(nom)}')">🔐 Suplantar</button>
+        <span style="border:1px solid #26303e;color:#5d6b7c;font-size:.62em;padding:4px 8px;border-radius:4px">🚫 Suplantar deshabilitado</span>
         ${(rol==='root'||rol==='owner'||rol==='super_admin'||rol==='admin')?`<button class="btn btn-sm btn-danger" onclick="quitarRolUsuario('${esc(nom)}','${esc(rol)}');cerrarModal()">🗑 Quitar ${esc(rol)}</button>`:''}
         ${(vip&&vip.activo)?`<button class="btn btn-sm btn-danger" onclick="quitarVIPUsuario('${esc(nom)}');cerrarModal()">✕ Quitar VIP</button>`:''}
         <button class="btn btn-sm btn-danger" onclick="if(confirm('ELIMINAR permanentemente a ${esc(nom)}?')){eliminarUsuario('${esc(nom)}');cerrarModal()}">🗑 Eliminar</button>
@@ -2838,14 +3035,7 @@ function asignarRolUsuario(){
   var rol = $("asignarRol").value;
   if(!user||!rol){$("asignarMsg").textContent="Falta usuario o rol";return;}
   var color = document.querySelector("#asignarRol option:checked")?.style?.color || "#00ff41";
-  // Upsert en rangos
-  api("GET","rangos?usuario_nombre=eq."+encodeURIComponent(user)+"&select=id").then(function(d){
-    if(d&&d.length){
-      return api("PATCH","rangos?usuario_nombre=eq."+encodeURIComponent(user),{rango:rol,color:color});
-    }else{
-      return api("POST","rangos",{usuario_nombre:user,rango:rol,color:color});
-    }
-  }).then(function(){
+  authAdmin("admin_set_rango",{usuario:user,rango:rol,color:color}).then(function(){
     $("asignarMsg").textContent = "✅ "+user+" ahora es "+rol;
     $("asignarUser").value = "";
     cargarRoles();
@@ -2855,7 +3045,7 @@ function asignarRolUsuario(){
 
 function quitarRol(user){
   if(!confirm("Quitar rango a "+user+"?")) return;
-  api("DELETE","rangos?usuario_nombre=eq."+encodeURIComponent(user)).then(function(){
+  authAdmin("admin_quitar_rango",{usuario:user}).then(function(){
     cargarRoles();
     api("POST","admin_logs",{admin_nombre:USER,accion:"quitar_rango",usuario_afectado:user});
   });
@@ -3643,7 +3833,7 @@ var recEstadoLabel = {pendiente:"PENDIENTE",hecho:"HECHA",denegado:"DENEGADA"};
 var recEstadoColor = {pendiente:"#f1c40f",hecho:"#2ecc71",denegado:"#e74c3c"};
 
 function cargarRecuperar(){
-  api("GET","recuperar_pass?select=*&order=creado.desc&limit=500").then(d=>{
+  api("GET","recuperar_pass_publica?select=*&order=creado.desc&limit=500").then(d=>{
     recAll = d||[];
     renderRecuperar();
     var pend = recAll.filter(r=>r.estado==="pendiente").length;
@@ -3723,31 +3913,31 @@ function abrirRecuperar(id){
 
 function cambiarPassRecuperar(id){
   var nueva = $("recNuevaPass").value.trim();
-  if(nueva.length<4){alert("La contraseña necesita mínimo 4 caracteres");return;}
+  if(nueva.length<6){alert("La contraseña necesita mínimo 6 caracteres");return;}
   var resp = $("recRespuesta").value.trim();
   var r = recAll.find(x=>x.id===id);
   if(!r) return;
-  hashPassAdmin(r.usuario,nueva).then(function(hp){
-  ZHFirebase.update("cuentas/"+r.usuario,{password:hp}).then(()=>{
-    api("PATCH","recuperar_pass?id=eq."+id,{estado:"hecho",nueva_pass:nueva,respuesta:resp||"Tu contraseña fue cambiada por un admin.",resuelto_por:USER,resuelto:new Date().toISOString()}).then(()=>{
+  // El servidor hashea y guarda la contraseña; nunca viaja al navegador en claro salvo para el admin.
+  authAdmin("admin_reset_pass",{usuario:r.usuario,password:nueva}).then(function(res){
+    if(!res || !res.ok){ alert("Error al cambiar la contraseña"); return; }
+    authAdmin("admin_resolver_recuperacion",{id:id,estado:"hecho",respuesta:resp||"Tu contraseña fue cambiada por un admin."}).then(()=>{
       api("POST","admin_logs",{admin_nombre:USER,accion:"pass_reset",usuario_afectado:r.usuario,detalle:"Cambió la contraseña de "+r.usuario});
       abrirRecuperar(id);
       cargarRecuperar();
     }).catch(()=>alert("Error al actualizar la solicitud"));
-  }).catch(()=>alert("Error al cambiar la contraseña"));
-  });
+  }).catch(()=>alert("Error de red"));
 }
 
 function denegarRecuperar(id){
   var resp = ($("recRespuesta")&&$("recRespuesta").value.trim())||"Solicitud denegada por un admin.";
-  api("PATCH","recuperar_pass?id=eq."+id,{estado:"denegado",respuesta:resp,resuelto_por:USER,resuelto:new Date().toISOString()}).then(()=>{
+  authAdmin("admin_resolver_recuperacion",{id:id,estado:"denegado",respuesta:resp}).then(()=>{
     abrirRecuperar(id);
     cargarRecuperar();
   }).catch(()=>alert("Error"));
 }
 
 function eliminarRecuperar(id){
-  api("DELETE","recuperar_pass?id=eq."+id).then(()=>{
+  authAdmin("admin_eliminar_recuperacion",{id:id}).then(()=>{
     cerrarModal();
     cargarRecuperar();
   }).catch(()=>alert("Error"));
@@ -4107,7 +4297,7 @@ function promptXPA(){
   });
 }
 function promptBan(){var u=prompt("Usuario a banear:");if(!u)return;banearUsuario(u);}
-function promptVIP(){var u=prompt("Usuario VIP:");if(!u)return;api("POST","vip",{usuario_nombre:u,tipo:"vip",activo:true}).then(function(){alert("VIP dado a "+u);});}
+function promptVIP(){var u=prompt("Usuario VIP:");if(!u)return;authAdmin("admin_set_vip",{usuario:u,dias:30}).then(function(){alert("VIP dado a "+u);});}
 function exportarUsuariosCSV(){
   var csv="Usuario,Rol,Nivel,XP,Online,Estado\n";
   allUsers.forEach(function(u){csv+=u.nombre+","+(u.rol||"user")+","+(u.nivel||1)+","+(u.xp||0)+","+(u.online?"Si":"No")+","+(u.estado||"activo")+"\n";});
@@ -4115,72 +4305,65 @@ function exportarUsuariosCSV(){
 }
 function limpiarLogsViejos(){
   if(!confirm("Eliminar logs +7 dias?"))return;
-  var f=new Date(Date.now()-7*86400000).toISOString();
-  api("GET","logs?select=id&created_at=lt."+f+"&limit=500").then(function(d){
-    if(!d||!d.length){alert("Sin logs viejos");return;}var i=0;
-    d.forEach(function(r){setTimeout(function(){api("DELETE","logs?id=eq."+r.id);},i*100);i++;});
-    alert("Limpiando "+d.length+" logs...");
-  });
+  authAdmin("admin_limpiar_logs",{dias:7}).then(function(d){
+    if(d && d.ok) alert("Logs de +7 días eliminados");
+    else alert("No se pudieron limpiar (¿sesión admin verificada?)");
+    if(typeof cargarLogs==="function") cargarLogs();
+  }).catch(function(){ alert("Error de conexión"); });
 }
 
 /* ─── INICIO ──────────────────────────── */
-// Verificar si el usuario puede acceder (autorización explícita)
+// Verificar si el usuario puede acceder (siempre contra el servidor)
 function verificarAccesoPanel(){
-  // El usuario logueado
-  var u = USER;
-  // 1) Autorización explícita en tabla panel_autorizados
-  fetch(SUPABASE+"/panel_autorizados?select=usuario_nombre,nivel,activo&usuario_nombre=eq."+encodeURIComponent(u)+"&limit=1",{headers:DBH})
-  .then(function(r){return r.json();}).then(function(aut){
-    var autorizado = aut && aut.length && aut[0].activo === true;
-    var nivel = autorizado ? (aut[0].nivel||'full') : '';
-    if(autorizado){
-      // Puede entrar
-      document.getElementById('sidebarName').textContent=u;
-      document.getElementById('sidebarRol').textContent=(nivel==='limited'?'lectura limitada':'admin autorizado');
-      actualizarBadgeUsuario();
-      conectarWS();
-      cargarDashboard();
-      conectarFeed();
-      cargarRecuperar();
-      cargarAsistente();
-      cargarGonza();
-      // Ocultar acciones de escritura si es limited
-      if(nivel==='limited'){
-        document.querySelectorAll(".btn-danger, .btn-primary").forEach(function(b){ b.style.display='none'; });
-        var navSec = document.getElementById("sec-autorizacion"); if(navSec) navSec.style.display='none';
-      }
-    }else{
-      // 2) Fallback: rango admin en DB (por compatibilidad)
-      fetch(SUPABASE+"/rangos?select=rango&usuario_nombre=eq."+encodeURIComponent(u)+"&limit=1",{headers:DBH})
-      .then(function(r2){return r2.json();}).then(function(d){
-        var rango=d&&d.length?d[0].rango:'';
-        if(['admin','super_admin','root','owner','fundador','developer'].includes(rango)||u==='admin'){
-          document.getElementById('sidebarName').textContent=u;
-          document.getElementById('sidebarRol').textContent=rango||'admin';
-          actualizarBadgeUsuario();
-          conectarWS();
-          cargarDashboard();
-          conectarFeed();
-          cargarRecuperar();
-          cargarAsistente();
-          cargarGonza();
-        }else{
-          document.body.innerHTML=`<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;flex-direction:column;gap:10px;padding:20px;text-align:center">
-            <div style="font-size:3em">⛔</div><h2>Acceso denegado</h2><p style="color:var(--text2);font-size:.85em;max-width:400px;line-height:1.5">No tenés autorización para acceder al panel de administración. Pedí acceso al dueño.</p>
-            <a href="/" style="color:var(--accent)">Volver al inicio</a></div>`;
-        }
-      }).catch(function(){ accesoDenegado(); });
+  var A=window.ZH_AUTH;
+  if(!A){ accesoDenegado(); return; }
+  A.ready.then(function(){
+    if(A.offline){ accesoDenegado("Necesitás conexión para verificar tu cuenta."); return; }
+    if(!A.verified){ location.replace(A.urlLogin("/panel_admin.html")); return; }
+    if(!_panelPermitido(A)){ accesoDenegado("Esta cuenta no tiene autorización para el panel."); return; }
+    var u=A.usuario;
+    var nivel=A.admin?'full':((A.panel&&A.panel.nivel)||'full');
+    USER=u;
+    document.getElementById('sidebarName').textContent=u;
+    document.getElementById('sidebarRol').textContent=(nivel==='limited'?'lectura limitada':'admin autorizado');
+    document.getElementById('adminLock').style.display='none';
+    _desbloqueado=true;
+    actualizarBadgeUsuario();
+    conectarWS();
+    cargarDashboard();
+    conectarFeed();
+    cargarRecuperar();
+    cargarAsistente();
+    cargarGonza();
+    if(nivel==='limited'||nivel==='lectura'){
+      document.querySelectorAll(".btn-danger, .btn-primary").forEach(function(b){ b.style.display='none'; });
+      var navSec = document.getElementById("sec-autorizacion"); if(navSec) navSec.style.display='none';
     }
-  }).catch(function(){ accesoDenegado(); });
+  });
 }
-function accesoDenegado(){
+function accesoDenegado(motivo){
   document.body.innerHTML=`<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;flex-direction:column;gap:10px;padding:20px;text-align:center">
-    <div style="font-size:3em">⛔</div><h2>Acceso denegado</h2><p style="color:var(--text2);font-size:.85em;max-width:400px;line-height:1.5">No tenés autorización para acceder al panel de administración.</p>
-    <a href="/" style="color:var(--accent)">Volver al inicio</a></div>`;
+    <div style="font-size:3em">⛔</div><h2>Acceso denegado</h2><p style="color:var(--text2);font-size:.85em;max-width:400px;line-height:1.5">${esc(motivo||"No tenés autorización para acceder al panel de administración.")}</p>
+    <a href="/login.html?next=/panel_admin.html" style="color:var(--accent)">Iniciar sesión</a>
+    <a href="/" style="color:var(--text2)">Volver al inicio</a></div>`;
 }
 verificarAccesoPanel();
 </script>
 <script src="/errores.js" defer></script>
 <script src="/update_check.js" defer></script>
+<script src="/zh_update.js?v=1" defer></script>
+<script>
+(function(){
+  try{
+    document.querySelectorAll('.sidebar nav a').forEach(function(a){
+      a.childNodes.forEach(function(n){
+        if(n.nodeType===3){
+          n.textContent = n.textContent.replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE0F}\u{200D}]/gu, '').replace(/\s+/g, ' ').replace(/^\s+/, '');
+        }
+      });
+    });
+  }catch(e){}
+})();
+</script>
 </body>
 </html>

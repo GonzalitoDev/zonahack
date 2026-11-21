@@ -1,0 +1,8 @@
+[
+  {"id": 1, "nombre": "VIP Premium · 30 días", "ico": "👑", "desc": "Acceso a todas las zonas VIP y estrenos."},
+  {"id": 2, "nombre": "Fichas de Casino (1000)", "ico": "🎰", "desc": "Fichas virtuales para jugar en el casino."},
+  {"id": 3, "nombre": "Skin / Tema exclusivo", "ico": "🎨", "desc": "Un tema visual exclusivo para tu perfil."},
+  {"id": 4, "nombre": "Insignia 'Legendario'", "ico": "🏅", "desc": "Insignia especial junto a tu nombre."},
+  {"id": 5, "nombre": "Soporte prioritario", "ico": "🎧", "desc": "Atención especial del dueño."},
+  {"id": 6, "nombre": "Estreno anticipado", "ico": "🎬", "desc": "Ves las películas antes que todos."}
+]

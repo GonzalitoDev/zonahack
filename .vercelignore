@@ -1,0 +1,39 @@
+# Carpetas fuente de apps de escritorio (Electron) NO se suben a Vercel.
+# Contienen node_modules y dist con archivos de +100 MB.
+ZonaHackPC
+CyberAlertaPC
+AsistentePC
+
+# Proyecto fuente Android (se compila en GitHub Actions)
+CyberAlertaApp
+
+# Carpetas locales de Python / test
+__pycache__
+.venv
+venv
+
+# Secretos: NUNCA deben subirse a Vercel. vercel.json sirve "*.json" como
+# estático, así que sin esto quedarían descargables públicamente.
+asistente_keys.json
+asistente_keys.enc
+bot2_config.json
+api_keys.json
+memoria.json
+memoria_log.json
+pc_permiso.txt
+.env
+# Mas secretos / datos internos (agregado 2026-10-09 tras el analisis web)
+owner_config.json
+admins_config.json
+thor_config.json
+push_config.json
+aviso_config.json
+npm_config.json
+limites_tokens.json
+plan.json
+plan_aplicado.json
+backup_videos.json
+*.bak*
+*.db
+*.sql
+CODIGO_DE_HOY.txt

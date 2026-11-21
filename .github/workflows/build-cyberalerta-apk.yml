@@ -1,0 +1,46 @@
+name: Compilar APK CyberAlerta
+
+# Compila el APK de CyberAlerta en la nube (GitHub Actions) SIN Android Studio.
+# Se dispara al subir cambios en CyberAlertaApp, o con el botón "Run workflow".
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "CyberAlertaApp/**"
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar el proyecto
+        uses: actions/checkout@v4
+
+      - name: Configurar JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Configurar Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          packages: "platform-tools platforms;android-34 build-tools;34.0.0"
+
+      - name: Descargar Gradle
+        run: |
+          curl -sL "https://services.gradle.org/distributions/gradle-8.5-bin.zip" -o /tmp/gradle.zip
+          unzip -q /tmp/gradle.zip -d /tmp
+          echo "/tmp/gradle-8.5/bin" >> $GITHUB_PATH
+
+      - name: Compilar APK (debug = instalable)
+        working-directory: CyberAlertaApp
+        run: gradle assembleDebug --no-daemon
+
+      - name: Subir el APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: CyberAlerta-APK
+          path: |
+            CyberAlertaApp/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: warn

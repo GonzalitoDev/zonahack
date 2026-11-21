@@ -1,0 +1,89 @@
+{
+    "version": 2,
+    "builds": [
+        { "src": "*.html", "use": "@vercel/static" },
+        { "src": "*.js", "use": "@vercel/static" },
+        { "src": "manifest.json", "use": "@vercel/static" },
+        { "src": "cyberalerta_version.json", "use": "@vercel/static" },
+        { "src": "dbxplorer_version.json", "use": "@vercel/static" },
+        { "src": "tienda.json", "use": "@vercel/static" },
+        { "src": "arg_datos.json", "use": "@vercel/static" },
+        { "src": "hacker_cand.json", "use": "@vercel/static" },
+        { "src": "*.png", "use": "@vercel/static" },
+        { "src": "*.exe", "use": "@vercel/static" },
+        { "src": "*.apk", "use": "@vercel/static" },
+        { "src": "*.min.js", "use": "@vercel/static" },
+        { "src": "*.yml", "use": "@vercel/static" },
+        { "src": "*.blockmap", "use": "@vercel/static" },
+        { "src": "subir_peliculas.bat", "use": "@vercel/static" },
+        { "src": "offline.html", "use": "@vercel/static" },
+        { "src": "api/*.py", "use": "@vercel/python", "config": { "maxDuration": 60, "excludeFiles": "{ZonaHack*.exe,CyberAlerta*.exe,*.apk,index.html.bak_mojibake,index.html.bak_mojibake2,ZonaHackPC/**,CyberAlertaPC/**,*.zip}" } }
+    ],
+    "routes": [
+        { "src": "/api/search", "dest": "/api/search.py" },
+        { "src": "/api/proxy_rom", "dest": "/api/proxy_media.py" },
+        { "src": "/api/search_18", "dest": "/api/search_18.py" },
+        { "src": "/api/anime", "dest": "/api/legal_scraper.py" },
+        { "src": "/api/status", "dest": "/api/legal_scraper.py" },
+        { "src": "/api/monitor", "dest": "/api/legal_scraper.py" },
+        { "src": "/api/search_multi", "dest": "/api/search_multi.py" },
+        { "src": "/api/discord_webhook", "dest": "/api/discord_webhook.py" },
+        { "src": "/api/discord_log", "dest": "/api/discord_webhook.py" },
+        { "src": "/api/proxy_youtube", "dest": "/api/proxy_media.py" },
+        { "src": "/api/historias_terror", "dest": "/api/historias_terror.py" },
+        { "src": "/api/legal_scraper", "dest": "/api/legal_scraper.py" },
+        { "src": "/api/peliculas_libres", "dest": "/api/legal_scraper.py" },
+        { "src": "/api/osint_user", "dest": "/api/legal_scraper.py" },
+        { "src": "/api/proxy", "dest": "/api/legal_scraper.py" },
+        { "src": "/api/canales_scrap", "dest": "/api/legal_scraper.py" },
+        { "src": "/api/ia", "dest": "/api/legal_scraper.py" },
+        { "src": "/api/deepweb", "dest": "/api/legal_scraper.py" },
+        { "src": "/host/(.*)", "dest": "/api/legal_scraper.py" },
+        { "src": "/api/scanner", "dest": "/api/scanner.py" },
+        { "src": "/api/auth", "dest": "/api/auth.py" },
+        { "src": "/api/push", "dest": "/api/push.py" },
+        { "src": "/api/discord_bot", "dest": "/api/discord_webhook.py" },
+        { "src": "/api/discord_send", "dest": "/api/discord_webhook.py" },
+        { "src": "/api/discord_register", "dest": "/api/discord_webhook.py" },
+        { "src": "/api/videohub", "dest": "/api/videohub.py" },
+        { "src": "/api/cineclasico", "dest": "/api/legal_scraper.py" },
+        { "src": "/api/scrape", "dest": "/api/legal_scraper.py" },
+        { "src": "/api/auto", "dest": "/api/legal_scraper.py" },
+        { "src": "/api/amor", "dest": "/api/legal_scraper.py" },
+        { "src": "/api/tesla", "dest": "/api/tesla.py" },
+        { "src": "/api/vps", "dest": "/api/legal_scraper.py" },
+        { "src": "/tesla", "dest": "/tesla.html" },
+        { "src": "/videohub", "dest": "/videohub.html" },
+        { "src": "/videohub_admin", "dest": "/videohub_admin.html" },
+        { "src": "/", "dest": "/index.html" },
+        { "src": "/CyberAlerta-Setup-(.*)\\.exe", "dest": "/CyberAlerta-Setup.exe", "status": 302 }
+    ],
+    "headers": [
+        {
+            "source": "/(.*)",
+            "headers": [
+                { "key": "Cache-Control", "value": "no-cache, max-age=0, must-revalidate" },
+                { "key": "X-Content-Type-Options", "value": "nosniff" },
+                { "key": "X-Frame-Options", "value": "SAMEORIGIN" },
+                { "key": "X-XSS-Protection", "value": "1; mode=block" },
+                { "key": "Strict-Transport-Security", "value": "max-age=31536000; includeSubDomains" },
+                { "key": "Content-Security-Policy", "value": "default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://cdnjs.cloudflare.com https://www.youtube.com https://cdn.jsdelivr.net https://*.firebasedatabase.app https://*.firebaseio.com; worker-src 'self' blob:; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; img-src 'self' data: https:; media-src 'self' data: https: blob:; connect-src 'self' https: wss:; frame-src 'self' https://www.youtube-nocookie.com https://www.youtube.com https://yewtu.be https://commons.wikimedia.org https:;" },
+                { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+                { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=()" },
+                { "key": "X-Permitted-Cross-Domain-Policies", "value": "none" }
+            ]
+        },
+        {
+            "source": "/api/(.*)",
+            "headers": [
+                { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" },
+                { "key": "Access-Control-Allow-Origin", "value": "*" },
+                { "key": "Access-Control-Allow-Methods", "value": "GET, POST, OPTIONS" },
+                { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization" }
+            ]
+        }
+    ],
+    "crons": [
+        { "path": "/api/monitor", "schedule": "0 12 * * *" }
+    ]
+}

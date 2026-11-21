@@ -1,0 +1,14 @@
+VIDEOHUB - AVISO LEGAL
+
+VideoHub es un proyecto personal con fines educativos y de entretenimiento.
+
+1. Todo el contenido multimedia se obtiene de APIs publicas (YouTube, Internet Archive).
+2. Los enlaces a sitios externos como ZonaSimpson son proporcionados por los usuarios
+   y no son parte del contenido oficial de VideoHub.
+3. VideoHub no almacena, distribuye ni reproduce contenido protegido por derechos de autor.
+4. El usuario es responsable de cumplir con las leyes de su pais respecto al contenido
+   al que accede.
+5. Los juegos incluidos son codigo original o emuladores que requieren ROMs
+   que el usuario debe proveer legalmente.
+
+Si tenes alguna duda o reclamo, contacta al administrador.

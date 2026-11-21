@@ -63,6 +63,8 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 @keyframes giro{to{transform:rotate(360deg)}}
 .footer{text-align:center;margin-top:26px;font-size:.6em;color:var(--gold);letter-spacing:1px}
 </style>
+<link rel="stylesheet" href="/zh_update.css?v=1">
+<script src="/zh_auth.js?v=2"></script>
 </head>
 <body>
 <div class="bg"><div class="orb orb1"></div><div class="orb orb2"></div></div>
@@ -185,5 +187,6 @@ try{
 $("buscador").addEventListener("input",function(){ q=this.value; render(); });
 cargar();
 </script>
+<script src="/zh_update.js?v=1" defer></script>
 </body>
 </html>

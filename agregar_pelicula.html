@@ -50,6 +50,8 @@ textarea{resize:vertical;min-height:50px}
 .sec .cnt{color:rgba(200,214,229,.25);font-size:.85em}
 .batch-progress{font-size:.6em;color:#00ff41;margin-top:6px;min-height:14px}
 </style>
+<link rel="stylesheet" href="/zh_update.css?v=1">
+<script src="/zh_auth.js?v=2"></script>
 </head>
 <body style="display:none">
 <div class="header">
@@ -160,14 +162,13 @@ var H = {"apikey":KEY,"Authorization":"Bearer "+KEY,"Content-Type":"application/
 
 // ─── SOLO ADMINS ────────────────────────
 function verificarAdmin(){
-  var user = localStorage.getItem('vh_usuario')||'anon';
-  fetch(SUPABASE+"/rangos?select=rango&usuario_nombre=eq."+encodeURIComponent(user)+"&limit=1",{headers:H})
-  .then(function(r){return r.json();}).then(function(d){
-    var rango = d&&d.length?d[0].rango:'';
-    if(['admin','fundador','super_admin','root','owner','developer'].indexOf(rango)>=0 || localStorage.getItem('vh_admin_pass')){
-      document.body.style.display='block'; cargarMisPelis();
-    }else denegado();
-  }).catch(function(){ if(localStorage.getItem('vh_admin_pass')){ document.body.style.display='block'; cargarMisPelis(); } else denegado(); });
+  var A=window.ZH_AUTH;
+  if(!A){ denegado(); return; }
+  A.ready.then(function(){
+    if(A.verified && A.admin){ document.body.style.display='block'; cargarMisPelis(); return; }
+    if(!A.verified && !A.offline){ location.replace(A.urlLogin('/agregar_pelicula.html')); return; }
+    denegado();
+  });
 }
 function denegado(){
   document.body.innerHTML='<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;flex-direction:column;gap:10px;padding:20px;text-align:center;background:#0a0a0a;color:#c8d6e5;font-family:\'Courier New\',monospace"><div style="font-size:3em">⛔</div><h2>Acceso denegado</h2><p style="color:rgba(200,214,229,.3);font-size:.8em">Solo administradores pueden usar el subidor.</p><a href="/" style="color:#00ff41">Volver al inicio</a></div>';
@@ -446,5 +447,6 @@ verificarAdmin();
 </script>
 <script src="/errores.js" defer></script>
 <script src="/update_check.js" defer></script>
+<script src="/zh_update.js?v=1" defer></script>
 </body>
 </html>

@@ -1,0 +1,82 @@
+ZONAHACK EN TU PROPIO VPS — GUÍA PASO A PASO
+=============================================
+
+1) CONSEGUÍ UN VPS GRATIS (o barato)
+------------------------------------
+  Opciones GRATIS para siempre:
+   - ORACLE CLOUD FREE TIER  ★★★★★ (la mejor)
+       2 VM gratis por siempre (Ampere ARM 4 núcleos/24GB o AMD 1GB/2 OCPU)
+       + 200GB de disco + base de datos.
+       https://www.oracle.com/cloud/free/
+       (Necesitás tarjeta para verificar, no te cobra)
+   - GOOGLE CLOUD FREE TIER  ★★★★
+       1 VM e2-micro gratis por siempre.
+       https://cloud.google.com/free
+   - AWS FREE TIER  ★★★
+       750hs de t2.micro por 12 meses.
+       https://aws.amazon.com/free
+   - AZURE  ★★★
+       12 meses de máquina pequeña.
+       https://azure.microsoft.com/free
+
+  Baratos (si preferís pagar ~US$4-6/mes, sin tarjeta de sorpresas):
+   - Contabo (https://contabo.com) VPS VPS0 ~US$5/mes, SSD, 1 núcleo, 2GB.
+   - Hetzner (https://hetzner.com) CX22 ~US$4/mes.
+
+2) CREÁ LA MÁQUINA
+------------------
+   - Sistema operativo: Ubuntu 22.04 o 24.04 LTS.
+   - Memoria mínima: 1GB (mejor 2GB+).
+   - Guardá la IP y la contraseña/clave SSH que te dan.
+
+3) CONECTATE POR SSH
+--------------------
+   En tu PC (Windows: PowerShell):
+     ssh ubuntu@IP_DE_TU_VPS
+
+4) SUBÍ EL PROYECTO AL VPS
+--------------------------
+   Desde tu PC, en la carpeta del proyecto:
+     scp -r ./* ubuntu@IP_DE_TU_VPS:/opt/zonahack/
+   (o comprimilo en zip, subilo y descomprimí en el VPS)
+
+   En el VPS, verificá que quedó:
+     ls /opt/zonahack        (debe ver local_server.py, index.html, api/...)
+
+5) EJECUTÁ EL INSTALADOR
+------------------------
+   sudo bash /opt/zonahack/vps/setup.sh
+   (O, si el kit no llegó: sudo apt install -y python3-venv python3-pip nginx
+    y copiá setup.sh, luego: sudo bash setup.sh)
+
+6) HTTPS GRATIS (recomendado)
+-----------------------------
+   - Conseguí un dominio (o un subdominio gratis, ej. duckdns.org).
+   - En el VPS:
+       sudo apt install -y certbot python3-certbot-nginx
+       sudo certbot --nginx -d tudominio.com
+   - Renovación automática: certbot ya la configura.
+
+7) COMPROBÁ QUE FUNCIONA
+------------------------
+   En tu navegador:
+     http://IP_DE_TU_VPS/api/test
+     http://IP_DE_TU_VPS/vip.html
+     http://IP_DE_TU_VPS/casino.html
+   Deberían andar igual que en Vercel (las APIs que no maneja
+   el VPS se reenvían al sitio real vía proxy).
+
+APIs GRATIS que quedan en TU VPS:
+  - /api/search          Buscar en YouTube
+  - /api/search_18       (zona +18)
+  - /api/anime           Top/temporada/buscar anime (Jikan)
+  - /api/videohub        Catálogo legal
+  - /api/db/*            Base de datos local (sqlite)
+  - /api/proxy_youtube   Proxy de YouTube
+  - /api/test            Estado del servidor
+  - /api/cineclasico     Cine clásico (proxied al real)
+
+COMANDOS ÚTILES:
+  journalctl -u zonahack -f        ver logs en vivo
+  systemctl restart zonahack       reiniciar
+  systemctl status zonahack        estado

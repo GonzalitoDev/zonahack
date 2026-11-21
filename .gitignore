@@ -18,6 +18,10 @@ npm_config.json
 limites_tokens.json
 plan.json
 plan_aplicado.json
+backup_videos.json
+CODIGO_DE_HOY.txt
+pc_codigo.txt
+pc_permiso.txt
 *.key
 *.pem
 
@@ -25,6 +29,7 @@ plan_aplicado.json
 *.db
 *.sqlite
 *.sqlite3
+*.sql
 
 # Backend / lógica del servidor (no se sube)
 *.py
@@ -37,6 +42,27 @@ __pycache__/
 *.blockmap
 *.msi
 
+# Build outputs (Electron / Android / logs)
+dist/
+**/app/build/
+.gradle/
+build.log
+latest.yml
+builder-debug.yml
+
+# Repo embebido (se deploya aparte en Heroku)
+heroku_app/
+
 # Backups / temporales
 *.bak*
 *.tmp
+
+# secreto local para firmar sesiones del login local
+.auth_local_secret
+
+# log del monitor de errores local
+errores_local.log
+
+# votos de las elecciones locales
+elecciones_votos.json
+elecciones_votos.json.tmp

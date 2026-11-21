@@ -2,7 +2,8 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<meta name="theme-color" content="#07090e">
 <title>📋 Logs en vivo · ZonaHack</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -60,7 +61,42 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 .l-page{color:var(--muted);white-space:nowrap;max-width:180px;overflow:hidden;text-overflow:ellipsis}
 .l-data{flex:1;color:var(--text);word-break:break-all;min-width:0}
 .empty{padding:30px;text-align:center;color:var(--muted);font-size:.75em}
+
+/* ─── MOBILE ─── */
+@media (max-width:640px){
+  body{overflow-x:hidden}
+  .header{padding:10px 12px;gap:10px}
+  .logo{width:36px;height:36px;border-radius:10px;font-size:18px}
+  .ttl h1{font-size:.85em;letter-spacing:1px}
+  .ttl span{font-size:.55em;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .back{padding:6px 11px;font-size:.8em}
+  .container{padding:12px 10px 32px}
+  .top{gap:8px;margin-bottom:12px}
+  .conex{width:100%;justify-content:center}
+  .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;width:100%;flex:none}
+  .stat{min-width:0;padding:8px 6px}
+  .stat b{font-size:1.15em}
+  .stat span{font-size:.55em;letter-spacing:.5px}
+  .danger{width:100%;padding:11px}
+  .filters{flex-direction:column;gap:8px}
+  .filters input,.filters select{width:100%;min-width:0;font-size:.8em;padding:11px 12px}
+  .log-list{border-radius:14px}
+  .log-item{flex-wrap:wrap;align-items:center;gap:6px 8px;padding:11px 12px;font-size:.8em}
+  .l-time{font-size:.82em}
+  .l-ev{min-width:0;padding:3px 8px}
+  .l-user{margin-left:auto;max-width:55%;overflow:hidden;text-overflow:ellipsis}
+  .l-page{flex:1 1 100%;max-width:none;white-space:normal;word-break:break-word;font-size:.92em;order:4}
+  .l-data{flex:1 1 100%;order:5;font-size:.95em;word-break:break-word}
+  .lock-box{padding:24px 18px}
+  .empty{padding:24px 16px;font-size:.8em}
+}
+@media (max-width:360px){
+  .stats{grid-template-columns:1fr 1fr}
+  .ttl h1{font-size:.78em}
+}
 </style>
+<link rel="stylesheet" href="/zh_update.css?v=1">
+<script src="/zh_auth.js?v=2"></script>
 </head>
 <body>
 <div class="bg"><div class="orb orb1"></div><div class="orb orb2"></div></div>
@@ -69,9 +105,9 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
   <div class="lock-box">
     <div class="ico">🔐</div>
     <h2>LOGS · ZONAHACK</h2>
-    <p>Zona restringida. Ingresá la contraseña.</p>
-    <input id="lockPass" type="password" placeholder="Contraseña…" autocomplete="off">
-    <button class="btn" onclick="desbloquear()">Entrar</button>
+    <p>Zona restringida. Solo administradores con sesión verificada.</p>
+    <button class="btn" onclick="desbloquear()">VERIFICAR MI SESIÓN</button>
+    <a href="/login.html?next=/logs.html" style="display:block;margin-top:8px;color:var(--accent);font-size:.7em">🔑 Iniciar sesión</a>
     <div class="lock-msg" id="lockMsg"></div>
   </div>
 </div>
@@ -114,22 +150,24 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 
 <script src="/firebase_zh.js"></script>
 <script>
-/* ─── BLOQUEO (misma contraseña que el Panel Admin) ─── */
-function _dec(s,k){var r='';for(var i=0;i<s.length;i+=2){r+=String.fromCharCode(parseInt(s.substr(i,2),16)^k.charCodeAt((i/2)%k.length));}return r;}
-function _b64(s){return atob(s);}
-var _master=_b64("WkgkM2N1cjF0eSE=");
-var _passAdmin=_dec("000065570e1c1c03444b17",_master);
+/* ─── BLOQUEO POR SESIÓN DE ADMIN VERIFICADA ─── */
 function desbloquear(){
-  var c=document.getElementById("lockPass").value;
-  if(c===_passAdmin){
-    sessionStorage.setItem("zh_logs_unlock","1");
-    document.getElementById("lock").style.display="none";
-    document.getElementById("main").style.display="block";
-    iniciar();
-  } else document.getElementById("lockMsg").textContent="❌ Contraseña incorrecta";
+  var A=window.ZH_AUTH;
+  var msg=document.getElementById("lockMsg");
+  if(!A){ if(msg)msg.textContent="❌ Error de seguridad"; return; }
+  A.ready.then(function(){
+    if(A.verified && A.admin){
+      document.getElementById("lock").style.display="none";
+      document.getElementById("main").style.display="block";
+      if(!window._zhLogsIniciado){ window._zhLogsIniciado=true; iniciar(); }
+    }else if(!A.verified && !A.offline){
+      location.replace(A.urlLogin("/logs.html"));
+    }else if(msg){
+      msg.textContent="❌ Necesitás una cuenta de administrador";
+    }
+  });
 }
-(function(){ try{ var p=new URLSearchParams(location.search); if(p.get("pass")===_passAdmin){ sessionStorage.setItem("zh_logs_unlock","1"); document.getElementById("lock").style.display="none"; document.getElementById("main").style.display="block"; iniciar(); } }catch(e){} })();
-if(sessionStorage.getItem("zh_logs_unlock")==="1"){ document.getElementById("lock").style.display="none"; document.getElementById("main").style.display="block"; iniciar(); }
+desbloquear();
 
 /* ─── VISOR EN VIVO (REST + EventSource) ─── */
 var LOGS={};
@@ -192,5 +230,6 @@ function vaciarLogs(){
   ZHFirebase.remove('logs').then(function(){ LOGS={}; render(); document.getElementById('conex').innerHTML='🗑️ Logs vaciados'; });
 }
 </script>
+<script src="/zh_update.js?v=1" defer></script>
 </body>
 </html>

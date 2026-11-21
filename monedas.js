@@ -23,6 +23,19 @@
   function user(){
     return localStorage.getItem("vh_usuario")||"anon";
   }
+  // VIP gana x2 en todos los créditos
+  function esVipMonedas(){
+    try{
+      if(window._esVIP) return true;
+      var g=JSON.parse(localStorage.getItem('vh_vip_gratis')||'null');
+      if(g && g.hasta && new Date(g.hasta)>new Date()) return true;
+      var A=window.ZH_AUTH;
+      if(A && A.verified) return !!(A.admin || (A.vip && A.vip.activo));
+      if(localStorage.getItem('vh_es_vip')==='1') return true;
+    }catch(e){}
+    return false;
+  }
+  function creditoVIP(monto){ return esVipMonedas()?Math.abs(monto)*2:Math.abs(monto); }
   function pad(n){ return n<10?"0"+n:""+n; }
   function hoyStr(){
     var d=new Date();
@@ -142,6 +155,7 @@
   /* Sumar monedas. credito=true para ganar, false para gastar. Devuelve nuevo saldo. */
   function sumarMonto(monto,credito,desc,tipo,cb){
     var u=user();
+    if(credito) monto=creditoVIP(monto);
     var delta=credito?Math.abs(monto):-Math.abs(monto);
     if(!u||u==="anon"){
       var l=saldoLocal();
@@ -213,6 +227,7 @@
       else if(row&&esAyer(row.ultimo_reclamo_diario)) rachaBase=row.racha_reclamo||0;
       var nuevaRacha=Math.min(7,rachaBase+1);
       var monto=calcularMontoPorDia(nuevaRacha);
+      var montoVip=creditoVIP(monto);
       // Marcar local YA (evita doble)
       ultimoLocalSet(hoy,nuevaRacha);
 
@@ -226,9 +241,9 @@
             body:JSON.stringify({usuario_nombre:u,saldo:nuevo,total_ganadas:nuevo,total_gastadas:0,
               racha_reclamo:nuevaRacha,ultimo_reclamo_diario:new Date().toISOString(),updated_at:new Date().toISOString()})}).catch(function(){});
         });
-        registrarTx(u,"reclamo_diario",monto,"Recompensa diaria (día "+nuevaRacha+")");
+        registrarTx(u,"reclamo_diario",montoVip,"Recompensa diaria (día "+nuevaRacha+")");
         try{ if(window.ZHRango) ZHRango.sumar(5,"Reclamo diario (día "+nuevaRacha+")"); }catch(e){}
-        cb&&cb({ok:true,monto:monto,dia:nuevaRacha,saldo:nuevo});
+        cb&&cb({ok:true,monto:montoVip,dia:nuevaRacha,saldo:nuevo});
       });
     });
   }
@@ -236,7 +251,7 @@
   /* Estado del reclamo diario: {reclamado, racha, monto_hoy} */
   function estadoDiario(cb){
     var u=user();
-    if(!u||u==="anon"){ cb&&cb({reclamado:false,racha:0,monto_hoy:50,dias_para:1}); return; }
+    if(!u||u==="anon"){ cb&&cb({reclamado:false,racha:0,monto_hoy:(esVipMonedas()?100:50),dias_para:1}); return; }
     var ult=ultimoLocalGet();
     var reclamado=ult&&ult.fecha===hoyStr();
     var racha=ult?ult.racha||0:0;
@@ -250,7 +265,7 @@
           ultimoLocalSet(ult&&ult.fecha||hoyStr(), racha);
         }
       }
-      var monto_hoy=calcularMontoPorDia(racha>=7?7:racha+1);
+      var monto_hoy=creditoVIP(calcularMontoPorDia(racha>=7?7:racha+1));
       cb&&cb({reclamado:reclamado,racha:racha,monto_hoy:monto_hoy,dias_para:1});
     });
   }

@@ -50,6 +50,8 @@ textarea::placeholder{color:rgba(216,232,255,.3)}
 .back:hover{color:var(--accent)}
 .rec-pass{background:rgba(0,0,0,.4);border:1px dashed rgba(0,229,255,.3);border-radius:10px;padding:9px;font-size:.95em;color:var(--accent);letter-spacing:2px;word-break:break-all;margin:6px 0;font-family:'Courier New',monospace}
 </style>
+<link rel="stylesheet" href="/zh_update.css?v=1">
+<script src="/zh_auth.js?v=2"></script>
 </head>
 <body>
 <div class="bg"><div class="orb orb1"></div><div class="orb orb2"></div></div>
@@ -90,7 +92,7 @@ textarea::placeholder{color:rgba(216,232,255,.3)}
 </div>
 <div id="formRecover" style="display:none">
   <p class="req">🔑 RECUPERAR CONTRASEÑA</p>
-  <p style="margin-bottom:14px;color:var(--muted);font-size:.68em">Pedile al admin que te cambie la contraseña. Cuando la cambie, la vas a poder ver acá.</p>
+  <p style="margin-bottom:14px;color:var(--muted);font-size:.68em">Pedile al admin que te cambie la contraseña. Por seguridad, el admin te la entrega por un canal privado (ya no se muestra acá).</p>
   <input id="recUser" placeholder="Tu usuario" maxlength="30">
   <input id="recEmail" placeholder="Email registrado (opcional)" maxlength="60">
   <textarea id="recMotivo" placeholder="¿Por qué no podés entrar? (opcional)" maxlength="300"></textarea>
@@ -109,26 +111,37 @@ var SB = "https://xfwolaurpeofysnymqle.supabase.co";
 var KEY = "sb_publishable_3VvBUD5Bdu3Uaq59fJ99MQ_XDCtujUU";
 var H = {"apikey":KEY,"Authorization":"Bearer "+KEY,"Content-Type":"application/json"};
 
-// Hash LEGACY (DJB2, 31 bits) — inseguro, se mantiene solo para poder migrar cuentas viejas
-function hashPass(s){
-  var h = 5381;
-  for(var i=0;i<s.length;i++){ h = ((h<<5)+h) + s.charCodeAt(i); h = h & 0x7fffffff; }
-  return "zh$" + h.toString(36) + "$" + s.length;
-}
-
-// Hash fuerte (SHA-256 vía Web Crypto, con el usuario como sal) para cuentas nuevas/migradas
-function sha256Hex(str){
-  var enc = new TextEncoder().encode(str);
-  return crypto.subtle.digest("SHA-256", enc).then(function(buf){
-    return Array.from(new Uint8Array(buf)).map(function(b){ return b.toString(16).padStart(2,"0"); }).join("");
+// ─── API de autenticación (server-side, /api/auth) ─────────
+// Las contraseñas ya NO se manejan en el navegador ni en Firestore.
+var AUTH_API = "/api/auth";
+function authApi(accion, data){
+  var opts = { method: data ? "POST" : "GET", headers: {"Content-Type":"application/json"}, credentials: "same-origin" };
+  if(data) opts.body = JSON.stringify(data);
+  return fetch(AUTH_API+"?accion="+accion, opts).then(function(r){
+    return r.json().catch(function(){return {};}).then(function(j){ j.__status = r.status; return j; });
   });
 }
-function hashPassStrong(usuario, pass){
-  if(!(window.crypto && window.crypto.subtle)){
-    // Contexto no seguro (http fuera de localhost): no hay Web Crypto, usar el legado como ultimo recurso
-    return Promise.resolve(hashPass(pass));
-  }
-  return sha256Hex("zh-salt-" + usuario + "-" + pass + "-zh2026").then(function(hex){ return "zh2$" + hex; });
+function authToken(){ return localStorage.getItem("vh_token") || ""; }
+function guardarSesion(d){
+  localStorage.setItem("vh_usuario", d.usuario);
+  localStorage.setItem("vh_rango", d.rango || "user");
+  // La sesión real vive en una cookie HttpOnly: JavaScript no puede robarla.
+  // No guardamos el token en localStorage.
+  localStorage.removeItem("vh_token");
+  localStorage.removeItem("vh_sesion");
+  localStorage.removeItem("vh_guest");
+  localStorage.removeItem("vh_admin_pass");
+  try{ sessionStorage.removeItem("zh_admin_unlock"); }catch(e){}
+}
+function siguienteDestino(){
+  try{
+    var n = new URLSearchParams(location.search).get("next") || "";
+    if(n){
+      var u = new URL(n, location.origin);
+      if(u.origin === location.origin) return u.pathname + u.search + u.hash;
+    }
+  }catch(e){}
+  return "/";
 }
 
 function esc(s){return (s||"").replace(/[&<>"]/g,function(m){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m];});}
@@ -198,31 +211,17 @@ function volverLogin(){
 
 function enviarSolicitud(){
   var u = document.getElementById("recUser").value.trim().toLowerCase();
-  var em = document.getElementById("recEmail").value.trim();
   var motivo = document.getElementById("recMotivo").value.trim();
   var sr = document.getElementById("statusRec");
   if(!u){ sr.innerHTML = '<span class="err">Ingresá tu usuario</span>'; return; }
   sr.innerHTML = '<span style="color:rgba(0,255,65,.5)">Verificando...</span>';
-  api("cuentas?select=usuario,email&usuario=eq."+encodeURIComponent(u)+"&limit=1").then(function(c){
-    if(!c || !c.length){ sr.innerHTML = '<span class="err">Ese usuario no existe</span>'; return; }
-    if(em && c[0].email && c[0].email.toLowerCase() !== em.toLowerCase()){
-      sr.innerHTML = '<span class="err">El email no coincide con el registrado</span>'; return;
+  authApi("recuperar_solicitar", {usuario:u, motivo:motivo}).then(function(d){
+    if(d && d.ok){
+      sr.innerHTML = '<span class="ok">✓ '+esc(d.mensaje||"Solicitud enviada al admin.")+'</span>';
+      document.getElementById("recMotivo").value = "";
+    } else {
+      sr.innerHTML = '<span class="err">'+esc(d.error||"No se pudo enviar la solicitud")+'</span>';
     }
-    api("recuperar_pass?select=id,estado&usuario=eq."+encodeURIComponent(u)+"&estado=eq.pendiente&limit=1").then(function(pend){
-      if(pend && pend.length){
-        sr.innerHTML = '<span class="err">Ya tenés una solicitud pendiente. Mirá su estado abajo.</span>';
-        consultarSolicitud();
-        return;
-      }
-      fetch(SB+"/rest/v1/recuperar_pass",{method:"POST",headers:H,body:JSON.stringify({
-        usuario:u, email:c[0].email || em, motivo:motivo, estado:"pendiente"
-      })}).then(function(r){
-        if(!r.ok){ sr.innerHTML = '<span class="err">Error al enviar la solicitud</span>'; return; }
-        sr.innerHTML = '<span class="ok">✓ Solicitud enviada al admin. Cuando te la cambie, la nueva contraseña va a aparecer acá.</span>';
-        document.getElementById("recEmail").value = "";
-        document.getElementById("recMotivo").value = "";
-      }).catch(function(){ sr.innerHTML = '<span class="err">Error de red</span>'; });
-    });
   }).catch(function(){ sr.innerHTML = '<span class="err">Error de red</span>'; });
 }
 
@@ -231,35 +230,20 @@ function consultarSolicitud(){
   var sr = document.getElementById("statusRec");
   if(!u){ sr.innerHTML = '<span class="err">Ingresá tu usuario</span>'; return; }
   sr.innerHTML = '<span style="color:rgba(0,255,65,.5)">Buscando...</span>';
-  api("recuperar_pass?select=id,estado,respuesta,nueva_pass,resuelto_por,creado,resuelto&usuario=eq."+encodeURIComponent(u)+"&order=creado.desc&limit=1").then(function(d){
-    if(!d || !d.length){ sr.innerHTML = '<span class="err">No encontré solicitudes para ese usuario</span>'; return; }
-    var r = d[0];
+  authApi("recuperar_estado", {usuario:u}).then(function(r){
+    if(!r || !r.estado){ sr.innerHTML = '<span class="err">'+esc((r&&r.error)||"No encontré solicitudes para ese usuario")+'</span>'; return; }
     var html = '<span style="color:rgba(0,255,65,.8)">Estado: <b>'+esc(REC_ESTADO[r.estado]||r.estado)+'</b></span>';
-    if(r.estado === "hecho" && r.nueva_pass){
-      html += '<br><span style="color:rgba(0,255,65,.6);font-size:.6em">✓ El admin te cambió la contraseña:</span>';
-      html += '<div class="rec-pass">'+esc(r.nueva_pass)+'</div>';
-      html += '<button onclick="usarNuevaPass()" style="font-size:.65em;padding:8px">USARLA PARA ENTRAR ▸</button>';
+    if(r.estado === "hecho"){
+      html += '<br><span style="color:rgba(0,255,65,.6);font-size:.6em">✓ Un admin procesó tu solicitud. Contactalo para recibir tu nueva contraseña.</span>';
     }else if(r.estado === "denegado"){
       html += '<br><span class="err">Solicitud denegada por el admin</span>';
     }else{
       html += '<br><span style="color:rgba(0,255,65,.4);font-size:.6em">Esperá a que un admin la procese.</span>';
     }
     if(r.respuesta) html += '<br><span style="color:rgba(0,255,65,.6)">📝 '+esc(r.respuesta)+'</span>';
-    html += '<br><span style="color:rgba(0,255,65,.25);font-size:.55em">Solicitada: '+new Date(r.creado).toLocaleString()+(r.resuelto?' · Resuelta: '+new Date(r.resuelto).toLocaleString():"")+'</span>';
+    if(r.creado) html += '<br><span style="color:rgba(0,255,65,.25);font-size:.55em">Solicitada: '+new Date(r.creado).toLocaleString()+(r.resuelto?' · Resuelta: '+new Date(r.resuelto).toLocaleString():"")+'</span>';
     sr.innerHTML = html;
   }).catch(function(){ sr.innerHTML = '<span class="err">Error de red</span>'; });
-}
-
-function usarNuevaPass(){
-  // Pre-cargar la nueva contraseña en el form de acceso
-  var div = document.querySelector("#statusRec .rec-pass");
-  if(div){
-    document.getElementById("loginPass").value = div.textContent;
-    document.getElementById("loginUser").value = document.getElementById("recUser").value.trim().toLowerCase();
-  }
-  volverLogin();
-  var st = document.getElementById("status");
-  if(st) st.innerHTML = '<span class="ok">Contraseña precargada. Tocá ENTRAR ▸</span>';
 }
 
 // ─── ANTI FUERZA BRUTA (cliente) ────────────────────────────────────────
@@ -381,48 +365,21 @@ function iniciarSesion(){
   if(verificarBloqueo()) return;
   var btn = document.querySelector("#formLogin button");
   btn.disabled = true; btn.textContent = "VERIFICANDO...";
-  function fallar(){
-    btn.disabled = false; btn.textContent = "ENTRAR ▸";
-    registrarFallo();
-    st.innerHTML = '<span class="err">✗ Usuario o contraseña incorrectos</span>';
-    verificarBloqueo();
-  }
-  function loginOk(){
-    btn.disabled = false; btn.textContent = "ENTRAR ▸";
-    registrarExito();
-    localStorage.setItem("vh_usuario", u);
-    localStorage.setItem("vh_sesion", btoa(u+":"+Date.now()));
-    asegurarUserId(u);
-    fetch(SB+"/rest/v1/usuarios_ext",{method:"POST",headers:Object.assign({Prefer:"resolution=merge-duplicates,return=minimal"},H),
-      body:JSON.stringify({usuario_nombre:u, online:true, ultima_conexion:new Date().toISOString()})}).catch(function(){});
-    st.innerHTML = '<span class="ok">✓ ACCESO CONCEDIDO</span>';
-    setTimeout(function(){ window.location.href = "/"; }, 800);
-  }
-
-  // Cuentas nuevas viven en Firestore. Si todavia no migro, cae al fallback de Supabase.
-  ZHFirebase.get("cuentas/"+u).then(function(cuenta){
-    if(cuenta && cuenta.password){
-      return hashPassStrong(u,p).then(function(hpNew){
-        if(cuenta.password === hpNew){ loginOk(); return; }
-        if(cuenta.password === hashPass(p)){
-          ZHFirebase.update("cuentas/"+u, {password:hpNew}).catch(function(){});
-          loginOk();
-          return;
-        }
-        fallar();
-      });
+  authApi("login", {usuario:u, password:p}).then(function(d){
+    if(d && d.ok && d.token){
+      registrarExito();
+      guardarSesion(d);
+      asegurarUserId(d.usuario || u);
+      fetch(SB+"/rest/v1/usuarios_ext",{method:"POST",headers:Object.assign({Prefer:"resolution=merge-duplicates,return=minimal"},H),
+        body:JSON.stringify({usuario_nombre:(d.usuario||u), online:true, ultima_conexion:new Date().toISOString()})}).catch(function(){});
+      st.innerHTML = '<span class="ok">✓ ACCESO CONCEDIDO</span>';
+      setTimeout(function(){ window.location.href = siguienteDestino(); }, 800);
+    } else {
+      btn.disabled = false; btn.textContent = "ENTRAR ▸";
+      registrarFallo();
+      st.innerHTML = '<span class="err">✗ '+esc((d&&d.error)||"Usuario o contraseña incorrectos")+'</span>';
+      verificarBloqueo();
     }
-    // No existe en Firestore: migracion perezosa de una cuenta vieja de Supabase
-    return api("cuentas?select=usuario,email,password&usuario=eq."+encodeURIComponent(u)+"&limit=1").then(function(d){
-      var vieja = d && d.length ? d[0] : null;
-      if(!vieja || !vieja.password){ fallar(); return; }
-      return hashPassStrong(u,p).then(function(hpNew){
-        var coincide = (vieja.password === hpNew) || (vieja.password === hashPass(p));
-        if(!coincide){ fallar(); return; }
-        ZHFirebase.set("cuentas/"+u, {usuario:u, email:vieja.email||"", password:hpNew, created_at:new Date().toISOString()}).catch(function(){});
-        loginOk();
-      });
-    });
   }).catch(function(){
     btn.disabled = false; btn.textContent = "ENTRAR ▸";
     st.innerHTML = '<span class="err">✗ Error de red. Intentalo de nuevo</span>';
@@ -438,35 +395,33 @@ function registrarse(){
   if(!u || u.length < 3){ st.innerHTML = '<span class="err">El usuario necesita al menos 3 caracteres</span>'; return; }
   if(!usuarioValido(u)){ st.innerHTML = '<span class="err">Solo letras, números, _ . - (3-30)</span>'; return; }
   if(!emailValido(em)){ st.innerHTML = '<span class="err">Email inválido</span>'; return; }
-  if(p1.length < 4){ st.innerHTML = '<span class="err">La contraseña necesita al menos 4 caracteres</span>'; return; }
+  if(p1.length < 6){ st.innerHTML = '<span class="err">La contraseña necesita al menos 6 caracteres</span>'; return; }
   if(p1 !== p2){ st.innerHTML = '<span class="err">✗ Las contraseñas no coinciden</span>'; return; }
   var btn = document.querySelector("#formReg button");
   btn.disabled = true; btn.textContent = "CREANDO CUENTA...";
-  Promise.all([
-    ZHFirebase.get("cuentas/"+u).catch(function(){ return null; }),
-    api("cuentas?usuario=eq."+encodeURIComponent(u)+"&limit=1").catch(function(){ return []; })
-  ]).then(function(r){
-    var existe = !!r[0] || (r[1] && r[1].length>0);
-    if(existe){ btn.disabled=false; btn.textContent="CREAR CUENTA ▸"; st.innerHTML='<span class="err">✗ Ese usuario ya existe</span>'; return; }
-    hashPassStrong(u,p1).then(function(hp){
-      ZHFirebase.set("cuentas/"+u, {usuario:u, email:em, password:hp, created_at:new Date().toISOString()}).then(function(){
-        btn.disabled=false; btn.textContent="CREAR CUENTA ▸";
-        localStorage.setItem("vh_usuario", u);
-        localStorage.setItem("vh_sesion", btoa(u+":"+Date.now()));
-        asegurarUserId(u);
-        fetch(SB+"/rest/v1/usuarios_ext",{method:"POST",headers:Object.assign({Prefer:"resolution=merge-duplicates,return=minimal"},H),
-          body:JSON.stringify({usuario_nombre:u, online:true, ultima_conexion:new Date().toISOString()})}).catch(function(){});
-        st.innerHTML = '<span class="ok">✓ CUENTA CREADA</span>';
-        setTimeout(function(){ window.location.href = "/"; }, 800);
-      }).catch(function(){ btn.disabled=false; btn.textContent="CREAR CUENTA ▸"; st.innerHTML='<span class="err">Error de red</span>'; });
-    });
-  });
+  authApi("registrar", {usuario:u, email:em, password:p1}).then(function(d){
+    if(d && d.ok && d.token){
+      guardarSesion(d);
+      asegurarUserId(d.usuario || u);
+      fetch(SB+"/rest/v1/usuarios_ext",{method:"POST",headers:Object.assign({Prefer:"resolution=merge-duplicates,return=minimal"},H),
+        body:JSON.stringify({usuario_nombre:(d.usuario||u), online:true, ultima_conexion:new Date().toISOString()})}).catch(function(){});
+      st.innerHTML = '<span class="ok">✓ CUENTA CREADA</span>';
+      setTimeout(function(){ window.location.href = siguienteDestino(); }, 800);
+    } else {
+      btn.disabled=false; btn.textContent="CREAR CUENTA ▸";
+      st.innerHTML='<span class="err">✗ '+esc((d&&d.error)||"No se pudo crear la cuenta")+'</span>';
+    }
+  }).catch(function(){ btn.disabled=false; btn.textContent="CREAR CUENTA ▸"; st.innerHTML='<span class="err">Error de red</span>'; });
 }
 
-// Si ya hay sesión válida, ir directo
-if(localStorage.getItem("vh_sesion")){
-  document.getElementById("info").textContent = "Ya tenés sesión iniciada. Redirigiendo...";
-  setTimeout(function(){ window.location.href = "/"; }, 600);
+// Si la sesión ya fue verificada por el servidor, ir directo.
+if(window.ZH_AUTH){
+  window.ZH_AUTH.ready.then(function(){
+    if(window.ZH_AUTH.verified){
+      document.getElementById("info").textContent = "Ya tenés sesión iniciada. Redirigiendo...";
+      setTimeout(function(){ window.location.href = siguienteDestino(); }, 600);
+    }
+  });
 }
 
 // Anti fuerza bruta: aplicar bloqueo pendiente al cargar
@@ -480,10 +435,20 @@ document.getElementById("recEmail").addEventListener("keydown", function(e){ if(
 
 // Entrar sin cuenta (invitado)
 function entrarInvitado(){
-  localStorage.setItem("vh_usuario","anon");
-  localStorage.setItem("vh_sesion", btoa("anon:"+Date.now()));
-  localStorage.setItem("vh_user_id", generarUserId());
-  window.location.href="/";
+  var ir = function(){
+    localStorage.setItem("vh_guest","1");
+    localStorage.removeItem("vh_token");
+    localStorage.removeItem("vh_sesion");
+    localStorage.removeItem("vh_rango");
+    localStorage.removeItem("vh_admin_pass");
+    localStorage.setItem("vh_usuario","anon");
+    localStorage.setItem("vh_user_id", generarUserId());
+    // El invitado no puede entrar a páginas privadas: siempre va al inicio.
+    window.location.href="/";
+  };
+  try{
+    fetch(AUTH_API+"?accion=logout",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}",credentials:"same-origin"}).then(ir,ir);
+  }catch(e){ ir(); }
 }
 
 // Abrir directo en "Crear cuenta" si viene ?tab=reg
@@ -511,5 +476,6 @@ setTimeout(function(){
 <script src="/errores.js" defer></script>
 <script src="/update_check.js" defer></script>
 <script src="/logger_zh.js?v=2026"></script>
+<script src="/zh_update.js?v=1" defer></script>
 </body>
 </html>

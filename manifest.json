@@ -1,0 +1,16 @@
+{
+  "name": "Asistente ZonaHack",
+  "short_name": "Asistente",
+  "version": "1.0.2",
+  "description": "Tu asistente personal de IA, corre en tu propio VPS",
+  "start_url": "/asistente.html",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#07090e",
+  "theme_color": "#2ee6a8",
+  "icons": [
+    { "src": "/icon_zh_192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon_zh_512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

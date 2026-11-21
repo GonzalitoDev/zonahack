@@ -1148,7 +1148,9 @@ var AI_CONOCIMIENTO = {
 "que es python":"Python es un lenguaje de programacion interpretado, de alto nivel y facil de aprender. Se usa en web, ciencia de datos, IA, automatizacion y mas. Sintaxis limpia y legible.\n\nEjemplo:\nprint('Hola Mundo')\nnombre = input('Tu nombre: ')\nprint(f'Hola {nombre}')\n\nPara empezar: instalalo desde python.org o usa los cursos de YouTube en esta pagina.",
 "como hacer un bucle for":"Un bucle FOR repite codigo varias veces.\n\nJavaScript:\nfor(var i=0; i<5; i++){\n  console.log('Vuelta '+i);\n}\n\nPython:\nfor i in range(5):\n  print('Vuelta', i)\n\nSi queres recorrer una lista:\nfrutas = ['manzana','pera','uva']\nfor fruta in frutas:\n  print(fruta)",
 "como crear una funcion":"Las funciones son bloques de codigo reutilizables.\n\nPython:\ndef saludar(nombre):\n  return 'Hola ' + nombre\n\nprint(saludar('Mundo'))\n\nJavaScript:\nfunction saludar(nombre){\n  return 'Hola ' + nombre;\n}\n\nconsole.log(saludar('Mundo'));\n\nTambien hay arrow functions en JS:\nconst saludar = (nombre) => 'Hola ' + nombre;",
-"que es html":"HTML (HyperText Markup Language) es el lenguaje de marcado para crear paginas web. NO es un lenguaje de programacion, es de estructura.\n\nEjemplo basico:\n<!DOCTYPE html>\n<html>\n<head><title>Mi Pagina</title></head>\n<body>\n  <h1>Hola Mundo</h1>\n  <p>Este es un parrafo.</p>\n<\/body>\n<\/html>\n\nLos elementos se arman con etiquetas: <h1>, <p>, <div>, <a>, <img>...\nCSS le da el estilo visual arriba de HTML.",
+"que es html":"HTML (HyperText Markup Language) es el lenguaje de marcado para crear paginas web. NO es un lenguaje de programacion, es de estructura.\n\nEjemplo basico:\n<!DOCTYPE html>\n<html>\n<head><title>Mi Pagina</title><link rel="stylesheet" href="/zh_update.css?v=1">
+<script src="/zh_auth.js?v=2"></script>
+</head>\n<body>\n  <h1>Hola Mundo</h1>\n  <p>Este es un parrafo.</p>\n<\/body>\n<\/html>\n\nLos elementos se arman con etiquetas: <h1>, <p>, <div>, <a>, <img>...\nCSS le da el estilo visual arriba de HTML.",
 "como centrar un div":"CSS: centrar un div horizontal y verticalmente.\n\nMetodo Flexbox (recomendado):\n.contenedor{\n  display: flex;\n  justify-content: center; /* horizontal */\n  align-items: center;     /* vertical */\n  height: 100vh;\n}\n\nMetodo Grid:\n.contenedor{\n  display: grid;\n  place-items: center;\n  height: 100vh;\n}\n\nCon margin auto (centrado horizontal):\n.centrado{\n  width: 300px;\n  margin: 0 auto;\n}",
 "que es una api":"API (Application Programming Interface) es una interfaz que permite que dos programas se comuniquen entre si.\n\nEjemplo: cuando usas fetch() en JavaScript para pedir datos de un servidor, estas usando una API.\n\nfetch('https://api.ejemplo.com/datos')\n  .then(r => r.json())\n  .then(datos => console.log(datos));\n\nUna API REST responde con JSON, tiene endpoints como:\n- GET /usuarios → lista usuarios\n- POST /usuarios → crea usuario\n- DELETE /usuarios/5 → borra usuario 5",
 "variables":"Las variables guardan datos en memoria.\n\nJavaScript:\nlet nombre = 'Juan';\nconst PI = 3.14;\nvar edad = 25; // viejo, evitar\n\nPython:\nnombre = 'Juan'\nPI = 3.14\nedad = 25\n\nTipos: string (texto), number (numeros), boolean (true/false), array/list, objeto/diccionario.",
@@ -1454,5 +1456,6 @@ renderContinuando();
 renderCursosGrid();
 saludoPersonalizado();
 </script>
+<script src="/zh_update.js?v=1" defer></script>
 </body>
 </html>

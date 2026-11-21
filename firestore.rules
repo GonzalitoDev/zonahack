@@ -1,0 +1,19 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ──────────────────────────────────────────────────────────
+    // Cuentas / contraseñas: SOLO accesibles desde el servidor
+    // (Admin SDK / service account). El navegador NO entra acá.
+    // El resto del sitio (chats, puntajes, marcadores, etc.) sigue
+    // como estaba mientras se migra a la API.
+    // ──────────────────────────────────────────────────────────
+    function esCuentas() {
+      return request.path.matches('.*/documents/cuentas/.*');
+    }
+
+    match /{document=**} {
+      allow read, write: if !esCuentas();
+    }
+  }
+}

@@ -137,6 +137,8 @@ body{background:var(--bg);color:var(--text);font-family:'Courier New',monospace;
   .hero .big{font-size:44px}
 }
 </style>
+<link rel="stylesheet" href="/zh_update.css?v=1">
+<script src="/zh_auth.js?v=2"></script>
 </head>
 <body>
 <div class="bg"><div class="orb orb1"></div><div class="orb orb2"></div></div>
@@ -169,7 +171,7 @@ body{background:var(--bg);color:var(--text);font-family:'Courier New',monospace;
       <div class="vip-ico">👑</div>
       <div class="vip-info">
         <div class="vip-nom">VIP ZonaHack</div>
-        <div class="vip-desc" id="vipDesc">Desbloquea contenido exclusivo, tema dorado, badge VIP y acceso a Zona +18</div>
+        <div class="vip-desc" id="vipDesc">Desbloquea contenido exclusivo, tema dorado, badge VIP, Zona +18, Player Pro, servidores prioritarios, monedas x2 e IA sin límite</div>
         <div class="vip-precio" id="vipPrecio">$500 ARS / 7 días</div>
       </div>
       <div class="vip-btns">
@@ -182,6 +184,10 @@ body{background:var(--bg);color:var(--text);font-family:'Courier New',monospace;
       <div class="beneficio"><span>🎨</span><b>Tema dorado</b> exclusivo</div>
       <div class="beneficio"><span>⭐</span><b>Badge VIP</b> en el perfil</div>
       <div class="beneficio"><span>🎬</span><b>Premium</b> de películas</div>
+      <div class="beneficio"><span>⚡</span><b>Player Pro</b>: velocidad, subtítulos, A-B loop y sleep timer</div>
+      <div class="beneficio"><span>🖥️</span><b>Servidores prioritarios</b> (directo y proxy HD)</div>
+      <div class="beneficio"><span>🪙</span><b>Monedas x2</b> en todas las recompensas</div>
+      <div class="beneficio"><span>🤖</span><b>Asistente IA</b> sin límite diario</div>
       <div class="beneficio"><span>🎧</span><b>Soporte</b> prioritario</div>
     </div>
   </div>
@@ -316,8 +322,8 @@ function cancelarVIP(){
   if(!esVIP){ return; }
   if(!confirm("❌ ¿Seguro que querés CANCELAR tu VIP?\n\nPerderás:\n• Acceso a Zona +18\n• Tema dorado\n• Categoría Premium\n• Badge VIP")) return;
   try{ localStorage.removeItem('vh_vip_gratis'); }catch(e){}
-  if(USER && USER!=='anon'){
-    fetch(API_URL+"/rest/v1/vip?usuario_nombre=eq."+encodeURIComponent(USER),{method:'PATCH',headers:{'apikey':API_KEY,'Authorization':'Bearer '+API_KEY,'Content-Type':'application/json'},body:JSON.stringify({activo:false})}).catch(function(){});
+  if(USER && USER!=='anon' && window.ZH_AUTH && window.ZH_AUTH.fetchAuth){
+    window.ZH_AUTH.fetchAuth("vip_quitar",{}).catch(function(){});
   }
   document.body.classList.remove('vip-mode');
   esVIP = false;
@@ -422,13 +428,13 @@ function canjearCodigo(){
   var btn = $('btnVip');
   if(btn){ btn.disabled = true; btn.textContent = '⏳ Verificando...'; }
   toast('🔍 Verificando código...','');
-  fetch(API_URL+"/rest/v1/vip_codigos?codigo=eq."+encodeURIComponent(c)+"&usado=eq.false&select=codigo,dias,id&limit=1",{headers:{'apikey':API_KEY,'Authorization':'Bearer '+API_KEY}})
-  .then(function(r){ return r.json(); }).then(function(d){
-    if(d && d.length>0){
-      var codigo = d[0];
-      var dias = codigo.dias || 7;
-      fetch(API_URL+"/rest/v1/vip_codigos?id=eq."+codigo.id,{method:'PATCH',headers:{'apikey':API_KEY,'Authorization':'Bearer '+API_KEY,'Content-Type':'application/json'},body:JSON.stringify({usado:true,usuario_uso:USER,usado_en:new Date().toISOString()})}).catch(function(){});
-      var hasta = new Date(Date.now() + dias*86400000).toISOString();
+  var pCanje = (window.ZH_AUTH && window.ZH_AUTH.fetchAuth)
+    ? window.ZH_AUTH.fetchAuth("vip_canjear",{codigo:c})
+    : Promise.reject(new Error("sin_sesion"));
+  pCanje.then(function(res){
+    if(res && res.ok && res.dias){
+      var dias = res.dias;
+      var hasta = res.hasta || new Date(Date.now() + dias*86400000).toISOString();
       localStorage.setItem('vh_vip_gratis', JSON.stringify({desde:new Date().toISOString(), hasta:hasta, origen:'codigo:'+c, dias:dias}));
       toast('✅ CÓDIGO VÁLIDO! VIP ACTIVADO por '+dias+' días','ok');
       $('codigoInput').value='';
@@ -602,5 +608,6 @@ if(window.ZHMonedas){
 </script>
 <script src="/errores.js" defer></script>
 <script src="/update_check.js" defer></script>
+<script src="/zh_update.js?v=1" defer></script>
 </body>
 </html>

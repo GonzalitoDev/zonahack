@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>🗳️ Elecciones ZonaHackistán 2026</title>
+<style>
+:root{--fondo:#0b0f1a;--panel:#121829;--borde:rgba(116,172,223,.22);--celeste:#74acdf;--sol:#f6b40e;--blanco:#f4f7fb;--tenue:#8a96ad;--rojo:#ff4d5e;--verde:#34d27b;--fuente:'Courier New',Courier,monospace;--titulo:Impact,'Arial Black',sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--fondo);color:var(--blanco);font-family:var(--fuente);min-height:100vh;padding:0 0 60px}
+a{color:var(--celeste)}
+.envoltura{max-width:980px;margin:0 auto;padding:0 16px}
+/* zócalo de noticias */
+.zocalo{background:var(--rojo);color:#fff;display:flex;align-items:center;overflow:hidden;font-size:13px;font-weight:bold;white-space:nowrap;position:sticky;top:0;z-index:20}
+.zocalo .tag{background:#000;padding:7px 12px;flex-shrink:0;letter-spacing:.08em}
+.zocalo .cinta{display:inline-block;padding-left:100%;animation:cinta 60s linear infinite}
+@keyframes cinta{to{transform:translateX(-100%)}}
+header{text-align:center;padding:26px 0 10px}
+.volver{display:inline-block;font-size:12px;margin-bottom:12px;text-decoration:none}
+h1{font-family:var(--titulo);font-size:clamp(30px,6.5vw,58px);letter-spacing:.02em;line-height:1;text-transform:uppercase;
+  background:linear-gradient(180deg,var(--celeste) 0 33%,var(--blanco) 33% 66%,var(--celeste) 66%);-webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 3px 0 rgba(0,0,0,.6))}
+.sol{font-size:34px;display:block;margin:6px 0;animation:gira 12s linear infinite}
+@keyframes gira{to{transform:rotate(360deg)}}
+.lema{color:var(--tenue);font-size:13px;margin-top:6px}
+nav{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin:18px 0}
+nav button{all:unset;cursor:pointer;padding:9px 14px;border:1px solid var(--borde);border-radius:20px;font-size:13px;color:var(--blanco);transition:background .15s,border-color .15s}
+nav button:hover,nav button:focus-visible{border-color:var(--celeste)}
+nav button.on{background:var(--celeste);color:#0b0f1a;border-color:var(--celeste);font-weight:bold}
+section{display:none}
+section.on{display:block;animation:entra .25s ease-out}
+@keyframes entra{from{opacity:0;transform:translateY(6px)}}
+h2{font-family:var(--titulo);font-size:26px;text-transform:uppercase;color:var(--sol);margin-bottom:6px;letter-spacing:.03em}
+.bajada{color:var(--tenue);font-size:13px;margin-bottom:16px;line-height:1.5}
+.btn{all:unset;cursor:pointer;display:inline-block;padding:10px 16px;border-radius:6px;background:var(--celeste);color:#0b0f1a;font-weight:bold;font-size:14px;text-align:center;transition:transform .1s,filter .15s}
+.btn:hover{filter:brightness(1.1)}.btn:active{transform:scale(.97)}
+.btn.sec{background:transparent;color:var(--blanco);border:1px solid var(--borde)}
+.btn.sol{background:var(--sol)}
+.btn:disabled{opacity:.4;cursor:default}
+/* candidatos */
+.grilla{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px}
+.cand{background:var(--panel);border:1px solid var(--borde);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:8px;position:relative;overflow:hidden}
+.cand::before{content:"";position:absolute;left:0;top:0;right:0;height:5px;background:var(--color)}
+.cand .cara{font-size:54px;line-height:1;text-align:center;filter:drop-shadow(0 4px 6px rgba(0,0,0,.4))}
+.cand .nom{font-family:var(--titulo);font-size:21px;text-transform:uppercase;letter-spacing:.02em;text-align:center}
+.cand .partido{font-size:12px;text-align:center;color:var(--color);font-weight:bold}
+.cand .lema-c{font-size:13px;text-align:center;font-style:italic;color:var(--blanco)}
+.cand ul{list-style:none;font-size:12px;color:var(--tenue);line-height:1.55}
+.cand li::before{content:"✓ ";color:var(--color)}
+.cand .esc{font-size:11px;color:var(--rojo);border-top:1px dashed var(--borde);padding-top:6px}
+.cand .acc{display:flex;gap:6px;margin-top:auto}
+.cand .acc .btn{flex:1;padding:8px;font-size:13px}
+/* debate */
+.debate{background:var(--panel);border:1px solid var(--borde);border-radius:10px;padding:16px}
+.moderador{display:flex;gap:10px;align-items:flex-start;margin-bottom:14px}
+.moderador .ico{font-size:34px}
+.pregunta{font-size:16px;line-height:1.5}
+.respuestas{display:flex;flex-direction:column;gap:8px}
+.resp{display:flex;gap:10px;align-items:flex-start;padding:10px;border-radius:8px;background:rgba(255,255,255,.03);border-left:4px solid var(--color);opacity:0;transform:translateX(-8px);transition:opacity .3s,transform .3s}
+.resp.ver{opacity:1;transform:none}
+.resp .c{font-size:28px;line-height:1}
+.resp .t{font-size:14px;line-height:1.5}
+.resp .t b{color:var(--color)}
+.resp .aplauso{all:unset;cursor:pointer;margin-left:auto;font-size:18px;padding:2px 6px;border-radius:6px}
+.resp .aplauso:hover{background:rgba(255,255,255,.08)}
+.medidor{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px;font-size:12px;color:var(--tenue)}
+.medidor span{padding:4px 8px;border:1px solid var(--borde);border-radius:12px}
+/* promesas */
+.promesa{background:linear-gradient(135deg,#1a2340,#121829);border:2px solid var(--sol);border-radius:12px;padding:22px;text-align:center;min-height:160px;display:flex;flex-direction:column;justify-content:center;gap:10px}
+.promesa .quien{font-size:13px;color:var(--sol)}
+.promesa .texto{font-family:var(--titulo);font-size:clamp(20px,3.6vw,30px);line-height:1.2;text-transform:uppercase}
+.promesa .letra{font-size:11px;color:var(--tenue)}
+.fila{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:12px}
+/* votación */
+.urna{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.boleta{all:unset;cursor:pointer;background:#f4f1e8;color:#1a1a1a;border-radius:6px;padding:12px;text-align:center;border:3px solid transparent;transition:transform .12s,border-color .12s;position:relative;box-shadow:0 3px 0 rgba(0,0,0,.35)}
+.boleta:hover,.boleta:focus-visible{transform:translateY(-3px) rotate(-1deg);border-color:var(--color)}
+.boleta .cara{font-size:40px}
+.boleta .nom{font-weight:bold;font-size:13px;margin-top:4px}
+.boleta .partido{font-size:10px;color:#555}
+.boleta.elegida{border-color:var(--color);transform:rotate(-2deg) scale(1.03)}
+.boleta.elegida::after{content:"✗";position:absolute;top:-6px;right:4px;font-size:44px;color:#c0392b;font-family:var(--titulo)}
+.resultados{margin-top:18px;display:flex;flex-direction:column;gap:8px}
+.barra-r{display:grid;grid-template-columns:150px 1fr 70px;gap:8px;align-items:center;font-size:13px}
+.barra-r .pista{height:22px;background:rgba(255,255,255,.05);border-radius:4px;overflow:hidden}
+.barra-r .lleno{height:100%;background:var(--color);width:0;transition:width .8s cubic-bezier(.2,.8,.2,1)}
+.barra-r .pct{text-align:right;color:var(--tenue)}
+.nota{font-size:12px;color:var(--tenue);margin-top:10px;line-height:1.5}
+/* noche electoral */
+.estudio{background:#06080f;border:1px solid var(--borde);border-radius:12px;overflow:hidden}
+.estudio .top{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:linear-gradient(90deg,#14203e,#0a1022);font-size:12px}
+.vivo{color:#fff;background:var(--rojo);padding:3px 8px;border-radius:3px;font-weight:bold;animation:vivo 1.4s infinite}
+@keyframes vivo{50%{opacity:.55}}
+.mesas{font-size:12px;color:var(--tenue)}
+.tablero{padding:14px;display:flex;flex-direction:column;gap:8px}
+.cronica{border-top:1px solid var(--borde);padding:12px 14px;max-height:220px;overflow:auto;font-size:13px;line-height:1.6}
+.cronica div{opacity:0;animation:aparece .4s forwards}
+.cronica .hora{color:var(--sol)}
+.cronica .alerta{color:var(--rojo);font-weight:bold}
+@keyframes aparece{to{opacity:1}}
+.ganador{display:none;text-align:center;padding:22px 14px;border-top:2px solid var(--sol);background:radial-gradient(circle at center,rgba(246,180,14,.14),transparent 70%)}
+.ganador.on{display:block}
+.ganador .cara{font-size:80px;animation:salta 1s ease-in-out infinite}
+@keyframes salta{50%{transform:translateY(-10px) rotate(4deg)}}
+.ganador h3{font-family:var(--titulo);font-size:clamp(24px,5vw,40px);text-transform:uppercase;color:var(--sol)}
+.discurso{font-size:15px;line-height:1.6;max-width:640px;margin:12px auto 0;font-style:italic}
+.decreto{margin:16px auto 0;max-width:560px;background:#f4f1e8;color:#222;border-radius:4px;padding:16px;text-align:left;font-size:13px;line-height:1.6;box-shadow:0 4px 0 rgba(0,0,0,.4);transform:rotate(-.6deg)}
+.decreto b{font-family:var(--titulo);font-size:16px;display:block;text-align:center;margin-bottom:6px;letter-spacing:.05em}
+#confeti{position:fixed;inset:0;pointer-events:none;z-index:30}
+@media (max-width:560px){.barra-r{grid-template-columns:96px 1fr 52px}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+<link rel="stylesheet" href="/zh_update.css?v=1">
+<script src="/zh_auth.js?v=2"></script>
+</head>
+<body>
+<div class="zocalo" aria-hidden="true"><span class="tag">ZHN ÚLTIMO MOMENTO</span><span class="cinta" id="cinta"></span></div>
+<div class="envoltura">
+<header>
+  <a class="volver" href="/zonadivertida.html">&larr; Zona divertida</a>
+  <span class="sol" aria-hidden="true">☀️</span>
+  <h1>Elecciones<br>ZonaHackistán 2026</h1>
+  <p class="lema">Seis candidatos. Cero propuestas serias. Tu voto puede cambiar nada.</p>
+</header>
+
+<nav role="tablist">
+  <button class="on" data-s="candidatos">🧑‍💼 Candidatos</button>
+  <button data-s="debate">🎤 Debate</button>
+  <button data-s="promesas">📢 Promesas</button>
+  <button data-s="votar">🗳️ Votar</button>
+  <button data-s="noche">📺 Noche electoral</button>
+</nav>
+
+<!-- CANDIDATOS -->
+<section id="candidatos" class="on">
+  <h2>Los candidatos</h2>
+  <p class="bajada">Todos los personajes son inventados. Cualquier parecido con la realidad es culpa de la realidad.</p>
+  <div class="grilla" id="grillaCand"></div>
+</section>
+
+<!-- DEBATE -->
+<section id="debate">
+  <h2>Gran debate presidencial</h2>
+  <p class="bajada">Preguntas serias, respuestas que no. Aplaudí 👏 la mejor respuesta de cada ronda.</p>
+  <div class="debate">
+    <div class="moderador"><span class="ico">🎙️</span><div><div style="font-size:12px;color:var(--tenue)">MODERADOR · Ronda <span id="ronda">1</span>/<span id="rondas">8</span></div><div class="pregunta" id="pregunta"></div></div></div>
+    <div class="respuestas" id="respuestas"></div>
+    <div class="fila"><button class="btn" id="bSigPregunta">Siguiente pregunta ▶</button></div>
+    <div class="medidor" id="medidor"></div>
+  </div>
+</section>
+
+<!-- PROMESAS -->
+<section id="promesas">
+  <h2>Generador de promesas de campaña</h2>
+  <p class="bajada">Promesas 100% cumplibles en ningún universo.</p>
+  <div class="promesa" id="promesa"><div class="quien"></div><div class="texto">Tocá el botón para escuchar una promesa</div><div class="letra"></div></div>
+  <div class="fila">
+    <button class="btn sol" id="bPromesa">📢 Nueva promesa</button>
+    <button class="btn sec" id="bCopiar">📋 Copiar</button>
+  </div>
+</section>
+
+<!-- VOTAR -->
+<section id="votar">
+  <h2>Cuarto oscuro</h2>
+  <p class="bajada" id="bajadaVoto">Elegí una boleta y metela en la urna. Un voto por persona (no como en mesa 404).</p>
+  <div class="urna" id="urna"></div>
+  <div class="fila"><button class="btn" id="bVotar" disabled>🗳️ Meter en la urna</button></div>
+  <div class="resultados" id="resultados"></div>
+  <p class="nota" id="notaVotos"></p>
+</section>
+
+<!-- NOCHE ELECTORAL -->
+<section id="noche">
+  <h2>Noche electoral</h2>
+  <p class="bajada">Escrutinio en vivo desde el búnker. Se toman como base los votos reales de ZonaHack, más los votantes de relleno de siempre.</p>
+  <div class="estudio">
+    <div class="top"><span class="vivo">● EN VIVO</span><span class="mesas" id="mesas">Mesas escrutadas: 0%</span></div>
+    <div class="tablero" id="tablero"></div>
+    <div class="cronica" id="cronica" aria-live="polite"></div>
+    <div class="ganador" id="ganador"></div>
+  </div>
+  <div class="fila"><button class="btn sol" id="bEscrutinio">▶ Empezar el escrutinio</button></div>
+</section>
+</div>
+<canvas id="confeti"></canvas>
+
+<script>
+(function(){
+"use strict";
+function $(id){ return document.getElementById(id); }
+function el(t, c, txt){ var e = document.createElement(t); if (c) e.className = c; if (txt != null) e.textContent = txt; return e; }
+function rnd(a, b){ return a + Math.floor(Math.random() * (b - a + 1)); }
+function elegir(a){ return a[Math.floor(Math.random() * a.length)]; }
+function mezclar(a){ a = a.slice(); for (var i = a.length - 1; i > 0; i--){ var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+function getLS(k, d){ try { var v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch(e){ return d; } }
+function setLS(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} }
+
+/* ═══════════ CANDIDATOS (todos inventados) ═══════════ */
+var CANDS = [
+  { id:"michi", cara:"🐈", nom:"Michi Pérez", partido:"Partido Siesta Nacional", color:"#a78bfa",
+    lema:"«Primero dormimos, después vemos.»",
+    promesas:["Siesta obligatoria de 3 horas", "Una caja de cartón por habitante", "Prohibido el lunes"],
+    escandalo:"Lo encontraron tirando un vaso de la mesa del Congreso. Dijo que fue sin querer.",
+    frases:["Miau. Y lo digo con todo respeto.", "Eso lo resolvemos después de la siesta.", "Mi plan económico es tirar cosas de la mesa hasta que alguien me dé de comer.", "*se va en medio de la respuesta a perseguir un punto rojo*", "Ronroneo, luego existo.", "Propongo que el Estado me rasque detrás de la oreja. Por el bien de todos."] },
+  { id:"rosa", cara:"👵📶", nom:"Doña Rosa del Wifi", partido:"Frente Wifi Libre", color:"#38bdf8",
+    lema:"«¿Probaste desenchufarlo y enchufarlo?»",
+    promesas:["Wifi gratis hasta en el colectivo", "Contraseña nacional: 12345678", "Reinicio de router cada domingo por decreto"],
+    escandalo:"Se descubrió que la contraseña de su propio wifi era «contraseña».",
+    frases:["Querido, eso se arregla reiniciando el país.", "Tengo cuatro barritas de señal y mucha experiencia.", "Mi nieto me explicó la economía y la entendí. Es como el router: se cuelga.", "Voy a bajar la inflación como bajo los megas: sin que nadie se dé cuenta.", "Si no me votan, les cambio la contraseña.", "Eso que preguntás está en la nube. Yo no subo a la nube, me da vértigo."] },
+  { id:"chori", cara:"🌭🦸", nom:"Capitán Choripán", partido:"Unión Parrillera", color:"#f97316",
+    lema:"«Ni de izquierda ni de derecha: a la parrilla.»",
+    promesas:["Asado obligatorio los domingos", "Feriado nacional si llueve", "Chimichurri en las canillas"],
+    escandalo:"Le encontraron una parrilla escondida en el despacho. Estaba prendida.",
+    frases:["La respuesta a todo es: con pan.", "Vamos a dar vuelta la economía como se da vuelta un vacío: una sola vez y con fe.", "¿Plan de salud? Morcilla para todos. Bueno, para el que quiera.", "Yo no prometo. Yo prendo el fuego.", "El déficit se tapa con papel de diario, como la carne.", "Traje chorizos para todos los periodistas. Eso no es soborno, es cultura."] },
+  { id:"rulo", cara:"🤖🍞", nom:"Ing. Rulo Tostadora", partido:"Movimiento Tostado", color:"#22c55e",
+    lema:"«Bip. Bip. Medialuna caliente.»",
+    promesas:["Todas las medialunas calientes por ley", "Ministerio de Enchufes", "Actualizar el país a la versión 2.0"],
+    escandalo:"En el último acto se tildó y hubo que darle un golpecito.",
+    frases:["PROCESANDO PREGUNTA... ERROR 418: SOY UNA TOSTADORA.", "Mi programa de gobierno tiene 3 niveles de tostado. Elijan.", "Bip. La corrupción se elimina reiniciando con el botón de atrás.", "No tengo ideología. Tengo resistencias eléctricas.", "Prometo no quemar nada. Salvo el pan del jueves.", "Si gano, todos los lunes se instalan actualizaciones a las 3 de la mañana."] },
+  { id:"chola", cara:"👵🍲", nom:"La Abuela Chola", partido:"Partido de los que Ya Comieron", color:"#ec4899",
+    lema:"«¿Comiste? Comé algo, estás flaquito.»",
+    promesas:["«¿Comiste?» como saludo oficial", "Prohibido salir sin campera", "Tupper de comida para cada ciudadano"],
+    escandalo:"Le dio milanesas a todo el comité de campaña. Nadie pudo trabajar después.",
+    frases:["Yo no vine a debatir, vine a que comas.", "¿La inflación? Hacé como yo: guardá las bolsitas.", "Abrigate, que el debate está fresco.", "Mi plan de seguridad es mirar por la ventana todo el día. Ya lo hago.", "Ese candidato está muy flaco para gobernar.", "Te mando un audio de 14 minutos con mi plan de gobierno."] },
+  { id:"lag", cara:"🧑‍💻🐢", nom:"Pepe Lag 404", partido:"Alianza Ping Alto", color:"#eab308",
+    lema:"«Ya va... ya va... ya va cargando.»",
+    promesas:["Internet lento para todos: sufrimos igual", "Pantalla de carga de 10 minutos en todo trámite", "Feriado cuando se cae el servidor"],
+    escandalo:"Llegó tarde a su propio lanzamiento de campaña. Dijo que tenía lag.",
+    frases:["Perdón, se me congeló la propuesta.", "Mi respuesta llega en... 3... 2... reconectando...", "Prometo transparencia: se me ven los píxeles.", "¿Me escuchan? ¿Hola? Creo que estoy muteado desde 2019.", "Mi plan económico está en buffering, pero viene bien.", "Error 404: propuesta no encontrada. Igual votame."] }
+];
+var porId = {}; CANDS.forEach(function(c){ porId[c.id] = c; });
+
+function pintarCandidatos(){
+  var g = $("grillaCand"); g.textContent = "";
+  CANDS.forEach(function(c){
+    var d = el("div", "cand"); d.style.setProperty("--color", c.color);
+    d.appendChild(el("div", "cara", c.cara));
+    d.appendChild(el("div", "nom", c.nom));
+    d.appendChild(el("div", "partido", c.partido));
+    d.appendChild(el("div", "lema-c", c.lema));
+    var ul = el("ul"); c.promesas.forEach(function(p){ ul.appendChild(el("li", "", p)); }); d.appendChild(ul);
+    d.appendChild(el("div", "esc", "🚨 Escándalo: " + c.escandalo));
+    var acc = el("div", "acc");
+    var b1 = el("button", "btn sec", "📢 Promesa"); b1.type = "button"; b1.addEventListener("click", function(){ irA("promesas"); nuevaPromesa(c); });
+    var b2 = el("button", "btn", "🗳️ Votar"); b2.type = "button"; b2.style.background = c.color; b2.addEventListener("click", function(){ irA("votar"); seleccionar(c.id); });
+    acc.appendChild(b1); acc.appendChild(b2); d.appendChild(acc);
+    g.appendChild(d);
+  });
+}
+
+/* ═══════════ ZÓCALO ═══════════ */
+var TITULARES = [
+  "Michi Pérez se durmió en la conferencia de prensa: sus asesores dicen que «estaba pensando»",
+  "Doña Rosa promete que el wifi del Congreso llegue hasta la cocina",
+  "Escándalo: el Capitán Choripán no invitó a nadie a su asado de campaña",
+  "La Tostadora tuvo que reiniciarse en vivo: «fue un problema de enchufe, no de ideas»",
+  "La Abuela Chola obligó a los periodistas a llevar campera",
+  "Pepe Lag 404 todavía no terminó de cargar su spot de campaña",
+  "Último momento: un perro intentó afiliarse a tres partidos",
+  "Encuesta exclusiva: el 110% de los encuestados no sabe qué es una encuesta",
+  "Se suspendió el debate porque nadie encontraba el control del aire acondicionado",
+  "La Junta Electoral confirma: las urnas son de cartón para que Michi no se queje"
+];
+$("cinta").textContent = mezclar(TITULARES).join("   ★   ");
+
+/* ═══════════ NAVEGACIÓN ═══════════ */
+function irA(s){
+  document.querySelectorAll("nav button").forEach(function(b){ b.classList.toggle("on", b.dataset.s === s); });
+  document.querySelectorAll("section").forEach(function(x){ x.classList.toggle("on", x.id === s); });
+  if (s === "debate" && !debateIniciado) siguientePregunta();
+  if (s === "votar") cargarResultados();
+  if (s === "noche") prepararNoche();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+document.querySelectorAll("nav button").forEach(function(b){ b.addEventListener("click", function(){ irA(b.dataset.s); }); });
+
+/* ═══════════ DEBATE ═══════════ */
+var PREGUNTAS = [
+  "¿Cómo piensa bajar la inflación?", "¿Cuál es su plan para la educación?", "¿Qué haría con el transporte público?",
+  "¿Cómo combatiría la inseguridad?", "¿Qué opina de los lunes?", "¿Qué hará con la deuda externa?",
+  "¿Cuál es su propuesta para los jubilados?", "¿Qué haría si se corta la luz en todo el país?",
+  "¿Cómo va a generar empleo?", "¿Qué le diría a quienes no lo van a votar?", "¿Cuál es su plan de salud?",
+  "¿Qué opina del aire acondicionado a 18 grados?"
+];
+var debateIniciado = false, ronda = 0, RONDAS = 8, ordenPreg = [], aplausos = getLS("zh_elec_aplausos", {});
+$("rondas").textContent = RONDAS;
+function siguientePregunta(){
+  debateIniciado = true;
+  if (!ordenPreg.length || ronda >= RONDAS){ ordenPreg = mezclar(PREGUNTAS).slice(0, RONDAS); ronda = 0; }
+  var q = ordenPreg[ronda++];
+  $("ronda").textContent = ronda; $("pregunta").textContent = q;
+  var cont = $("respuestas"); cont.textContent = "";
+  var participantes = mezclar(CANDS).slice(0, 4), aplaudido = false;
+  participantes.forEach(function(c, i){
+    var r = el("div", "resp"); r.style.setProperty("--color", c.color);
+    r.appendChild(el("span", "c", c.cara));
+    var t = el("div", "t"); var b = el("b", "", c.nom + ": "); t.appendChild(b); t.appendChild(document.createTextNode(elegir(c.frases))); r.appendChild(t);
+    var a = el("button", "aplauso", "👏"); a.type = "button"; a.setAttribute("aria-label", "Aplaudir a " + c.nom);
+    a.addEventListener("click", function(){
+      if (aplaudido) return; aplaudido = true;
+      aplausos[c.id] = (aplausos[c.id] || 0) + 1; setLS("zh_elec_aplausos", aplausos);
+      a.textContent = "👏👏👏"; r.style.background = "rgba(255,255,255,.08)"; pintarMedidor(); tonito(660);
+    });
+    r.appendChild(a); cont.appendChild(r);
+    setTimeout(function(){ r.classList.add("ver"); }, 250 + i * 600);
+  });
+  $("bSigPregunta").textContent = ronda >= RONDAS ? "🔁 Otro debate" : "Siguiente pregunta ▶";
+}
+function pintarMedidor(){
+  var m = $("medidor"); m.textContent = "";
+  var lista = CANDS.slice().sort(function(a, b){ return (aplausos[b.id] || 0) - (aplausos[a.id] || 0); });
+  if (!lista.some(function(c){ return aplausos[c.id]; })){ m.appendChild(el("span", "", "Aplausómetro: todavía nadie aplaudió")); return; }
+  m.appendChild(el("span", "", "Aplausómetro:"));
+  lista.forEach(function(c){ if (aplausos[c.id]) m.appendChild(el("span", "", c.cara + " " + aplausos[c.id])); });
+}
+$("bSigPregunta").addEventListener("click", siguientePregunta);
+pintarMedidor();
+
+/* ═══════════ PROMESAS ═══════════ */
+var P_VERBO = ["Vamos a reemplazar", "Prometo convertir", "En los primeros 100 días vamos a transformar", "Por decreto, vamos a cambiar", "Juro que voy a privatizar", "Vamos a nacionalizar"];
+var P_OBJ = ["el Congreso", "los semáforos", "el colectivo 60", "la Casa Rosada", "el Obelisco", "los lunes", "el dólar", "el mate", "las colas del banco", "la AFIP", "el subte", "las rotondas", "las palomas de la plaza", "el wifi del vecino"];
+var P_EN = ["en un pelotero gigante", "en una parrilla libre", "en un cyber con internet de 1999", "en una siesta colectiva", "en un tobogán acuático", "en un kiosco 24 horas", "en un escape room", "en una feria de fernet", "en un karaoke", "en un torneo de truco", "en una pista de patinaje", "en un museo del lag"];
+var P_EXTRA = ["financiado con las monedas que se caen entre los almohadones", "con fondos del FMI (Fondo de Milanesas Internacional)", "sin aumentar ningún impuesto, salvo el del alfajor", "y si no se cumple, devolvemos el voto", "antes de que termine el mundial", "pagado en cuotas sin interés hasta 2099", "con la ayuda de un grupo de expertos que encontramos en la plaza"];
+var P_LETRA = ["*Sujeto a disponibilidad de stock.", "*Válido solo los años bisiestos.", "*No válido en este universo.", "*La promesa puede variar según el humor del candidato.", "*Consulte bases y condiciones en una oficina que no existe.", "*Prometido no significa cumplido."];
+var ultimaPromesa = "";
+function nuevaPromesa(c){
+  c = c || elegir(CANDS);
+  var texto = elegir(P_VERBO) + " " + elegir(P_OBJ) + " " + elegir(P_EN) + ", " + elegir(P_EXTRA) + ".";
+  var p = $("promesa"); p.style.borderColor = c.color;
+  p.querySelector(".quien").textContent = c.cara + " " + c.nom + " · " + c.partido;
+  p.querySelector(".texto").textContent = "«" + texto + "»";
+  p.querySelector(".letra").textContent = elegir(P_LETRA);
+  ultimaPromesa = c.nom + " promete: «" + texto + "» 🗳️ Elecciones ZonaHackistán 2026";
+  tonito(520);
+}
+$("bPromesa").addEventListener("click", function(){ nuevaPromesa(); });
+$("bCopiar").addEventListener("click", function(){
+  if (!ultimaPromesa) nuevaPromesa();
+  var b = this;
+  (navigator.clipboard ? navigator.clipboard.writeText(ultimaPromesa) : Promise.reject()).then(function(){ b.textContent = "✅ Copiada"; }, function(){ b.textContent = "No se pudo copiar"; });
+  setTimeout(function(){ b.textContent = "📋 Copiar"; }, 1500);
+});
+
+/* ═══════════ VOTACIÓN ═══════════ */
+var API = "/api/elecciones";
+var miId = getLS("zh_elec_id", null); if (!miId){ miId = Math.random().toString(36).slice(2) + Date.now().toString(36); setLS("zh_elec_id", miId); }
+var miVoto = getLS("zh_elec_voto", null), seleccion = null, conteo = null, servidorOk = false;
+function pintarUrna(){
+  var u = $("urna"); u.textContent = "";
+  CANDS.forEach(function(c){
+    var b = el("button", "boleta" + ((miVoto || seleccion) === c.id ? " elegida" : "")); b.type = "button"; b.style.setProperty("--color", c.color);
+    b.appendChild(el("div", "cara", c.cara)); b.appendChild(el("div", "nom", c.nom)); b.appendChild(el("div", "partido", c.partido));
+    b.disabled = !!miVoto; if (miVoto) b.style.cursor = "default";
+    b.addEventListener("click", function(){ seleccionar(c.id); });
+    u.appendChild(b);
+  });
+  $("bVotar").disabled = !!miVoto || !seleccion;
+  $("bVotar").textContent = miVoto ? "✅ Ya votaste a " + porId[miVoto].nom : "🗳️ Meter en la urna";
+  $("bajadaVoto").textContent = miVoto ? "Tu voto ya está en la urna. Mirá cómo viene la cosa:" : "Elegí una boleta y metela en la urna. Un voto por persona (no como en mesa 404).";
+}
+function seleccionar(id){ if (miVoto) return; seleccion = id; pintarUrna(); tonito(440); }
+$("bVotar").addEventListener("click", function(){
+  if (!seleccion || miVoto) return;
+  var id = seleccion, b = this; b.disabled = true; b.textContent = "Contando...";
+  fetch(API, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ candidato: id, votante: miId }) })
+    .then(function(r){ return r.ok ? r.json() : Promise.reject(r.status); })
+    .then(function(d){ servidorOk = true; conteo = d.votos || null; })
+    .catch(function(){ servidorOk = false; })
+    .then(function(){
+      miVoto = id; setLS("zh_elec_voto", id);
+      if (!servidorOk){ var loc = getLS("zh_elec_local", {}); loc[id] = (loc[id] || 0) + 1; setLS("zh_elec_local", loc); }
+      pintarUrna(); pintarResultados(); confeti(porId[id].color); tonito(880);
+    });
+});
+function cargarResultados(){
+  pintarUrna();
+  fetch(API).then(function(r){ return r.ok ? r.json() : Promise.reject(); })
+    .then(function(d){ servidorOk = true; conteo = d.votos || {}; })
+    .catch(function(){ servidorOk = false; conteo = null; })
+    .then(pintarResultados);
+}
+function votosActuales(){
+  if (servidorOk && conteo) return conteo;
+  return getLS("zh_elec_local", {});
+}
+function pintarResultados(){
+  var v = votosActuales(), total = 0;
+  CANDS.forEach(function(c){ total += v[c.id] || 0; });
+  var r = $("resultados"); r.textContent = "";
+  if (!miVoto){ $("notaVotos").textContent = "Los resultados se ven después de votar. Así es la democracia de ZonaHackistán."; return; }
+  CANDS.slice().sort(function(a, b){ return (v[b.id] || 0) - (v[a.id] || 0); }).forEach(function(c){
+    var n = v[c.id] || 0, pct = total ? Math.round(n * 1000 / total) / 10 : 0;
+    var f = el("div", "barra-r"); f.style.setProperty("--color", c.color);
+    f.appendChild(el("span", "", c.cara + " " + c.nom));
+    var pista = el("div", "pista"), lleno = el("div", "lleno"); pista.appendChild(lleno); f.appendChild(pista);
+    f.appendChild(el("span", "pct", pct + "% (" + n + ")"));
+    r.appendChild(f); setTimeout(function(){ lleno.style.width = pct + "%"; }, 50);
+  });
+  $("notaVotos").textContent = servidorOk
+    ? "Votos reales de todos los que entraron a este ZonaHack: " + total + ". Recuento auditado por la Abuela Chola."
+    : "Sin conexión con el servidor de votos: solo se cuenta tu voto en este navegador.";
+}
+
+/* ═══════════ NOCHE ELECTORAL ═══════════ */
+var EVENTOS = [
+  "Se cayó el sistema de cómputos. Doña Rosa lo reinició desenchufando el router. Volvió.",
+  "Un perro intentó votar tres veces. Lo descubrieron porque firmó con la pata.",
+  "Mesa 404: no encontrada.",
+  "Michi Pérez se durmió arriba de una urna. Nadie se anima a moverlo.",
+  "El Capitán Choripán prendió una parrilla en la puerta de la escuela. Se triplicó la participación.",
+  "La Tostadora contó los votos en binario. Hubo que traducirlos.",
+  "La Abuela Chola le preguntó a cada fiscal si había comido. El recuento se demoró 40 minutos.",
+  "Pepe Lag 404 sigue esperando que le carguen los resultados de 2019.",
+  "Un fiscal encontró un voto por «Ninguno, quiero dormir». Se contó para Michi.",
+  "Se cortó la luz en el búnker. Alguien gritó «¡FERIADO!».",
+  "Apareció una urna llena de figuritas del mundial. Se declaró nula, pero se cambiaron las repetidas.",
+  "El conteo se suspendió 5 minutos porque pasó el heladero.",
+  "Un votante confundió la urna con un buzón y mandó una carta a su tía.",
+  "En la mesa 23 encontraron un voto con dibujito. Los fiscales le pusieron un 10."
+];
+var nocheCorriendo = false;
+function prepararNoche(){
+  if (nocheCorriendo) return;
+  fetch(API).then(function(r){ return r.ok ? r.json() : Promise.reject(); })
+    .then(function(d){ servidorOk = true; conteo = d.votos || {}; }).catch(function(){}).then(function(){ pintarTablero(cerosTablero(), 0); });
+}
+function cerosTablero(){ var o = {}; CANDS.forEach(function(c){ o[c.id] = 0; }); return o; }
+function pintarTablero(v, avance){
+  var t = $("tablero"), total = 0; t.textContent = "";
+  CANDS.forEach(function(c){ total += v[c.id]; });
+  CANDS.slice().sort(function(a, b){ return v[b.id] - v[a.id]; }).forEach(function(c){
+    var pct = total ? v[c.id] * 100 / total : 0;
+    var f = el("div", "barra-r"); f.style.setProperty("--color", c.color);
+    f.appendChild(el("span", "", c.cara + " " + c.nom));
+    var pista = el("div", "pista"), lleno = el("div", "lleno"); lleno.style.width = pct.toFixed(1) + "%"; pista.appendChild(lleno); f.appendChild(pista);
+    f.appendChild(el("span", "pct", pct.toFixed(1) + "%"));
+    t.appendChild(f);
+  });
+  $("mesas").textContent = "Mesas escrutadas: " + Math.round(avance) + "%";
+}
+function linea(texto, clase){
+  var c = $("cronica"), d = el("div", clase || "");
+  var h = el("span", "hora", (function(){ var x = new Date(); return ("0" + x.getHours()).slice(-2) + ":" + ("0" + x.getMinutes()).slice(-2); })() + " · ");
+  d.appendChild(h); d.appendChild(document.createTextNode(texto)); c.appendChild(d); c.scrollTop = c.scrollHeight;
+}
+$("bEscrutinio").addEventListener("click", function(){
+  if (nocheCorriendo) return;
+  nocheCorriendo = true; var b = this; b.disabled = true; b.textContent = "Escrutando...";
+  $("cronica").textContent = ""; $("ganador").classList.remove("on");
+  // peso de cada candidato: votos reales + relleno al azar (para que haya suspenso)
+  var reales = votosActuales(), pesos = {};
+  CANDS.forEach(function(c){ pesos[c.id] = 1 + Math.random() * 1.6 + (reales[c.id] || 0) * 1.5 + (miVoto === c.id ? 0.4 : 0); });
+  var v = cerosTablero(), avance = 0, eventos = mezclar(EVENTOS), paso = 0;
+  linea("Abren los centros de cómputo. Los fiscales ya pidieron facturas.");
+  var timer = setInterval(function(){
+    paso++;
+    var lote = rnd(800, 2400);
+    CANDS.forEach(function(c){ v[c.id] += Math.round(lote * pesos[c.id] * (0.6 + Math.random() * 0.8)); });
+    // remontadas dramáticas
+    if (paso === 6 || paso === 11){ var tapado = elegir(CANDS); pesos[tapado.id] *= 1.7; linea("¡Llegan los votos del interior! " + tapado.cara + " " + tapado.nom + " empieza a remontar.", "alerta"); tonito(330); }
+    avance = Math.min(100, avance + rnd(5, 11));
+    pintarTablero(v, avance);
+    if (paso % 2 === 0 && eventos.length) linea(eventos.shift(), paso % 4 === 0 ? "alerta" : "");
+    if (avance >= 100){
+      clearInterval(timer);
+      setTimeout(function(){ proclamar(v); nocheCorriendo = false; b.disabled = false; b.textContent = "🔁 Repetir la elección (ilegal pero divertido)"; }, 900);
+    }
+  }, 1100);
+});
+var DISCURSOS = {
+  michi: "«Gracias, pueblo. Ahora, si me disculpan, me voy a dormir hasta 2030. Dejen comida en la puerta de la Casa Rosada.»",
+  rosa: "«Ganamos, querido. Primer anuncio: la contraseña del wifi nacional va a estar pegada en la heladera de cada casa.»",
+  chori: "«¡Compatriotas! Esta noche no hay discurso: hay asado. Traigan pan, que de la carne me encargo yo.»",
+  rulo: "«BIP. VICTORIA CONFIRMADA. INICIANDO GOBIERNO... 12%... 13%... NO APAGUEN EL PAÍS DURANTE LA ACTUALIZACIÓN.»",
+  chola: "«Gracias, chicos. Ahora todos a casa que se enfría la comida. Y abríguense, que refresca.»",
+  lag: "«Gracias por... (se congela)... confiar en... (reconectando)... ...¿ganamos? ¿Me escuchan? Hola.»"
+};
+var DECRETOS = {
+  michi: ["La siesta pasa a ser jornada laboral.", "Queda prohibido mover a un gato que duerme sobre papeles oficiales.", "El himno se reemplaza por un ronroneo de 4 minutos."],
+  rosa: ["Todo trámite comienza con «¿probaste reiniciarlo?».", "Se crea el Ministerio de Contraseñas Olvidadas.", "Las barritas de señal pasan a ser moneda de curso legal."],
+  chori: ["El domingo pasa a llamarse «Asadingo».", "Cada plaza tendrá una parrilla comunitaria.", "Se declara al chimichurri patrimonio de la humanidad."],
+  rulo: ["Todas las medialunas se servirán a 74 °C exactos.", "El país se reinicia todos los lunes a las 3 AM.", "Se reconoce a los electrodomésticos como ciudadanos."],
+  chola: ["Nadie sale de su casa sin campera hasta nuevo aviso.", "Todo ciudadano recibirá un tupper que deberá devolver lavado.", "Se prohíbe decir «no tengo hambre»."],
+  lag: ["Toda página del Estado tendrá una barra de carga obligatoria.", "Se declara feriado cada vez que se caiga el servidor.", "El ping oficial de la Nación se fija en 999 ms."]
+};
+function proclamar(v){
+  var orden = CANDS.slice().sort(function(a, b){ return v[b.id] - v[a.id]; }), g = orden[0], seg = orden[1];
+  var total = 0; CANDS.forEach(function(c){ total += v[c.id]; });
+  var pct = (v[g.id] * 100 / total).toFixed(1);
+  linea("🏁 CON EL 100% ESCRUTADO: " + g.nom + " es el nuevo presidente de ZonaHackistán con el " + pct + "%.", "alerta");
+  linea(seg.cara + " " + seg.nom + " no reconoce la derrota y pide recontar los votos «pero con ganas».");
+  var gan = $("ganador"); gan.textContent = "";
+  gan.style.borderTopColor = g.color;
+  gan.appendChild(el("div", "cara", g.cara));
+  gan.appendChild(el("h3", "", g.nom + " presidente"));
+  gan.appendChild(el("div", "", g.partido + " · " + pct + "% de los votos" + (miVoto ? (miVoto === g.id ? " · ¡ganó tu candidato!" : " · tu candidato perdió, como corresponde") : "")));
+  gan.appendChild(el("p", "discurso", DISCURSOS[g.id]));
+  var dec = el("div", "decreto"); dec.appendChild(el("b", "", "DECRETO PRESIDENCIAL N.º " + rnd(1, 999)));
+  DECRETOS[g.id].forEach(function(t, i){ dec.appendChild(el("div", "", "Art. " + (i + 1) + ".º — " + t)); });
+  dec.appendChild(el("div", "", "Art. " + (DECRETOS[g.id].length + 1) + ".º — Comuníquese, publíquese y olvídese."));
+  gan.appendChild(dec);
+  gan.classList.add("on");
+  confeti(g.color); fanfarria();
+  gan.scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+/* ═══════════ SONIDO Y CONFETI ═══════════ */
+var actx = null;
+function tonito(f){
+  try { actx = actx || new (window.AudioContext || window.webkitAudioContext)(); var o = actx.createOscillator(), g = actx.createGain();
+    o.type = "triangle"; o.frequency.value = f; g.gain.value = .05; g.gain.exponentialRampToValueAtTime(.0001, actx.currentTime + .25);
+    o.connect(g); g.connect(actx.destination); o.start(); o.stop(actx.currentTime + .26); } catch(e){}
+}
+function fanfarria(){ [523, 659, 784, 1046].forEach(function(f, i){ setTimeout(function(){ tonito(f); }, i * 160); }); }
+var cv = $("confeti"), cx = cv.getContext("2d"), piezas = [], animando = false;
+function confeti(color){
+  if (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  cv.width = innerWidth; cv.height = innerHeight;
+  var cols = [color, "#74acdf", "#ffffff", "#f6b40e"];
+  for (var i = 0; i < 160; i++) piezas.push({ x: Math.random() * cv.width, y: -20 - Math.random() * cv.height * .5, vx: (Math.random() - .5) * 3, vy: 2 + Math.random() * 3, r: Math.random() * 6.28, vr: (Math.random() - .5) * .2, c: elegir(cols), w: 6 + Math.random() * 6 });
+  if (!animando){ animando = true; requestAnimationFrame(caer); }
+}
+function caer(){
+  cx.clearRect(0, 0, cv.width, cv.height);
+  piezas = piezas.filter(function(p){ return p.y < cv.height + 20; });
+  piezas.forEach(function(p){ p.x += p.vx; p.y += p.vy; p.r += p.vr; cx.save(); cx.translate(p.x, p.y); cx.rotate(p.r); cx.fillStyle = p.c; cx.fillRect(-p.w/2, -p.w/4, p.w, p.w/2); cx.restore(); });
+  if (piezas.length) requestAnimationFrame(caer); else { animando = false; cx.clearRect(0, 0, cv.width, cv.height); }
+}
+
+/* ═══════════ INICIO ═══════════ */
+pintarCandidatos(); pintarUrna();
+var hash = location.hash.replace("#", ""); if (["candidatos", "debate", "promesas", "votar", "noche"].indexOf(hash) >= 0) irA(hash);
+})();
+</script>
+<script src="/zh_update.js?v=1" defer></script>
+</body>
+</html>

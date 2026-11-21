@@ -1,0 +1,49 @@
+{
+  "name": "asistente-zonahack",
+  "productName": "Asistente ZonaHack",
+  "version": "1.0.3",
+  "description": "Asistente personal de IA Â· corre en tu VPS",
+  "main": "main.js",
+  "author": "ZonaHack",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win",
+    "publish": "electron-builder --win -p always"
+  },
+  "dependencies": {
+    "electron-updater": "^6.3.9"
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.zonahack.asistente",
+    "productName": "Asistente ZonaHack",
+    "directories": {
+      "output": "dist"
+    },
+    "publish": {
+      "provider": "generic",
+      "url": "https://5fae371f-39e5-4c16-9b04-658e273c947c.clouding.host"
+    },
+    "files": [
+      "main.js"
+    ],
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "icon": "build/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Asistente ZonaHack",
+      "artifactName": "Asistente-Setup-${version}.${ext}"
+    }
+  }
+}

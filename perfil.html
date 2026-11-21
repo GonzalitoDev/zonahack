@@ -216,6 +216,8 @@ body::after{content:'';position:fixed;top:0;left:0;right:0;bottom:0;pointer-even
 .back-btn{color:var(--khaki);text-decoration:none;font-size:.6em;padding:4px 10px;border:1px solid var(--glass-border);border-radius:3px;display:inline-block;margin-bottom:8px;transition:var(--transition)}
 .back-btn:hover{border-color:rgba(194,178,128,.2)}
 </style>
+<link rel="stylesheet" href="/zh_update.css?v=1">
+<script src="/zh_auth.js?v=2"></script>
 </head>
 <body>
 
@@ -309,8 +311,9 @@ body::after{content:'';position:fixed;top:0;left:0;right:0;bottom:0;pointer-even
 var SUPABASE = "https://xfwolaurpeofysnymqle.supabase.co/rest/v1";
 var APIKEY = "sb_publishable_3VvBUD5Bdu3Uaq59fJ99MQ_XDCtujUU";
 var DBH = {"apikey":APIKEY,"Authorization":"Bearer "+APIKEY,"Content-Type":"application/json"};
-var USER = localStorage.getItem('vh_usuario')||'anon';
+var USER = 'anon';
 var UID = localStorage.getItem('vh_user_id')||'0';
+function authAdmin(accion,data){ return window.ZH_AUTH.fetchAuth(accion,data); }
 var DB_NAME = "ZonaHackProfile";
 
 /* ─── INDEXEDDB ──────────────────────── */
@@ -435,9 +438,9 @@ function mostrar(id){
 function cargarPerfil(){
   // Cargar datos de Supabase
   Promise.all([
-    fetch(SUPABASE+"/progreso?select=id",{headers:DBH}).then(function(r){return r.json();}).catch(function(){return[];}),
-    fetch(SUPABASE+"/favoritos?select=id",{headers:DBH}).then(function(r){return r.json();}).catch(function(){return[];}),
-    fetch(SUPABASE+"/logs?select=id",{headers:DBH}).then(function(r){return r.json();}).catch(function(){return[];}),
+    fetch(SUPABASE+"/progreso?select=id&usuario_nombre=eq."+encodeURIComponent(USER),{headers:DBH}).then(function(r){return r.json();}).catch(function(){return[];}),
+    fetch(SUPABASE+"/favoritos?select=id&usuario_nombre=eq."+encodeURIComponent(USER),{headers:DBH}).then(function(r){return r.json();}).catch(function(){return[];}),
+    fetch(SUPABASE+"/logs?select=id&usuario_nombre=eq."+encodeURIComponent(USER),{headers:DBH}).then(function(r){return r.json();}).catch(function(){return[];}),
     fetch(SUPABASE+"/rangos?select=rango,color&usuario_nombre=eq."+encodeURIComponent(USER)+"&limit=1",{headers:DBH}).then(function(r){return r.json();}).catch(function(){return[];})
   ]).then(function(d){
     var vistos = (d[0]||[]).length || 0;
@@ -593,7 +596,7 @@ function renderLogros(){
 function renderActividad(){
   var el = document.getElementById('actividadTimeline');
   if(!el) return;
-  fetch(SUPABASE+"/logs?select=accion,detalle,created_at&order=created_at.desc&limit=20",{headers:DBH})
+  fetch(SUPABASE+"/logs?select=accion,detalle,created_at&usuario_nombre=eq."+encodeURIComponent(USER)+"&order=created_at.desc&limit=20",{headers:DBH})
   .then(function(r){return r.json();}).then(function(d){
     if(!d||!d.length){el.innerHTML='<div style="font-size:.6em;color:var(--text2);padding:20px;text-align:center">Sin actividad reciente</div>';return;}
     var dias = {};
@@ -617,7 +620,7 @@ function renderActividad(){
 function renderFavoritos(){
   var el = document.getElementById('favGrid');
   if(!el) return;
-  fetch(SUPABASE+"/favoritos?select=video_id,titulo&order=created_at.desc&limit=20",{headers:DBH})
+  fetch(SUPABASE+"/favoritos?select=video_id,titulo&usuario_nombre=eq."+encodeURIComponent(USER)+"&order=created_at.desc&limit=20",{headers:DBH})
   .then(function(r){return r.json();}).then(function(d){
     if(!d||!d.length){el.innerHTML='<span style="font-size:.6em;color:var(--text2);grid-column:1/-1;text-align:center;padding:20px">Sin favoritos</span>';return;}
     el.innerHTML = d.map(function(f){return '<div class="fav-item" title="'+esc(f.titulo||'')+'" onclick="window.location.href=\'/?q='+encodeURIComponent(f.titulo||'')+'\'"></div>';}).join('');
@@ -688,9 +691,9 @@ function cargarUserId(){
 
 function exportarDatos(){
   Promise.all([
-    fetch(SUPABASE+"/progreso?order=created_at.desc&limit=100",{headers:DBH}).then(function(r){return r.json();}).catch(function(){return[];}),
-    fetch(SUPABASE+"/favoritos?order=created_at.desc&limit=100",{headers:DBH}).then(function(r){return r.json();}).catch(function(){return[];}),
-    fetch(SUPABASE+"/logs?order=created_at.desc&limit=100",{headers:DBH}).then(function(r){return r.json();}).catch(function(){return[];})
+    fetch(SUPABASE+"/progreso?usuario_nombre=eq."+encodeURIComponent(USER)+"&order=created_at.desc&limit=100",{headers:DBH}).then(function(r){return r.json();}).catch(function(){return[];}),
+    fetch(SUPABASE+"/favoritos?usuario_nombre=eq."+encodeURIComponent(USER)+"&order=created_at.desc&limit=100",{headers:DBH}).then(function(r){return r.json();}).catch(function(){return[];}),
+    fetch(SUPABASE+"/logs?usuario_nombre=eq."+encodeURIComponent(USER)+"&order=created_at.desc&limit=100",{headers:DBH}).then(function(r){return r.json();}).catch(function(){return[];})
   ]).then(function(d){
     var data = {exportado:new Date().toISOString(),usuario:USER,progreso:d[0]||[],favoritos:d[1]||[],logs:d[2]||[]};
     var blob = new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
@@ -700,19 +703,22 @@ function exportarDatos(){
 
 function logout(){
   if(confirm('Cerrar sesion?')){
+    if(window.ZH_AUTH && window.ZH_AUTH.logout){ window.ZH_AUTH.logout('/login.html'); return; }
     localStorage.removeItem('vh_usuario');
     localStorage.removeItem('vh_user_id');
-    window.location.href='/';
+    localStorage.removeItem('vh_token');
+    localStorage.removeItem('vh_sesion');
+    window.location.href='/login.html';
   }
 }
 
 /* ─── GESTION ────────────────────────── */
 function gestSetRango(nom,rango,color){
   if(!nom) return;
-  fetch(SUPABASE+"/rangos?usuario_nombre=eq."+encodeURIComponent(nom)+"&limit=1",{headers:DBH}).then(function(r){return r.json();}).then(function(d){
-    if(d&&d.length>0) return fetch(SUPABASE+"/rangos?usuario_nombre=eq."+encodeURIComponent(nom),{method:"PATCH",headers:DBH,body:JSON.stringify({rango:rango,color:color})});
-    else return fetch(SUPABASE+"/rangos",{method:"POST",headers:Object.assign({},DBH,{"Prefer":"return=minimal"}),body:JSON.stringify({usuario_nombre:nom,rango:rango,color:color})});
-  }).then(function(){cargarGestion();}).catch(function(){});
+  var p = rango==='baneado'
+    ? authAdmin("admin_ban",{usuario:nom})
+    : authAdmin("admin_set_rango",{usuario:nom,rango:rango,color:color});
+  p.then(function(){cargarGestion();}).catch(function(){});
 }
 function gestRango(rango,color){
   var nom = document.getElementById('inputGestNom').value.trim();
@@ -722,13 +728,11 @@ function gestRango(rango,color){
 }
 function gestBan(nom){
   if(!nom||!confirm("Banear a "+nom+"?\n\nSu VIP se le QUITARÁ automáticamente.")) return;
-  fetch(SUPABASE+"/baneados",{method:"POST",headers:Object.assign({},DBH,{"Prefer":"return=minimal"}),body:JSON.stringify({usuario_nombre:nom,usuario_id:nom,tipo:"ban",motivo:"Baneado desde perfil",admin_nombre:USER,activo:true})}).then(function(){
-    gestSetRango(nom,"baneado","#e74c3c");
-    // Quitar VIP automáticamente
-    fetch(SUPABASE+"/vip?usuario_nombre=eq."+encodeURIComponent(nom),{method:"PATCH",headers:DBH,body:JSON.stringify({activo:false})}).catch(function(){});
+  authAdmin("admin_ban",{usuario:nom}).then(function(d){
+    if(!d || !d.ok){ alert("⛔ No se pudo banear (¿sesión de admin verificada?)"); return; }
     alert("🚫 "+nom+" fue baneado y su VIP fue QUITADO.\nSolo un admin puede volver a dárselo.");
     cargarGestion();
-  }).catch(function(){});
+  }).catch(function(){ alert("⛔ Error de conexión"); });
 }
 function cargarGestion(){
   var div = document.getElementById('gestionUsers');
@@ -860,12 +864,26 @@ function cargarCondecoraciones(s){
   g.innerHTML=h;
 }
 
-// Iniciar
-cargarPerfil();
+// Iniciar: la cuenta se verifica contra el servidor antes de mostrar nada.
+function iniciarPerfil(){
+  var A=window.ZH_AUTH;
+  if(!A){ location.replace('/login.html?next=/perfil.html'); return; }
+  A.ready.then(function(){
+    if(A.offline){ A.avisoOffline("Necesitás conexión para entrar a tu perfil."); return; }
+    if(!A.verified){ location.replace(A.urlLogin('/perfil.html')); return; }
+    USER=A.usuario;
+    UID=localStorage.getItem('vh_user_id')||'0';
+    document.querySelectorAll('[data-zh-user]').forEach(function(el){ el.textContent=USER; });
+    cargarPerfil();
+    if(A.admin){ var gs=document.getElementById('gestionSection'); if(gs) gs.style.display=''; }
+  });
+}
+iniciarPerfil();
 if('serviceWorker'in navigator){navigator.serviceWorker.register('sw.js').catch(function(){});}
 </script>
 <script src="/militar.js" defer></script>
 <script src="/errores.js" defer></script>
 <script src="/update_check.js" defer></script>
+<script src="/zh_update.js?v=1" defer></script>
 </body>
 </html>

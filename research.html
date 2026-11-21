@@ -75,6 +75,8 @@ iframe{position:absolute;inset:0;width:100%;height:100%;border:none;background:#
 .footerr{position:fixed;bottom:6px;left:0;right:0;text-align:center;font-size:.52em;color:var(--muted);letter-spacing:1px;z-index:5;pointer-events:none}
 .toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%);background:#10141b;border:1px solid var(--accent);color:var(--accent);padding:10px 18px;border-radius:12px;font-size:.68em;z-index:999;box-shadow:0 8px 30px rgba(0,0,0,.6);display:none;max-width:90vw;text-align:center}
 </style>
+<link rel="stylesheet" href="/zh_update.css?v=1">
+<script src="/zh_auth.js?v=2"></script>
 </head>
 <body>
 
@@ -355,16 +357,21 @@ function rangoModal(){
   });
 }
 function setUser(){
-  var u=$("mdlUserSet").value.trim();
-  try{ localStorage.setItem("vh_usuario",u); }catch(e){}
+  // La identidad NO se puede cambiar a mano: sale de la sesión verificada.
+  toast("🔒 Tu usuario se toma de la sesión iniciada.");
   window._zhRangoCache=null;
   rangoLoad();
-  toast("👤 Usuario guardado: "+(u||"(ninguno)"));
 }
 
 /* ─── PANEL DEL JEFE (otorgar accesos) ─── */
 var JEFE_ADMIN=["owner","admin","root","super_admin","developer","fundador"];
-function jefeDesbloqueado(){ try{ return localStorage.getItem("zh_jefe")==="1"; }catch(e){ return false; } }
+function jefeDesbloqueado(){
+  try{ return !!(window.ZH_AUTH && window.ZH_AUTH.verified && window.ZH_AUTH.admin); }catch(e){ return false; }
+}
+function authAdmin(accion,data){
+  if(window.ZH_AUTH && window.ZH_AUTH.fetchAuth) return window.ZH_AUTH.fetchAuth(accion,data);
+  return Promise.reject(new Error("sin_sesion"));
+}
 function rangoColorJefe(r){
   return {vip:"#f1c40f",premium:"#9b59b6",moderator:"#00e5ff",admin:"#ff4d4d",user:"#6d7f93"}[r]||"#6d7f93";
 }
@@ -378,14 +385,16 @@ function abrirPanelJefe(){
   jefeCargarEstado();
 }
 function jefeCargarEstado(){
-  var u=zhUsuario();
-  zhObtenerRango(function(r){
+  var A=window.ZH_AUTH;
+  if(!A || !A.ready){ var e=$("jefEstado"); if(e)e.textContent="Comprobando identidad..."; setTimeout(jefeCargarEstado,300); return; }
+  A.ready.then(function(){
+    var u=A.verified?A.usuario:"";
+    var r=A.verified?A.rango:"user";
     var est=$("jefEstado");
     if(!est)return;
-    var esAdmin=JEFE_ADMIN.indexOf(r)>=0;
-    if(esAdmin){ try{localStorage.setItem("zh_jefe","1");}catch(e){} }
-    var des=jefeDesbloqueado();
-    est.innerHTML='<b>'+(u||"sin sesión")+'</b> · rango <b style="color:'+rangoColorJefe(r)+'">'+r.toUpperCase()+'</b>'+(esAdmin?' <span style="color:#00ff41">· JEFE</span>':'');
+    var esAdmin=jefeDesbloqueado();
+    var des=esAdmin;
+    est.innerHTML='<b>'+(u||"sin sesión")+'</b> · rango <b style="color:'+rangoColorJefe(r)+'">'+String(r).toUpperCase()+'</b>'+(esAdmin?' <span style="color:#00ff41">· JEFE</span>':'');
     var b=$("jefBody");
     if(!b)return;
     if(des){
@@ -417,18 +426,8 @@ function jefeCargarEstado(){
   });
 }
 function jefeEntrar(){
-  var c=$("jefClave").value.trim();
-  if(!c){ msg('Escribí la clave'); return; }
-  fetch(API+"/anuncios?select=mensaje&tipo=eq.config&activo=eq.false&titulo=eq.config_jefe&limit=1",{headers:H})
-  .then(function(r){return r.json();}).then(function(d){
-    if(d&&d[0]&&d[0].mensaje===c){
-      try{localStorage.setItem("zh_jefe","1");}catch(e){}
-      toast("👑 Modo jefe activado");
-      jefeCargarEstado();
-    }else{
-      msg('<span style="color:#ff4d4d">Clave incorrecta</span>');
-    }
-  }).catch(function(){ msg('Error de conexión'); });
+  // Ya no existe clave compartida: el acceso se valida con la sesión real.
+  location.href="/login.html?next="+encodeURIComponent("/research.html");
 }
 function jefeOtorgar(){
   var u=($("jefUser")||{}).value.trim();
@@ -436,22 +435,18 @@ function jefeOtorgar(){
   if(!u){ msg('Escribí un usuario'); return; }
   if(r==="user"){ jefeSacar(); return; }
   msg('Aplicando...');
-  fetch(API+"/rangos?on_conflict=usuario_nombre",{method:"POST",
-    headers:Object.assign({},H,{Prefer:"resolution=merge-duplicates,return=minimal"}),
-    body:JSON.stringify({usuario_nombre:u,rango:r,color:rangoColorJefe(r)})
-  }).then(function(res){
-    if(res.ok||res.status===201){ msg('<span style="color:#00ff41">👑 '+esc(u)+' ahora es '+r.toUpperCase()+'. Ya puede entrar a los sectores 🔒.</span>'); }
-    else msg('<span style="color:#ff4d4d">Error ('+res.status+')</span>');
+  authAdmin("admin_set_rango",{usuario:u,rango:r,color:rangoColorJefe(r)}).then(function(d){
+    if(d && d.ok){ msg('<span style="color:#00ff41">👑 '+esc(u)+' ahora es '+esc(r.toUpperCase())+'. Ya puede entrar a los sectores 🔒.</span>'); }
+    else msg('<span style="color:#ff4d4d">Error: se requiere sesión de administrador</span>');
   }).catch(function(){ msg('<span style="color:#ff4d4d">Error de conexión</span>'); });
 }
 function jefeSacar(){
   var u=($("jefUser")||{}).value.trim();
   if(!u){ msg('Escribí un usuario'); return; }
   msg('Aplicando...');
-  fetch(API+"/rangos?usuario_nombre=eq."+encodeURIComponent(u),{method:"DELETE",headers:H})
-  .then(function(res){
-    if(res.ok||res.status===204){ msg('<span style="color:#f1c40f">🔻 Acceso quitado a '+esc(u)+'.</span>'); }
-    else msg('<span style="color:#ff4d4d">Error ('+res.status+')</span>');
+  authAdmin("admin_quitar_rango",{usuario:u}).then(function(d){
+    if(d && d.ok){ msg('<span style="color:#f1c40f">🔻 Acceso quitado a '+esc(u)+'.</span>'); }
+    else msg('<span style="color:#ff4d4d">Error: se requiere sesión de administrador</span>');
   }).catch(function(){ msg('<span style="color:#ff4d4d">Error de conexión</span>'); });
 }
 function msg(t){ var m=$("jefMsg"); if(m)m.innerHTML=t; }
@@ -1143,5 +1138,6 @@ setInterval(enviarPresencia, 90000);
 cargarConfig();
 conectarConfig();
 </script>
+<script src="/zh_update.js?v=1" defer></script>
 </body>
 </html>

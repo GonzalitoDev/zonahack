@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<title>MinaHack — ZonaHack</title>
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/icon_96.png" type="image/png">
+<meta name="theme-color" content="#00ff41">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--g:#00ff41;--g2:#00c2d1;--gold:#f1c40f;--red:#ff4d6d;--bg:#07090e;--card:#0d1219;--line:rgba(0,255,65,.16);--rock:#5a3d24;--rock2:#2b1b0e;--txt:#d7e2ef;--mut:#7f91a5}
+body{background:radial-gradient(circle at 15% 0%,rgba(0,255,65,.07),transparent 40%),radial-gradient(circle at 85% 100%,rgba(241,196,15,.06),transparent 45%),var(--bg);color:var(--txt);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;overscroll-behavior:none}
+.wrap{max-width:980px;margin:0 auto;padding:12px 12px 34px}
+.hdr{display:flex;align-items:center;gap:10px;padding-bottom:10px;border-bottom:1px solid var(--line)}
+.hdr .logo{font-size:1.6em;filter:drop-shadow(0 0 10px rgba(0,255,65,.4))}
+.hdr h1{font-size:1em;letter-spacing:2px;font-family:'Courier New',monospace;color:var(--g);text-shadow:0 0 12px rgba(0,255,65,.45)}
+.hdr span{display:block;font-size:.54em;color:var(--mut);letter-spacing:1px;font-weight:400}
+.hdr .back{margin-left:auto;color:var(--g);text-decoration:none;font-size:.68em;border:1px solid rgba(0,255,65,.25);padding:6px 10px;border-radius:8px;white-space:nowrap}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0}
+.stat{background:linear-gradient(180deg,rgba(0,255,65,.055),rgba(13,18,25,.9));border:1px solid var(--line);border-radius:12px;padding:9px 10px}
+.stat .l{font-size:.5em;letter-spacing:1px;text-transform:uppercase;color:var(--mut)}
+.stat .v{font-size:1.05em;font-weight:800;color:var(--g);margin-top:3px;font-family:'Courier New',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stat.gold .v{color:var(--gold)}
+.stat.cyan .v{color:var(--g2)}
+.grid{display:grid;grid-template-columns:1.02fr .98fr;gap:12px;align-items:start}
+@media(max-width:820px){.grid{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}}
+.mine{position:relative;border:1px solid var(--line);border-radius:18px;padding:14px;background:radial-gradient(circle at 50% 35%,var(--rock),var(--rock2) 72%);overflow:hidden;transition:background .5s;min-height:430px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.mine::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(45deg,rgba(0,0,0,.12) 0 2px,transparent 2px 12px);opacity:.5;pointer-events:none}
+.mine::after{content:'';position:absolute;left:0;right:0;top:0;height:18px;background:linear-gradient(180deg,rgba(0,0,0,.55),transparent);pointer-events:none}
+.layerTag{position:absolute;top:10px;left:12px;font-size:.56em;letter-spacing:1px;color:rgba(255,255,255,.75);background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.12);padding:4px 10px;border-radius:20px;z-index:3}
+.depthTag{position:absolute;top:10px;right:12px;font-size:.56em;letter-spacing:1px;color:var(--gold);background:rgba(0,0,0,.35);border:1px solid rgba(241,196,15,.25);padding:4px 10px;border-radius:20px;z-index:3}
+.mineBtn{position:relative;z-index:2;width:min(62vw,230px);aspect-ratio:1;border-radius:50%;border:2px solid rgba(0,255,65,.35);background:radial-gradient(circle at 38% 30%,rgba(255,255,255,.18),rgba(0,0,0,.35) 45%,rgba(0,0,0,.72));box-shadow:0 18px 50px rgba(0,0,0,.55),inset 0 0 34px rgba(0,255,65,.14),0 0 0 8px rgba(0,0,0,.18);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-family:'Courier New',monospace;color:#fff;transition:transform .07s,box-shadow .2s;touch-action:manipulation;user-select:none}
+.mineBtn:hover{box-shadow:0 20px 60px rgba(0,0,0,.6),inset 0 0 44px rgba(0,255,65,.2),0 0 0 8px rgba(0,255,65,.07)}
+.mineBtn:active{transform:scale(.94)}
+.mineBtn .ico{font-size:3.1em;filter:drop-shadow(0 0 16px rgba(0,0,0,.6));line-height:1}
+.mineBtn .lbl{font-size:1em;letter-spacing:4px;font-weight:900;color:var(--g);text-shadow:0 0 14px rgba(0,255,65,.6)}
+.mineBtn .sub{font-size:.52em;color:rgba(255,255,255,.55);letter-spacing:1px}
+.mineBtn.hit{animation:hit .18s ease}
+@keyframes hit{0%{transform:scale(.93)}60%{transform:scale(1.03)}100%{transform:scale(1)}}
+.mine.shake{animation:mshake .22s}
+@keyframes mshake{0%,100%{transform:translate(0,0)}25%{transform:translate(-5px,3px)}50%{transform:translate(4px,-4px)}75%{transform:translate(-3px,-2px)}}
+.comboWrap{position:relative;z-index:2;width:min(78%,300px);margin-top:16px}
+.comboTop{display:flex;justify-content:space-between;font-size:.56em;color:rgba(255,255,255,.7);letter-spacing:1px;margin-bottom:4px}
+.comboTop b{color:var(--gold)}
+.comboBar{height:7px;border-radius:6px;background:rgba(0,0,0,.42);border:1px solid rgba(255,255,255,.1);overflow:hidden}
+.comboBar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--g),var(--gold));transition:width .12s}
+.fx{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:4}
+.float{position:absolute;font-family:'Courier New',monospace;font-weight:900;font-size:1em;color:var(--g);text-shadow:0 0 12px rgba(0,255,65,.7);animation:up .9s ease-out forwards;white-space:nowrap}
+.float.crit{color:var(--gold);font-size:1.35em;text-shadow:0 0 16px rgba(241,196,15,.9)}
+@keyframes up{0%{transform:translate(-50%,0) scale(.8);opacity:0}15%{opacity:1}100%{transform:translate(-50%,-90px) scale(1.08);opacity:0}}
+.spark{position:absolute;width:6px;height:6px;border-radius:2px;background:var(--gold);animation:spark .7s ease-out forwards}
+@keyframes spark{0%{transform:translate(0,0) rotate(0);opacity:1}100%{transform:translate(var(--dx),var(--dy)) rotate(220deg);opacity:0}}
+.shop{border:1px solid var(--line);border-radius:18px;background:rgba(13,18,25,.9);padding:12px}
+.shop h2{font-size:.7em;letter-spacing:2px;color:var(--g);text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.shop h2 small{margin-left:auto;font-size:.7em;color:var(--mut);letter-spacing:0;font-weight:400;text-transform:none}
+.up{display:flex;align-items:center;gap:9px;border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:9px;margin-bottom:7px;background:rgba(255,255,255,.015);transition:.15s}
+.up:hover{border-color:rgba(0,255,65,.22);background:rgba(0,255,65,.035)}
+.up.max{border-color:rgba(241,196,15,.3)}
+.up .uico{font-size:1.5em;width:38px;height:38px;display:flex;align-items:center;justify-content:center;border-radius:10px;background:rgba(0,255,65,.06);border:1px solid rgba(0,255,65,.12);flex-shrink:0}
+.up .uinfo{flex:1;min-width:0}
+.up .uname{font-size:.72em;font-weight:700;color:#eaf2fb;display:flex;gap:6px;align-items:center}
+.up .ulvl{font-size:.75em;color:var(--gold);border:1px solid rgba(241,196,15,.25);border-radius:8px;padding:0 5px}
+.up .udesc{font-size:.58em;color:var(--mut);margin-top:2px}
+.up .ueff{font-size:.55em;color:rgba(0,255,65,.65);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ubtn{border:1px solid rgba(0,255,65,.35);background:linear-gradient(135deg,rgba(0,255,65,.16),rgba(0,194,209,.12));color:var(--g);border-radius:10px;padding:8px 10px;font-family:'Courier New',monospace;font-size:.6em;font-weight:900;letter-spacing:.5px;cursor:pointer;min-width:88px;line-height:1.3;transition:.15s}
+.ubtn:hover:not(:disabled){background:rgba(0,255,65,.22);box-shadow:0 0 16px rgba(0,255,65,.18)}
+.ubtn:disabled{opacity:.4;cursor:not-allowed;filter:grayscale(.5)}
+.ubtn small{display:block;font-weight:400;font-size:.85em;color:rgba(255,255,255,.65)}
+.ubtn.maxed{color:var(--gold);border-color:rgba(241,196,15,.4)}
+.tools{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.tool{flex:1;border:1px solid rgba(255,255,255,.1);background:#0a0f15;color:var(--mut);border-radius:10px;padding:9px;font-size:.6em;font-family:inherit;letter-spacing:1px;cursor:pointer;min-width:110px}
+.tool:hover{color:var(--g);border-color:rgba(0,255,65,.3)}
+.foot{text-align:center;font-size:.54em;color:#5c6b7c;letter-spacing:1px;margin-top:14px}
+.toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%) translateY(140%);background:#0b1310;border:1px solid rgba(0,255,65,.4);color:var(--g);padding:10px 18px;border-radius:12px;font-size:.66em;z-index:60;transition:transform .25s;max-width:90vw;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast.red{border-color:rgba(255,77,109,.5);color:var(--red)}
+.toast.gold{border-color:rgba(241,196,15,.5);color:var(--gold)}
+@media(max-width:480px){.mine{min-height:390px}.mineBtn{width:min(70vw,215px)}.stat .v{font-size:.9em}.up .ueff{display:none}}
+</style>
+<link rel="stylesheet" href="/zh_update.css?v=1">
+</head>
+<body>
+<div class="wrap">
+  <header class="hdr">
+    <div class="logo">⛏️</div>
+    <div>
+      <h1>MINAHACK</h1>
+      <span>miná con un botón · mejorá tu equipo</span>
+    </div>
+    <a class="back" href="/juegos.html">&larr; Juegos</a>
+  </header>
+
+  <div class="stats">
+    <div class="stat gold"><div class="l">Minerales</div><div class="v" id="ores">0</div></div>
+    <div class="stat"><div class="l">Por click</div><div class="v" id="perClick">1</div></div>
+    <div class="stat cyan"><div class="l">Por segundo</div><div class="v" id="perSec">0</div></div>
+    <div class="stat"><div class="l">Profundidad</div><div class="v" id="depth">1</div></div>
+  </div>
+
+  <div class="grid">
+    <section class="mine" id="mine">
+      <div class="layerTag" id="layerTag">🪨 Tierra</div>
+      <div class="depthTag" id="depthTag">NIVEL 1</div>
+      <button class="mineBtn" id="mineBtn" aria-label="Minar">
+        <span class="ico" id="oreIco">🪨</span>
+        <span class="lbl">MINAR</span>
+        <span class="sub">click o barra espaciadora</span>
+      </button>
+      <div class="comboWrap">
+        <div class="comboTop"><span>COMBO</span><b id="comboTxt">x1.00</b></div>
+        <div class="comboBar"><i id="comboBar"></i></div>
+      </div>
+      <div class="fx" id="fx"></div>
+    </section>
+
+    <section class="shop">
+      <h2>⛏️ Mejoras <small id="shopHint">comprá para minar más rápido</small></h2>
+      <div id="shopList"></div>
+      <div class="tools">
+        <button class="tool" id="btnSound">🔊 Sonido</button>
+        <button class="tool" id="btnReset">🗑 Reiniciar</button>
+      </div>
+    </section>
+  </div>
+
+  <div class="foot">ZONAHACK · el progreso se guarda en tu dispositivo</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  'use strict';
+  var KEY='zh_mina_save_v1';
+  var $=function(id){return document.getElementById(id);};
+  var mineEl=$('mine'),fx=$('fx'),btn=$('mineBtn'),toastEl=$('toast');
+
+  var LAYERS=[
+    {n:'Tierra',ico:'🪨',c1:'#5a3d24',c2:'#241608'},
+    {n:'Carbón',ico:'⚫',c1:'#3b3b3b',c2:'#111111'},
+    {n:'Hierro',ico:'🔩',c1:'#717b85',c2:'#242c33'},
+    {n:'Oro',ico:'🪙',c1:'#a9831f',c2:'#3b2a00'},
+    {n:'Diamante',ico:'💎',c1:'#0a8f9c',c2:'#022a30'},
+    {n:'ZonaHack',ico:'🟢',c1:'#0a7a2c',c2:'#02220c'}
+  ];
+
+  var SHOP=[
+    {id:'pick',ico:'⛏️',name:'Pico reforzado',desc:'+1 mineral por click',base:12,mult:1.15},
+    {id:'drill',ico:'🔧',name:'Taladro',desc:'+0.6 mineral por segundo',base:40,mult:1.17},
+    {id:'crit',ico:'🎯',name:'Precisión',desc:'+2% de golpe crítico',base:140,mult:1.26},
+    {id:'luck',ico:'🍀',name:'Suerte',desc:'+0.5x al daño crítico',base:240,mult:1.30},
+    {id:'foreman',ico:'👷',name:'Capataz',desc:'+25% a la producción automática',base:460,mult:1.34},
+    {id:'magnet',ico:'🧲',name:'Imán de mineral',desc:'+6% a toda la producción',base:800,mult:1.38}
+  ];
+
+  var S={
+    ores:0,total:0,depth:1,best:1,combo:0,comboT:0,ts:Date.now(),
+    up:{pick:0,drill:0,crit:0,luck:0,foreman:0,magnet:0},
+    muted:false
+  };
+  var lastClick=0,lastToastT=0,hiddenAt=0,lastSave=0;
+
+  function clamp(v,a,b){return v<a?a:(v>b?b:v);}
+  function fmt(n){
+    n=Number(n)||0;
+    if(n<1000) return (Math.floor(n*10)/10).toString().replace(/\.0$/,'');
+    var u=['K','M','B','T','Qa','Qi'],i=-1;
+    while(n>=1000&&i<u.length-1){n/=1000;i++;}
+    var s=n>=100?n.toFixed(0):n>=10?n.toFixed(1):n.toFixed(2);
+    return s.replace(/\.0+$/,'')+u[i];
+  }
+  function layerFor(d){ return LAYERS[Math.min(LAYERS.length-1,Math.floor((d-1)/3))]; }
+
+  function getStats(){
+    var dm=1+(S.depth-1)*0.3;
+    var all=1+S.up.magnet*0.06;
+    var click=(1+S.up.pick)*dm*all;
+    var crit=Math.min(0.75,0.05+S.up.crit*0.02);
+    var critMult=3+S.up.luck*0.5;
+    var auto=S.up.drill*0.6*dm*(1+S.up.foreman*0.25)*all;
+    return {click:click,crit:crit,critMult:critMult,auto:auto,all:all,dm:dm};
+  }
+
+  function cost(u){ return Math.ceil(u.base*Math.pow(u.mult,S.up[u.id])); }
+  function effectNow(u,st){
+    if(u.id==='pick') return '+'+st.click.toFixed(st.click<10?1:0)+' por click';
+    if(u.id==='drill') return '+'+(S.up.drill*0.6*(1+(S.depth-1)*0.3)*(1+S.up.foreman*0.25)*(1+S.up.magnet*0.06)).toFixed(1)+'/seg';
+    if(u.id==='crit') return (st.crit*100).toFixed(0)+'% crítico';
+    if(u.id==='luck') return st.critMult.toFixed(1)+'x crítico';
+    if(u.id==='foreman') return '+'+(S.up.foreman*25)+'% auto';
+    return '+'+(S.up.magnet*6)+'% total';
+  }
+
+  function beep(freq,dur,type){
+    if(S.muted) return;
+    try{
+      window._ac=window._ac||new (window.AudioContext||window.webkitAudioContext)();
+      var ac=window._ac;
+      if(ac.state==='suspended') ac.resume();
+      var o=ac.createOscillator(),g=ac.createGain();
+      o.type=type||'square';o.frequency.value=freq;
+      g.gain.value=0.03;o.connect(g);g.connect(ac.destination);
+      o.start();g.gain.exponentialRampToValueAtTime(0.0001,ac.currentTime+dur);
+      o.stop(ac.currentTime+dur+0.02);
+    }catch(e){}
+  }
+
+  function toast(msg,cls,ms){
+    toastEl.textContent=msg;
+    toastEl.className='toast show '+(cls||'');
+    clearTimeout(lastToastT);
+    lastToastT=setTimeout(function(){toastEl.className='toast '+(cls||'');},ms||2200);
+  }
+
+  function fxText(txt,crit){
+    var d=document.createElement('div');
+    d.className='float'+(crit?' crit':'');
+    d.textContent=txt;
+    d.style.left=(18+Math.random()*64)+'%';
+    d.style.top=(44+Math.random()*18)+'%';
+    fx.appendChild(d);
+    setTimeout(function(){d.remove();},900);
+    var n=crit?9:5;
+    for(var i=0;i<n;i++){
+      var s=document.createElement('div');
+      s.className='spark';
+      s.style.left=(44+Math.random()*12)+'%';
+      s.style.top=(48+Math.random()*10)+'%';
+      s.style.setProperty('--dx',(Math.random()*180-90)+'px');
+      s.style.setProperty('--dy',(-40-Math.random()*110)+'px');
+      s.style.background=crit?'#f1c40f':'#00ff41';
+      fx.appendChild(s);
+      (function(el){setTimeout(function(){el.remove();},750);})(s);
+    }
+  }
+
+  function updateDepth(){
+    var d=1+Math.floor(S.total/150);
+    if(d!==S.depth){
+      S.depth=d;
+      if(d>S.best){ S.best=d; toast('⛏️ Nueva profundidad: '+d+' · '+layerFor(d).n,'gold',2600); }
+    }
+  }
+
+  function mine(){
+    var st=getStats();
+    var now=performance.now();
+    if(now-lastClick<680){ S.combo=Math.min(30,S.combo+1); } else { S.combo=0; }
+    lastClick=now; S.comboT=1.6;
+    var comboMult=1+S.combo*0.04;
+    var gain=st.click*comboMult;
+    var crit=Math.random()<st.crit;
+    if(crit) gain*=st.critMult;
+    gain=Math.max(1,Math.round(gain));
+    S.ores+=gain; S.total+=gain;
+    updateDepth();
+    fxText('+'+fmt(gain),crit);
+    btn.classList.remove('hit');void btn.offsetWidth;btn.classList.add('hit');
+    if(crit){ mineEl.classList.remove('shake');void mineEl.offsetWidth;mineEl.classList.add('shake'); }
+    beep(crit?980:(430+Math.min(S.combo,20)*18),crit?0.13:0.05,crit?'sine':'square');
+    updateUI();
+    if(Date.now()-lastSave>1500){ save(); lastSave=Date.now(); }
+  }
+
+  function buy(id){
+    var u=null;
+    for(var i=0;i<SHOP.length;i++){ if(SHOP[i].id===id){u=SHOP[i];break;} }
+    if(!u) return;
+    var c=cost(u);
+    if(S.ores<c){ toast('Te faltan '+fmt(c-S.ores)+' minerales','red'); beep(150,.12,'sawtooth'); return; }
+    S.ores-=c;
+    S.up[id]++;
+    beep(720,.08,'square');
+    setTimeout(function(){beep(940,.08,'square');},70);
+    toast(u.name+' mejorado a nivel '+S.up[id],'',1400);
+    updateUI();
+    save();
+  }
+
+  function renderShop(){
+    var h='';
+    for(var i=0;i<SHOP.length;i++){
+      var u=SHOP[i];
+      h+='<div class="up" id="up-'+u.id+'">'
+        +'<div class="uico">'+u.ico+'</div>'
+        +'<div class="uinfo"><div class="uname">'+u.name+' <span class="ulvl" id="lvl-'+u.id+'">Nv.0</span></div>'
+        +'<div class="udesc">'+u.desc+'</div>'
+        +'<div class="ueff" id="eff-'+u.id+'"></div></div>'
+        +'<button class="ubtn" id="buy-'+u.id+'">MEJORAR<small id="cost-'+u.id+'">0</small></button>'
+        +'</div>';
+    }
+    $('shopList').innerHTML=h;
+    for(var j=0;j<SHOP.length;j++){
+      (function(id){
+        $('buy-'+id).addEventListener('click',function(){buy(id);});
+      })(SHOP[j].id);
+    }
+  }
+
+  function updateUI(){
+    var st=getStats();
+    $('ores').textContent=fmt(S.ores);
+    $('perClick').textContent=fmt(st.click);
+    $('perSec').textContent=fmt(st.auto);
+    $('depth').textContent=S.depth;
+    var L=layerFor(S.depth);
+    $('layerTag').textContent=L.ico+' '+L.n;
+    $('oreIco').textContent=L.ico;
+    $('depthTag').textContent='NIVEL '+S.depth;
+    mineEl.style.setProperty('--rock',L.c1);
+    mineEl.style.setProperty('--rock2',L.c2);
+    var cm=1+Math.min(S.combo,30)*0.04;
+    $('comboTxt').textContent='x'+cm.toFixed(2);
+    $('comboBar').style.width=clamp((S.combo/30)*100,0,100)+'%';
+    for(var i=0;i<SHOP.length;i++){
+      var u=SHOP[i],c=cost(u),lvl=S.up[u.id];
+      var b=$('buy-'+u.id),lb=$('lvl-'+u.id),cb=$('cost-'+u.id),ef=$('eff-'+u.id);
+      if(!b) continue;
+      lb.textContent='Nv.'+lvl;
+      cb.textContent=fmt(c)+' 🪨';
+      ef.textContent='Ahora: '+effectNow(u,st);
+      b.disabled=S.ores<c;
+      b.classList.toggle('maxed',lvl>=50);
+      $('up-'+u.id).classList.toggle('max',lvl>=50);
+    }
+  }
+
+  function tick(dt){
+    var st=getStats();
+    if(st.auto>0){
+      S.ores+=st.auto*dt;
+      S.total+=st.auto*dt;
+      updateDepth();
+    }
+    if(S.comboT>0){ S.comboT-=dt; if(S.comboT<=0) S.combo=0; }
+    updateUI();
+  }
+
+  function save(){
+    try{
+      S.ts=Date.now();
+      localStorage.setItem(KEY,JSON.stringify(S));
+    }catch(e){}
+  }
+
+  function load(){
+    try{
+      var raw=localStorage.getItem(KEY);
+      if(!raw) return 0;
+      var d=JSON.parse(raw);
+      if(!d) return 0;
+      S.ores=Number(d.ores)||0;
+      S.total=Number(d.total)||0;
+      S.depth=Math.max(1,Number(d.depth)||1);
+      S.best=Math.max(S.depth,Number(d.best)||1);
+      S.muted=!!d.muted;
+      var up=d.up||{};
+      for(var k in S.up){ if(typeof up[k]==='number'&&up[k]>=0) S.up[k]=Math.floor(up[k]); }
+      updateDepth();
+      var away=Math.max(0,(Date.now()-(Number(d.ts)||Date.now()))/1000);
+      if(away>45){
+        var st=getStats();
+        var gain=st.auto*Math.min(away,14400)*0.5;
+        if(gain>=1){
+          gain=Math.floor(gain);
+          S.ores+=gain;S.total+=gain;updateDepth();
+          setTimeout(function(){toast('⛏️ Mientras no estabas: +'+fmt(gain)+' minerales','gold',4200);},500);
+        }
+      }
+      return 1;
+    }catch(e){ return 0; }
+  }
+
+  function reset(){
+    if(!confirm('¿Reiniciar todo el progreso de MinaHack?')) return;
+    S={ores:0,total:0,depth:1,best:1,combo:0,comboT:0,ts:Date.now(),up:{pick:0,drill:0,crit:0,luck:0,foreman:0,magnet:0},muted:S.muted};
+    try{localStorage.removeItem(KEY);}catch(e){}
+    lastClick=0;
+    updateUI();save();
+    toast('Progreso reiniciado','',1800);
+  }
+
+  btn.addEventListener('click',mine);
+  document.addEventListener('keydown',function(e){
+    if(e.code==='Space'||e.key===' '){
+      var tag=(e.target&&e.target.tagName)||'';
+      if(tag==='BUTTON'||tag==='INPUT'||tag==='TEXTAREA') return;
+      e.preventDefault();
+      if(!e.repeat||performance.now()-lastClick>55) mine();
+    }
+  });
+  $('btnSound').addEventListener('click',function(){
+    S.muted=!S.muted;
+    this.textContent=S.muted?'🔇 Sonido':'🔊 Sonido';
+    save();
+    if(!S.muted) beep(660,.07,'square');
+  });
+  $('btnReset').addEventListener('click',reset);
+  document.addEventListener('visibilitychange',function(){
+    if(document.hidden){ hiddenAt=Date.now(); save(); }
+    else if(hiddenAt){
+      var away=(Date.now()-hiddenAt)/1000;
+      hiddenAt=0;
+      if(away>20){
+        var st=getStats();
+        var gain=Math.floor(st.auto*Math.min(away,14400)*0.5);
+        if(gain>=1){ S.ores+=gain;S.total+=gain;updateDepth();updateUI();toast('⛏️ +'+fmt(gain)+' mientras no estabas','gold',3000); }
+      }
+    }
+  });
+  window.addEventListener('beforeunload',save);
+
+  renderShop();
+  load();
+  if(S.muted) $('btnSound').textContent='🔇 Sonido';
+  updateUI();
+  setInterval(function(){ if(!document.hidden) tick(0.1); },100);
+  setInterval(save,4000);
+})();
+</script>
+<script src="/zh_update.js?v=1" defer></script>
+</body>
+</html>

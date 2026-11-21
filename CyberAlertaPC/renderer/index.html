@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>CyberAlerta</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{--bg:#05070c;--card:rgba(13,17,23,.85);--border:#1c2531;--text:#d7e2ef;--muted:#6d7f93;
+    --accent:#00e5ff;--accent2:#7a5cff;--red:#ff5a5a;--green:#2ee6a8}
+  html,body{height:100%}
+  body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+    overflow:hidden;display:flex;flex-direction:column}
+  /* FONDO ANIMADO */
+  .bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+  .orb{position:absolute;border-radius:50%;filter:blur(70px);opacity:.55;animation:flotar 14s ease-in-out infinite}
+  .orb1{width:480px;height:480px;background:radial-gradient(circle,rgba(0,229,255,.35),transparent 70%);top:-160px;right:-120px}
+  .orb2{width:520px;height:520px;background:radial-gradient(circle,rgba(122,92,255,.4),transparent 70%);bottom:-200px;left:-160px;animation-delay:-6s}
+  .orb3{width:300px;height:300px;background:radial-gradient(circle,rgba(46,230,168,.22),transparent 70%);top:40%;left:50%;animation-delay:-3s}
+  @keyframes flotar{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(30px,-20px) scale(1.1)}}
+  .bg::after{content:'';position:absolute;inset:0;
+    background:linear-gradient(rgba(0,229,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,.03) 1px,transparent 1px);
+    background-size:44px 44px;mask-image:radial-gradient(ellipse at center,black 30%,transparent 75%)}
+  .wrap{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;min-height:0}
+  /* HEADER */
+  header{display:flex;align-items:center;gap:14px;padding:14px 18px;
+    border-bottom:1px solid var(--border);background:rgba(5,7,12,.8);backdrop-filter:blur(10px)}
+  .logo{width:42px;height:42px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+    font-size:22px;background:linear-gradient(135deg,rgba(0,229,255,.25),rgba(122,92,255,.25));
+    border:1px solid rgba(0,229,255,.4);box-shadow:0 0 22px rgba(0,229,255,.35)}
+  .ttl{flex:1;min-width:0}
+  .ttl h1{font-size:1.1em;letter-spacing:2px;font-weight:900;color:#fff;
+    font-family:'Courier New',Consolas,monospace;
+    background:linear-gradient(90deg,#00e5ff,#7a5cff,#00e5ff);background-size:200%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+    animation:brillo 4s linear infinite}
+  @keyframes brillo{to{background-position:200%}}
+  .ttl p{font-size:.66em;color:var(--muted);letter-spacing:.5px;margin-top:1px}
+  .search{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border);
+    border-radius:10px;padding:8px 12px;width:230px;transition:border-color .2s,box-shadow .2s}
+  .search:focus-within{border-color:rgba(0,229,255,.5);box-shadow:0 0 16px rgba(0,229,255,.15)}
+  .search input{flex:1;background:none;border:none;outline:none;color:var(--text);font-size:.8em;font-family:inherit}
+  .search input::placeholder{color:var(--muted)}
+  .search .ic{opacity:.5}
+  .btn{border:1px solid var(--border);background:var(--card);color:var(--accent);border-radius:10px;
+    padding:9px 14px;cursor:pointer;font-size:.78em;font-family:inherit;font-weight:700;letter-spacing:.5px;transition:.2s;white-space:nowrap}
+  .btn:hover{border-color:rgba(0,229,255,.45);box-shadow:0 0 14px rgba(0,229,255,.18);transform:translateY(-1px)}
+  .btn:active{transform:scale(.96)}
+  .btn.spin .arr{animation:giro .8s linear infinite}
+  @keyframes giro{to{transform:rotate(360deg)}}
+  /* HERO */
+  .hero{padding:22px 18px 12px;text-align:center;position:relative}
+  .hero .badge{display:inline-flex;align-items:center;gap:7px;padding:5px 14px;border-radius:20px;
+    font-size:.66em;letter-spacing:1.5px;font-weight:700;color:var(--green);
+    border:1px solid rgba(46,230,168,.35);background:rgba(46,230,168,.08)}
+  .pulse{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 10px var(--green);animation:pulse 1.4s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+  .hero h2{font-size:2em;font-weight:900;margin-top:10px;letter-spacing:1px;color:#fff;
+    font-family:'Courier New',Consolas,monospace;
+    background:linear-gradient(90deg,#fff,#00e5ff,#fff);background-size:200%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:brillo 5s linear infinite}
+  .hero .sub{color:var(--muted);font-size:.75em;margin-top:6px}
+  .stats{display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+  .stat{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:8px 16px;min-width:90px}
+  .stat b{display:block;font-size:1.05em;color:#fff;font-family:'Courier New',monospace}
+  .stat span{font-size:.58em;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+  /* CHIPS */
+  .chips{display:flex;gap:8px;padding:12px 18px;overflow-x:auto;scrollbar-width:thin}
+  .chip{white-space:nowrap;padding:6px 13px;border-radius:20px;border:1px solid var(--border);
+    background:var(--card);color:var(--muted);font-size:.7em;cursor:pointer;transition:.2s;font-family:inherit}
+  .chip:hover{color:var(--text);transform:translateY(-1px)}
+  .chip.on{background:linear-gradient(135deg,rgba(0,229,255,.18),rgba(122,92,255,.18));
+    border-color:rgba(0,229,255,.5);color:var(--accent);font-weight:700;box-shadow:0 0 14px rgba(0,229,255,.15)}
+  /* MAIN */
+  main{flex:1;overflow-y:auto;padding:8px 18px 44px}
+  .feat{border-radius:16px;overflow:hidden;position:relative;margin-bottom:16px;cursor:pointer;
+    border:1px solid var(--border);min-height:180px;display:flex;align-items:flex-end;
+    background:linear-gradient(135deg,#0d1117,#101a2b)}
+  .feat .fbg{position:absolute;inset:0;background-size:cover;background-position:center;opacity:.35;transition:transform .4s}
+  .feat:hover .fbg{transform:scale(1.05)}
+  .feat .fg{position:absolute;inset:0;background:linear-gradient(transparent 20%,rgba(5,7,12,.95))}
+  .feat .fc{position:relative;z-index:2;padding:18px;display:flex;flex-direction:column;gap:7px}
+  .feat .fc .f-src{align-self:flex-start}
+  .feat h3{font-size:1.15em;color:#fff;font-weight:800;line-height:1.35}
+  .feat .f-meta{font-size:.66em;color:var(--muted)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(285px,1fr));gap:14px}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;
+    cursor:pointer;transition:border-color .25s,transform .25s,box-shadow .25s;display:flex;flex-direction:column}
+  .card:hover{border-color:rgba(0,229,255,.45);transform:translateY(-3px);
+    box-shadow:0 12px 34px rgba(0,0,0,.45),0 0 22px rgba(0,229,255,.12)}
+  .thumb{height:140px;background-size:cover;background-position:center;position:relative;flex-shrink:0}
+  .thumb .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    font-size:34px;background:linear-gradient(135deg,#0f1a2b,#141a33);opacity:.85}
+  .thumb .src{position:absolute;top:10px;left:10px;z-index:2}
+  .src{display:inline-flex;align-items:center;gap:6px;font-size:.6em;font-weight:800;letter-spacing:.6px;
+    text-transform:uppercase;padding:3px 9px;border-radius:6px;width:fit-content;backdrop-filter:blur(6px)}
+  .dot{width:7px;height:7px;border-radius:50%;background:currentColor;box-shadow:0 0 6px currentColor}
+  .cbody{padding:13px 14px 12px;display:flex;flex-direction:column;gap:7px;flex:1}
+  .card h3{font-size:.86em;line-height:1.45;color:#fff;font-weight:600}
+  .card p{font-size:.72em;color:var(--muted);line-height:1.5;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+  .meta{margin-top:auto;display:flex;justify-content:space-between;align-items:center;font-size:.64em;color:var(--muted);padding-top:6px}
+  .meta b{color:var(--accent);font-weight:600;opacity:.8}
+  .meta b:hover{opacity:1}
+  /* ESTADOS */
+  .state{display:none;flex:1;align-items:center;justify-content:center;flex-direction:column;gap:12px;padding:40px;text-align:center}
+  .state.show{display:flex}
+  .state .big{font-size:46px;filter:drop-shadow(0 0 18px rgba(0,229,255,.35))}
+  .state h3{color:#fff;font-size:1em}
+  .state p{color:var(--muted);font-size:.74em;max-width:360px;line-height:1.6}
+  .spinner{width:36px;height:36px;border-radius:50%;border:3px solid var(--border);
+    border-top-color:var(--accent);animation:giro .7s linear infinite}
+  /* FOOTER */
+  footer{padding:9px 18px;border-top:1px solid var(--border);display:flex;justify-content:space-between;
+    align-items:center;font-size:.64em;color:var(--muted);background:rgba(5,7,12,.7)}
+  footer b{color:var(--accent)}
+  ::-webkit-scrollbar{width:9px;height:9px}
+  ::-webkit-scrollbar-thumb{background:#1c2531;border-radius:5px}
+  ::-webkit-scrollbar-thumb:hover{background:#2a3a4d}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  /* PANEL IA */
+  #aiPanel{position:fixed;top:0;right:0;bottom:0;width:410px;max-width:92vw;z-index:50;
+    display:flex;flex-direction:column;background:#0a0e15;border-left:1px solid var(--border);
+    box-shadow:-18px 0 60px rgba(0,0,0,.6);transform:translateX(105%);transition:transform .25s ease}
+  #aiPanel.open{transform:none}
+  .ai-hdr{display:flex;align-items:center;gap:10px;padding:14px;border-bottom:1px solid var(--border);
+    background:linear-gradient(135deg,rgba(0,229,255,.1),rgba(122,92,255,.1))}
+  .ai-logo{font-size:22px;filter:drop-shadow(0 0 10px rgba(0,229,255,.5))}
+  .ai-ttl{flex:1;min-width:0}
+  .ai-ttl b{color:#fff;letter-spacing:1.5px;font-size:.9em;font-family:'Courier New',monospace}
+  .ai-ttl span{display:block;font-size:.62em;color:var(--muted)}
+  .ai-close{background:none;border:none;color:var(--muted);font-size:1.1em;cursor:pointer;padding:4px 8px}
+  .ai-close:hover{color:#fff}
+  .ai-settings{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:7px}
+  .ai-settings input{background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);
+    padding:8px 10px;font-size:.75em;font-family:inherit;outline:none}
+  .ai-settings input:focus{border-color:rgba(0,229,255,.5)}
+  .ai-msgs{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
+  .msg{max-width:88%;padding:9px 12px;border-radius:12px;font-size:.78em;line-height:1.55;white-space:pre-wrap;word-break:break-word}
+  .msg.user{align-self:flex-end;background:rgba(0,229,255,.14);border:1px solid rgba(0,229,255,.3);color:#dff7ff}
+  .msg.bot{align-self:flex-start;background:var(--card);border:1px solid var(--border);color:var(--text)}
+  .msg.err{align-self:flex-start;background:rgba(255,90,90,.08);border:1px solid rgba(255,90,90,.25);color:#ffb4b4}
+  .msg.typing{color:var(--muted);font-style:italic}
+  .ai-sug{display:flex;gap:6px;padding:0 14px 10px;flex-wrap:wrap}
+  .sug{font-size:.64em;padding:5px 10px;border-radius:16px;border:1px solid var(--border);
+    background:var(--card);color:var(--muted);cursor:pointer;transition:.2s}
+  .sug:hover{color:var(--accent);border-color:rgba(0,229,255,.4)}
+  .ai-in{display:flex;gap:8px;padding:12px 14px;border-top:1px solid var(--border)}
+  .ai-in input{flex:1;background:var(--card);border:1px solid var(--border);border-radius:9px;color:var(--text);
+    padding:10px 12px;font-size:.78em;font-family:inherit;outline:none}
+  .ai-in input:focus{border-color:rgba(0,229,255,.4)}
+</style>
+</head>
+<body>
+<div class="bg"><div class="orb orb1"></div><div class="orb orb2"></div><div class="orb orb3"></div></div>
+
+<div class="wrap">
+  <header>
+    <div class="logo">🛡️</div>
+    <div class="ttl">
+      <h1>CYBERALERTA</h1>
+      <p>Noticias y novedades de ciberseguridad</p>
+    </div>
+    <div class="search">
+      <span class="ic">🔍</span>
+      <input id="q" type="text" placeholder="Buscar noticia…">
+    </div>
+    <button class="btn" id="aiBtn" title="Asistente de IA (Gemini gratis)">🤖</button>
+    <button class="btn" id="refresh" title="Actualizar"><span class="arr">⟳</span></button>
+  </header>
+
+  <div class="hero">
+    <span class="badge"><span class="pulse"></span> EN VIVO · MONITOREANDO</span>
+    <h2>SEGURIDAD EN TIEMPO REAL</h2>
+    <div class="sub">Las últimas alertas y novedades del mundo de la ciberseguridad</div>
+    <div class="stats">
+      <div class="stat"><b id="statNews">—</b><span>Noticias</span></div>
+      <div class="stat"><b id="statFeeds">—</b><span>Fuentes</span></div>
+      <div class="stat"><b id="statLang">—</b><span>Español</span></div>
+    </div>
+  </div>
+
+  <div class="chips" id="chips"></div>
+
+  <main id="main">
+    <div class="state show" id="stateLoading">
+      <div class="spinner"></div>
+      <h3>Consultando fuentes de seguridad…</h3>
+      <p>Buscando lo último en The Hacker News, Hackplayers, Krebs on Security y más.</p>
+    </div>
+    <div class="state" id="stateEmpty">
+      <div class="big">📰</div>
+      <h3>Sin resultados</h3>
+      <p>No hay noticias que coincidan con la búsqueda.</p>
+    </div>
+    <div class="state" id="stateError">
+      <div class="big">📡</div>
+      <h3>No se pudo conectar</h3>
+      <p>Revisá tu conexión a internet e intentá de nuevo.</p>
+      <button class="btn" id="retry">⟳ Reintentar</button>
+    </div>
+    <div class="feat" id="feat" style="display:none"></div>
+    <div class="grid" id="grid"></div>
+  </main>
+
+  <footer>
+    <span>CyberAlerta · v1.2 · solo PC</span>
+    <span id="updated">—</span>
+  </footer>
+</div>
+
+<!-- ─── PANEL IA ─── -->
+<div id="aiPanel">
+  <div class="ai-hdr">
+    <span class="ai-logo">🤖</span>
+    <div class="ai-ttl">
+      <b>CYBERALERTA IA</b>
+      <span>Asistente de ciberseguridad · Gemini gratis</span>
+    </div>
+    <button class="ai-close" id="aiClose">✕</button>
+  </div>
+
+  <div class="ai-settings" id="aiSettings">
+    <span style="font-size:.66em;color:var(--muted)">Clave gratuita de Gemini (opcional):</span>
+    <div style="display:flex;gap:6px">
+      <input id="aiKey" type="password" placeholder="Pegá tu clave gratuita…">
+      <button class="btn" id="aiKeySave" style="padding:8px 12px">Guardar</button>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <a id="aiKeyLink" href="#" style="font-size:.62em;color:var(--accent)">Obtener clave gratis →</a>
+      <span id="aiMode" style="font-size:.6em;color:var(--muted)">modo: servidor</span>
+    </div>
+  </div>
+
+  <div class="ai-msgs" id="aiMsgs"></div>
+  <div class="ai-sug" id="aiSug"></div>
+
+  <div class="ai-in">
+    <input id="aiInput" type="text" placeholder="Preguntá sobre ciberseguridad…" autocomplete="off">
+    <button class="btn" id="aiSend">Enviar</button>
+  </div>
+</div>
+
+<script src="renderer.js"></script>
+</body>
+</html>

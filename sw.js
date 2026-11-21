@@ -1,4 +1,4 @@
-var CACHE = "vh-v19";
+var CACHE = "vh-v29";
 var OFFLINE_URL = "/offline.html";
 // Optimización de tamaño/velocidad: solo se precachean los archivos críticos de
 // arranque. El resto (paneles, emuladores, herramientas) se cachea bajo demanda
@@ -7,8 +7,9 @@ var FILES = [
   "/","/index.html","/offline.html","/manifest.json","/sw.js",
   "/icon_48.png","/icon_96.png","/icon_144.png","/icon_192.png",
   "/icon_256.png","/icon_384.png","/icon_512.png",
-  "/monedas.js","/militar.js","/errores.js",
-  "/perfil.html","/login.html","/registro.html","/descargar_apk.html"
+  "/monedas.js","/militar.js","/errores.js","/zh_update.css","/zh_update.js","/zh_auth.js",
+  "/perfil.html","/login.html","/registro.html","/descargar_apk.html",
+  "/poli.html","/minar.html"
 ];
 
 self.addEventListener("install",function(e){

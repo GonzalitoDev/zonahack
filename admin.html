@@ -38,14 +38,16 @@ input:focus{border-color:#00ff41}
 #loginBox .btn{width:100%;margin-top:6px}
 #app{display:none}
 </style>
+<link rel="stylesheet" href="/zh_update.css?v=1">
+<script src="/zh_auth.js?v=2"></script>
 </head>
 <body>
 <div id="loginOverlay">
   <div id="loginBox">
     <h2>👑 Admin Panel</h2>
-    <p style="color:rgba(200,214,229,.3);font-size:.7em;margin-bottom:10px">Ingresa la contraseña de administrador</p>
-    <input id="loginPass" type="password" placeholder="Contraseña..." onkeydown="if(event.key==='Enter')intentarLogin()">
-    <button class="btn" onclick="intentarLogin()">Ingresar</button>
+    <p style="color:rgba(200,214,229,.3);font-size:.7em;margin-bottom:10px">Acceso solo para administradores con sesión verificada</p>
+    <button class="btn" onclick="verificarSesionAdmin()">VERIFICAR MI SESIÓN</button>
+    <a class="back" href="/login.html?next=/admin.html" style="margin-top:10px">🔑 Iniciar sesión</a>
     <div id="loginError" style="color:#e74c3c;font-size:.65em;margin-top:6px;display:none"></div>
     <a class="back" href="/" style="margin-top:12px">← Volver al inicio</a>
   </div>
@@ -178,7 +180,7 @@ function adminBan(nom){
 
 function adminVIP(nom){
   if(!confirm("Hacer VIP a "+nom+"?")) return;
-  fetch(SUPABASE+"/vip",{method:"POST",headers:Object.assign({},DBH,{"Prefer":"return=minimal"}),body:JSON.stringify({usuario_nombre:nom,tipo:"vip",activo:true})})
+  authAdmin("admin_set_vip",{usuario:nom,dias:30})
   .then(function(){ cargarUsuarios(); })
   .catch(function(){});
 }
@@ -187,13 +189,8 @@ function adminUser(nom){
   var r = prompt("Rango para "+nom+": (fundador, admin, vip, colaborador, user)","user");
   if(!r) return;
   var col = {fundador:"#f1c40f",admin:"#00ff41",vip:"#e74c3c",colaborador:"#3498db",user:"#888888",baneado:"#e74c3c"}[r]||"#888888";
-  fetch(SUPABASE+"/rangos?usuario_nombre=eq."+encodeURIComponent(nom)+"&limit=1",{headers:DBH}).then(function(r2){return r2.json();}).then(function(d){
-    if(d&&d.length>0){
-      fetch(SUPABASE+"/rangos?usuario_nombre=eq."+encodeURIComponent(nom),{method:"PATCH",headers:DBH,body:JSON.stringify({rango:r,color:col})}).then(function(){cargarUsuarios();cargarRangos();});
-    }else{
-      fetch(SUPABASE+"/rangos",{method:"POST",headers:Object.assign({},DBH,{"Prefer":"return=minimal"}),body:JSON.stringify({usuario_nombre:nom,rango:r,color:col})}).then(function(){cargarUsuarios();cargarRangos();});
-    }
-  });
+  var p = r==="baneado" ? authAdmin("admin_ban",{usuario:nom}) : authAdmin("admin_set_rango",{usuario:nom,rango:r,color:col});
+  p.then(function(){ cargarUsuarios(); cargarRangos(); }).catch(function(){});
 }
 </script>
 
@@ -201,50 +198,25 @@ function adminUser(nom){
 var APIKEY = "sb_publishable_3VvBUD5Bdu3Uaq59fJ99MQ_XDCtujUU";
 var SUPABASE = "https://xfwolaurpeofysnymqle.supabase.co/rest/v1";
 var DBH = {"apikey":APIKEY,"Authorization":"Bearer "+APIKEY,"Content-Type":"application/json"};
-var ADMIN_PASS = "admin123";
-var ADMIN_PASS_KEY = "vh_admin_pass";
-var ATTEMPTS_KEY = "vh_admin_intentos";
-var BLOCK_KEY = "vh_admin_block";
-var MAX_ATTEMPTS = 3;
-
-function intentarLogin(){
-  var pass = document.getElementById("loginPass").value;
-  if(!pass) return;
-  var blocked = localStorage.getItem(BLOCK_KEY);
-  if(blocked && parseInt(blocked) > Date.now()){
-    document.getElementById("loginError").textContent = "Bloqueado. Espera 24h.";
-    document.getElementById("loginError").style.display = "block";
-    return;
-  }
-  fetch(SUPABASE+"/rangos?select=rango&usuario_nombre=eq.admin&limit=1",{headers:DBH})
-  .then(function(r){return r.json();}).then(function(d){
-    var dbPass = (d&&d.length>0) ? d[0].rango : ADMIN_PASS;
-    if(pass === dbPass){
-      localStorage.setItem(ADMIN_PASS_KEY, pass);
-      document.getElementById("loginOverlay").style.display = "none";
-      document.getElementById("app").style.display = "block";
-      cargarTodo();
-    }else{
-      var att = parseInt(localStorage.getItem(ATTEMPTS_KEY)||"0")+1;
-      localStorage.setItem(ATTEMPTS_KEY, att);
-      if(att >= MAX_ATTEMPTS){
-        localStorage.setItem(BLOCK_KEY, Date.now()+86400000);
-        document.getElementById("loginError").textContent = "Demasiados intentos. Bloqueado 24h.";
-      }else{
-        document.getElementById("loginError").textContent = "Contraseña incorrecta ("+att+"/"+MAX_ATTEMPTS+")";
-      }
-      document.getElementById("loginError").style.display = "block";
-    }
-  }).catch(function(){
-    if(pass === ADMIN_PASS){
-      localStorage.setItem(ADMIN_PASS_KEY, pass);
-      document.getElementById("loginOverlay").style.display = "none";
-      document.getElementById("app").style.display = "block";
-      cargarTodo();
-    }else{
-      document.getElementById("loginError").textContent = "Error de conexion";
-      document.getElementById("loginError").style.display = "block";
-    }
+var USER = "anon";
+function authAdmin(accion,data){
+  if(window.ZH_AUTH && window.ZH_AUTH.fetchAuth) return window.ZH_AUTH.fetchAuth(accion,data);
+  return Promise.reject(new Error("sin_sesion"));
+}
+function verificarSesionAdmin(){
+  var err = document.getElementById("loginError");
+  function fallo(t){ if(err){ err.textContent=t; err.style.display="block"; } }
+  var A=window.ZH_AUTH;
+  if(!A){ fallo("Error de seguridad. Recargá la página."); return; }
+  A.ready.then(function(){
+    if(A.offline){ fallo("Necesitás conexión para verificar tu cuenta."); return; }
+    if(!A.verified){ location.replace(A.urlLogin("/admin.html")); return; }
+    if(!A.admin){ fallo("La cuenta "+A.usuario+" no tiene rango de administrador."); return; }
+    USER=A.usuario;
+    try{ localStorage.setItem("vh_usuario",A.usuario); }catch(e){}
+    document.getElementById("loginOverlay").style.display = "none";
+    document.getElementById("app").style.display = "block";
+    cargarTodo();
   });
 }
 
@@ -313,18 +285,11 @@ function asignarRangoDirecto(nom, rango, color){
 function asignarRango(rango, color){
   var nom = document.getElementById("inputRangoUser").value.trim();
   if(!nom){document.getElementById("rangoMsg").textContent="Ingresa un nombre";return;}
-  fetch(SUPABASE+"/rangos?usuario_nombre=eq."+encodeURIComponent(nom)+"&limit=1",{headers:DBH})
-  .then(function(r){return r.json();}).then(function(d){
-    if(d&&d.length>0){
-      return fetch(SUPABASE+"/rangos?usuario_nombre=eq."+encodeURIComponent(nom),{method:"PATCH",headers:DBH,body:JSON.stringify({rango:rango,color:color})});
-    }else{
-      return fetch(SUPABASE+"/rangos",{method:"POST",headers:Object.assign({},DBH,{"Prefer":"return=minimal"}),body:JSON.stringify({usuario_nombre:nom,rango:rango,color:color})});
-    }
-  }).then(function(){
-    document.getElementById("rangoMsg").innerHTML = '<span style="color:#00ff41">Rango asignado: '+rango+'</span>';
-    // Log
-    var admin = localStorage.getItem("vh_usuario")||"admin";
-    fetch(SUPABASE+"/logs",{method:"POST",headers:Object.assign({},DBH,{"Prefer":"return=minimal"}),body:JSON.stringify({usuario_nombre:admin,accion:"admin_rango",detalle:nom+" -> "+rango})}).catch(function(){});
+  var p = rango==="baneado" ? authAdmin("admin_ban",{usuario:nom}) : authAdmin("admin_set_rango",{usuario:nom,rango:rango,color:color});
+  p.then(function(d){
+    if(!d || !d.ok){ document.getElementById("rangoMsg").textContent="Error (¿sesión admin verificada?)"; return; }
+    document.getElementById("rangoMsg").innerHTML = '<span style="color:#00ff41">Rango asignado: '+esc(rango)+'</span>';
+    fetch(SUPABASE+"/logs",{method:"POST",headers:Object.assign({},DBH,{"Prefer":"return=minimal"}),body:JSON.stringify({usuario_nombre:USER,accion:"admin_rango",detalle:nom+" -> "+rango})}).catch(function(){});
     cargarRangos();
   }).catch(function(){document.getElementById("rangoMsg").textContent="Error";});
 }
@@ -354,25 +319,12 @@ function banearUsuario(){
   var tipo = document.getElementById("inputBanTipo").value;
   var motivo = document.getElementById("inputBanMotivo").value.trim() || "Sin motivo especificado";
   if(!nom){document.getElementById("banMsg").textContent="Ingresa un nombre";return;}
-  var admin = localStorage.getItem("vh_usuario")||"admin";
-  var data = {usuario_nombre:nom,usuario_id:nom,tipo:tipo,motivo:motivo,admin_nombre:admin,activo:true};
-  if(tipo==="suspendido"){
-    var dias = parseInt(document.getElementById("inputBanDuracion").value) || 7;
-    data.fecha_fin = new Date(Date.now()+dias*86400000).toISOString();
-  }
-  fetch(SUPABASE+"/baneados",{method:"POST",headers:Object.assign({},DBH,{"Prefer":"return=minimal"}),body:JSON.stringify(data)})
-  .then(function(){
-    document.getElementById("banMsg").innerHTML = '<span style="color:#e74c3c">Usuario '+tipo+': '+nom+'</span>';
-    // Log
-    fetch(SUPABASE+"/logs",{method:"POST",headers:Object.assign({},DBH,{"Prefer":"return=minimal"}),body:JSON.stringify({usuario_nombre:admin,accion:"admin_"+tipo,detalle:nom+": "+motivo})}).catch(function(){});
-    // Asignar rango baneado
-    fetch(SUPABASE+"/rangos?usuario_nombre=eq."+encodeURIComponent(nom)+"&limit=1",{headers:DBH}).then(function(r){return r.json();}).then(function(d){
-      if(d&&d.length>0){
-        fetch(SUPABASE+"/rangos?usuario_nombre=eq."+encodeURIComponent(nom),{method:"PATCH",headers:DBH,body:JSON.stringify({rango:"baneado",color:"#e74c3c"})}).catch(function(){});
-      }else{
-        fetch(SUPABASE+"/rangos",{method:"POST",headers:Object.assign({},DBH,{"Prefer":"return=minimal"}),body:JSON.stringify({usuario_nombre:nom,rango:"baneado",color:"#e74c3c"})}).catch(function(){});
-      }
-    }).catch(function(){});
+  var dias = parseInt(document.getElementById("inputBanDuracion").value) || 7;
+  authAdmin("admin_ban",{usuario:nom,tipo:tipo,motivo:motivo,dias:dias})
+  .then(function(d){
+    if(!d || !d.ok){ document.getElementById("banMsg").textContent="Error al banear"; return; }
+    document.getElementById("banMsg").innerHTML = '<span style="color:#e74c3c">Usuario '+esc(tipo)+': '+esc(nom)+'</span>';
+    fetch(SUPABASE+"/logs",{method:"POST",headers:Object.assign({},DBH,{"Prefer":"return=minimal"}),body:JSON.stringify({usuario_nombre:USER,accion:"admin_"+tipo,detalle:nom+": "+motivo})}).catch(function(){});
     cargarBaneados();
   }).catch(function(){document.getElementById("banMsg").textContent="Error al banear";});
 }
@@ -397,9 +349,7 @@ function cargarBaneados(){
 
 function desbanear(id, nom){
   if(!confirm("Desbanear a "+nom+"?")) return;
-  fetch(SUPABASE+"/baneados?id=eq."+id,{method:"PATCH",headers:DBH,body:JSON.stringify({activo:false})}).then(function(){
-    // Restaurar rango
-    fetch(SUPABASE+"/rangos?usuario_nombre=eq."+encodeURIComponent(nom),{method:"PATCH",headers:DBH,body:JSON.stringify({rango:"user",color:"#888888"})}).catch(function(){});
+  authAdmin("admin_unban",{usuario:nom}).then(function(){
     cargarBaneados();
   }).catch(function(){});
 }
@@ -462,13 +412,12 @@ function dbLimpiarCache(){
 }
 
 function eliminarTodosLogs(){
-  var admin = localStorage.getItem("vh_usuario")||"admin";
-  fetch(SUPABASE+"/logs",{method:"DELETE",headers:DBH}).then(function(){
+  authAdmin("admin_limpiar_logs",{dias:0}).then(function(d){
+    if(!d || !d.ok){ document.getElementById("dbActionsMsg").innerHTML = '<span style="color:#e74c3c">No se pudieron borrar (¿sesión admin?)</span>'; return; }
     document.getElementById("dbActionsMsg").innerHTML = '<span style="color:#e74c3c">Todos los logs eliminados</span>';
     cargarLogs();
     cargarDBStats();
-    // Registrar
-    fetch(SUPABASE+"/logs",{method:"POST",headers:Object.assign({},DBH,{"Prefer":"return=minimal"}),body:JSON.stringify({usuario_nombre:admin,accion:"admin_limpia_logs",detalle:"Elimino todos los logs"})}).catch(function(){});
+    fetch(SUPABASE+"/logs",{method:"POST",headers:Object.assign({},DBH,{"Prefer":"return=minimal"}),body:JSON.stringify({usuario_nombre:USER,accion:"admin_limpia_logs",detalle:"Elimino todos los logs"})}).catch(function(){});
   }).catch(function(){});
 }
 
@@ -484,12 +433,9 @@ function cargarTodo(){
   cargarDBStats();
 }
 
-// Auto-login si ya esta autorizado
-if(localStorage.getItem(ADMIN_PASS_KEY)){
-  document.getElementById("loginOverlay").style.display = "none";
-  document.getElementById("app").style.display = "block";
-  cargarTodo();
-}
+// Verificación automática: solo entra una sesión de admin real.
+verificarSesionAdmin();
 </script>
+<script src="/zh_update.js?v=1" defer></script>
 </body>
 </html>

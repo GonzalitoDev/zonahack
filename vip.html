@@ -66,6 +66,8 @@ body.cine-oscuro .container{opacity:0;pointer-events:none;transition:opacity .5s
 .mas button:active{transform:scale(.96)}
 @media(max-width:480px){.grid{grid-template-columns:repeat(2,1fr)}.perk{padding:6px 10px;font-size:.56em}}
 </style>
+<link rel="stylesheet" href="/zh_update.css?v=1">
+<script src="/zh_auth.js?v=2"></script>
 </head>
 <body>
 <div class="bg"><div class="orb orb1"></div><div class="orb orb2"></div></div>
@@ -87,6 +89,9 @@ body.cine-oscuro .container{opacity:0;pointer-events:none;transition:opacity .5s
       <div class="perk">🚫 <b>Sin anuncios</b></div>
       <div class="perk">📺 <b>Transmitir a TV</b></div>
       <div class="perk">🎥 <b>Modo cine</b></div>
+      <div class="perk">⚡ <b>Player Pro</b> (A-B, sleep timer, subs)</div>
+      <div class="perk">🪙 <b>Monedas x2</b></div>
+      <div class="perk">🤖 <b>IA sin límite</b></div>
     </div>
   </div>
 
@@ -140,24 +145,22 @@ function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(m){retur
 
 // ─── ESTADO VIP (tabla 'vip') ───
 function chequearVip(){
-  var u=localStorage.getItem('vh_usuario')||'anon';
-  if(u==='anon'){
-    document.getElementById('vipStatusPill').innerHTML='🔒 Iniciá sesión para ver tu VIP';
+  var A=window.ZH_AUTH;
+  if(A && !A.listo){ A.ready.then(chequearVip); return; }
+  var pill=document.getElementById('vipStatusPill');
+  if(!pill) return;
+  if(!A || !A.verified){
+    pill.innerHTML='🔒 Iniciá sesión para ver tu VIP';
     return;
   }
-  fetch(SUPABASE+"/vip?select=activo,tipo,fecha_expiracion&usuario_nombre=eq."+encodeURIComponent(u)+"&activo=eq.true&limit=1",
-    {headers:{'apikey':KEY,'Authorization':'Bearer '+KEY}})
-  .then(function(r){return r.json();}).then(function(d){
-    var pill=document.getElementById('vipStatusPill');
-    if(d&&d.length){
-      var hasta=(d[0].fecha_expiracion||'').slice(0,10);
-      pill.className='vip-status on';
-      pill.innerHTML='👑 <b>VIP ACTIVO</b> · '+esc(d[0].tipo||'vip')+(hasta?' · hasta '+hasta:'');
-    }else{
-      pill.className='vip-status off';
-      pill.innerHTML='🔓 No sos VIP · <a href="/tienda.html" style="color:#f1c40f">conseguilo acá</a>';
-    }
-  }).catch(function(){});
+  if(A.vip && A.vip.activo){
+    var hasta=(A.vip.hasta||'').slice(0,10);
+    pill.className='vip-status on';
+    pill.innerHTML='👑 <b>VIP ACTIVO</b> · '+esc(A.vip.tipo||'vip')+(hasta?' · hasta '+hasta:'');
+  }else{
+    pill.className='vip-status off';
+    pill.innerHTML='🔓 No sos VIP · <a href="/tienda.html" style="color:#f1c40f">conseguilo acá</a>';
+  }
 }
 
 function buscarVip(q,btn,fbIdx){
@@ -379,5 +382,6 @@ chequearVip();
 buscarVip("estrenos de cine 2026", document.querySelector("#catBtns button.active"));
 </script>
 <script src="/logger_zh.js?v=2026"></script>
+<script src="/zh_update.js?v=1" defer></script>
 </body>
 </html>
