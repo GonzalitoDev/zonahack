@@ -1,0 +1,277 @@
+/* =====================================================================
+   ZonaHack — TEMA ESTILO NETFLIX
+   Capa visual aparte: no modifica ningún HTML ni JS original.
+   Para sacarlo: python aplicar_tema.py --quitar  (o borrar este archivo)
+   ===================================================================== */
+
+/* ---------- 1. Paleta: pisa las variables que ya usan tus páginas ---------- */
+:root, body, body.owner-mode, body.vip-mode {
+  --nf-bg: #141414;
+  --nf-surface: #181818;
+  --nf-surface2: #232323;
+  --nf-line: rgba(255,255,255,.08);
+  --nf-red: #e50914;
+  --nf-red-dark: #b20710;
+  --nf-text: #ffffff;
+  --nf-muted: #b3b3b3;
+  --nf-radius: 6px;
+  --nf-font: "Helvetica Neue", Helvetica, Arial, "Segoe UI", Roboto, sans-serif;
+
+  --bg: var(--nf-bg) !important;
+  --bg2: var(--nf-surface) !important;
+  --card: var(--nf-surface) !important;
+  --accent: var(--nf-red) !important;
+  --accent2: var(--nf-red-dark) !important;
+  --text: var(--nf-text) !important;
+  --text2: var(--nf-muted) !important;
+  --muted: var(--nf-muted) !important;
+  --border: var(--nf-line) !important;
+  --radius: var(--nf-radius) !important;
+  --font: var(--nf-font) !important;
+}
+
+/* ---------- 2. Base ---------- */
+html, body {
+  background: var(--nf-bg) !important;
+  color: var(--nf-text) !important;
+}
+body {
+  font-family: var(--nf-font) !important;
+  max-width: 1400px !important;
+  -webkit-font-smoothing: antialiased;
+}
+body::before, body::after { background-image: none !important; }   /* scanlines / camuflaje */
+.bg, .orb, .orb1, .orb2 { display: none !important; }              /* orbes de fondo */
+code, pre, kbd, samp, .terminal, .mono { font-family: Consolas, "Courier New", monospace !important; }
+
+h1, h2, h3, .section-title, .hero h1, .ttl, .logo {
+  font-family: var(--nf-font) !important;
+  color: var(--nf-text) !important;
+  text-shadow: none !important;
+  letter-spacing: -.01em;
+  -webkit-text-fill-color: currentColor !important;   /* anula títulos con degradé */
+  background-image: none !important;
+}
+h2, h3, .section-title { font-weight: 700 !important; }
+a { color: var(--nf-text); }
+::selection { background: var(--nf-red); color: #fff; }
+
+/* Scrollbar finita y gris */
+::-webkit-scrollbar { width: 10px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--nf-bg) !important; }
+::-webkit-scrollbar-thumb { background: #3a3a3a !important; border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: #555 !important; }
+
+/* ---------- 3. Header: negro que se funde hacia abajo ---------- */
+.header, header, .top, #statusBar {
+  background: linear-gradient(180deg, rgba(0,0,0,.92) 0%, rgba(20,20,20,.75) 70%, rgba(20,20,20,0) 100%) !important;
+  border: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+.header-text, .header-text *, .header-brand { color: var(--nf-text) !important; text-shadow: none !important; }
+.header-icon, .logo {
+  color: var(--nf-red) !important;
+  filter: none !important;
+}
+
+/* ---------- 4. Pestañas / navegación ---------- */
+.tabs { border: none !important; background: transparent !important; gap: 4px; }
+.tab, .tab-dd {
+  background: transparent !important;
+  border: none !important;
+  border-bottom: 2px solid transparent !important;
+  border-radius: 0 !important;
+  color: var(--nf-muted) !important;
+  font-family: var(--nf-font) !important;
+  font-weight: 500 !important;
+  text-shadow: none !important;
+  box-shadow: none !important;
+  transition: color .2s, border-color .2s !important;
+}
+.tab:hover, .tab-dd:hover { color: #e5e5e5 !important; }
+.tab.active, .tab.on, .tab-dd.active {
+  color: var(--nf-text) !important;
+  border-bottom-color: var(--nf-red) !important;
+  font-weight: 700 !important;
+}
+.dropdown-content, .drawer-panel {
+  background: rgba(0,0,0,.94) !important;
+  border: 1px solid var(--nf-line) !important;
+  border-radius: 4px !important;
+  box-shadow: 0 10px 30px rgba(0,0,0,.7) !important;
+}
+.dropdown-content a, .dropdown-content button, .drawer-panel a { color: #e5e5e5 !important; }
+.dropdown-content a:hover, .dropdown-content button:hover { background: rgba(255,255,255,.08) !important; }
+
+/* ---------- 5. Tarjetas de video / peli / anime / juego ---------- */
+.card, .pelis-card, .cine-card, .peli, .anime-card, .juego-card,
+.stat-card, .dev-card, .militar-card, .video-card, .vid-card {
+  background: var(--nf-surface) !important;
+  border: none !important;
+  border-radius: var(--nf-radius) !important;
+  box-shadow: none !important;
+  color: var(--nf-text) !important;
+}
+
+/* El efecto Netflix: la portada crece al pasar el mouse */
+.pelis-card, .cine-card, .peli, .anime-card, .juego-card, .video-card, .vid-card, .grid > .card {
+  transition: transform .3s cubic-bezier(.2,.8,.2,1), box-shadow .3s, z-index 0s .3s !important;
+  position: relative;
+  overflow: hidden;
+}
+.pelis-card:hover, .cine-card:hover, .peli:hover, .anime-card:hover, .juego-card:hover,
+.video-card:hover, .vid-card:hover, .grid > .card:hover {
+  transform: scale(1.07) !important;
+  z-index: 5 !important;
+  box-shadow: 0 14px 34px rgba(0,0,0,.75) !important;
+  transition-delay: 0s !important;
+}
+.thumb, .card img, .pelis-card img, .cine-card img, .anime-card img, .peli img {
+  background: #222 !important;
+  border-radius: 0 !important;
+  color: var(--nf-muted) !important;
+}
+
+/* Botón de play sobre la portada */
+.play-ov { background: linear-gradient(0deg, rgba(0,0,0,.65), transparent 60%) !important; }
+
+/* Filas horizontales tipo carrusel */
+.cine-row, .rrow { margin-bottom: 26px !important; }
+.rhead, .rt, .sug-hdr, .sp-head {
+  color: #e5e5e5 !important;
+  font-family: var(--nf-font) !important;
+  font-weight: 700 !important;
+  text-shadow: none !important;
+}
+
+/* ---------- 6. Botones ---------- */
+button, .btn, .back, .back-btn, .add-btn, .load-more, .mainbtn, .retry, .wbtn, .apk-btn, .ctrl-btn {
+  font-family: var(--nf-font) !important;
+  text-shadow: none !important;
+}
+.btn, .mainbtn, .add-btn, .btn-green, .btn-purple, .load-more, .retry, .apk-btn {
+  background: var(--nf-red) !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: 4px !important;
+  font-weight: 700 !important;
+  box-shadow: none !important;
+  transition: background .15s !important;
+}
+.btn:hover, .mainbtn:hover, .add-btn:hover, .btn-green:hover, .btn-purple:hover,
+.load-more:hover, .retry:hover, .apk-btn:hover {
+  background: #f6121d !important;
+}
+.back, .back-btn, .guest, .ctrl-btn {
+  background: rgba(109,109,110,.7) !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: 4px !important;
+  box-shadow: none !important;
+}
+.back:hover, .back-btn:hover, .guest:hover, .ctrl-btn:hover { background: rgba(109,109,110,.45) !important; }
+
+/* ---------- 7. Formularios / buscador ---------- */
+input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),
+select, textarea, .search-box input {
+  background: #333 !important;
+  border: 1px solid transparent !important;
+  border-radius: 4px !important;
+  color: #fff !important;
+  font-family: var(--nf-font) !important;
+  box-shadow: none !important;
+}
+input:focus, select:focus, textarea:focus {
+  background: #454545 !important;
+  border-color: #fff !important;
+  outline: none !important;
+}
+input::placeholder, textarea::placeholder { color: #8c8c8c !important; }
+input[type=checkbox], input[type=radio], input[type=range] { accent-color: var(--nf-red); }
+
+/* ---------- 8. Modales ---------- */
+.modal-overlay, .drawer-overlay { background: rgba(0,0,0,.72) !important; }
+.modal, .modal-body {
+  background: var(--nf-surface) !important;
+  border: none !important;
+  border-radius: 8px !important;
+  box-shadow: 0 20px 60px rgba(0,0,0,.8) !important;
+  color: var(--nf-text) !important;
+}
+.modal-banner { position: relative; }
+.modal-banner::after {
+  content: ""; position: absolute; inset: auto 0 0 0; height: 45%;
+  background: linear-gradient(0deg, var(--nf-surface), transparent);
+  pointer-events: none;
+}
+.modal-close {
+  background: #181818 !important; color: #fff !important;
+  border-radius: 50% !important; border: none !important;
+}
+
+/* ---------- 9. Hero / encabezados de sección ---------- */
+.hero {
+  background: linear-gradient(77deg, rgba(0,0,0,.85) 0%, rgba(0,0,0,0) 85%),
+              linear-gradient(0deg, var(--nf-bg) 0%, transparent 40%), #222 !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+.hero p, .sub, .modal-meta, .modal-original, .info, .inf { color: var(--nf-muted) !important; }
+
+/* ---------- 10. Etiquetas, badges y barras ---------- */
+.badge, .badge-yt, .cat, .modal-genres span, .vivo-pill {
+  background: rgba(255,255,255,.1) !important;
+  color: #e5e5e5 !important;
+  border: none !important;
+  border-radius: 3px !important;
+  text-shadow: none !important;
+}
+.cat.active, .cat.on { background: #fff !important; color: #000 !important; }
+.vivo-dot { background: var(--nf-red) !important; box-shadow: none !important; }
+.xp-bar, .mil-bar-fill, #forceFill { background: var(--nf-red) !important; box-shadow: none !important; }
+
+/* Indicadores de carga */
+.spin, .spinner, .loading::before {
+  border-color: rgba(255,255,255,.15) !important;
+  border-top-color: var(--nf-red) !important;
+}
+
+/* ---------- 11. Elementos de zh_update.css (barra y botón "arriba") ---------- */
+#zhProgressBar { background: var(--nf-red) !important; box-shadow: none !important; }
+#zhBackTop {
+  background: rgba(20,20,20,.9) !important;
+  color: #fff !important;
+  border: 1px solid rgba(255,255,255,.25) !important;
+  box-shadow: 0 6px 22px rgba(0,0,0,.6) !important;
+}
+html.zh-enhanced :focus-visible { outline-color: #fff !important; }
+
+/* ---------- 12. Celular ---------- */
+@media (max-width: 600px) {
+  .pelis-card:hover, .cine-card:hover, .peli:hover, .anime-card:hover,
+  .juego-card:hover, .video-card:hover, .vid-card:hover, .grid > .card:hover {
+    transform: none !important;   /* sin zoom en táctil */
+  }
+}
+
+/* ---------- 13. Estilos escritos en línea (style="...") con el verde hacker ---------- */
+[style*="color:#00ff41"], [style*="color: #00ff41"],
+[style*="color:#0f0"], [style*="color:#2ecc71"], [style*="color:#00cc88"] {
+  color: #e5e5e5 !important;
+  text-shadow: none !important;
+}
+[style*="border:1px solid rgba(0,255,65"], [style*="border: 1px solid rgba(0,255,65"] {
+  border-color: rgba(255,255,255,.18) !important;
+}
+[style*="background:rgba(0,255,65"], [style*="background: rgba(0,255,65"] {
+  background: rgba(255,255,255,.08) !important;
+}
+[style*="background:#00ff41"], [style*="background: #00ff41"] {
+  background: var(--nf-red) !important;
+  box-shadow: none !important;
+}
+button[style*="Courier"], span[style*="Courier"], div[style*="Courier"] {
+  font-family: var(--nf-font) !important;
+}
