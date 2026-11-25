@@ -569,14 +569,7 @@ function detectarScraper() {
     } catch(e) {}
     if (!window.chrome && !window.safari && !navigator.userAgent.includes('Firefox')) { sospechoso = true; razones.push("navegador_extraño"); }
     if (sospechoso) {
-        try {
-            fetch('https://api.ipify.org?format=json').then(function(r){return r.json();}).then(function(d){
-                fetch('https://xfwolaurpeofysnymqle.supabase.co/rest/v1/visitas', {
-                    method:'POST', headers:{'apikey':'sb_publishable_3VvBUD5Bdu3Uaq59fJ99MQ_XDCtujUU','Authorization':'Bearer sb_publishable_3VvBUD5Bdu3Uaq59fJ99MQ_XDCtujUU','Content-Type':'application/json','Prefer':'return=minimal'},
-                    body: JSON.stringify({ip:d.ip||'',usuario_nombre:'BOT',pagina:'/scraping',user_agent:'ANTI-SCRAPING: '+razones.join(', ')})
-                }).catch(function(){});
-            }).catch(function(){});
-        } catch(e) {}
+        // Se conserva la detección local, sin enviar IP ni datos a ningún servidor.
     }
     return sospechoso;
 }
@@ -614,23 +607,8 @@ overlay.style.display='none';
 }
 verificarMantenimiento();
 // Verificar mantenimiento periodicamente (fallback si Realtime no funciona)
-setInterval(verificarMantenimiento, 30000);// Registrar IP + Discord webhook
-try{
-var ipUser = localStorage.getItem('vh_usuario') || 'anon';
-fetch('https://api.ipify.org?format=json').then(function(r){return r.json();}).then(function(d){
-var ip = d.ip || '';
-var datosVisita = {ip:ip,usuario_nombre:ipUser,pagina:window.location.pathname,user_agent:navigator.userAgent.slice(0,200)};
-fetch('https://xfwolaurpeofysnymqle.supabase.co/rest/v1/visitas',{
-method:'POST',headers:{'apikey':'sb_publishable_3VvBUD5Bdu3Uaq59fJ99MQ_XDCtujUU','Authorization':'Bearer sb_publishable_3VvBUD5Bdu3Uaq59fJ99MQ_XDCtujUU','Content-Type':'application/json','Prefer':'return=minimal'},
-body:JSON.stringify(datosVisita)
-}).catch(function(){});
-// Enviar a Discord webhook
-fetch('/api/discord_webhook',{
-method:'POST',headers:{'Content-Type':'application/json'},
-body:JSON.stringify({ip:ip,usuario:ipUser,pagina:window.location.pathname,user_agent:navigator.userAgent.slice(0,200),timestamp:new Date().toISOString()})
-}).catch(function(){});
-}).catch(function(){});
-}catch(e){}
+setInterval(verificarMantenimiento, 30000);
+// (registro de visitas con IP eliminado por privacidad)
 </script>
 
 <!-- SPLASH / LOADING SCREEN (BIOS) -->
