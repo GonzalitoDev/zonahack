@@ -37,3 +37,11 @@ backup_videos.json
 *.db
 *.sql
 CODIGO_DE_HOY.txt
+
+# Copias / experimentos locales (NO se publican)
+v2
+offline-player-2.0
+Claude outputs
+run_ai_center.bat
+chinese_ai_providers.json
+Nuevo Documento de texto (2).txt
