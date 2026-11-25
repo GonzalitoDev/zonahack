@@ -57,6 +57,8 @@
         { "src": "/tesla", "dest": "/tesla.html" },
         { "src": "/videohub", "dest": "/videohub.html" },
         { "src": "/videohub_admin", "dest": "/videohub_admin.html" },
+        { "src": "/paneladmin", "dest": "/panel_admin.html" },
+        { "src": "/panel_admin", "dest": "/panel_admin.html" },
         { "src": "/", "dest": "/index.html" },
         { "src": "/CyberAlerta-Setup-(.*)\\.exe", "dest": "/CyberAlerta-Setup.exe", "status": 302 }
     ],
